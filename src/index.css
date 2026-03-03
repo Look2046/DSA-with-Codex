@@ -230,3 +230,143 @@ body {
   display: inline-block;
   padding: 4px 8px;
 }
+
+.bubble-page {
+  display: grid;
+  gap: 12px;
+}
+
+.bubble-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.control-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.speed-group {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.speed-group button,
+.bubble-toolbar button {
+  border: 1px solid #bdd4ea;
+  background: #fff;
+  color: var(--brand-strong);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.speed-group button:hover,
+.bubble-toolbar button:hover {
+  background: #eef4fb;
+}
+
+.speed-group .speed-active {
+  background: #dcecfb;
+}
+
+.array-bars {
+  height: 220px;
+  border: 1px solid #d7e8f8;
+  border-radius: 10px;
+  background: #f8fbff;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(24px, 1fr));
+  align-items: end;
+  gap: 6px;
+  padding: 10px;
+}
+
+.array-bar {
+  min-height: 22px;
+  border-radius: 8px 8px 4px 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-size: 0.75rem;
+  color: #0b2947;
+  transition: height 0.35s ease, background-color 0.25s ease, transform 0.2s ease;
+}
+
+.bar-default {
+  background: #cfe1f3;
+}
+
+.bar-comparing {
+  background: #f9c66b;
+  transform: translateY(-2px);
+}
+
+.bar-swapping {
+  background: #f08a8a;
+  transform: translateY(-3px);
+}
+
+.bar-sorted {
+  background: #9ed3b0;
+}
+
+.legend-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  border: 1px solid #d3deea;
+}
+
+.legend-comparing {
+  background: #fff3de;
+}
+
+.legend-swapping {
+  background: #ffe8e8;
+}
+
+.legend-sorted {
+  background: #e8f7ee;
+}
+
+.legend-default {
+  background: #edf4fb;
+}
+
+.pseudocode-block {
+  background: #fff;
+  border: 1px solid #d7e8f8;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.pseudocode-block h3 {
+  margin: 0 0 8px;
+}
+
+.pseudocode-block ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #41566e;
+}
+
+.pseudocode-block li {
+  padding: 2px 0;
+}
+
+.pseudocode-block .code-active {
+  color: #0b4f90;
+  font-weight: 700;
+}
