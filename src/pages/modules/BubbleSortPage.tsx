@@ -1,8 +1,12 @@
+import { useI18n } from '../../i18n/useI18n';
+
 export function BubbleSortPage() {
+  const { t } = useI18n();
+
   return (
     <section>
-      <h2>S-01 Bubble Sort</h2>
-      <p>M2 will implement step generation and playback.</p>
+      <h2>{t('module.s01.title')}</h2>
+      <p>{t('module.s01.body')}</p>
     </section>
   );
 }

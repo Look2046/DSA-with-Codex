@@ -1,8 +1,12 @@
+import { useI18n } from '../../i18n/useI18n';
+
 export function ArrayPage() {
+  const { t } = useI18n();
+
   return (
     <section>
-      <h2>L-01 Array</h2>
-      <p>P1 module placeholder for array operation visualization.</p>
+      <h2>{t('module.l01.title')}</h2>
+      <p>{t('module.l01.body')}</p>
     </section>
   );
 }

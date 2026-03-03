@@ -1,8 +1,12 @@
+import { useI18n } from '../i18n/useI18n';
+
 export function ModulesPage() {
+  const { t } = useI18n();
+
   return (
     <section>
-      <h2>Modules</h2>
-      <p>Category filtering and module discovery will be implemented in later milestones.</p>
+      <h2>{t('modules.title')}</h2>
+      <p>{t('modules.body')}</p>
     </section>
   );
 }

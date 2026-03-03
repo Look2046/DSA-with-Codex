@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom';
+import { useI18n } from '../i18n/useI18n';
 
 export function NotFoundPage() {
+  const { t } = useI18n();
+
   return (
     <section>
-      <h2>404</h2>
-      <p>Page not found.</p>
-      <Link to="/">Back to Home</Link>
+      <h2>{t('notFound.title')}</h2>
+      <p>{t('notFound.body')}</p>
+      <Link to="/">{t('notFound.backHome')}</Link>
     </section>
   );
 }

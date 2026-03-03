@@ -55,6 +55,13 @@ body {
   color: var(--muted);
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .app-nav {
   display: flex;
   gap: 12px;
@@ -80,6 +87,20 @@ body {
   color: var(--brand-strong);
   border-color: #bdd4ea;
   background: #e9f1fa;
+}
+
+.language-toggle {
+  border: 1px solid #bdd4ea;
+  background: #fff;
+  color: var(--brand-strong);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.language-toggle:hover {
+  background: #eef4fb;
 }
 
 .app-main {

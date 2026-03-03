@@ -1,8 +1,12 @@
+import { useI18n } from '../../i18n/useI18n';
+
 export function LinkedListPage() {
+  const { t } = useI18n();
+
   return (
     <section>
-      <h2>L-03 Linked List</h2>
-      <p>P1 module placeholder for node operation visualization.</p>
+      <h2>{t('module.l03.title')}</h2>
+      <p>{t('module.l03.body')}</p>
     </section>
   );
 }
