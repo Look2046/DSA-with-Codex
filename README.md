@@ -4,8 +4,8 @@ This repository tracks design and implementation artifacts for the project.
 
 ## Current Phase
 
-- Phase: M0 scaffold
-- Scope: docs + frontend skeleton
+- Phase: M3 quality gates
+- Scope: docs + frontend implementation
 
 ## Git Workflow
 
@@ -32,6 +32,9 @@ npm run dev
 
 # lint
 npm run lint
+
+# run full quality gate
+npm run check
 
 # create branch for one scope
 git switch -c <docs-or-feat>/<topic>

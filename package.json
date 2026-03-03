@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run",
+    "check:docs": "./scripts/check-doc-links.sh",
+    "check": "npm run check:docs && npm test && npm run lint && npm run build",
     "preview": "vite preview"
   },
   "dependencies": {
