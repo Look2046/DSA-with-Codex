@@ -28,7 +28,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Target: 2026-03-05
 
 ## P1 (Should Have)
-- [ ] Add L-01 array module page with minimal interactions (next milestone: `feat/l01-v1`)
+- [x] Add L-01 array module page with minimal interactions (next milestone: `feat/l01-v1`)
   - DoD: supports data input and step preview for at least one array operation.
 
 - [ ] Add L-03 linked list module page with basic node operations
