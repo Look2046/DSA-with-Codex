@@ -2,6 +2,34 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-03 (L-03 animation savepoint, pending 2 bugs)
+
+### Today Done
+- Completed major L-03 UI/animation refinement on `feat/l03-v1`:
+  - split-node visual + HEAD pointer semantics
+  - staged insert animation flow refinement
+  - improved arrow sync during movement/reset
+  - insert index input switched to "before index" semantics (1-based in UI)
+
+### Current State
+- Branch: `feat/l03-v1`
+- Working tree status: expected clean after savepoint commit
+- Quality gate: `npm run check` passed
+
+### Remaining Issues (confirmed by manual test)
+- Bug 1: after `find` finishes, UI should explicitly show the matched result index (or not-found feedback with index context).
+- Bug 2: `delete` behavior is incorrect in UI flow; user-observed behavior currently resembles insert flow and needs dedicated deletion playback verification/fix.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/l03-v1
+```
+
+### Next 3 Tasks
+- Add explicit find-result output (matched index / not found) in linked-list page status area.
+- Re-test and fix delete playback data flow + rendering path so it is fully distinct from insert.
+- Run `npm run check` and commit focused bugfix patch.
+
 ## 2026-03-03 (L-01 milestone closed)
 
 ### Today Done

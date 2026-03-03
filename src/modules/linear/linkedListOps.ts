@@ -267,7 +267,9 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
     appendStep(steps, operation.type, 'shiftForInsert', [6, 7], nodes, headId, [
       { id: prevNode.id, type: 'swapping' },
       { id: detachedNode.id, type: 'new-node' },
-    ]);
+    ], {
+      targetIndex: operation.index,
+    });
     appendStep(steps, operation.type, 'completed', [8], nodes, headId);
     return steps;
   }

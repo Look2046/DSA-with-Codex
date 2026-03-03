@@ -230,7 +230,7 @@ export function LinkedListPage() {
   const [listInput, setListInput] = useState(DEFAULT_CONFIG.list.join(', '));
   const [operationType, setOperationType] = useState<LinkedListOperation['type']>(DEFAULT_CONFIG.operation.type);
   const [valueInput, setValueInput] = useState(String(DEFAULT_OPERATION.value));
-  const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index));
+  const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
   const [error, setError] = useState('');
   const [speedMs, setSpeedMs] = useState(700);
   const [hasHeadNode, setHasHeadNode] = useState(false);
@@ -441,13 +441,14 @@ export function LinkedListPage() {
   }, [currentSnapshot, floatingNodeIds, highlightByNodeId, nodeMap, t]);
 
   const operationCodeLines = useMemo(() => getOperationCodeLines(config.operation.type), [config.operation.type]);
-  const floatingSlotIndex = useMemo(() => {
-    const targetIndex = currentSnapshot?.targetIndex;
-    if (typeof targetIndex !== 'number') {
-      return null;
-    }
-    return Math.max(0, targetIndex + (hasHeadNode ? 1 : 0));
-  }, [currentSnapshot?.targetIndex, hasHeadNode]);
+  const targetIndex =
+    typeof currentSnapshot?.targetIndex === 'number'
+      ? currentSnapshot.targetIndex
+      : config.operation.type === 'insertAt'
+        ? config.operation.index
+        : null;
+  const floatingSlotIndex =
+    typeof targetIndex === 'number' ? Math.max(0, targetIndex + (hasHeadNode ? 1 : 0)) : null;
 
   const showInsertSlot = currentSnapshot?.action === 'shiftForInsert' && floatingVisualNodes.length > 0;
   const renderNodes = useMemo(() => [...chainVisualNodes, ...floatingVisualNodes], [chainVisualNodes, floatingVisualNodes]);
@@ -644,9 +645,9 @@ export function LinkedListPage() {
     }
 
     if (operationType === 'insertAt') {
-      const index = Number(indexInput);
+      const displayIndex = Number(indexInput);
       const value = Number(valueInput);
-      if (!Number.isInteger(index) || index < 0 || index > parsedList.length) {
+      if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length + 1) {
         setError(t('module.l03.error.insertIndex'));
         return;
       }
@@ -655,6 +656,7 @@ export function LinkedListPage() {
         return;
       }
 
+      const index = displayIndex - 1;
       setError('');
       setConfig({ list: parsedList, operation: { type: 'insertAt', index, value } });
       setStatus('idle');
@@ -703,7 +705,7 @@ export function LinkedListPage() {
 
         {(operationType === 'insertAt' || operationType === 'deleteAt') && (
           <label htmlFor="linked-list-index">
-            <span>{t('module.l03.input.index')}</span>
+            <span>{operationType === 'insertAt' ? t('module.l03.input.insertIndex') : t('module.l03.input.deleteIndex')}</span>
             <input
               id="linked-list-index"
               type="number"
