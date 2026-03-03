@@ -206,8 +206,7 @@ ST-01, P-02, P-04, P-05
 
 ## 📚 关键文档引用
 
-- **AnimationStep 设计**：见 `ANIMATION_STEP_DESIGN.md`
-- **完整规划**：见 `ARCHITECTURE.md`
+- **AnimationStep 设计**：见 `2 ANIMATION_STEP_DESIGN.md`
+- **完整规划**：见 `1 ARCHITECTURE.md`
 - **模块详情**：各模块的 markdown 说明
-- **UI/UX 设计**：见 `UI_UX_DESIGN.md`
-</artifact>
+- **UI/UX 设计**：见 `4 UI_UX_DESIGN.md`

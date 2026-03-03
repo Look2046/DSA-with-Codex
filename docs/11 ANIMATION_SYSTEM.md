@@ -1460,4 +1460,3 @@ const precomputeNodePaths = (steps: AnimationStep[]): Map<string, Point[]> => {
 ---
 
 **文档完成于 2026-03-02**  
-**下一阶段**：请提示"继续"，我将输出第八个文档：**TESTING_STRATEGY.md**
