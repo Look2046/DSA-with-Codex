@@ -487,8 +487,8 @@ import styles from './Visualizer.module.css';
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourorg/algorithm-visualizer.git
-cd algorithm-visualizer
+git clone https://github.com/Look2046/DSA-with-Codex.git
+cd DSA-with-Codex
 
 # 创建特性分支
 git checkout -b feature/your-feature-name
@@ -1107,7 +1107,7 @@ for (let i = 0; i < arr.length; i++) { } // 显而易见
 
 请通过以下方式报告：
 - 邮件：security@example.com
-- 使用 GitHub 安全公告：https://github.com/yourorg/algorithm-visualizer/security/advisories
+- 使用 GitHub 安全公告：https://github.com/Look2046/DSA-with-Codex/security/advisories
 
 **您会在 30 天内收到回复。**
 

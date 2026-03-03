@@ -29,6 +29,8 @@
 - ✅ 监控和日志体系
 - ✅ 灾难恢复方案
 
+> 范围说明（与 ARCHITECTURE 对齐）：v1 推荐先走纯前端静态部署（无需后端与登录）；数据库、认证与 `/api` 相关章节为可选增强方案。
+
 **版本**：v1.0  
 **最后更新**：2026-03-02  
 **支持平台**：Vercel, Netlify, AWS, Docker
@@ -56,8 +58,8 @@
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/yourorg/algorithm-visualizer.git
-cd algorithm-visualizer
+git clone https://github.com/Look2046/DSA-with-Codex.git
+cd DSA-with-Codex
 
 # 2. 安装依赖
 npm install

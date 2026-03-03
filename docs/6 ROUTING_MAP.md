@@ -23,7 +23,7 @@
 本文档定义了整个算法可视化系统的所有路由路径。这些路由确保：
 
 - ✅ 页面导航结构清晰
-- ✅ 39个模块都有唯一的路由标识
+- ✅ 42个核心模块都有唯一的路由标识
 - ✅ 用户可以直接通过URL访问任意模块
 - ✅ 浏览器后退/前进正常工作
 - ✅ 书签和分享功能正常
@@ -51,7 +51,7 @@ const coreRoutes = {
 
 | 路径 | 名称 | 组件 | 功能 |
 |------|------|------|------|
-| `/` | 首页 | HomePage | 显示所有39个模块的卡片网格，支持分类过滤、搜索、难度筛选 |
+| `/` | 首页 | HomePage | 显示所有42个核心模块的卡片网格，支持分类过滤、搜索、难度筛选 |
 | `/about` | 关于 | AboutPage | 项目简介、技术栈、贡献者等 |
 | `*` | 404 | NotFoundPage | 404错误页面 |
 
@@ -529,9 +529,9 @@ export const getModuleByRoute = (route: string): ModuleMetadata | null => {
   // 根据路由查找模块元数据
   const routeToModuleMap = {
     '/modules/array-family': ['L-01', 'L-02'],
-    '/modules/linked-list': ['L-03', 'L-04', 'L-05'],
-    '/modules/stack': ['L-06'],
-    '/modules/queue': ['L-07', 'L-08', 'L-09'],
+    '/modules/linked-list': ['L-03'],
+    '/modules/stack': ['L-04'],
+    '/modules/queue': ['L-05'],
     // ... 完整映射
   };
   
@@ -545,16 +545,16 @@ export const getModuleByRoute = (route: string): ModuleMetadata | null => {
 
 ### 完整模块路由计数
 
-| 分类 | 物理页面数 | 逻辑模块数 | 示例 |
-|------|----------|----------|------|
-| 线性结构 | 4 | 9 | `/modules/linked-list` 包含 L-03、L-04、L-05 |
+| 分类 | 物理页面数 | 逻辑子场景数（含tab/变体） | 示例 |
+|------|----------|-----------------------------|------|
+| 线性结构 | 4 | 9 | `/modules/linked-list` 包含单向/双向/循环链表 |
 | 树结构 | 8 | 8 | `/modules/binary-tree` 对应 T-01 |
 | 图结构 | 6 | 6 | `/modules/bfs` 对应 G-02 |
 | 排序算法 | 10 | 10 | `/modules/bubble-sort` 对应 S-01 |
 | 查找算法 | 3 | 3 | `/modules/linear-search` 对应 SR-01 |
-| 字符串算法 | 4 | 4 | `/modules/string-matching` 对应 ST-01 |
+| 字符串算法 | 4 | 4 | `/modules/kmp` 对应 ST-01 |
 | 其他算法 | 3 | 3 | `/modules/dynamic-programming` 对应 O-01 |
-| **总计** | **38** | **43** | 包括首页、404 |
+| **总计** | **38** | **43** | 含首页、404 与可选 about 路由 |
 
 ---
 
@@ -562,7 +562,8 @@ export const getModuleByRoute = (route: string): ModuleMetadata | null => {
 
 | 版本 | 日期 | 主要变化 |
 |-----|------|---------|
-| v1.0 | 2026-03-02 | 初始版本，定义所有39个模块路由 |
+| v1.1 | 2026-03-03 | 统一为42个核心模块口径，修复示例ID映射冲突 |
+| v1.0 | 2026-03-02 | 初始版本，定义路由结构 |
 
 ---
 

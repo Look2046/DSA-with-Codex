@@ -2,7 +2,7 @@
 
 **项目名称**：数据结构与算法可视化平台  
 **简称**：DSA-Viz  
-**最终模块数**：39 个核心可视化模块 + 2 个附属页面  
+**最终模块数**：42 个核心可视化模块 + 2 个附属页面  
 **版本**：v1.2（删除合并备注，模块编码连续化）  
 **技术栈**：React 18 + TypeScript + Vite + Tailwind CSS + D3.js + Framer Motion + Zustand
 
@@ -18,7 +18,7 @@
 | 用户数据 | 无需登录，仅记录各模块使用次数与时长（LocalStorage + 可选轻量后端） |
 | 技术栈 | **React 18 + TypeScript + Vite + Tailwind CSS + D3.js + Framer Motion + Zustand** |
 
-## 二、最终模块清单（39个核心 + 2个附属）
+## 二、最终模块清单（42个核心 + 2个附属）
 
 ### 线性结构（5个）
 - **L-01** 数组 | `/modules/array`
@@ -280,7 +280,7 @@ dsa-viz/
 │   │   └── storageUtils.ts               # LocalStorage增强封装
 │   │
 │   ├── data/                             # 📊 静态数据与配置
-│   │   ├── moduleRegistry.ts             # 39个模块元数据（名称、难度、描述）
+│   │   ├── moduleRegistry.ts             # 42个模块元数据（名称、难度、描述）
 │   │   ├── learningPaths.ts              # 推荐学习路径
 │   │   └── pseudocode/
 │   │       ├── sortingPseudocode.ts
@@ -511,7 +511,7 @@ module.exports = {
 #### 4. 模块元数据
 
 ```
-src/data/moduleRegistry.ts  ← 39个模块的名称、难度、描述、路由
+src/data/moduleRegistry.ts  ← 42个模块的名称、难度、描述、路由
 ```
 
 #### 5. 伪代码库
@@ -584,7 +584,7 @@ src/data/pseudocode/
 2. 配置 vite.config.ts、tailwind.config.ts（含highlight颜色变量）、tsconfig.json
 3. 创建并实现以下核心文件：
    - src/engine/types.ts（AnimationStep接口）
-   - src/data/moduleRegistry.ts（39个模块元数据）
+   - src/data/moduleRegistry.ts（42个模块元数据）
    - src/components/layout/Layout.tsx（三栏布局）
    - src/hooks/useAnimationPlayer.ts（播放控制Hook）
 4. 设置路由框架（React Router v6）
@@ -686,4 +686,3 @@ src/data/pseudocode/
 }
 ```
 </artifact>
-
