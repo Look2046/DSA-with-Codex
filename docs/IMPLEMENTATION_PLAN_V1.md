@@ -1,7 +1,8 @@
 # IMPLEMENTATION_PLAN_V1
 
-Status: draft for execution
+Status: approved for execution
 Branch model: feature branches -> review -> merge to `main`
+Package manager: npm
 
 ## V1 Target
 
@@ -102,4 +103,3 @@ Exit criteria:
 3. Finish M0 only and merge.
 4. Create branch `feat/m1-runtime-foundations`.
 5. Continue milestone-by-milestone.
-

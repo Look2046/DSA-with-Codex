@@ -2,24 +2,39 @@
 
 Track actionable tasks here. Keep tasks small and testable.
 
-## In Progress
-- [ ] Set up frontend project scaffold
-  - DoD: project runs locally and has baseline folder structure.
+## P0 (V1 Must Have)
+- [ ] M0 scaffold: initialize frontend app and route skeleton
+  - DoD: app starts locally; routes `/`, `/modules`, `/modules/sorting`, `/about`, `*` work.
+  - Acceptance: manual navigation across routes without runtime errors.
   - Owner: haoyu
   - Target: 2026-03-04
 
-## Next Up
-- [ ] Implement first visualization module (array + pointer animation)
-  - DoD: can play/pause/step a basic insertion operation.
+- [ ] M1 foundations: base types + minimal store
+  - DoD: `AnimationStep` and module metadata types defined; current module/playback state managed.
+  - Acceptance: switching module updates state and UI placeholder correctly.
+  - Owner: haoyu
+  - Target: 2026-03-04
+
+- [ ] M2 first vertical slice: S-01 bubble sort
+  - DoD: bubble sort steps generated and playable (play/pause/step).
+  - Acceptance: fixed sample input gives deterministic first/last step output.
   - Owner: haoyu
   - Target: 2026-03-05
 
-- [ ] Add lint and test scripts
-  - DoD: `lint` and `test` commands pass in CI-ready mode.
+- [ ] M3 quality gates: lint/test/link-check wired
+  - DoD: `lint`, `test`, `./scripts/check-doc-links.sh` available and pass locally.
+  - Acceptance: one clean run with captured command output.
   - Owner: haoyu
   - Target: 2026-03-05
 
-## Backlog
+## P1 (Should Have)
+- [ ] Add L-01 array module page with minimal interactions
+  - DoD: supports data input and step preview for at least one array operation.
+
+- [ ] Add L-03 linked list module page with basic node operations
+  - DoD: insert/delete visual steps can be played in timeline.
+
+## P2 (Could Have / Backlog)
 - [ ] Build reusable animation timeline engine
   - DoD: supports seek, speed control, and deterministic replay.
 
@@ -29,4 +44,4 @@ Track actionable tasks here. Keep tasks small and testable.
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
 - [x] Establish daily handoff/decision/todo documentation workflow (2026-03-03)
-
+- [x] Define pre-code checklist and V1 execution plan (2026-03-03)

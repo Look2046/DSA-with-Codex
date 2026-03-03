@@ -2,6 +2,33 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-03 (Pre-code readiness)
+
+### Today Done
+- Added pre-code readiness docs: `PRE_CODE_CHECKLIST.md`, `IMPLEMENTATION_PLAN_V1.md`.
+- Frozen V1 scope and recorded it in `DECISIONS.md`.
+- Upgraded `TODO.md` to `P0/P1/P2` with DoD and acceptance criteria.
+- Completed Go/No-Go checklist for entering `feat/m0-scaffold`.
+
+### Current State
+- Branch: `docs/pre-code-readiness`
+- Working tree status: docs updates in progress
+- Next milestone: start coding on `feat/m0-scaffold`
+
+### Blockers / Risks
+- No blockers on planning side.
+- Risk: implementation may diverge from routing/state docs if M0 scope is exceeded.
+
+### First Step Tomorrow
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch -c feat/m0-scaffold
+```
+
+### Next 3 Tasks
+- Initialize frontend scaffold (Vite + React + TypeScript).
+- Register P0 routes and placeholder pages.
+- Add baseline lint/test scripts and run local checks.
+
 ## 2026-03-03
 
 ### Today Done
@@ -25,4 +52,3 @@ git -C /home/haoyu/data-structure-algorithm-visualizor pull
 - Create initial scaffold for frontend app.
 - Define first visualized data structure module scope.
 - Set up lint/test scripts.
-

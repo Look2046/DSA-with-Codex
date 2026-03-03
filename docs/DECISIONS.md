@@ -32,3 +32,20 @@ Record architecture or workflow decisions here.
 - Consequences: One-time SSH setup, then stable push workflow.
 - Owner: haoyu + codex
 
+## DEC-20260303-03
+- Date: 2026-03-03
+- Status: accepted
+- Context: Need to avoid scope creep before coding and keep first implementation cycle short.
+- Decision: Freeze V1 to 3 core modules (`S-01`, `L-01`, `L-03`) plus 2 auxiliary pages (`/modules/sorting`, `/about`); defer auth/backend persistence.
+- Alternatives considered: implement broader module set or backend integration in V1.
+- Consequences: Faster first delivery and lower integration risk; some planned features move to later milestones.
+- Owner: haoyu + codex
+
+## DEC-20260303-04
+- Date: 2026-03-03
+- Status: accepted
+- Context: Need explicit quality gates and branch discipline before coding begins.
+- Decision: Use branch-based workflow (`docs/*`, `feat/*`) and require local checks (`./scripts/check-doc-links.sh`, then `lint`/`test` after scaffold) before merge.
+- Alternatives considered: continue direct commits to `main`.
+- Consequences: Slightly more process overhead, but better traceability and safer merges.
+- Owner: haoyu + codex
