@@ -17,6 +17,19 @@ describe('generateArrayInsertSteps', () => {
     expect(last.arrayState).toEqual([3, 8, 9, 1, 5]);
   });
 
+  it('shows an explicit empty slot and moves it left before insertion', () => {
+    const steps = generateArrayInsertSteps([3, 8, 1, 5], 1, 9);
+    const expandStep = steps.find((step) => step.action === 'expand');
+    const shiftSteps = steps.filter((step) => step.action === 'shift');
+    const prepareStep = steps.find((step) => step.action === 'prepareInsert');
+
+    expect(expandStep?.arrayState).toEqual([3, 8, 1, 5, null]);
+    expect(shiftSteps.length).toBeGreaterThan(0);
+    expect(shiftSteps[0].arrayState.includes(null)).toBe(true);
+    expect(prepareStep?.arrayState[1]).toBeNull();
+    expect(prepareStep?.pendingValue).toBe(9);
+  });
+
   it('supports insert at array tail', () => {
     const steps = generateArrayInsertSteps([4, 6], 2, 10);
 

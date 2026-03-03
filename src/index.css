@@ -423,11 +423,37 @@ body {
   justify-items: center;
   align-content: center;
   gap: 4px;
+  position: relative;
+}
+
+.array-cell-empty {
+  border-style: dashed;
+  color: #7b8fa6;
 }
 
 .array-cell-index {
   font-size: 0.72rem;
   color: #5b728d;
+}
+
+.pending-insert {
+  position: absolute;
+  top: -16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1e5ea3;
+  animation: insert-drop 0.45s ease;
+}
+
+@keyframes insert-drop {
+  from {
+    transform: translateY(-10px);
+    opacity: 0.25;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .pseudocode-block {

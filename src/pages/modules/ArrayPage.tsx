@@ -59,8 +59,14 @@ function getStepDescription(step: ArrayInsertStep | undefined, t: ReturnType<typ
   if (step.action === 'initial') {
     return t('module.l01.step.initial');
   }
+  if (step.action === 'expand') {
+    return t('module.l01.step.expand');
+  }
   if (step.action === 'shift') {
     return `${t('module.l01.step.shift')} ${step.indices[0]} -> ${step.indices[1]}`;
+  }
+  if (step.action === 'prepareInsert') {
+    return `${t('module.l01.step.prepare')} ${step.indices[0]}`;
   }
   if (step.action === 'insert') {
     return `${t('module.l01.step.insert')} ${step.indices[0]}`;
@@ -236,10 +242,17 @@ export function ArrayPage() {
       <div className="array-cells" aria-label="array-cells">
         {(currentSnapshot?.arrayState ?? []).map((value, index) => {
           const highlight = highlightMap.get(index) ?? 'default';
+          const isEmpty = value === null;
+          const isPrepareTarget =
+            currentSnapshot?.action === 'prepareInsert' && currentSnapshot.indices[0] === index;
+          const pendingValue = isPrepareTarget ? currentSnapshot.pendingValue : undefined;
+          const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}`;
+
           return (
-            <div key={`${index}-${value}`} className={`array-cell bar-${highlight}`}>
+            <div key={`${index}-${String(value)}`} className={cellClassName}>
               <span className="array-cell-index">{index}</span>
-              <strong>{value}</strong>
+              {pendingValue !== undefined ? <span className="pending-insert">{pendingValue}</span> : null}
+              <strong>{value ?? '∅'}</strong>
             </div>
           );
         })}
@@ -277,6 +290,7 @@ export function ArrayPage() {
           <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l01.code.line3')}</li>
           <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l01.code.line4')}</li>
           <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l01.code.line5')}</li>
+          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l01.code.line6')}</li>
         </ol>
       </div>
     </section>
