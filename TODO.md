@@ -46,3 +46,4 @@ Track actionable tasks here. Keep tasks small and testable.
 - [x] Establish daily handoff/decision/todo documentation workflow (2026-03-03)
 - [x] Define pre-code checklist and V1 execution plan (2026-03-03)
 - [x] Close S-01 milestone (M0 + M1 + M2 + M3) on `feat/m0-scaffold` (2026-03-03)
+- [x] Close L-01 milestone (array insert v1 + playback + tests) on `feat/l01-v1` (2026-03-03)

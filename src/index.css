@@ -409,9 +409,12 @@ body {
 }
 
 .array-cells {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .array-cell {
@@ -424,6 +427,7 @@ body {
   align-content: center;
   gap: 4px;
   position: relative;
+  flex: 0 0 72px;
 }
 
 .array-cell-empty {

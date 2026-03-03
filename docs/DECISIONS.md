@@ -58,3 +58,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue implementing L-01 directly on `feat/m0-scaffold`.
 - Consequences: Cleaner history and easier review/rollback per milestone.
 - Owner: haoyu + codex
+
+## DEC-20260303-06
+- Date: 2026-03-03
+- Status: accepted
+- Context: L-01 array module reached v1 acceptance and needs a clean handoff into the next module milestone.
+- Decision: Close L-01 on `feat/l01-v1`, then start L-03 on a dedicated branch `feat/l03-v1`.
+- Alternatives considered: continue L-03 work on `feat/l01-v1`.
+- Consequences: Better milestone isolation and easier PR review/rollback by module.
+- Owner: haoyu + codex

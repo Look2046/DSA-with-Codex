@@ -2,6 +2,34 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-03 (L-01 milestone closed)
+
+### Today Done
+- Completed L-01 array module v1 on `feat/l01-v1`.
+- Added array insert step generator and tests (deterministic, final state, tail insert, out-of-range guard, explicit empty-slot behavior).
+- Reworked L-01 playback to make insertion process explicit: append empty slot, shift with visible hole movement, prepare insert, then insert.
+- Added zh/en localized copy and UI polish for L-01 interaction and visualization.
+- Passed local quality gate and pushed branch updates (`npm run check`).
+
+### Current State
+- Branch: `feat/l01-v1`
+- Working tree status: expected clean after final push
+- Milestone status: L-01 v1 closed and pushed
+
+### Blockers / Risks
+- No blocker for entering L-03.
+- Risk: L-03 should follow existing playback conventions to avoid introducing a separate animation model.
+
+### First Step Tomorrow
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch -c feat/l03-v1
+```
+
+### Next 3 Tasks
+- Start L-03 linked list v1 with one core operation (insert first).
+- Reuse playback store + timeline controls from S-01/L-01.
+- Keep `npm run check` green before every push.
+
 ## 2026-03-03 (S-01 milestone closed)
 
 ### Today Done
