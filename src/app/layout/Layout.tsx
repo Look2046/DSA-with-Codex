@@ -25,6 +25,7 @@ export function Layout() {
               <NavLink
                 key={link.to}
                 to={link.to}
+                end={link.to === '/modules'}
                 className={({ isActive }) => (isActive ? 'nav-link nav-link-active' : 'nav-link')}
               >
                 {link.label}

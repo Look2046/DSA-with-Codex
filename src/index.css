@@ -201,3 +201,23 @@ body {
 .milestone {
   padding: 16px;
 }
+
+.playback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.playback-actions button {
+  border: 1px solid #bdd4ea;
+  background: #fff;
+  color: var(--brand-strong);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.playback-actions button:hover {
+  background: #eef4fb;
+}
