@@ -7,9 +7,12 @@ type PlaybackStore = {
   totalSteps: number;
   currentStep: number;
   status: PlaybackStatus;
+  setStatus: (status: PlaybackStatus) => void;
   setCurrentModule: (moduleItem: ModuleMetadata | null) => void;
   setTotalSteps: (total: number) => void;
   goToStep: (step: number) => void;
+  nextStep: () => void;
+  prevStep: () => void;
   play: () => void;
   pause: () => void;
   reset: () => void;
@@ -20,6 +23,7 @@ export const usePlaybackStore = create<PlaybackStore>((set) => ({
   totalSteps: 0,
   currentStep: 0,
   status: 'idle',
+  setStatus: (status) => set({ status }),
 
   setCurrentModule: (moduleItem) => {
     set({
@@ -38,6 +42,23 @@ export const usePlaybackStore = create<PlaybackStore>((set) => ({
     set((state) => {
       const clamped = Math.max(0, Math.min(step, state.totalSteps > 0 ? state.totalSteps - 1 : 0));
       return { currentStep: clamped };
+    });
+  },
+  nextStep: () => {
+    set((state) => {
+      if (state.totalSteps === 0) {
+        return state;
+      }
+      const next = Math.min(state.currentStep + 1, state.totalSteps - 1);
+      const nextStatus: PlaybackStatus = next >= state.totalSteps - 1 ? 'completed' : state.status;
+      return { currentStep: next, status: nextStatus };
+    });
+  },
+  prevStep: () => {
+    set((state) => {
+      const prev = Math.max(state.currentStep - 1, 0);
+      const nextStatus: PlaybackStatus = state.status === 'completed' ? 'paused' : state.status;
+      return { currentStep: prev, status: nextStatus };
     });
   },
 

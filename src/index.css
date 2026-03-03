@@ -221,3 +221,12 @@ body {
 .playback-actions button:hover {
   background: #eef4fb;
 }
+
+.array-preview {
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  background: #f8fbff;
+  border: 1px solid #d7e8f8;
+  border-radius: 8px;
+  display: inline-block;
+  padding: 4px 8px;
+}
