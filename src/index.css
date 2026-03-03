@@ -1,7 +1,17 @@
 :root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-alt: #eef4fb;
+  --text: #0f172a;
+  --muted: #475569;
+  --line: #d8e3ef;
+  --brand: #0f6cbd;
+  --brand-strong: #084c8d;
+  --shadow-soft: 0 8px 26px rgba(15, 45, 84, 0.08);
+  --radius: 14px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: var(--text);
+  background-color: var(--bg);
 }
 
 * {
@@ -10,6 +20,10 @@
 
 body {
   margin: 0;
+  background:
+    radial-gradient(circle at 0% 0%, #e9f2fd 0, transparent 40%),
+    radial-gradient(circle at 100% 10%, #eef7ec 0, transparent 32%),
+    var(--bg);
 }
 
 .app-shell {
@@ -22,40 +36,147 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #ffffff;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
-.app-header nav {
+.app-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.app-nav {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
 .nav-link {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
   text-decoration: none;
-  color: #0369a1;
+  color: var(--brand);
   font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .nav-link:hover {
-  text-decoration: underline;
+  border-color: var(--line);
+  background: var(--surface-alt);
+}
+
+.nav-link-active {
+  color: var(--brand-strong);
+  border-color: #bdd4ea;
+  background: #e9f1fa;
 }
 
 .app-main {
   max-width: 960px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 26px 16px 36px;
 }
 
-section h2 {
+.home-page {
+  display: grid;
+  gap: 16px;
+}
+
+.hero,
+.feature-card,
+.milestone {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+}
+
+.hero {
+  padding: 22px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.hero h2 {
+  margin: 10px 0;
+  line-height: 1.2;
+}
+
+.hero-copy {
+  margin: 0;
+  color: var(--muted);
+  max-width: 65ch;
+}
+
+.hero-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--brand-strong);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--brand-strong);
+  border: 1px solid #bdd4ea;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.feature-card {
+  padding: 16px;
+}
+
+.feature-card h3,
+.milestone h3 {
   margin-top: 0;
+}
+
+.feature-card p,
+.milestone p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.milestone {
+  padding: 16px;
 }

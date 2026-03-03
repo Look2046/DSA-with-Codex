@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -11,12 +11,19 @@ export function Layout() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>DSA Visualizor</h1>
-        <nav>
+        <div>
+          <h1>DSA Visualizor</h1>
+          <p className="app-subtitle">Data Structures and Algorithms, Visual First.</p>
+        </div>
+        <nav className="app-nav">
           {navLinks.map((link) => (
-            <Link key={link.to} to={link.to} className="nav-link">
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => (isActive ? 'nav-link nav-link-active' : 'nav-link')}
+            >
               {link.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
       </header>
