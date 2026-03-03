@@ -239,6 +239,7 @@ export function LinkedListPage() {
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
   const [movingRootProgress, setMovingRootProgress] = useState(1);
+  const [linkDrawProgress, setLinkDrawProgress] = useState(1);
   const [arrowFrameTick, setArrowFrameTick] = useState(0);
   const diagramRef = useRef<HTMLDivElement | null>(null);
   const nodeWrapRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -275,26 +276,20 @@ export function LinkedListPage() {
 
   useEffect(() => {
     if (currentSnapshot?.action !== 'movePointerRoot') {
-      if (currentSnapshot?.action === 'shiftForInsert' || currentSnapshot?.action === 'insert') {
-        let rafId = 0;
-        const start = performance.now();
-        const tick = (now: number) => {
-          setArrowFrameTick(now);
-          if (now - start < 680) {
-            rafId = window.requestAnimationFrame(tick);
-          }
-        };
-        rafId = window.requestAnimationFrame(tick);
-        return () => window.cancelAnimationFrame(rafId);
-      }
-      return;
+      const raf = window.requestAnimationFrame(() => setMovingRootProgress(0));
+      return () => window.cancelAnimationFrame(raf);
     }
 
     const start = performance.now();
     let rafId = 0;
+    let initialized = false;
 
     const tick = (now: number) => {
-      const progress = Math.max(0, Math.min((now - start) / 620, 1));
+      if (!initialized) {
+        initialized = true;
+        setMovingRootProgress(0);
+      }
+      const progress = Math.max(0, Math.min((now - start) / 700, 1));
       setMovingRootProgress(progress);
       setArrowFrameTick(now);
       if (progress < 1) {
@@ -302,6 +297,50 @@ export function LinkedListPage() {
       }
     };
 
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [currentSnapshot?.action, currentStep]);
+
+  useEffect(() => {
+    if (currentSnapshot?.action !== 'linkNewNode') {
+      const raf = window.requestAnimationFrame(() => setLinkDrawProgress(0));
+      return () => window.cancelAnimationFrame(raf);
+    }
+
+    const start = performance.now();
+    let rafId = 0;
+    let initialized = false;
+
+    const tick = (now: number) => {
+      if (!initialized) {
+        initialized = true;
+        setLinkDrawProgress(0);
+      }
+      const progress = Math.max(0, Math.min((now - start) / 620, 1));
+      setLinkDrawProgress(progress);
+      setArrowFrameTick(now);
+      if (progress < 1) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [currentSnapshot?.action, currentStep]);
+
+  useEffect(() => {
+    if (currentSnapshot?.action !== 'shiftForInsert' && currentSnapshot?.action !== 'insert') {
+      return;
+    }
+
+    let rafId = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      setArrowFrameTick(now);
+      if (now - start < 920) {
+        rafId = window.requestAnimationFrame(tick);
+      }
+    };
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
   }, [currentSnapshot?.action, currentStep]);
@@ -425,6 +464,9 @@ export function LinkedListPage() {
 
   useLayoutEffect(() => {
     const nextRects = new Map<string, DOMRect>();
+    let hasMovement = false;
+    const transitionMs = currentSnapshot?.action === 'shiftForInsert' ? 920 : 320;
+
     renderNodes.forEach((node) => {
       const el = nodeWrapRefs.current.get(node.id);
       if (!el) {
@@ -443,18 +485,32 @@ export function LinkedListPage() {
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
         return;
       }
+      hasMovement = true;
 
       el.style.transition = 'none';
       el.style.transform = `translate(${dx}px, ${dy}px)`;
 
       window.requestAnimationFrame(() => {
-        el.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+        el.style.transition = `transform ${transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1)`;
         el.style.transform = 'translate(0, 0)';
       });
     });
 
     prevNodeRects.current = nextRects;
-  }, [renderNodes, currentStep]);
+
+    if (hasMovement) {
+      let rafId = 0;
+      const start = performance.now();
+      const tick = (now: number) => {
+        setArrowFrameTick(now);
+        if (now - start < transitionMs + 60) {
+          rafId = window.requestAnimationFrame(tick);
+        }
+      };
+      rafId = window.requestAnimationFrame(tick);
+      return () => window.cancelAnimationFrame(rafId);
+    }
+  }, [renderNodes, currentStep, currentSnapshot?.action]);
 
   useLayoutEffect(() => {
     const updateArrows = () => {
@@ -517,8 +573,16 @@ export function LinkedListPage() {
           }
         }
 
+        const animatedTo =
+          link.style === 'new-link'
+            ? {
+                x: fromPoint.x + (toPoint.x - fromPoint.x) * linkDrawProgress,
+                y: fromPoint.y + (toPoint.y - fromPoint.y) * linkDrawProgress,
+              }
+            : toPoint;
+
         arrows.push({
-          d: buildCurvePath(fromPoint, toPoint),
+          d: buildCurvePath(fromPoint, animatedTo),
           key: `transient-${link.style}-${link.fromId}-${link.toId}-${currentStep}`,
           className:
             link.style === 'moving-root' ? 'linked-node-arrow linked-node-arrow-moving' : 'linked-node-arrow linked-node-arrow-new',
@@ -552,7 +616,7 @@ export function LinkedListPage() {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener('resize', updateArrows);
     };
-  }, [chainVisualNodes, currentSnapshot, floatingVisualNodes, movingRootProgress, currentStep, arrowFrameTick]);
+  }, [chainVisualNodes, currentSnapshot, floatingVisualNodes, movingRootProgress, currentStep, arrowFrameTick, linkDrawProgress]);
 
   const applyOperation = () => {
     const parsedList = parseNumberArrayAllowEmpty(listInput);

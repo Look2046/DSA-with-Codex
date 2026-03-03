@@ -246,7 +246,7 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
         { id: detachedNode.id, type: 'new-node' },
       ], {
         floatingNodeIds: [detachedNode.id],
-        hiddenLinkFromIds: [prevNode.id],
+        hiddenLinkFromIds: [prevNode.id, detachedNode.id],
         transientLinks: [{ fromId: prevNode.id, toId: detachedNode.nextId, style: 'moving-root', moveToPointerId: detachedNode.id }],
         targetIndex: operation.index,
       });
@@ -258,25 +258,16 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
     ], {
       floatingNodeIds: [detachedNode.id],
       hiddenLinkFromIds: [prevNode.id],
-      transientLinks: [
-        ...(detachedNode.nextId ? [{ fromId: detachedNode.id, toId: detachedNode.nextId, style: 'new-link' as const }] : []),
-        { fromId: prevNode.id, toId: detachedNode.id, style: 'new-link' },
-      ],
+      transientLinks: [{ fromId: prevNode.id, toId: detachedNode.id, style: 'new-link' }],
       targetIndex: operation.index,
     });
 
     prevNode.nextId = detachedNode.id;
-
-    appendStep(steps, operation.type, 'shiftForInsert', [6], nodes, headId, [
+    detachedNode.detached = false;
+    appendStep(steps, operation.type, 'shiftForInsert', [6, 7], nodes, headId, [
       { id: prevNode.id, type: 'swapping' },
       { id: detachedNode.id, type: 'new-node' },
-    ], {
-      floatingNodeIds: [detachedNode.id],
-      targetIndex: operation.index,
-    });
-
-    detachedNode.detached = false;
-    appendStep(steps, operation.type, 'insert', [7], nodes, headId, [{ id: detachedNode.id, type: 'new-node' }]);
+    ]);
     appendStep(steps, operation.type, 'completed', [8], nodes, headId);
     return steps;
   }
