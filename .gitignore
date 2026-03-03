@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.swp
+*.swo
+
+# Node / frontend build artifacts (future modules)
+node_modules/
+dist/
+build/
+.cache/
+coverage/
+
