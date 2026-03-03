@@ -2,6 +2,33 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-03 (S-01 milestone closed)
+
+### Today Done
+- Completed M0 scaffold (Vite + React + TypeScript + route shell).
+- Completed M1 foundations (types, module registry, playback store).
+- Completed M2 first vertical slice for S-01 (bubble sort steps, playback, bars/highlights, speed/data-size controls, zh/en UI text).
+- Completed M3 quality gates (`npm run check`, unit tests, CI workflow).
+
+### Current State
+- Branch: `feat/m0-scaffold`
+- Working tree status: clean
+- Milestone status: S-01 + M3 closed and pushed
+
+### Blockers / Risks
+- No blocker for entering L-01.
+- Risk: L-01 implementation should reuse existing playback patterns to avoid divergent architecture.
+
+### First Step Tomorrow
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch -c feat/l01-v1
+```
+
+### Next 3 Tasks
+- Start L-01 v1 implementation (array operation steps + playback).
+- Reuse current store/playback infrastructure from S-01.
+- Keep passing `npm run check` before each push.
+
 ## 2026-03-03 (Pre-code readiness)
 
 ### Today Done

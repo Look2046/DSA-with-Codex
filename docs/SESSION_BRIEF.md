@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/m0-scaffold`
-- Current phase: M3 quality gates completed, ready for next feature module
+- Active branch (expected): `feat/m0-scaffold` (milestone closed), next: `feat/l01-v1`
+- Current phase: S-01 milestone closed, preparing L-01 implementation kickoff
 - Last local quality gate: `npm run check` (passed)
 
 ## 2) What Is Already Done
@@ -15,12 +15,13 @@ Use this file as the first thing to read in a new chat/session.
 - Route shell and page placeholders
 - zh/en one-click language toggle (UI text)
 - S-01 bubble sort basic playback + bars/highlights + speed/data-size controls
+- S-01 bubble sort enhanced demo with localized UI and pseudocode highlight
 - Unit test baseline for bubble sort step generation
 - CI workflow and unified local quality gate
 
 ## 3) Next Priority
 
-- Implement L-01 module first version (reuse playback patterns from S-01)
+- Create branch `feat/l01-v1` and implement L-01 module first version
 - Keep branch scope focused to one milestone
 - Run `npm run check` before every push
 
@@ -37,7 +38,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ```bash
 git fetch
-git switch feat/m0-scaffold
+git switch feat/l01-v1
 git pull
 npm install
 npm run dev

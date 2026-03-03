@@ -49,3 +49,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue direct commits to `main`.
 - Consequences: Slightly more process overhead, but better traceability and safer merges.
 - Owner: haoyu + codex
+
+## DEC-20260303-05
+- Date: 2026-03-03
+- Status: accepted
+- Context: S-01 module and M3 gates have reached a stable checkpoint and need a clear transition boundary.
+- Decision: Close current milestone on `feat/m0-scaffold`, then start L-01 work on a new branch `feat/l01-v1`.
+- Alternatives considered: continue implementing L-01 directly on `feat/m0-scaffold`.
+- Consequences: Cleaner history and easier review/rollback per milestone.
+- Owner: haoyu + codex
