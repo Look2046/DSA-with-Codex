@@ -475,7 +475,7 @@ state = {
 #### 1. 本规划文档
 
 ```
-docs/ARCHITECTURE.md  ← 本文档
+docs/1 ARCHITECTURE.md  ← 本文档
 ```
 
 #### 2. 核心类型定义

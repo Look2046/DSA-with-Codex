@@ -37,6 +37,14 @@
 
 ---
 
+## 执行前提（重要）
+
+- 当前仓库可能处于“文档设计阶段”（仅 `docs/` 与 `README.md`），尚未落地前端脚手架。  
+- 本文中 `npm install`、`npm run dev`、`.env`、Docker、K8s 等命令，默认前提是代码脚手架已创建并包含 `package.json`。  
+- 若你当前看不到 `package.json`，请先按 [1 ARCHITECTURE.md](./1%20ARCHITECTURE.md) 的阶段计划完成 Phase 1 骨架初始化。
+
+---
+
 ## 本地开发环境
 
 ### 环境要求
@@ -61,15 +69,15 @@
 git clone https://github.com/Look2046/DSA-with-Codex.git
 cd DSA-with-Codex
 
-# 2. 安装依赖
+# 2. 安装依赖（需已存在 package.json）
 npm install
 # 或
 yarn install
 
-# 3. 设置环境变量
+# 3. 设置环境变量（需已提供 .env.example）
 cp .env.example .env.local
 
-# 4. 验证环境
+# 4. 验证环境（需已提供 scripts/checkEnv.js）
 npm run check-env
 
 # 5. 启动开发服务器
