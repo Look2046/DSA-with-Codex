@@ -20,6 +20,7 @@ This repository is currently in a docs-first phase.
 
 ## Quality Checklist
 
+- [ ] Run `./scripts/check-doc-links.sh` and ensure it passes.
 - [ ] No stale generated text (for example, "请提示继续").
 - [ ] Dates are explicit (`YYYY-MM-DD`).
 - [ ] Links and file names match real repository paths.

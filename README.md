@@ -21,6 +21,9 @@ This repository tracks design and implementation artifacts for the project.
 git status
 git diff
 
+# validate local markdown links in docs
+./scripts/check-doc-links.sh
+
 # create branch for one design topic
 git switch -c docs/review-<topic>
 
@@ -28,4 +31,3 @@ git switch -c docs/review-<topic>
 git add docs
 git commit -m "docs: <change summary>"
 ```
-
