@@ -78,6 +78,22 @@ describe('generateLinkedListSteps', () => {
     expect(collectChainValues(deleteTail[deleteTail.length - 1])).toEqual([2, 6]);
   });
 
+  it('deleteAt uses dedicated deletion transition metadata', () => {
+    const deleteHead = generateLinkedListSteps([2, 6, 9], { type: 'deleteAt', index: 0 });
+    const deleteMiddle = generateLinkedListSteps([2, 6, 9], { type: 'deleteAt', index: 1 });
+
+    const headDeleteStep = deleteHead.find((step) => step.action === 'delete');
+    const middleDeleteStep = deleteMiddle.find((step) => step.action === 'delete');
+
+    expect(headDeleteStep?.floatingNodeIds).toEqual(['n0']);
+    expect(headDeleteStep?.targetIndex).toBe(0);
+
+    expect(middleDeleteStep?.floatingNodeIds).toEqual(['n1']);
+    expect(middleDeleteStep?.hiddenLinkFromIds).toEqual(['n0', 'n1']);
+    expect(middleDeleteStep?.transientLinks).toEqual([{ fromId: 'n0', toId: 'n2', style: 'delete-link' }]);
+    expect(middleDeleteStep?.targetIndex).toBe(1);
+  });
+
   it('keeps every step link target valid', () => {
     const steps = generateLinkedListSteps([5, 8, 12], { type: 'insertAt', index: 1, value: 7 });
 

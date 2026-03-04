@@ -35,7 +35,7 @@ export type LinkedListStep = AnimationStep & {
   transientLinks: Array<{
     fromId: string;
     toId: string;
-    style: 'moving-root' | 'new-link';
+    style: 'moving-root' | 'new-link' | 'delete-link';
     moveToPointerId?: string;
   }>;
   targetIndex?: number;
@@ -107,12 +107,12 @@ function appendStep(
   nodes: LinkedListNode[],
   headId: string | null,
   highlightEntries: Array<{ id: string; type: HighlightType }> = [],
-    options?: {
-      floatingNodeIds?: string[];
-      hiddenLinkFromIds?: string[];
-      transientLinks?: Array<{ fromId: string; toId: string; style: 'moving-root' | 'new-link'; moveToPointerId?: string }>;
-      targetIndex?: number;
-    },
+  options?: {
+    floatingNodeIds?: string[];
+    hiddenLinkFromIds?: string[];
+    transientLinks?: Array<{ fromId: string; toId: string; style: 'moving-root' | 'new-link' | 'delete-link'; moveToPointerId?: string }>;
+    targetIndex?: number;
+  },
 ): void {
   const renderOrder = buildRenderOrder(headId, nodes);
   steps.push({
@@ -300,10 +300,15 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
 
     appendStep(steps, operation.type, 'prepareDelete', [3], nodes, headId, [{ id: deleteId, type: 'swapping' }]);
 
-    headId = deleteNode.nextId;
+    const nextHeadId = deleteNode.nextId;
+    headId = nextHeadId;
     deleteNode.detached = true;
     deleteNode.nextId = null;
-    appendStep(steps, operation.type, 'delete', [4], nodes, headId, [{ id: deleteId, type: 'swapping' }]);
+    appendStep(steps, operation.type, 'delete', [4], nodes, headId, [{ id: deleteId, type: 'swapping' }], {
+      floatingNodeIds: [deleteId],
+      hiddenLinkFromIds: [deleteId],
+      targetIndex: 0,
+    });
 
     const removeIndex = nodes.findIndex((node) => node.id === deleteId);
     nodes.splice(removeIndex, 1);
@@ -329,13 +334,19 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
     { id: deleteNode.id, type: 'swapping' },
   ]);
 
-  prevNode.nextId = deleteNode.nextId;
+  const nextIdAfterDelete = deleteNode.nextId;
+  prevNode.nextId = nextIdAfterDelete;
   deleteNode.nextId = null;
   deleteNode.detached = true;
   appendStep(steps, operation.type, 'delete', [4], nodes, headId, [
     { id: prevNode.id, type: 'swapping' },
     { id: deleteNode.id, type: 'swapping' },
-  ]);
+  ], {
+    floatingNodeIds: [deleteNode.id],
+    hiddenLinkFromIds: [prevNode.id, deleteNode.id],
+    transientLinks: nextIdAfterDelete ? [{ fromId: prevNode.id, toId: nextIdAfterDelete, style: 'delete-link' }] : [],
+    targetIndex: operation.index,
+  });
 
   const removeIndex = nodes.findIndex((node) => node.id === deleteId);
   nodes.splice(removeIndex, 1);

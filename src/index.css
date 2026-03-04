@@ -551,6 +551,10 @@ body {
   stroke: #1e5ea3;
 }
 
+.linked-node-arrow-delete {
+  stroke: #b94848;
+}
+
 .linked-diagram-track {
   position: relative;
   z-index: 2;

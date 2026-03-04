@@ -166,6 +166,32 @@ function getOperationCodeLines(operation: LinkedListOperation['type']): Translat
   ];
 }
 
+function getFindResultText(
+  operation: LinkedListOperation,
+  list: number[],
+  step: LinkedListStep | undefined,
+  t: ReturnType<typeof useI18n>['t'],
+): string | null {
+  if (operation.type !== 'find') {
+    return null;
+  }
+
+  if (step?.action !== 'completed') {
+    return null;
+  }
+
+  const matchedIndex = list.indexOf(operation.value);
+  if (matchedIndex >= 0) {
+    return `${t('module.l03.findResult.found')} ${matchedIndex}`;
+  }
+
+  if (list.length === 0) {
+    return `${t('module.l03.findResult.notFound')} []`;
+  }
+
+  return `${t('module.l03.findResult.notFound')} [0, ${list.length - 1}]`;
+}
+
 function collectMainChainOrder(snapshot: LinkedListStep | undefined): string[] {
   if (!snapshot) {
     return [];
@@ -231,10 +257,8 @@ export function LinkedListPage() {
   const [operationType, setOperationType] = useState<LinkedListOperation['type']>(DEFAULT_CONFIG.operation.type);
   const [valueInput, setValueInput] = useState(String(DEFAULT_OPERATION.value));
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
-  const [error, setError] = useState('');
   const [speedMs, setSpeedMs] = useState(700);
   const [hasHeadNode, setHasHeadNode] = useState(false);
-  const [config, setConfig] = useState<LinkedListConfig>(DEFAULT_CONFIG);
 
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
@@ -245,16 +269,58 @@ export function LinkedListPage() {
   const nodeWrapRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const prevNodeRects = useRef<Map<string, DOMRect>>(new Map());
 
-  const { status, currentStep, totalSteps, setTotalSteps, setStatus, play, pause, nextStep, prevStep, reset } =
+  const { status, currentStep, totalSteps, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
-  const steps = useMemo(() => generateLinkedListSteps(config.list, config.operation), [config]);
+  const parsedConfig = useMemo<{ config: LinkedListConfig | null; error: string }>(() => {
+    const parsedList = parseNumberArrayAllowEmpty(listInput);
+    if (!parsedList) {
+      return { config: null, error: t('module.l03.error.list') };
+    }
+    if (parsedList.length > 30) {
+      return { config: null, error: t('module.l03.error.length') };
+    }
+
+    if (operationType === 'find') {
+      const value = Number(valueInput);
+      if (Number.isNaN(value)) {
+        return { config: null, error: t('module.l03.error.value') };
+      }
+      return { config: { list: parsedList, operation: { type: 'find', value } }, error: '' };
+    }
+
+    if (operationType === 'insertAt') {
+      const displayIndex = Number(indexInput);
+      const value = Number(valueInput);
+      if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length + 1) {
+        return { config: null, error: t('module.l03.error.insertIndex') };
+      }
+      if (Number.isNaN(value)) {
+        return { config: null, error: t('module.l03.error.value') };
+      }
+      return { config: { list: parsedList, operation: { type: 'insertAt', index: displayIndex - 1, value } }, error: '' };
+    }
+
+    const displayIndex = Number(indexInput);
+    if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length) {
+      return { config: null, error: t('module.l03.error.deleteIndex') };
+    }
+    return { config: { list: parsedList, operation: { type: 'deleteAt', index: displayIndex - 1 } }, error: '' };
+  }, [listInput, operationType, valueInput, indexInput, t]);
+
+  const steps = useMemo(
+    () => (parsedConfig.config ? generateLinkedListSteps(parsedConfig.config.list, parsedConfig.config.operation) : []),
+    [parsedConfig.config],
+  );
+  const error = parsedConfig.error;
+  const activeOperationType = parsedConfig.config?.operation.type ?? operationType;
+  const hasValidConfig = parsedConfig.config !== null;
   const currentSnapshot = steps[currentStep] ?? steps[0];
 
   useEffect(() => {
     setTotalSteps(steps.length);
     reset();
-  }, [setTotalSteps, reset, steps.length]);
+  }, [setTotalSteps, reset, steps]);
 
   useEffect(() => {
     if (status !== 'playing') {
@@ -431,27 +497,33 @@ export function LinkedListPage() {
         label: String(node.value),
         nextId: node.nextId,
         detached: true,
-        highlight: highlightByNodeId.get(node.id) ?? 'new-node',
-        indexLabel: t('module.l03.index.new'),
+        highlight:
+          highlightByNodeId.get(node.id) ?? (activeOperationType === 'deleteAt' ? 'swapping' : 'new-node'),
+        indexLabel: activeOperationType === 'deleteAt' ? t('module.l03.index.removed') : t('module.l03.index.new'),
         floating: true,
       });
     });
 
     return nodes;
-  }, [currentSnapshot, floatingNodeIds, highlightByNodeId, nodeMap, t]);
+  }, [currentSnapshot, floatingNodeIds, highlightByNodeId, nodeMap, activeOperationType, t]);
 
-  const operationCodeLines = useMemo(() => getOperationCodeLines(config.operation.type), [config.operation.type]);
+  const operationCodeLines = useMemo(() => getOperationCodeLines(activeOperationType), [activeOperationType]);
   const targetIndex =
     typeof currentSnapshot?.targetIndex === 'number'
       ? currentSnapshot.targetIndex
-      : config.operation.type === 'insertAt'
-        ? config.operation.index
+      : parsedConfig.config?.operation.type === 'insertAt'
+        ? parsedConfig.config.operation.index
         : null;
   const floatingSlotIndex =
     typeof targetIndex === 'number' ? Math.max(0, targetIndex + (hasHeadNode ? 1 : 0)) : null;
 
   const showInsertSlot = currentSnapshot?.action === 'shiftForInsert' && floatingVisualNodes.length > 0;
   const renderNodes = useMemo(() => [...chainVisualNodes, ...floatingVisualNodes], [chainVisualNodes, floatingVisualNodes]);
+  const findResultText = useMemo(
+    () =>
+      parsedConfig.config ? getFindResultText(parsedConfig.config.operation, parsedConfig.config.list, currentSnapshot, t) : null,
+    [parsedConfig.config, currentSnapshot, t],
+  );
 
   const setNodeWrapRef = useCallback((id: string) => {
     return (el: HTMLDivElement | null) => {
@@ -585,8 +657,15 @@ export function LinkedListPage() {
         arrows.push({
           d: buildCurvePath(fromPoint, animatedTo),
           key: `transient-${link.style}-${link.fromId}-${link.toId}-${currentStep}`,
-          className:
-            link.style === 'moving-root' ? 'linked-node-arrow linked-node-arrow-moving' : 'linked-node-arrow linked-node-arrow-new',
+          className: (() => {
+            if (link.style === 'moving-root') {
+              return 'linked-node-arrow linked-node-arrow-moving';
+            }
+            if (link.style === 'delete-link') {
+              return 'linked-node-arrow linked-node-arrow-delete';
+            }
+            return 'linked-node-arrow linked-node-arrow-new';
+          })(),
         });
       });
 
@@ -618,61 +697,6 @@ export function LinkedListPage() {
       window.removeEventListener('resize', updateArrows);
     };
   }, [chainVisualNodes, currentSnapshot, floatingVisualNodes, movingRootProgress, currentStep, arrowFrameTick, linkDrawProgress]);
-
-  const applyOperation = () => {
-    const parsedList = parseNumberArrayAllowEmpty(listInput);
-    if (!parsedList) {
-      setError(t('module.l03.error.list'));
-      return;
-    }
-
-    if (parsedList.length > 30) {
-      setError(t('module.l03.error.length'));
-      return;
-    }
-
-    if (operationType === 'find') {
-      const value = Number(valueInput);
-      if (Number.isNaN(value)) {
-        setError(t('module.l03.error.value'));
-        return;
-      }
-
-      setError('');
-      setConfig({ list: parsedList, operation: { type: 'find', value } });
-      setStatus('idle');
-      return;
-    }
-
-    if (operationType === 'insertAt') {
-      const displayIndex = Number(indexInput);
-      const value = Number(valueInput);
-      if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length + 1) {
-        setError(t('module.l03.error.insertIndex'));
-        return;
-      }
-      if (Number.isNaN(value)) {
-        setError(t('module.l03.error.value'));
-        return;
-      }
-
-      const index = displayIndex - 1;
-      setError('');
-      setConfig({ list: parsedList, operation: { type: 'insertAt', index, value } });
-      setStatus('idle');
-      return;
-    }
-
-    const index = Number(indexInput);
-    if (!Number.isInteger(index) || index < 0 || index >= parsedList.length) {
-      setError(t('module.l03.error.deleteIndex'));
-      return;
-    }
-
-    setError('');
-    setConfig({ list: parsedList, operation: { type: 'deleteAt', index } });
-    setStatus('idle');
-  };
 
   return (
     <section className="linked-list-page">
@@ -737,9 +761,6 @@ export function LinkedListPage() {
           />
         </label>
 
-        <button type="button" onClick={applyOperation}>
-          {t('module.l03.apply')}
-        </button>
       </div>
 
       {error ? <p className="form-error">{error}</p> : null}
@@ -766,6 +787,7 @@ export function LinkedListPage() {
       </p>
 
       <p>{getStepDescription(currentSnapshot, t)}</p>
+      {findResultText ? <p className="array-preview">{findResultText}</p> : null}
       <p className="array-preview">
         {t('module.l03.currentList')}: [{currentChainValues.join(', ')}]
       </p>
@@ -884,19 +906,19 @@ export function LinkedListPage() {
       </div>
 
       <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing'}>
+        <button type="button" onClick={play} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
           {t('playback.play')}
         </button>
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
           {t('playback.pause')}
         </button>
-        <button type="button" onClick={prevStep}>
+        <button type="button" onClick={prevStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.prev')}
         </button>
-        <button type="button" onClick={nextStep}>
+        <button type="button" onClick={nextStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.next')}
         </button>
-        <button type="button" onClick={reset}>
+        <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.reset')}
         </button>
       </div>
