@@ -249,24 +249,39 @@ function normalizeListText(text: string): string {
     .join(',');
 }
 
-function getRightCenter(rect: DOMRect, containerRect: DOMRect): { x: number; y: number } {
+function getRightCenter(
+  rect: DOMRect,
+  containerRect: DOMRect,
+  offsetX = 0,
+  offsetY = 0,
+): { x: number; y: number } {
   return {
-    x: rect.right - containerRect.left,
-    y: rect.top + rect.height / 2 - containerRect.top,
+    x: rect.right - containerRect.left + offsetX,
+    y: rect.top + rect.height / 2 - containerRect.top + offsetY,
   };
 }
 
-function getLeftCenter(rect: DOMRect, containerRect: DOMRect): { x: number; y: number } {
+function getLeftCenter(
+  rect: DOMRect,
+  containerRect: DOMRect,
+  offsetX = 0,
+  offsetY = 0,
+): { x: number; y: number } {
   return {
-    x: rect.left - containerRect.left,
-    y: rect.top + rect.height / 2 - containerRect.top,
+    x: rect.left - containerRect.left + offsetX,
+    y: rect.top + rect.height / 2 - containerRect.top + offsetY,
   };
 }
 
-function getCenterOfPointerField(rect: DOMRect, containerRect: DOMRect): { x: number; y: number } {
+function getCenterOfPointerField(
+  rect: DOMRect,
+  containerRect: DOMRect,
+  offsetX = 0,
+  offsetY = 0,
+): { x: number; y: number } {
   return {
-    x: rect.left + rect.width / 2 - containerRect.left,
-    y: rect.top + rect.height / 2 - containerRect.top,
+    x: rect.left + rect.width / 2 - containerRect.left + offsetX,
+    y: rect.top + rect.height / 2 - containerRect.top + offsetY,
   };
 }
 
@@ -297,12 +312,14 @@ export function LinkedListPage() {
 
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
+  const [arrowLayerSize, setArrowLayerSize] = useState({ width: 0, height: 0 });
   const [movingRootProgress, setMovingRootProgress] = useState(1);
   const [linkDrawProgress, setLinkDrawProgress] = useState(1);
   const [arrowFrameTick, setArrowFrameTick] = useState(0);
   const diagramRef = useRef<HTMLDivElement | null>(null);
   const nodeWrapRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const prevNodeRects = useRef<Map<string, DOMRect>>(new Map());
+  const arrowLayerSizeRef = useRef({ width: 0, height: 0 });
 
   const { status, currentStep, totalSteps, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
@@ -646,8 +663,8 @@ export function LinkedListPage() {
   }, [renderNodes, currentStep, currentSnapshot?.action]);
 
   useLayoutEffect(() => {
+    const container = diagramRef.current;
     const updateArrows = () => {
-      const container = diagramRef.current;
       if (!container) {
         setLinkArrows([]);
         setHeadArrow(null);
@@ -655,6 +672,19 @@ export function LinkedListPage() {
       }
 
       const containerRect = container.getBoundingClientRect();
+      const offsetX = container.scrollLeft;
+      const offsetY = container.scrollTop;
+      const nextArrowLayerSize = {
+        width: Math.max(container.clientWidth, container.scrollWidth),
+        height: Math.max(container.clientHeight, container.scrollHeight),
+      };
+      if (
+        nextArrowLayerSize.width !== arrowLayerSizeRef.current.width ||
+        nextArrowLayerSize.height !== arrowLayerSizeRef.current.height
+      ) {
+        arrowLayerSizeRef.current = nextArrowLayerSize;
+        setArrowLayerSize(nextArrowLayerSize);
+      }
       const arrows: ArrowSegment[] = [];
       const hiddenFromIds = new Set(currentSnapshot?.hiddenLinkFromIds ?? []);
       const defaultNodes = [...chainVisualNodes, ...floatingVisualNodes];
@@ -676,8 +706,8 @@ export function LinkedListPage() {
           return;
         }
 
-        const fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect);
-        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect);
+        const fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
 
         arrows.push({
           d: buildLinePath(fromPoint, toPoint),
@@ -693,12 +723,12 @@ export function LinkedListPage() {
           return;
         }
 
-        let fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect);
-        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect);
+        let fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
         if (link.style === 'moving-root' && link.moveToPointerId) {
           const moveToEl = container.querySelector<HTMLElement>(`[data-pointer-id="${link.moveToPointerId}"]`);
           if (moveToEl) {
-            const moveToPoint = getCenterOfPointerField(moveToEl.getBoundingClientRect(), containerRect);
+            const moveToPoint = getCenterOfPointerField(moveToEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
             fromPoint = {
               x: fromPoint.x + (moveToPoint.x - fromPoint.x) * movingRootProgress,
               y: fromPoint.y + (moveToPoint.y - fromPoint.y) * movingRootProgress,
@@ -736,8 +766,8 @@ export function LinkedListPage() {
         : container.querySelector<HTMLElement>('[data-null-target="true"]');
 
       if (headPointerEl && targetEl) {
-        const fromPoint = getRightCenter(headPointerEl.getBoundingClientRect(), containerRect);
-        const toPoint = getLeftCenter(targetEl.getBoundingClientRect(), containerRect);
+        const fromPoint = getRightCenter(headPointerEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+        const toPoint = getLeftCenter(targetEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
         setHeadArrow({
           d: `M ${fromPoint.x} ${fromPoint.y} L ${fromPoint.x} ${toPoint.y} L ${toPoint.x} ${toPoint.y}`,
           key: `head-${currentStep}`,
@@ -751,12 +781,22 @@ export function LinkedListPage() {
 
     const rafId = window.requestAnimationFrame(updateArrows);
     window.addEventListener('resize', updateArrows);
+    container?.addEventListener('scroll', updateArrows, { passive: true });
 
     return () => {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener('resize', updateArrows);
+      container?.removeEventListener('scroll', updateArrows);
     };
-  }, [chainVisualNodes, currentSnapshot, floatingVisualNodes, movingRootProgress, currentStep, arrowFrameTick, linkDrawProgress]);
+  }, [
+    chainVisualNodes,
+    currentSnapshot,
+    floatingVisualNodes,
+    movingRootProgress,
+    currentStep,
+    arrowFrameTick,
+    linkDrawProgress,
+  ]);
 
   return (
     <section className="linked-list-page">
@@ -859,7 +899,12 @@ export function LinkedListPage() {
       </p>
 
       <div className="linked-diagram-canvas" ref={diagramRef} aria-label="linked-list-visualizer">
-        <svg className="linked-arrow-layer" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          className="linked-arrow-layer"
+          xmlns="http://www.w3.org/2000/svg"
+          width={arrowLayerSize.width || undefined}
+          height={arrowLayerSize.height || undefined}
+        >
           <defs>
             <marker
               id="linked-arrow-head"
