@@ -309,7 +309,6 @@ export function LinkedListPage() {
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
   const [speedMs, setSpeedMs] = useState(700);
   const [hasHeadNode, setHasHeadNode] = useState(false);
-  const [heldSnapshot, setHeldSnapshot] = useState<LinkedListStep | null>(null);
 
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
@@ -321,7 +320,7 @@ export function LinkedListPage() {
   const prevNodeRects = useRef<Map<string, DOMRect>>(new Map());
   const skipNextLayoutAnimationRef = useRef(false);
 
-  const { status, currentStep, totalSteps, setTotalSteps, play, pause, nextStep, prevStep, reset } =
+  const { status, currentStep, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
   const parsedConfig = useMemo<{ config: LinkedListConfig | null; error: string }>(() => {
@@ -367,11 +366,24 @@ export function LinkedListPage() {
   const error = parsedConfig.error;
   const activeOperationType = parsedConfig.config?.operation.type ?? operationType;
   const hasValidConfig = parsedConfig.config !== null;
-  const currentSnapshot = heldSnapshot ?? steps[currentStep] ?? steps[0];
+  const currentSnapshot = steps[currentStep] ?? steps[0];
   const completedListText = useMemo(() => {
     const lastStep = steps[steps.length - 1];
     return collectChainValues(lastStep).join(', ');
   }, [steps]);
+
+  const logicalStepByIndex = useMemo(
+    () =>
+      steps.reduce<number[]>((acc, step) => {
+        const prev = acc.length > 0 ? acc[acc.length - 1] : -1;
+        const isInsertVisualTail = step.operation === 'insertAt' && (step.action === 'shiftForInsert' || step.action === 'completed');
+        const next = isInsertVisualTail ? Math.max(prev, 0) : prev + 1;
+        return [...acc, Math.max(next, 0)];
+      }, []),
+    [steps],
+  );
+  const currentLogicalStep = logicalStepByIndex[currentStep] ?? 0;
+  const totalLogicalSteps = logicalStepByIndex[logicalStepByIndex.length - 1] ?? 0;
 
   const syncInputToCompletedList = useCallback(() => {
     if (!hasValidConfig || steps.length === 0) {
@@ -387,10 +399,10 @@ export function LinkedListPage() {
     prevNodeRects.current = new Map();
     // Skip exactly one layout animation pass right after auto-sync.
     skipNextLayoutAnimationRef.current = true;
-    // Hold only the final snapshot, not the whole step list, to avoid state mismatch.
-    setHeldSnapshot(steps[steps.length - 1] ?? null);
+    // Prepare for a clean next-round step-0 state.
+    reset();
     setListInput(completedListText);
-  }, [completedListText, hasValidConfig, listInput, steps]);
+  }, [completedListText, hasValidConfig, listInput, steps, reset]);
 
   useEffect(() => {
     setTotalSteps(steps.length);
@@ -417,33 +429,39 @@ export function LinkedListPage() {
   }, [status, speedMs, syncInputToCompletedList]);
 
   const handleNextStep = useCallback(() => {
-    if (heldSnapshot) {
-      setHeldSnapshot(null);
-      prevNodeRects.current = new Map();
-      skipNextLayoutAnimationRef.current = true;
-      reset();
-      usePlaybackStore.getState().nextStep();
-      return;
-    }
-
     const willComplete = currentStep >= steps.length - 2;
     nextStep();
     if (willComplete) {
       syncInputToCompletedList();
     }
-  }, [currentStep, heldSnapshot, nextStep, reset, steps.length, syncInputToCompletedList]);
+  }, [currentStep, nextStep, steps.length, syncInputToCompletedList]);
 
   const handlePlay = useCallback(() => {
-    if (heldSnapshot) {
-      setHeldSnapshot(null);
-      prevNodeRects.current = new Map();
-      skipNextLayoutAnimationRef.current = true;
-      reset();
-      play();
+    play();
+  }, [play]);
+
+  useEffect(() => {
+    if (status === 'playing') {
       return;
     }
-    play();
-  }, [heldSnapshot, play, reset]);
+    if (!currentSnapshot || currentSnapshot.operation !== 'insertAt') {
+      return;
+    }
+
+    if (currentSnapshot.action === 'shiftForInsert') {
+      const timer = window.setTimeout(() => {
+        nextStep();
+      }, 420);
+      return () => window.clearTimeout(timer);
+    }
+
+    if (currentSnapshot.action === 'completed') {
+      const timer = window.setTimeout(() => {
+        syncInputToCompletedList();
+      }, 260);
+      return () => window.clearTimeout(timer);
+    }
+  }, [status, currentSnapshot, nextStep, syncInputToCompletedList]);
 
   useEffect(() => {
     if (currentSnapshot?.action !== 'movePointerRoot') {
@@ -836,7 +854,6 @@ export function LinkedListPage() {
               reset();
               prevNodeRects.current = new Map();
               skipNextLayoutAnimationRef.current = true;
-              setHeldSnapshot(null);
               setListInput(event.target.value);
             }}
             placeholder="4, 7, 11"
@@ -852,7 +869,6 @@ export function LinkedListPage() {
               reset();
               prevNodeRects.current = new Map();
               skipNextLayoutAnimationRef.current = true;
-              setHeldSnapshot(null);
               setOperationType(event.target.value as LinkedListOperation['type']);
             }}
           >
@@ -873,7 +889,6 @@ export function LinkedListPage() {
                 reset();
                 prevNodeRects.current = new Map();
                 skipNextLayoutAnimationRef.current = true;
-                setHeldSnapshot(null);
                 setIndexInput(event.target.value);
               }}
             />
@@ -891,7 +906,6 @@ export function LinkedListPage() {
                 reset();
                 prevNodeRects.current = new Map();
                 skipNextLayoutAnimationRef.current = true;
-                setHeldSnapshot(null);
                 setValueInput(event.target.value);
               }}
             />
@@ -929,7 +943,8 @@ export function LinkedListPage() {
       </div>
 
       <p>
-        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep + 1}/{totalSteps || 0}{' '}
+        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentLogicalStep}/
+        {totalLogicalSteps}{' '}
         | {t('playback.status')}: {getStatusLabel(status, t)}
       </p>
 
