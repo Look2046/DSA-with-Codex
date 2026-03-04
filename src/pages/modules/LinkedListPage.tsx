@@ -214,6 +214,41 @@ function collectMainChainOrder(snapshot: LinkedListStep | undefined): string[] {
   return result;
 }
 
+function collectChainValues(snapshot: LinkedListStep | undefined): number[] {
+  if (!snapshot) {
+    return [];
+  }
+
+  const map = new Map(snapshot.nodes.map((node) => [node.id, node]));
+  const values: number[] = [];
+  const visited = new Set<string>();
+
+  let cursor = snapshot.headId;
+  while (cursor) {
+    if (visited.has(cursor)) {
+      break;
+    }
+    visited.add(cursor);
+
+    const node = map.get(cursor);
+    if (!node) {
+      break;
+    }
+    values.push(node.value);
+    cursor = node.nextId;
+  }
+
+  return values;
+}
+
+function normalizeListText(text: string): string {
+  return text
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+    .join(',');
+}
+
 function getRightCenter(rect: DOMRect, containerRect: DOMRect): { x: number; y: number } {
   return {
     x: rect.right - containerRect.left,
@@ -316,6 +351,22 @@ export function LinkedListPage() {
   const activeOperationType = parsedConfig.config?.operation.type ?? operationType;
   const hasValidConfig = parsedConfig.config !== null;
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const completedListText = useMemo(() => {
+    const lastStep = steps[steps.length - 1];
+    return collectChainValues(lastStep).join(', ');
+  }, [steps]);
+
+  const syncInputToCompletedList = useCallback(() => {
+    if (!hasValidConfig || steps.length === 0) {
+      return;
+    }
+
+    if (normalizeListText(listInput) === normalizeListText(completedListText)) {
+      return;
+    }
+
+    setListInput(completedListText);
+  }, [completedListText, hasValidConfig, listInput, steps.length]);
 
   useEffect(() => {
     setTotalSteps(steps.length);
@@ -331,6 +382,7 @@ export function LinkedListPage() {
       const state = usePlaybackStore.getState();
       if (state.currentStep >= state.totalSteps - 1) {
         state.setStatus('completed');
+        syncInputToCompletedList();
         window.clearInterval(timer);
         return;
       }
@@ -338,7 +390,15 @@ export function LinkedListPage() {
     }, speedMs);
 
     return () => window.clearInterval(timer);
-  }, [status, speedMs]);
+  }, [status, speedMs, syncInputToCompletedList]);
+
+  const handleNextStep = useCallback(() => {
+    const willComplete = currentStep >= steps.length - 2;
+    nextStep();
+    if (willComplete) {
+      syncInputToCompletedList();
+    }
+  }, [currentStep, nextStep, steps.length, syncInputToCompletedList]);
 
   useEffect(() => {
     if (currentSnapshot?.action !== 'movePointerRoot') {
@@ -915,7 +975,7 @@ export function LinkedListPage() {
         <button type="button" onClick={prevStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.prev')}
         </button>
-        <button type="button" onClick={nextStep} disabled={!hasValidConfig || steps.length === 0}>
+        <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.next')}
         </button>
         <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
