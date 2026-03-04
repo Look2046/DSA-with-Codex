@@ -249,6 +249,48 @@ function normalizeListText(text: string): string {
     .join(',');
 }
 
+function resolveLinkedListConfig(
+  listInput: string,
+  operationType: LinkedListOperation['type'],
+  valueInput: string,
+  indexInput: string,
+  t: ReturnType<typeof useI18n>['t'],
+): { config: LinkedListConfig | null; error: string } {
+  const parsedList = parseNumberArrayAllowEmpty(listInput);
+  if (!parsedList) {
+    return { config: null, error: t('module.l03.error.list') };
+  }
+  if (parsedList.length > 30) {
+    return { config: null, error: t('module.l03.error.length') };
+  }
+
+  if (operationType === 'find') {
+    const value = Number(valueInput);
+    if (Number.isNaN(value)) {
+      return { config: null, error: t('module.l03.error.value') };
+    }
+    return { config: { list: parsedList, operation: { type: 'find', value } }, error: '' };
+  }
+
+  if (operationType === 'insertAt') {
+    const displayIndex = Number(indexInput);
+    const value = Number(valueInput);
+    if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length + 1) {
+      return { config: null, error: t('module.l03.error.insertIndex') };
+    }
+    if (Number.isNaN(value)) {
+      return { config: null, error: t('module.l03.error.value') };
+    }
+    return { config: { list: parsedList, operation: { type: 'insertAt', index: displayIndex - 1, value } }, error: '' };
+  }
+
+  const displayIndex = Number(indexInput);
+  if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length) {
+    return { config: null, error: t('module.l03.error.deleteIndex') };
+  }
+  return { config: { list: parsedList, operation: { type: 'deleteAt', index: displayIndex - 1 } }, error: '' };
+}
+
 function getRightCenter(
   rect: DOMRect,
   containerRect: DOMRect,
@@ -309,6 +351,9 @@ export function LinkedListPage() {
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
   const [speedMs, setSpeedMs] = useState(700);
   const [hasHeadNode, setHasHeadNode] = useState(false);
+  const [displayConfig, setDisplayConfig] = useState<LinkedListConfig>(DEFAULT_CONFIG);
+  const [error, setError] = useState('');
+  const [hasValidConfig, setHasValidConfig] = useState(true);
 
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
@@ -323,49 +368,23 @@ export function LinkedListPage() {
   const { status, currentStep, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
-  const parsedConfig = useMemo<{ config: LinkedListConfig | null; error: string }>(() => {
-    const parsedList = parseNumberArrayAllowEmpty(listInput);
-    if (!parsedList) {
-      return { config: null, error: t('module.l03.error.list') };
-    }
-    if (parsedList.length > 30) {
-      return { config: null, error: t('module.l03.error.length') };
-    }
-
-    if (operationType === 'find') {
-      const value = Number(valueInput);
-      if (Number.isNaN(value)) {
-        return { config: null, error: t('module.l03.error.value') };
+  const recomputeInputState = useCallback(
+    (nextListInput: string, nextOperationType: LinkedListOperation['type'], nextValueInput: string, nextIndexInput: string) => {
+      const resolved = resolveLinkedListConfig(nextListInput, nextOperationType, nextValueInput, nextIndexInput, t);
+      setError(resolved.error);
+      setHasValidConfig(resolved.config !== null);
+      if (resolved.config) {
+        setDisplayConfig(resolved.config);
       }
-      return { config: { list: parsedList, operation: { type: 'find', value } }, error: '' };
-    }
-
-    if (operationType === 'insertAt') {
-      const displayIndex = Number(indexInput);
-      const value = Number(valueInput);
-      if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length + 1) {
-        return { config: null, error: t('module.l03.error.insertIndex') };
-      }
-      if (Number.isNaN(value)) {
-        return { config: null, error: t('module.l03.error.value') };
-      }
-      return { config: { list: parsedList, operation: { type: 'insertAt', index: displayIndex - 1, value } }, error: '' };
-    }
-
-    const displayIndex = Number(indexInput);
-    if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length) {
-      return { config: null, error: t('module.l03.error.deleteIndex') };
-    }
-    return { config: { list: parsedList, operation: { type: 'deleteAt', index: displayIndex - 1 } }, error: '' };
-  }, [listInput, operationType, valueInput, indexInput, t]);
+    },
+    [t],
+  );
 
   const steps = useMemo(
-    () => (parsedConfig.config ? generateLinkedListSteps(parsedConfig.config.list, parsedConfig.config.operation) : []),
-    [parsedConfig.config],
+    () => generateLinkedListSteps(displayConfig.list, displayConfig.operation),
+    [displayConfig],
   );
-  const error = parsedConfig.error;
-  const activeOperationType = parsedConfig.config?.operation.type ?? operationType;
-  const hasValidConfig = parsedConfig.config !== null;
+  const activeOperationType = displayConfig.operation.type;
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const completedListText = useMemo(() => {
     const lastStep = steps[steps.length - 1];
@@ -377,7 +396,8 @@ export function LinkedListPage() {
       steps.reduce<number[]>((acc, step) => {
         const prev = acc.length > 0 ? acc[acc.length - 1] : -1;
         const isInsertVisualTail = step.operation === 'insertAt' && (step.action === 'shiftForInsert' || step.action === 'completed');
-        const next = isInsertVisualTail ? Math.max(prev, 0) : prev + 1;
+        const isDeleteVisualTail = step.operation === 'deleteAt' && step.action === 'completed';
+        const next = isInsertVisualTail || isDeleteVisualTail ? Math.max(prev, 0) : prev + 1;
         return [...acc, Math.max(next, 0)];
       }, []),
     [steps],
@@ -402,7 +422,8 @@ export function LinkedListPage() {
     // Prepare for a clean next-round step-0 state.
     reset();
     setListInput(completedListText);
-  }, [completedListText, hasValidConfig, listInput, steps, reset]);
+    recomputeInputState(completedListText, operationType, valueInput, indexInput);
+  }, [completedListText, hasValidConfig, listInput, steps, reset, recomputeInputState, operationType, valueInput, indexInput]);
 
   useEffect(() => {
     setTotalSteps(steps.length);
@@ -444,18 +465,28 @@ export function LinkedListPage() {
     if (status === 'playing') {
       return;
     }
-    if (!currentSnapshot || currentSnapshot.operation !== 'insertAt') {
+    if (!currentSnapshot) {
       return;
     }
 
-    if (currentSnapshot.action === 'shiftForInsert') {
+    if (currentSnapshot.operation === 'insertAt' && currentSnapshot.action === 'shiftForInsert') {
       const timer = window.setTimeout(() => {
         nextStep();
       }, 420);
       return () => window.clearTimeout(timer);
     }
 
-    if (currentSnapshot.action === 'completed') {
+    if (currentSnapshot.operation === 'deleteAt' && currentSnapshot.action === 'delete') {
+      const timer = window.setTimeout(() => {
+        nextStep();
+      }, 420);
+      return () => window.clearTimeout(timer);
+    }
+
+    if (
+      currentSnapshot.action === 'completed' &&
+      (currentSnapshot.operation === 'insertAt' || currentSnapshot.operation === 'deleteAt')
+    ) {
       const timer = window.setTimeout(() => {
         syncInputToCompletedList();
       }, 260);
@@ -634,8 +665,8 @@ export function LinkedListPage() {
   const targetIndex =
     typeof currentSnapshot?.targetIndex === 'number'
       ? currentSnapshot.targetIndex
-      : parsedConfig.config?.operation.type === 'insertAt'
-        ? parsedConfig.config.operation.index
+      : displayConfig.operation.type === 'insertAt'
+        ? displayConfig.operation.index
         : null;
   const floatingSlotIndex =
     typeof targetIndex === 'number' ? Math.max(0, targetIndex + (hasHeadNode ? 1 : 0)) : null;
@@ -643,9 +674,8 @@ export function LinkedListPage() {
   const showInsertSlot = currentSnapshot?.action === 'shiftForInsert' && floatingVisualNodes.length > 0;
   const renderNodes = useMemo(() => [...chainVisualNodes, ...floatingVisualNodes], [chainVisualNodes, floatingVisualNodes]);
   const findResultText = useMemo(
-    () =>
-      parsedConfig.config ? getFindResultText(parsedConfig.config.operation, parsedConfig.config.list, currentSnapshot, t) : null,
-    [parsedConfig.config, currentSnapshot, t],
+    () => getFindResultText(displayConfig.operation, displayConfig.list, currentSnapshot, t),
+    [displayConfig, currentSnapshot, t],
   );
 
   const setNodeWrapRef = useCallback((id: string) => {
@@ -851,10 +881,12 @@ export function LinkedListPage() {
             id="linked-list-input"
             value={listInput}
             onChange={(event) => {
+              const nextListInput = event.target.value;
               reset();
               prevNodeRects.current = new Map();
               skipNextLayoutAnimationRef.current = true;
-              setListInput(event.target.value);
+              setListInput(nextListInput);
+              recomputeInputState(nextListInput, operationType, valueInput, indexInput);
             }}
             placeholder="4, 7, 11"
           />
@@ -866,10 +898,12 @@ export function LinkedListPage() {
             id="linked-list-operation"
             value={operationType}
             onChange={(event) => {
+              const nextOperationType = event.target.value as LinkedListOperation['type'];
               reset();
               prevNodeRects.current = new Map();
               skipNextLayoutAnimationRef.current = true;
-              setOperationType(event.target.value as LinkedListOperation['type']);
+              setOperationType(nextOperationType);
+              recomputeInputState(listInput, nextOperationType, valueInput, indexInput);
             }}
           >
             <option value="find">{t('module.l03.operation.find')}</option>
@@ -886,10 +920,12 @@ export function LinkedListPage() {
               type="number"
               value={indexInput}
               onChange={(event) => {
+                const nextIndexInput = event.target.value;
                 reset();
                 prevNodeRects.current = new Map();
                 skipNextLayoutAnimationRef.current = true;
-                setIndexInput(event.target.value);
+                setIndexInput(nextIndexInput);
+                recomputeInputState(listInput, operationType, valueInput, nextIndexInput);
               }}
             />
           </label>
@@ -903,10 +939,12 @@ export function LinkedListPage() {
               type="number"
               value={valueInput}
               onChange={(event) => {
+                const nextValueInput = event.target.value;
                 reset();
                 prevNodeRects.current = new Map();
                 skipNextLayoutAnimationRef.current = true;
-                setValueInput(event.target.value);
+                setValueInput(nextValueInput);
+                recomputeInputState(listInput, operationType, nextValueInput, indexInput);
               }}
             />
           </label>
