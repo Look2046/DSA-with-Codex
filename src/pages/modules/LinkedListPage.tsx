@@ -833,6 +833,9 @@ export function LinkedListPage() {
             id="linked-list-input"
             value={listInput}
             onChange={(event) => {
+              reset();
+              prevNodeRects.current = new Map();
+              skipNextLayoutAnimationRef.current = true;
               setHeldSnapshot(null);
               setListInput(event.target.value);
             }}
@@ -846,6 +849,9 @@ export function LinkedListPage() {
             id="linked-list-operation"
             value={operationType}
             onChange={(event) => {
+              reset();
+              prevNodeRects.current = new Map();
+              skipNextLayoutAnimationRef.current = true;
               setHeldSnapshot(null);
               setOperationType(event.target.value as LinkedListOperation['type']);
             }}
@@ -864,6 +870,9 @@ export function LinkedListPage() {
               type="number"
               value={indexInput}
               onChange={(event) => {
+                reset();
+                prevNodeRects.current = new Map();
+                skipNextLayoutAnimationRef.current = true;
                 setHeldSnapshot(null);
                 setIndexInput(event.target.value);
               }}
@@ -879,6 +888,9 @@ export function LinkedListPage() {
               type="number"
               value={valueInput}
               onChange={(event) => {
+                reset();
+                prevNodeRects.current = new Map();
+                skipNextLayoutAnimationRef.current = true;
                 setHeldSnapshot(null);
                 setValueInput(event.target.value);
               }}
