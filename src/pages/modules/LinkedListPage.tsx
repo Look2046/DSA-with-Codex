@@ -382,6 +382,9 @@ export function LinkedListPage() {
       return;
     }
 
+    // Clear FLIP baseline before swapping to the next operation input,
+    // so stale rects do not cause artificial jump animations.
+    prevNodeRects.current = new Map();
     setListInput(completedListText);
   }, [completedListText, hasValidConfig, listInput, steps.length]);
 
@@ -616,6 +619,7 @@ export function LinkedListPage() {
     const nextRects = new Map<string, DOMRect>();
     let hasMovement = false;
     const transitionMs = currentSnapshot?.action === 'shiftForInsert' ? 920 : 320;
+    const skipLayoutAnimation = activeOperationType === 'deleteAt' && currentSnapshot?.action === 'completed';
 
     renderNodes.forEach((node) => {
       const el = nodeWrapRefs.current.get(node.id);
@@ -627,6 +631,9 @@ export function LinkedListPage() {
 
       const prevRect = prevNodeRects.current.get(node.id);
       if (!prevRect) {
+        return;
+      }
+      if (skipLayoutAnimation) {
         return;
       }
 
@@ -660,7 +667,7 @@ export function LinkedListPage() {
       rafId = window.requestAnimationFrame(tick);
       return () => window.cancelAnimationFrame(rafId);
     }
-  }, [renderNodes, currentStep, currentSnapshot?.action]);
+  }, [renderNodes, currentStep, currentSnapshot?.action, activeOperationType]);
 
   useLayoutEffect(() => {
     const container = diagramRef.current;
