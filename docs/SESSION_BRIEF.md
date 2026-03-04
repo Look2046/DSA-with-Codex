@@ -5,9 +5,9 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/l01-v1` (milestone closed), next: `feat/l03-v1`
-- Current phase: L-01 milestone closed, preparing L-03 implementation kickoff
-- Last local quality gate: `npm run check` (passed)
+- Active branch (expected): `feat/l03-v1`
+- Current phase: L-03 interaction/animation stabilization and regression wrap-up
+- Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
 
@@ -23,9 +23,9 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Create branch `feat/l03-v1` and implement L-03 module first version
-- Keep branch scope focused to one milestone
-- Run `npm run check` before every push
+- Finish L-03 regression validation (step semantics + invalid-input behavior + continuity)
+- Update handoff/todo after final verification
+- Prepare PR-ready change summary
 
 ## 4) Guardrails
 

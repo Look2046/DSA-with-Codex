@@ -2,6 +2,43 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (L-03 interaction/animation stabilization savepoint)
+
+### Today Done
+- Refined L-03 interaction flow to be playback-first (no explicit apply button).
+- Fixed multiple linked-list rendering issues across delete/insert/find:
+  - find result feedback now explicit (matched index / not-found range)
+  - delete visual semantics split from insert semantics
+  - horizontal-scroll arrow alignment and visibility issues resolved
+  - operation-switch jitter and delete-tail jitter addressed
+- Added continuity behavior for consecutive operations.
+- Updated step behavior:
+  - logic step display starts at 0
+  - insert/delete trailing display-only frames auto-advance (no extra manual clicks)
+- Improved invalid-input UX:
+  - keep last valid diagram visible
+  - disable playback controls while input is invalid
+- Re-ran local gate multiple times with passing result (`npm run check`).
+
+### Current State
+- Branch: `feat/l03-v1`
+- Working tree status: clean
+- Last verified command: `npm run check` (pass)
+
+### Remaining Focus (Next Session)
+- Re-verify latest invalid-input and step-index behavior by manual walkthrough.
+- If behavior is confirmed stable, update `TODO.md` to mark L-03 as completed.
+- Prepare PR-ready summary grouped by:
+  - interaction model changes
+  - animation/render fixes
+  - validation and UX improvements
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/l03-v1
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-03 (L-03 animation savepoint, pending 2 bugs)
 
 ### Today Done
