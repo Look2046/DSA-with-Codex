@@ -309,17 +309,17 @@ export function LinkedListPage() {
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
   const [speedMs, setSpeedMs] = useState(700);
   const [hasHeadNode, setHasHeadNode] = useState(false);
+  const [heldSnapshot, setHeldSnapshot] = useState<LinkedListStep | null>(null);
 
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
-  const [arrowLayerSize, setArrowLayerSize] = useState({ width: 0, height: 0 });
   const [movingRootProgress, setMovingRootProgress] = useState(1);
   const [linkDrawProgress, setLinkDrawProgress] = useState(1);
   const [arrowFrameTick, setArrowFrameTick] = useState(0);
   const diagramRef = useRef<HTMLDivElement | null>(null);
   const nodeWrapRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const prevNodeRects = useRef<Map<string, DOMRect>>(new Map());
-  const arrowLayerSizeRef = useRef({ width: 0, height: 0 });
+  const skipNextLayoutAnimationRef = useRef(false);
 
   const { status, currentStep, totalSteps, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
@@ -367,7 +367,7 @@ export function LinkedListPage() {
   const error = parsedConfig.error;
   const activeOperationType = parsedConfig.config?.operation.type ?? operationType;
   const hasValidConfig = parsedConfig.config !== null;
-  const currentSnapshot = steps[currentStep] ?? steps[0];
+  const currentSnapshot = heldSnapshot ?? steps[currentStep] ?? steps[0];
   const completedListText = useMemo(() => {
     const lastStep = steps[steps.length - 1];
     return collectChainValues(lastStep).join(', ');
@@ -385,8 +385,12 @@ export function LinkedListPage() {
     // Clear FLIP baseline before swapping to the next operation input,
     // so stale rects do not cause artificial jump animations.
     prevNodeRects.current = new Map();
+    // Skip exactly one layout animation pass right after auto-sync.
+    skipNextLayoutAnimationRef.current = true;
+    // Hold only the final snapshot, not the whole step list, to avoid state mismatch.
+    setHeldSnapshot(steps[steps.length - 1] ?? null);
     setListInput(completedListText);
-  }, [completedListText, hasValidConfig, listInput, steps.length]);
+  }, [completedListText, hasValidConfig, listInput, steps]);
 
   useEffect(() => {
     setTotalSteps(steps.length);
@@ -413,12 +417,33 @@ export function LinkedListPage() {
   }, [status, speedMs, syncInputToCompletedList]);
 
   const handleNextStep = useCallback(() => {
+    if (heldSnapshot) {
+      setHeldSnapshot(null);
+      prevNodeRects.current = new Map();
+      skipNextLayoutAnimationRef.current = true;
+      reset();
+      usePlaybackStore.getState().nextStep();
+      return;
+    }
+
     const willComplete = currentStep >= steps.length - 2;
     nextStep();
     if (willComplete) {
       syncInputToCompletedList();
     }
-  }, [currentStep, nextStep, steps.length, syncInputToCompletedList]);
+  }, [currentStep, heldSnapshot, nextStep, reset, steps.length, syncInputToCompletedList]);
+
+  const handlePlay = useCallback(() => {
+    if (heldSnapshot) {
+      setHeldSnapshot(null);
+      prevNodeRects.current = new Map();
+      skipNextLayoutAnimationRef.current = true;
+      reset();
+      play();
+      return;
+    }
+    play();
+  }, [heldSnapshot, play, reset]);
 
   useEffect(() => {
     if (currentSnapshot?.action !== 'movePointerRoot') {
@@ -619,7 +644,8 @@ export function LinkedListPage() {
     const nextRects = new Map<string, DOMRect>();
     let hasMovement = false;
     const transitionMs = currentSnapshot?.action === 'shiftForInsert' ? 920 : 320;
-    const skipLayoutAnimation = activeOperationType === 'deleteAt' && currentSnapshot?.action === 'completed';
+    const skipLayoutAnimation =
+      skipNextLayoutAnimationRef.current || (activeOperationType === 'deleteAt' && currentSnapshot?.action === 'completed');
 
     renderNodes.forEach((node) => {
       const el = nodeWrapRefs.current.get(node.id);
@@ -654,6 +680,9 @@ export function LinkedListPage() {
     });
 
     prevNodeRects.current = nextRects;
+    if (skipNextLayoutAnimationRef.current) {
+      skipNextLayoutAnimationRef.current = false;
+    }
 
     if (hasMovement) {
       let rafId = 0;
@@ -679,19 +708,6 @@ export function LinkedListPage() {
       }
 
       const containerRect = container.getBoundingClientRect();
-      const offsetX = container.scrollLeft;
-      const offsetY = container.scrollTop;
-      const nextArrowLayerSize = {
-        width: Math.max(container.clientWidth, container.scrollWidth),
-        height: Math.max(container.clientHeight, container.scrollHeight),
-      };
-      if (
-        nextArrowLayerSize.width !== arrowLayerSizeRef.current.width ||
-        nextArrowLayerSize.height !== arrowLayerSizeRef.current.height
-      ) {
-        arrowLayerSizeRef.current = nextArrowLayerSize;
-        setArrowLayerSize(nextArrowLayerSize);
-      }
       const arrows: ArrowSegment[] = [];
       const hiddenFromIds = new Set(currentSnapshot?.hiddenLinkFromIds ?? []);
       const defaultNodes = [...chainVisualNodes, ...floatingVisualNodes];
@@ -713,8 +729,8 @@ export function LinkedListPage() {
           return;
         }
 
-        const fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
-        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+        const fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect);
+        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect);
 
         arrows.push({
           d: buildLinePath(fromPoint, toPoint),
@@ -730,12 +746,12 @@ export function LinkedListPage() {
           return;
         }
 
-        let fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
-        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+        let fromPoint = getCenterOfPointerField(fromEl.getBoundingClientRect(), containerRect);
+        const toPoint = getLeftCenter(toEl.getBoundingClientRect(), containerRect);
         if (link.style === 'moving-root' && link.moveToPointerId) {
           const moveToEl = container.querySelector<HTMLElement>(`[data-pointer-id="${link.moveToPointerId}"]`);
           if (moveToEl) {
-            const moveToPoint = getCenterOfPointerField(moveToEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+            const moveToPoint = getCenterOfPointerField(moveToEl.getBoundingClientRect(), containerRect);
             fromPoint = {
               x: fromPoint.x + (moveToPoint.x - fromPoint.x) * movingRootProgress,
               y: fromPoint.y + (moveToPoint.y - fromPoint.y) * movingRootProgress,
@@ -773,8 +789,8 @@ export function LinkedListPage() {
         : container.querySelector<HTMLElement>('[data-null-target="true"]');
 
       if (headPointerEl && targetEl) {
-        const fromPoint = getRightCenter(headPointerEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
-        const toPoint = getLeftCenter(targetEl.getBoundingClientRect(), containerRect, offsetX, offsetY);
+        const fromPoint = getRightCenter(headPointerEl.getBoundingClientRect(), containerRect);
+        const toPoint = getLeftCenter(targetEl.getBoundingClientRect(), containerRect);
         setHeadArrow({
           d: `M ${fromPoint.x} ${fromPoint.y} L ${fromPoint.x} ${toPoint.y} L ${toPoint.x} ${toPoint.y}`,
           key: `head-${currentStep}`,
@@ -816,7 +832,10 @@ export function LinkedListPage() {
           <input
             id="linked-list-input"
             value={listInput}
-            onChange={(event) => setListInput(event.target.value)}
+            onChange={(event) => {
+              setHeldSnapshot(null);
+              setListInput(event.target.value);
+            }}
             placeholder="4, 7, 11"
           />
         </label>
@@ -826,7 +845,10 @@ export function LinkedListPage() {
           <select
             id="linked-list-operation"
             value={operationType}
-            onChange={(event) => setOperationType(event.target.value as LinkedListOperation['type'])}
+            onChange={(event) => {
+              setHeldSnapshot(null);
+              setOperationType(event.target.value as LinkedListOperation['type']);
+            }}
           >
             <option value="find">{t('module.l03.operation.find')}</option>
             <option value="insertAt">{t('module.l03.operation.insertAt')}</option>
@@ -841,7 +863,10 @@ export function LinkedListPage() {
               id="linked-list-index"
               type="number"
               value={indexInput}
-              onChange={(event) => setIndexInput(event.target.value)}
+              onChange={(event) => {
+                setHeldSnapshot(null);
+                setIndexInput(event.target.value);
+              }}
             />
           </label>
         )}
@@ -853,7 +878,10 @@ export function LinkedListPage() {
               id="linked-list-value"
               type="number"
               value={valueInput}
-              onChange={(event) => setValueInput(event.target.value)}
+              onChange={(event) => {
+                setHeldSnapshot(null);
+                setValueInput(event.target.value);
+              }}
             />
           </label>
         )}
@@ -906,12 +934,7 @@ export function LinkedListPage() {
       </p>
 
       <div className="linked-diagram-canvas" ref={diagramRef} aria-label="linked-list-visualizer">
-        <svg
-          className="linked-arrow-layer"
-          xmlns="http://www.w3.org/2000/svg"
-          width={arrowLayerSize.width || undefined}
-          height={arrowLayerSize.height || undefined}
-        >
+        <svg className="linked-arrow-layer" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker
               id="linked-arrow-head"
@@ -1018,7 +1041,7 @@ export function LinkedListPage() {
       </div>
 
       <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
+        <button type="button" onClick={handlePlay} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
           {t('playback.play')}
         </button>
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
