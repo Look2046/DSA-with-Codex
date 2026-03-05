@@ -14,7 +14,7 @@ describe('generateQueueSteps', () => {
     expect(last.action).toBe('completed');
     expect(last.queueState).toEqual([3, 8, 1, 9]);
     expect(last.frontIndex).toBe(0);
-    expect(last.rearIndex).toBe(3);
+    expect(last.rearIndex).toBe(4);
   });
 
   it('dequeue moves front pointer forward instead of shifting whole buffer', () => {
@@ -25,7 +25,7 @@ describe('generateQueueSteps', () => {
     expect(dequeueStep?.dequeuedValue).toBe(3);
     expect(last.queueState).toEqual([8, 1]);
     expect(last.frontIndex).toBe(1);
-    expect(last.rearIndex).toBe(2);
+    expect(last.rearIndex).toBe(3);
     expect(last.bufferState[1]).toBe(8);
     expect(last.bufferState[2]).toBe(1);
   });

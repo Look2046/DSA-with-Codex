@@ -55,7 +55,7 @@ function createRuntime(input: number[]): QueueRuntime {
     queueState: [...input],
     bufferState,
     frontIndex: input.length > 0 ? 0 : 0,
-    rearIndex: input.length > 0 ? input.length - 1 : 0,
+    rearIndex: input.length % QUEUE_CAPACITY,
     size: input.length,
   };
 }
@@ -139,17 +139,17 @@ export function generateQueueSteps(
       throw new RangeError(mode === 'circular' ? 'Enqueue operation on full circular queue' : 'Enqueue operation on full queue');
     }
 
-    const nextRear = runtime.size === 0 ? runtime.rearIndex : (runtime.rearIndex + 1) % QUEUE_CAPACITY;
-    runtime.bufferState[nextRear] = operation.value;
-    runtime.rearIndex = nextRear;
+    const insertedIndex = runtime.rearIndex;
+    runtime.bufferState[insertedIndex] = operation.value;
     if (runtime.size === 0) {
-      runtime.frontIndex = nextRear;
+      runtime.frontIndex = insertedIndex;
     }
+    runtime.rearIndex = (runtime.rearIndex + 1) % QUEUE_CAPACITY;
     runtime.size += 1;
     runtime.queueState.push(operation.value);
 
     steps.push(
-      snapshot(runtime, 'enqueue', [3], [{ index: nextRear, type: 'new-node' }], {
+      snapshot(runtime, 'enqueue', [3], [{ index: insertedIndex, type: 'new-node' }], {
         enqueuedValue: operation.value,
         frontValue: runtime.queueState[0],
       }),
