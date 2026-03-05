@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
@@ -34,6 +34,7 @@ export function StackPage() {
   const [jsonInput, setJsonInput] = useState('');
   const [jsonFeedback, setJsonFeedback] = useState('');
   const [hasJsonError, setHasJsonError] = useState(false);
+  const stackCellsRef = useRef<HTMLDivElement | null>(null);
 
   const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
   const currentStep = currentFrame;
@@ -65,6 +66,25 @@ export function StackPage() {
     setTotalFrames(steps.length);
     reset();
   }, [setTotalFrames, reset, steps.length]);
+
+  useEffect(() => {
+    const container = stackCellsRef.current;
+    if (!container || !currentSnapshot) {
+      return;
+    }
+
+    const activeIndex = currentSnapshot.highlights[0]?.index ?? currentSnapshot.indices[0];
+    if (activeIndex === undefined) {
+      return;
+    }
+
+    const target = container.querySelector<HTMLElement>(`[data-stack-index="${activeIndex}"]`);
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [currentStep, currentSnapshot]);
 
   const syncInputToCompletedStack = useCallback(() => {
     if (!hasValidConfig || steps.length === 0) {
@@ -275,14 +295,18 @@ export function StackPage() {
         subtitle={t('module.l04.stage')}
         stageClassName="viz-canvas-stage-array"
       >
-        <div className="stack-cells" aria-label="stack-cells">
+        <div ref={stackCellsRef} className="stack-cells" aria-label="stack-cells">
           {Array.from({ length: STACK_CAPACITY }, (_, index) => {
             const value = currentSnapshot?.stackState[index] ?? null;
             const highlight = highlightMap.get(index) ?? 'default';
             const isTop = index === (currentSnapshot?.stackState.length ?? 0) - 1;
             const isUnused = value === null;
             return (
-              <div key={`${index}-${String(value)}`} className={`stack-cell bar-${highlight}${isUnused ? ' stack-cell-unused' : ''}`}>
+              <div
+                key={`${index}-${String(value)}`}
+                data-stack-index={index}
+                className={`stack-cell bar-${highlight}${isUnused ? ' stack-cell-unused' : ''}`}
+              >
                 {isTop ? <span className="stack-top-pointer">{t('module.l04.top')}</span> : null}
                 <span className="array-cell-index">{index}</span>
                 <strong>{value ?? '∅'}</strong>
