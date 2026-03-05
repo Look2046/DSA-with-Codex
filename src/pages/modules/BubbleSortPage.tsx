@@ -74,9 +74,8 @@ export function BubbleSortPage() {
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
-  const [speedMs, setSpeedMs] = useState(700);
 
-  const { status, currentStep, totalSteps, setTotalSteps, setStatus, play, pause, nextStep, prevStep, reset } =
+  const { status, speedMs, currentStep, totalSteps, setTotalSteps, setStatus, setSpeed, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
   const timelineFrames = useMemo(() => buildBubbleSortTimelineFromInput(inputData), [inputData]);
@@ -162,7 +161,7 @@ export function BubbleSortPage() {
               key={option.key}
               type="button"
               className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeedMs(option.value)}
+              onClick={() => setSpeed(option.value)}
             >
               {t(option.key)}
             </button>

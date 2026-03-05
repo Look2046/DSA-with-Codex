@@ -23,10 +23,9 @@ export function ArrayPage() {
   const [valueInput, setValueInput] = useState(String(DEFAULT_CONFIG.value));
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
-  const [speedMs, setSpeedMs] = useState(700);
   const [insertConfig, setInsertConfig] = useState<InsertConfig>(DEFAULT_CONFIG);
 
-  const { status, currentStep, setTotalSteps, play, pause, nextStep, prevStep, reset } =
+  const { status, speedMs, currentStep, setSpeed, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
   const steps = useMemo(
@@ -213,7 +212,7 @@ export function ArrayPage() {
               key={option.key}
               type="button"
               className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeedMs(option.value)}
+              onClick={() => setSpeed(option.value)}
             >
               {t(option.key)}
             </button>

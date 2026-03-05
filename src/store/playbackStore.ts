@@ -9,7 +9,9 @@ type PlaybackStore = {
   totalSteps: number;
   currentStep: number;
   status: PlaybackStatus;
+  speedMs: number;
   setStatus: (status: PlaybackStatus) => void;
+  setSpeed: (speedMs: number) => void;
   setCurrentModule: (moduleItem: ModuleMetadata | null) => void;
   setTotalSteps: (total: number) => void;
   goToStep: (step: number) => void;
@@ -20,20 +22,21 @@ type PlaybackStore = {
   reset: () => void;
 };
 
-function toTimelineState(state: Pick<PlaybackStore, 'totalSteps' | 'currentStep' | 'status'>): TimelineState {
+function toTimelineState(state: Pick<PlaybackStore, 'totalSteps' | 'currentStep' | 'status' | 'speedMs'>): TimelineState {
   return {
     totalFrames: state.totalSteps,
     currentFrame: state.currentStep,
     status: state.status,
-    speedMs: createInitialTimelineState().speedMs,
+    speedMs: state.speedMs,
   };
 }
 
-function fromTimelineState(next: TimelineState): Pick<PlaybackStore, 'totalSteps' | 'currentStep' | 'status'> {
+function fromTimelineState(next: TimelineState): Pick<PlaybackStore, 'totalSteps' | 'currentStep' | 'status' | 'speedMs'> {
   return {
     totalSteps: next.totalFrames,
     currentStep: next.currentFrame,
     status: next.status,
+    speedMs: next.speedMs,
   };
 }
 
@@ -41,6 +44,11 @@ export const usePlaybackStore = create<PlaybackStore>((set) => ({
   currentModule: null,
   ...fromTimelineState(createInitialTimelineState()),
   setStatus: (status) => set({ status }),
+  setSpeed: (speedMs) =>
+    set((state) => {
+      const next = timelineReducer(toTimelineState(state), { type: 'setSpeed', speedMs });
+      return fromTimelineState(next);
+    }),
 
   setCurrentModule: (moduleItem) => {
     set({

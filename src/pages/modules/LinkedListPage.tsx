@@ -260,7 +260,6 @@ export function LinkedListPage() {
   const [operationType, setOperationType] = useState<LinkedListOperation['type']>(DEFAULT_CONFIG.operation.type);
   const [valueInput, setValueInput] = useState(String(DEFAULT_OPERATION.value));
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
-  const [speedMs, setSpeedMs] = useState(700);
   const [hasHeadNode, setHasHeadNode] = useState(true);
   const [displayConfig, setDisplayConfig] = useState<LinkedListConfig>(DEFAULT_CONFIG);
   const [error, setError] = useState('');
@@ -276,7 +275,7 @@ export function LinkedListPage() {
   const prevNodeRects = useRef<Map<string, DOMRect>>(new Map());
   const skipNextLayoutAnimationRef = useRef(false);
 
-  const { status, currentStep, setTotalSteps, play, pause, nextStep, prevStep, reset } =
+  const { status, speedMs, currentStep, setSpeed, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
   const recomputeInputState = useCallback(
@@ -876,7 +875,7 @@ export function LinkedListPage() {
               key={option.key}
               type="button"
               className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeedMs(option.value)}
+              onClick={() => setSpeed(option.value)}
             >
               {t(option.key)}
             </button>
