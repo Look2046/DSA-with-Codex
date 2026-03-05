@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import type { TranslationKey } from '../../i18n/translations';
@@ -897,55 +898,87 @@ export function LinkedListPage() {
           .join(' | ') || t('module.s01.none')}
       </p>
 
-      <div className="linked-diagram-canvas" ref={diagramRef} aria-label="linked-list-visualizer">
-        <svg className="linked-arrow-layer" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker
-              id="linked-arrow-head"
-              markerWidth="7"
-              markerHeight="5"
-              refX="6"
-              refY="2.5"
-              orient="auto"
-              markerUnits="strokeWidth"
-            >
-              <path d="M0,0 L7,2.5 L0,5 z" fill="#365a80" />
-            </marker>
-          </defs>
+      <VisualizationCanvas
+        title={t('module.l03.title')}
+        subtitle={t('module.canvas.linkedStage')}
+        stageClassName="viz-canvas-stage-linked"
+      >
+        <div className="linked-diagram-canvas" ref={diagramRef} aria-label="linked-list-visualizer">
+          <svg className="linked-arrow-layer" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker
+                id="linked-arrow-head"
+                markerWidth="7"
+                markerHeight="5"
+                refX="6"
+                refY="2.5"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M0,0 L7,2.5 L0,5 z" fill="#365a80" />
+              </marker>
+            </defs>
 
-          {headArrow ? (
-            <path
-              d={getHeadArrowPolylinePoints(headArrow)}
-              className="head-pointer-arrow"
-              markerEnd="url(#linked-arrow-head)"
-            />
-          ) : null}
+            {headArrow ? (
+              <path
+                d={getHeadArrowPolylinePoints(headArrow)}
+                className="head-pointer-arrow"
+                markerEnd="url(#linked-arrow-head)"
+              />
+            ) : null}
 
-          {linkArrows.map((arrow) => (
-            <path
-              key={arrow.key}
-              d={arrow.d}
-              className={arrow.className ?? 'linked-node-arrow'}
-              markerEnd="url(#linked-arrow-head)"
-            />
-          ))}
-        </svg>
+            {linkArrows.map((arrow) => (
+              <path
+                key={arrow.key}
+                d={arrow.d}
+                className={arrow.className ?? 'linked-node-arrow'}
+                markerEnd="url(#linked-arrow-head)"
+              />
+            ))}
+          </svg>
 
-        <div className="linked-diagram-track">
-          <div className="head-pointer-float" data-head-pointer="true">
-            {t('module.l03.headPointer')}
-          </div>
+          <div className="linked-diagram-track">
+            <div className="head-pointer-float" data-head-pointer="true">
+              {t('module.l03.headPointer')}
+            </div>
 
-          <div className="linked-chain-wrap">
-            {chainVisualNodes.length > 0 || floatingVisualNodes.length > 0 ? (
-              <div className="linked-list-nodes">
-                {chainVisualNodes.map((node, index) => {
-                  const detached = node.detached;
+            <div className="linked-chain-wrap">
+              {chainVisualNodes.length > 0 || floatingVisualNodes.length > 0 ? (
+                <div className="linked-list-nodes">
+                  {chainVisualNodes.map((node, index) => {
+                    const detached = node.detached;
 
-                  return (
-                    <Fragment key={node.id}>
-                      {showInsertSlot && floatingSlotIndex === index ? <div className="linked-insert-slot" /> : null}
-                      <div ref={setNodeWrapRef(node.id)} className="linked-node-wrap">
+                    return (
+                      <Fragment key={node.id}>
+                        {showInsertSlot && floatingSlotIndex === index ? <div className="linked-insert-slot" /> : null}
+                        <div ref={setNodeWrapRef(node.id)} className="linked-node-wrap">
+                          <div className="linked-node-index">{node.indexLabel}</div>
+                          <div
+                            data-node-id={node.id}
+                            className={`linked-node split-node bar-${node.highlight}${detached ? ' linked-node-detached' : ''}`}
+                          >
+                            <div className="linked-node-data">{node.label}</div>
+                            <div className="linked-node-pointer" data-pointer-id={node.id}>
+                              {node.nextId ? '' : t('module.l03.nullPointer')}
+                            </div>
+                          </div>
+                        </div>
+                      </Fragment>
+                    );
+                  })}
+                  {showInsertSlot && floatingSlotIndex === chainVisualNodes.length ? <div className="linked-insert-slot" /> : null}
+
+                  {floatingVisualNodes.map((node) => {
+                    const detached = node.detached;
+                    const left = (floatingSlotIndex ?? 0) * (NODE_WIDTH + NODE_GAP);
+
+                    return (
+                      <div
+                        key={node.id}
+                        ref={setNodeWrapRef(node.id)}
+                        className="linked-node-wrap linked-node-wrap-floating"
+                        style={{ left: `${left}px` }}
+                      >
                         <div className="linked-node-index">{node.indexLabel}</div>
                         <div
                           data-node-id={node.id}
@@ -957,44 +990,18 @@ export function LinkedListPage() {
                           </div>
                         </div>
                       </div>
-                    </Fragment>
-                  );
-                })}
-                {showInsertSlot && floatingSlotIndex === chainVisualNodes.length ? <div className="linked-insert-slot" /> : null}
-
-                {floatingVisualNodes.map((node) => {
-                  const detached = node.detached;
-                  const left = (floatingSlotIndex ?? 0) * (NODE_WIDTH + NODE_GAP);
-
-                  return (
-                    <div
-                      key={node.id}
-                      ref={setNodeWrapRef(node.id)}
-                      className="linked-node-wrap linked-node-wrap-floating"
-                      style={{ left: `${left}px` }}
-                    >
-                      <div className="linked-node-index">{node.indexLabel}</div>
-                      <div
-                        data-node-id={node.id}
-                        className={`linked-node split-node bar-${node.highlight}${detached ? ' linked-node-detached' : ''}`}
-                      >
-                        <div className="linked-node-data">{node.label}</div>
-                        <div className="linked-node-pointer" data-pointer-id={node.id}>
-                          {node.nextId ? '' : t('module.l03.nullPointer')}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="linked-null-target" data-null-target="true">
-                {t('module.l03.nullPointer')}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="linked-null-target" data-null-target="true">
+                  {t('module.l03.nullPointer')}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </VisualizationCanvas>
 
       <div className="legend-row">
         <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>

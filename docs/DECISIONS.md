@@ -67,3 +67,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue L-03 work on `feat/l01-v1`.
 - Consequences: Better milestone isolation and easier PR review/rollback by module.
 - Owner: haoyu + codex
+
+## DEC-20260305-07
+- Date: 2026-03-05
+- Status: accepted
+- Context: Visualization stages across modules have inconsistent canvas size and behavior, causing layout jump and unclear visual focus.
+- Decision: Standardize module visualization with a shared large-canvas container (`VisualizationCanvas`) and fixed stage sizing rules; migrate in phases (L-01/L-03 first, S-01 next).
+- Alternatives considered: keep module-specific canvas styles and tune each page separately.
+- Consequences: Better cross-module consistency and easier future layout maintenance; short-term mixed state remains until S-01 migration completes.
+- Owner: haoyu + codex

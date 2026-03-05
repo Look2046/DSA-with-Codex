@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { ARRAY_CAPACITY, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
@@ -225,7 +226,9 @@ export function ArrayPage() {
       <p className="array-preview">
         {t('module.l01.currentArray')}: [{usedArrayPreview.join(', ')}]
       </p>
-      <p className="array-preview">Length/Capacity: {currentSnapshot?.logicalLength ?? 0}/{ARRAY_CAPACITY}</p>
+      <p className="array-preview">
+        {t('module.l01.lengthCapacity')}: {currentSnapshot?.logicalLength ?? 0}/{ARRAY_CAPACITY}
+      </p>
       <p>
         {t('module.s01.highlight')}:{' '}
         {(currentSnapshot?.highlights ?? [])
@@ -233,23 +236,29 @@ export function ArrayPage() {
           .join(' | ') || t('module.s01.none')}
       </p>
 
-      <div className="array-cells" aria-label="array-cells">
-        {(currentSnapshot?.arrayState ?? []).map((value, index) => {
-          const highlight = highlightMap.get(index) ?? 'default';
-          const isEmpty = value === null;
-          const isUnused = index >= visualUsedLength;
-          const isInsertTarget = index === insertConfig.index;
-          const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}${isUnused ? ' array-cell-unused' : ''}`;
+      <VisualizationCanvas
+        title={t('module.l01.title')}
+        subtitle={t('module.canvas.arrayStage')}
+        stageClassName="viz-canvas-stage-array"
+      >
+        <div className="array-cells" aria-label="array-cells">
+          {(currentSnapshot?.arrayState ?? []).map((value, index) => {
+            const highlight = highlightMap.get(index) ?? 'default';
+            const isEmpty = value === null;
+            const isUnused = index >= visualUsedLength;
+            const isInsertTarget = index === insertConfig.index;
+            const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}${isUnused ? ' array-cell-unused' : ''}`;
 
-          return (
-            <div key={`${index}-${String(value)}`} className={cellClassName}>
-              {isInsertTarget ? <span className="array-insert-pointer">↓</span> : null}
-              <span className="array-cell-index">{index}</span>
-              <strong>{value ?? '∅'}</strong>
-            </div>
-          );
-        })}
-      </div>
+            return (
+              <div key={`${index}-${String(value)}`} className={cellClassName}>
+                {isInsertTarget ? <span className="array-insert-pointer">↓</span> : null}
+                <span className="array-cell-index">{index}</span>
+                <strong>{value ?? '∅'}</strong>
+              </div>
+            );
+          })}
+        </div>
+      </VisualizationCanvas>
 
       <div className="legend-row">
         <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>

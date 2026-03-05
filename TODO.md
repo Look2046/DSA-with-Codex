@@ -35,6 +35,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - DoD: insert/delete visual steps can be played in timeline.
   - Done: playwright-assisted manual walkthrough completed (invalid input behavior, step semantics, continuity verified).
 
+- [x] Unify visualization stage to large-canvas layout across modules
+  - DoD: consistent stage size/structure on all algorithm pages; no obvious canvas jump when switching modules.
+  - Done: shared `VisualizationCanvas` landed and migrated on S-01/L-01/L-03.
+
 ## P2 (Could Have / Backlog)
 - [ ] Build reusable animation timeline engine
   - DoD: supports seek, speed control, and deterministic replay.

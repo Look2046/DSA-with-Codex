@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { generateBubbleSortSteps } from '../../modules/sorting/bubbleSort';
@@ -175,16 +176,22 @@ export function BubbleSortPage() {
       </p>
       <p>{getStepDescription(currentSnapshot, t)}</p>
 
-      <div className="array-bars" aria-label="array-visualizer">
-        {(currentSnapshot?.arrayState ?? []).map((value, index) => {
-          const highlight = highlightMap.get(index) ?? 'default';
-          return (
-            <div key={`${index}-${value}`} className={`array-bar bar-${highlight}`} style={{ height: `${(value / maxValue) * 100}%` }}>
-              <span>{value}</span>
-            </div>
-          );
-        })}
-      </div>
+      <VisualizationCanvas
+        title={t('module.s01.title')}
+        subtitle={t('module.canvas.sortingStage')}
+        stageClassName="viz-canvas-stage-sorting"
+      >
+        <div className="array-bars" aria-label="array-visualizer">
+          {(currentSnapshot?.arrayState ?? []).map((value, index) => {
+            const highlight = highlightMap.get(index) ?? 'default';
+            return (
+              <div key={`${index}-${value}`} className={`array-bar bar-${highlight}`} style={{ height: `${(value / maxValue) * 100}%` }}>
+                <span>{value}</span>
+              </div>
+            );
+          })}
+        </div>
+      </VisualizationCanvas>
 
       <div className="legend-row">
         <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>

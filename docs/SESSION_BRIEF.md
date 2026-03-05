@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/l03-v1`
-- Current phase: L-03 regression closed, preparing PR-ready summary
+- Current phase: Visualization canvas standardization completed on S-01/L-01/L-03, preparing PR-ready summary
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -23,8 +23,8 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Prepare PR-ready summary grouped by interaction model, animation/render fixes, and validation/UX
-- Optional: add focused screenshot evidence under `output/playwright/` for PR description
+- Run manual cross-module visual regression (`/modules/bubble-sort`, `/modules/array`, `/modules/linked-list`) for canvas size/scroll continuity.
+- Prepare PR-ready summary grouped by interaction model, visualization standardization, and validation/UX.
 
 ## 4) Guardrails
 

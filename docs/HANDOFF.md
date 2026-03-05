@@ -28,6 +28,18 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - invalid input keeps last valid diagram and disables playback controls
   - insert/delete trailing display-only frames auto-advance with continuity
   - find result feedback confirms matched index and not-found index range
+- Refined L-01 semantics and UX based on manual testing feedback:
+  - logic step display starts from 0 and tracks algorithm steps
+  - removed non-essential visual-only insertion steps
+  - fixed end-of-round state sync for continuous multi-round operations
+  - switched to fixed-capacity array memory model (20 cells + explicit length/capacity)
+  - added insert target downward pointer marker and corrected shift-tail color semantics
+- Introduced shared large-canvas container (`VisualizationCanvas`) and migrated:
+  - L-01 array page
+  - L-03 linked-list page
+- Completed S-01 migration to shared large-canvas container, finishing cross-module stage structure unification.
+- Updated translations/styles for stage subtitles and capacity-related feedback.
+- Re-ran local quality gate with passing result (`npm run check`).
 
 ### Current State
 - Branch: `feat/l03-v1`
@@ -35,9 +47,10 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 - Last verified command: `npm run check` (pass)
 
 ### Remaining Focus (Next Session)
+- Run manual cross-module visual regression for canvas size/scroll continuity after full S-01/L-01/L-03 migration.
 - Prepare PR-ready summary grouped by:
   - interaction model changes
-  - animation/render fixes
+  - visualization/canvas standardization
   - validation and UX improvements
 
 ### First Step Next Session
