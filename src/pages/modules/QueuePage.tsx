@@ -3,7 +3,7 @@ import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
-import { QUEUE_CAPACITY, type QueueMode as QueueRuntimeMode } from '../../modules/linear/queueOps';
+import { QUEUE_CAPACITY, type QueueMode as QueueRuntimeMode, type QueueRuntimeSnapshot } from '../../modules/linear/queueOps';
 import { buildQueueTimelineFromInput } from '../../modules/linear/queueTimelineAdapter';
 import {
   getHighlightLabel,
@@ -37,6 +37,7 @@ export function QueuePage() {
   const [jsonInput, setJsonInput] = useState('');
   const [jsonFeedback, setJsonFeedback] = useState('');
   const [hasJsonError, setHasJsonError] = useState(false);
+  const [runtimeSeed, setRuntimeSeed] = useState<QueueRuntimeSnapshot | null>(null);
   const queueCellsRef = useRef<HTMLDivElement | null>(null);
   const runtimeMode: QueueRuntimeMode = mode === 'circular' ? 'circular' : 'normal';
 
@@ -56,14 +57,27 @@ export function QueuePage() {
   );
 
   const timelineFrames = useMemo(
-    () => buildQueueTimelineFromInput(queueConfig.queue, queueConfig.operation, runtimeMode),
-    [queueConfig, runtimeMode],
+    () => buildQueueTimelineFromInput(queueConfig.queue, queueConfig.operation, runtimeMode, runtimeSeed ?? undefined),
+    [queueConfig, runtimeMode, runtimeSeed],
   );
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const completedQueueText = useMemo(() => {
     const last = steps[steps.length - 1];
     return (last?.queueState ?? []).join(', ');
+  }, [steps]);
+  const completedRuntimeSeed = useMemo<QueueRuntimeSnapshot | null>(() => {
+    const last = steps[steps.length - 1];
+    if (!last) {
+      return null;
+    }
+    return {
+      queueState: [...last.queueState],
+      bufferState: [...last.bufferState],
+      frontIndex: last.frontIndex,
+      rearIndex: last.rearIndex,
+      size: last.size,
+    };
   }, [steps]);
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -112,6 +126,7 @@ export function QueuePage() {
     const nextValueInput = resolved.config.operation.type === 'enqueue' ? String(resolved.config.operation.value) : '';
 
     reset();
+    setRuntimeSeed(null);
     setQueueInput(nextQueueInput);
     setOperationType(nextOperationType);
     setValueInput(nextValueInput);
@@ -124,6 +139,7 @@ export function QueuePage() {
     if (status === 'completed' && operationType !== 'front') {
       const nextQueueInput = completedQueueText;
       setQueueInput(nextQueueInput);
+      setRuntimeSeed(completedRuntimeSeed);
       recomputeInputState(nextQueueInput, operationType, valueInput);
       reset();
       window.setTimeout(() => {
@@ -132,7 +148,7 @@ export function QueuePage() {
       return;
     }
     next();
-  }, [completedQueueText, next, operationType, recomputeInputState, reset, status, valueInput]);
+  }, [completedQueueText, completedRuntimeSeed, next, operationType, recomputeInputState, reset, status, valueInput]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -170,10 +186,12 @@ export function QueuePage() {
             onClick={() => {
               const nextRuntimeMode: QueueRuntimeMode = tab.key === 'circular' ? 'circular' : 'normal';
               const nextQueueInput = status === 'completed' && operationType !== 'front' ? completedQueueText : queueInput;
+              const nextSeed = status === 'completed' ? completedRuntimeSeed : runtimeSeed;
               const resolved = resolveQueueConfig(nextQueueInput, operationType, valueInput, nextRuntimeMode, t);
               reset();
               setMode(tab.key);
               setQueueInput(nextQueueInput);
+              setRuntimeSeed(nextSeed);
               setError(resolved.error);
               setHasValidConfig(resolved.config !== null);
               if (resolved.config) {
@@ -199,6 +217,7 @@ export function QueuePage() {
                 onChange={(event) => {
                   const nextValue = event.target.value;
                   reset();
+                  setRuntimeSeed(null);
                   setQueueInput(nextValue);
                   recomputeInputState(nextValue, operationType, valueInput);
                 }}
@@ -213,9 +232,11 @@ export function QueuePage() {
                 onChange={(event) => {
                   const nextValue = event.target.value as QueueConfig['operation']['type'];
                   const nextQueueInput = status === 'completed' && operationType !== 'front' ? completedQueueText : queueInput;
+                  const nextSeed = status === 'completed' ? completedRuntimeSeed : runtimeSeed;
                   reset();
                   setOperationType(nextValue);
                   setQueueInput(nextQueueInput);
+                  setRuntimeSeed(nextSeed);
                   const normalized = nextValue === 'enqueue' ? valueInput : '';
                   if (nextValue !== 'enqueue') {
                     setValueInput('');
@@ -238,6 +259,7 @@ export function QueuePage() {
                   onChange={(event) => {
                     const nextValue = event.target.value;
                     reset();
+                    setRuntimeSeed(null);
                     setValueInput(nextValue);
                     recomputeInputState(queueInput, operationType, nextValue);
                   }}

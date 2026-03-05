@@ -19,6 +19,14 @@ export type QueueStep = AnimationStep & {
   frontValue?: number;
 };
 
+export type QueueRuntimeSnapshot = {
+  queueState: number[];
+  bufferState: Array<number | null>;
+  frontIndex: number;
+  rearIndex: number;
+  size: number;
+};
+
 type QueueRuntime = {
   queueState: number[];
   bufferState: Array<number | null>;
@@ -49,6 +57,22 @@ function createRuntime(input: number[]): QueueRuntime {
     frontIndex: input.length > 0 ? 0 : -1,
     rearIndex: input.length > 0 ? input.length - 1 : -1,
     size: input.length,
+  };
+}
+
+function createRuntimeFromSnapshot(snapshot: QueueRuntimeSnapshot): QueueRuntime {
+  if (snapshot.bufferState.length !== QUEUE_CAPACITY) {
+    throw new RangeError(`Queue buffer length must be ${QUEUE_CAPACITY}`);
+  }
+  if (snapshot.size < 0 || snapshot.size > QUEUE_CAPACITY) {
+    throw new RangeError(`Queue size must be within [0, ${QUEUE_CAPACITY}]`);
+  }
+  return {
+    queueState: [...snapshot.queueState],
+    bufferState: [...snapshot.bufferState],
+    frontIndex: snapshot.frontIndex,
+    rearIndex: snapshot.rearIndex,
+    size: snapshot.size,
   };
 }
 
@@ -96,10 +120,15 @@ function snapshot(
   };
 }
 
-export function generateQueueSteps(input: number[], operation: QueueOperation, mode: QueueMode = 'normal'): QueueStep[] {
+export function generateQueueSteps(
+  input: number[],
+  operation: QueueOperation,
+  mode: QueueMode = 'normal',
+  runtimeSeed?: QueueRuntimeSnapshot,
+): QueueStep[] {
   assertQueueRange(input);
 
-  const runtime = createRuntime(input);
+  const runtime = runtimeSeed ? createRuntimeFromSnapshot(runtimeSeed) : createRuntime(input);
   const steps: QueueStep[] = [];
   const maxSize = getQueueMaxSize(mode);
   if (runtime.size > maxSize) {
