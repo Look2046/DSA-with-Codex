@@ -570,13 +570,15 @@ body {
 
 .stack-cells {
   width: 100%;
-  min-height: 280px;
+  height: 320px;
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
   padding: 8px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .stack-cell {
@@ -588,6 +590,12 @@ body {
   justify-items: center;
   gap: 4px;
   position: relative;
+}
+
+.stack-cell-unused {
+  opacity: 0.62;
+  background: #f7fafc;
+  border-style: dashed;
 }
 
 .stack-top-pointer {

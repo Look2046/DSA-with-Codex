@@ -3,6 +3,7 @@ import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
+import { STACK_CAPACITY } from '../../modules/linear/stackOps';
 import { buildStackTimelineFromInput } from '../../modules/linear/stackTimelineAdapter';
 import {
   getHighlightLabel,
@@ -259,6 +260,9 @@ export function StackPage() {
       <p className="array-preview">
         {t('module.l04.currentStack')}: [{(currentSnapshot?.stackState ?? []).join(', ')}]
       </p>
+      <p className="array-preview">
+        {t('module.l01.lengthCapacity')}: {(currentSnapshot?.stackState ?? []).length}/{STACK_CAPACITY}
+      </p>
       <p>
         {t('module.s01.highlight')}:{' '}
         {(currentSnapshot?.highlights ?? [])
@@ -272,15 +276,16 @@ export function StackPage() {
         stageClassName="viz-canvas-stage-array"
       >
         <div className="stack-cells" aria-label="stack-cells">
-          {(currentSnapshot?.stackState ?? []).map((value, index, array) => {
-            const visualIndex = array.length - 1 - index;
+          {Array.from({ length: STACK_CAPACITY }, (_, index) => {
+            const value = currentSnapshot?.stackState[index] ?? null;
             const highlight = highlightMap.get(index) ?? 'default';
-            const isTop = index === array.length - 1;
+            const isTop = index === (currentSnapshot?.stackState.length ?? 0) - 1;
+            const isUnused = value === null;
             return (
-              <div key={`${index}-${value}`} className={`stack-cell bar-${highlight}`}>
+              <div key={`${index}-${String(value)}`} className={`stack-cell bar-${highlight}${isUnused ? ' stack-cell-unused' : ''}`}>
                 {isTop ? <span className="stack-top-pointer">{t('module.l04.top')}</span> : null}
-                <span className="array-cell-index">{visualIndex}</span>
-                <strong>{value}</strong>
+                <span className="array-cell-index">{index}</span>
+                <strong>{value ?? '∅'}</strong>
               </div>
             );
           })}
