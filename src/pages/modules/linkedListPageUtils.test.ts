@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { TranslationKey } from '../../i18n/translations';
+import { generateLinkedListSteps } from '../../modules/linear/linkedListOps';
 import type { LinkedListStep } from '../../modules/linear/linkedListOps';
-import { buildLogicalStepByIndex, getFindResultText, parseNumberArrayAllowEmpty, resolveLinkedListConfig } from './linkedListPageUtils';
+import {
+  buildLogicalStepByIndex,
+  getFindResultText,
+  parseNumberArrayAllowEmpty,
+  resolveLinkedListConfig,
+  resolveLinkedListConfigFromJson,
+  serializeLinkedListConfigAsJson,
+} from './linkedListPageUtils';
 
 const t = (key: TranslationKey): string => key;
 
@@ -60,5 +68,40 @@ describe('linkedListPageUtils', () => {
     ];
 
     expect(buildLogicalStepByIndex(steps)).toEqual([0, 1, 1, 1, 2, 2]);
+  });
+
+  it('serializes and resolves linked-list JSON config', () => {
+    const serialized = serializeLinkedListConfigAsJson({
+      list: [4, 7, 11],
+      operation: { type: 'insertAt', index: 1, value: 9 },
+    });
+    expect(resolveLinkedListConfigFromJson(serialized, t)).toEqual({
+      config: { list: [4, 7, 11], operation: { type: 'insertAt', index: 1, value: 9 } },
+      error: '',
+    });
+  });
+
+  it('rejects invalid linked-list JSON and schema', () => {
+    expect(resolveLinkedListConfigFromJson('{oops}', t)).toEqual({
+      config: null,
+      error: 'module.l03.json.error.parse',
+    });
+    expect(resolveLinkedListConfigFromJson('{"list":[1,2],"operation":{"kind":"find"}}', t)).toEqual({
+      config: null,
+      error: 'module.l03.json.error.schema',
+    });
+  });
+
+  it('keeps replay deterministic after linked-list export/import round-trip', () => {
+    const raw = serializeLinkedListConfigAsJson({
+      list: [4, 7, 11],
+      operation: { type: 'find', value: 7 },
+    });
+    const resolved = resolveLinkedListConfigFromJson(raw, t);
+    expect(resolved.config).not.toBeNull();
+
+    const direct = generateLinkedListSteps([4, 7, 11], { type: 'find', value: 7 });
+    const replay = generateLinkedListSteps(resolved.config?.list ?? [], resolved.config?.operation ?? { type: 'find', value: 0 });
+    expect(replay).toEqual(direct);
   });
 });

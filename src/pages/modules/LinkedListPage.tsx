@@ -6,7 +6,14 @@ import { useI18n } from '../../i18n/useI18n';
 import type { TranslationKey } from '../../i18n/translations';
 import { generateLinkedListSteps } from '../../modules/linear/linkedListOps';
 import type { LinkedListOperation, LinkedListStep } from '../../modules/linear/linkedListOps';
-import { buildLogicalStepByIndex, getFindResultText, resolveLinkedListConfig, type LinkedListConfig } from './linkedListPageUtils';
+import {
+  buildLogicalStepByIndex,
+  getFindResultText,
+  resolveLinkedListConfig,
+  resolveLinkedListConfigFromJson,
+  serializeLinkedListConfigAsJson,
+  type LinkedListConfig,
+} from './linkedListPageUtils';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 type ArrowSegment = {
@@ -263,6 +270,9 @@ export function LinkedListPage() {
   const [displayConfig, setDisplayConfig] = useState<LinkedListConfig>(DEFAULT_CONFIG);
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
+  const [jsonInput, setJsonInput] = useState('');
+  const [jsonFeedback, setJsonFeedback] = useState('');
+  const [hasJsonError, setHasJsonError] = useState(false);
 
   const [linkArrows, setLinkArrows] = useState<ArrowSegment[]>([]);
   const [headArrow, setHeadArrow] = useState<ArrowSegment | null>(null);
@@ -340,6 +350,43 @@ export function LinkedListPage() {
   const handlePlay = useCallback(() => {
     play();
   }, [play]);
+
+  const handleExportJson = useCallback(() => {
+    setJsonInput(serializeLinkedListConfigAsJson(displayConfig));
+    setHasJsonError(false);
+    setJsonFeedback(t('module.l03.json.exported'));
+  }, [displayConfig, t]);
+
+  const handleImportJson = useCallback(() => {
+    const resolved = resolveLinkedListConfigFromJson(jsonInput, t);
+    if (!resolved.config) {
+      setHasJsonError(true);
+      setJsonFeedback(resolved.error);
+      return;
+    }
+
+    const nextOperationType = resolved.config.operation.type;
+    const nextListInput = resolved.config.list.join(', ');
+    const nextValueInput =
+      resolved.config.operation.type === 'find' || resolved.config.operation.type === 'insertAt'
+        ? String(resolved.config.operation.value)
+        : valueInput;
+    const nextIndexInput =
+      resolved.config.operation.type === 'insertAt' || resolved.config.operation.type === 'deleteAt'
+        ? String(resolved.config.operation.index + 1)
+        : indexInput;
+
+    reset();
+    prevNodeRects.current = new Map();
+    skipNextLayoutAnimationRef.current = true;
+    setListInput(nextListInput);
+    setOperationType(nextOperationType);
+    setValueInput(nextValueInput);
+    setIndexInput(nextIndexInput);
+    recomputeInputState(nextListInput, nextOperationType, nextValueInput, nextIndexInput);
+    setHasJsonError(false);
+    setJsonFeedback(t('module.l03.json.imported'));
+  }, [indexInput, jsonInput, recomputeInputState, reset, t, valueInput]);
 
   useEffect(() => {
     if (status === 'playing') {
@@ -843,6 +890,28 @@ export function LinkedListPage() {
       </div>
 
       {error ? <p className="form-error">{error}</p> : null}
+
+      <div className="array-form">
+        <label htmlFor="linked-list-json-input">
+          <span>{t('module.l03.json.label')}</span>
+          <textarea
+            id="linked-list-json-input"
+            value={jsonInput}
+            onChange={(event) => setJsonInput(event.target.value)}
+            rows={6}
+            placeholder={t('module.l03.json.placeholder')}
+          />
+        </label>
+      </div>
+      <div className="playback-actions">
+        <button type="button" onClick={handleExportJson}>
+          {t('module.l03.json.export')}
+        </button>
+        <button type="button" onClick={handleImportJson}>
+          {t('module.l03.json.import')}
+        </button>
+      </div>
+      {jsonFeedback ? <p className={hasJsonError ? 'form-error' : 'array-preview'}>{jsonFeedback}</p> : null}
 
       <div className="bubble-toolbar">
         <span>{t('module.s01.speed')}</span>

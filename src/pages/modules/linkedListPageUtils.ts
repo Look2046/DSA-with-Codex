@@ -8,6 +8,11 @@ export type LinkedListConfig = {
 
 type Translator = (key: TranslationKey) => string;
 
+type JsonParseResult<T> = {
+  config: T | null;
+  error: string;
+};
+
 export function parseNumberArrayAllowEmpty(raw: string): number[] | null {
   const trimmed = raw.trim();
   if (trimmed.length === 0) {
@@ -67,6 +72,58 @@ export function resolveLinkedListConfig(
     return { config: null, error: t('module.l03.error.deleteIndex') };
   }
   return { config: { list: parsedList, operation: { type: 'deleteAt', index: displayIndex - 1 } }, error: '' };
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function serializeLinkedListConfigAsJson(config: LinkedListConfig): string {
+  return JSON.stringify(config, null, 2);
+}
+
+export function resolveLinkedListConfigFromJson(rawJson: string, t: Translator): JsonParseResult<LinkedListConfig> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawJson);
+  } catch {
+    return { config: null, error: t('module.l03.json.error.parse') };
+  }
+
+  if (!isObjectRecord(parsed) || !Array.isArray(parsed.list) || !isObjectRecord(parsed.operation) || typeof parsed.operation.type !== 'string') {
+    return { config: null, error: t('module.l03.json.error.schema') };
+  }
+
+  const listInput = parsed.list.join(', ');
+  const operationType = parsed.operation.type;
+  if (operationType === 'find') {
+    if (typeof parsed.operation.value !== 'number') {
+      return { config: null, error: t('module.l03.json.error.schema') };
+    }
+    return resolveLinkedListConfig(listInput, operationType, String(parsed.operation.value), '', t);
+  }
+
+  if (operationType === 'insertAt') {
+    if (typeof parsed.operation.value !== 'number' || typeof parsed.operation.index !== 'number') {
+      return { config: null, error: t('module.l03.json.error.schema') };
+    }
+    return resolveLinkedListConfig(
+      listInput,
+      operationType,
+      String(parsed.operation.value),
+      String(parsed.operation.index + 1),
+      t,
+    );
+  }
+
+  if (operationType === 'deleteAt') {
+    if (typeof parsed.operation.index !== 'number') {
+      return { config: null, error: t('module.l03.json.error.schema') };
+    }
+    return resolveLinkedListConfig(listInput, operationType, '', String(parsed.operation.index + 1), t);
+  }
+
+  return { config: null, error: t('module.l03.json.error.schema') };
 }
 
 export function getFindResultText(

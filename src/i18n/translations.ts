@@ -129,6 +129,16 @@ export const translations = {
     'module.l03.input.deleteIndex': 'Delete index (current position, 1-based)',
     'module.l03.input.value': 'Value',
     'module.l03.input.withHeadNode': 'Enable head node',
+    'module.l03.json.label': 'JSON dataset',
+    'module.l03.json.placeholder':
+      '{\n  "list": [4, 7, 11],\n  "operation": {\n    "type": "find",\n    "value": 7\n  }\n}',
+    'module.l03.json.export': 'Export JSON',
+    'module.l03.json.import': 'Import JSON',
+    'module.l03.json.exported': 'Linked-list JSON exported to editor.',
+    'module.l03.json.imported': 'Linked-list JSON imported successfully.',
+    'module.l03.json.error.parse': 'Invalid JSON format. Please check syntax.',
+    'module.l03.json.error.schema':
+      'JSON schema invalid. Required: list(number[]) and operation(type=find|insertAt|deleteAt with valid fields).',
     'module.l03.operation.find': 'Find',
     'module.l03.operation.insertAt': 'Insert At',
     'module.l03.operation.deleteAt': 'Delete At',
@@ -305,6 +315,16 @@ export const translations = {
     'module.l03.input.deleteIndex': '删除索引（当前位置，1起始）',
     'module.l03.input.value': '值',
     'module.l03.input.withHeadNode': '启用头结点',
+    'module.l03.json.label': 'JSON 数据集',
+    'module.l03.json.placeholder':
+      '{\n  "list": [4, 7, 11],\n  "operation": {\n    "type": "find",\n    "value": 7\n  }\n}',
+    'module.l03.json.export': '导出 JSON',
+    'module.l03.json.import': '导入 JSON',
+    'module.l03.json.exported': '已将链表 JSON 导出到编辑框。',
+    'module.l03.json.imported': '链表 JSON 导入成功。',
+    'module.l03.json.error.parse': 'JSON 格式无效，请检查语法。',
+    'module.l03.json.error.schema':
+      'JSON 结构无效，需包含 list(number[]) 与 operation(type=find|insertAt|deleteAt 及对应字段)。',
     'module.l03.operation.find': '查找',
     'module.l03.operation.insertAt': '按索引插入',
     'module.l03.operation.deleteAt': '按索引删除',
