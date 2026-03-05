@@ -17,17 +17,15 @@ describe('generateArrayInsertSteps', () => {
     expect(last.arrayState).toEqual([3, 8, 9, 1, 5]);
   });
 
-  it('shows an explicit empty slot and moves it left before insertion', () => {
+  it('moves values right and inserts directly after target slot is found', () => {
     const steps = generateArrayInsertSteps([3, 8, 1, 5], 1, 9);
-    const expandStep = steps.find((step) => step.action === 'expand');
     const shiftSteps = steps.filter((step) => step.action === 'shift');
-    const prepareStep = steps.find((step) => step.action === 'prepareInsert');
+    const insertIndex = steps.findIndex((step) => step.action === 'insert');
 
-    expect(expandStep?.arrayState).toEqual([3, 8, 1, 5, null]);
     expect(shiftSteps.length).toBeGreaterThan(0);
     expect(shiftSteps[0].arrayState.includes(null)).toBe(true);
-    expect(prepareStep?.arrayState[1]).toBeNull();
-    expect(prepareStep?.pendingValue).toBe(9);
+    expect(insertIndex).toBeGreaterThan(0);
+    expect(steps[insertIndex - 1]?.action).toBe('shift');
   });
 
   it('supports insert at array tail', () => {

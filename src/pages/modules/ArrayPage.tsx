@@ -1,88 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
-import type { ArrayInsertStep } from '../../modules/linear/arrayInsert';
+import { getHighlightLabel, getStatusLabel, getStepDescription, resolveInsertConfig, type InsertConfig } from './arrayPageUtils';
 import { usePlaybackStore } from '../../store/playbackStore';
-import type { HighlightType, PlaybackStatus } from '../../types/animation';
-
-type InsertConfig = {
-  array: number[];
-  index: number;
-  value: number;
-};
+import type { HighlightType } from '../../types/animation';
 
 const DEFAULT_CONFIG: InsertConfig = {
   array: [3, 8, 1, 5],
   index: 2,
   value: 9,
 };
-
-function parseNumberArray(raw: string): number[] | null {
-  const parts = raw
-    .split(',')
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
-
-  if (parts.length === 0) {
-    return null;
-  }
-
-  const parsed = parts.map((item) => Number(item));
-  if (parsed.some((value) => Number.isNaN(value))) {
-    return null;
-  }
-
-  return parsed;
-}
-
-function getStatusLabel(status: PlaybackStatus, t: ReturnType<typeof useI18n>['t']): string {
-  switch (status) {
-    case 'idle':
-      return t('playback.status.idle');
-    case 'playing':
-      return t('playback.status.playing');
-    case 'paused':
-      return t('playback.status.paused');
-    case 'completed':
-      return t('playback.status.completed');
-    default:
-      return status;
-  }
-}
-
-function getStepDescription(step: ArrayInsertStep | undefined, t: ReturnType<typeof useI18n>['t']): string {
-  if (!step) {
-    return '-';
-  }
-
-  if (step.action === 'initial') {
-    return t('module.l01.step.initial');
-  }
-  if (step.action === 'expand') {
-    return t('module.l01.step.expand');
-  }
-  if (step.action === 'shift') {
-    return `${t('module.l01.step.shift')} ${step.indices[0]} -> ${step.indices[1]}`;
-  }
-  if (step.action === 'prepareInsert') {
-    return `${t('module.l01.step.prepare')} ${step.indices[0]}`;
-  }
-  if (step.action === 'insert') {
-    return `${t('module.l01.step.insert')} ${step.indices[0]}`;
-  }
-  return t('module.l01.step.completed');
-}
-
-function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t']): string {
-  if (type === 'moving') {
-    return t('module.l01.highlight.moving');
-  }
-  if (type === 'new-node') {
-    return t('module.l01.highlight.inserted');
-  }
-  return t('module.s01.highlight.default');
-}
 
 export function ArrayPage() {
   const { t } = useI18n();
@@ -92,10 +20,11 @@ export function ArrayPage() {
   const [indexInput, setIndexInput] = useState(String(DEFAULT_CONFIG.index));
   const [valueInput, setValueInput] = useState(String(DEFAULT_CONFIG.value));
   const [error, setError] = useState('');
+  const [hasValidConfig, setHasValidConfig] = useState(true);
   const [speedMs, setSpeedMs] = useState(700);
   const [insertConfig, setInsertConfig] = useState<InsertConfig>(DEFAULT_CONFIG);
 
-  const { status, currentStep, totalSteps, setTotalSteps, setStatus, play, pause, nextStep, prevStep, reset } =
+  const { status, currentStep, setTotalSteps, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
   const steps = useMemo(
@@ -103,11 +32,52 @@ export function ArrayPage() {
     [insertConfig],
   );
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const logicalStepByIndex = useMemo(
+    () =>
+      steps.reduce<number[]>((acc, step) => {
+        const prev = acc.length > 0 ? acc[acc.length - 1] : -1;
+        const next = step.action === 'completed' ? Math.max(prev, 0) : prev + 1;
+        return [...acc, Math.max(next, 0)];
+      }, []),
+    [steps],
+  );
+  const currentLogicalStep = logicalStepByIndex[currentStep] ?? 0;
+  const totalLogicalSteps = logicalStepByIndex[logicalStepByIndex.length - 1] ?? 0;
+  const completedArrayText = useMemo(() => {
+    const last = steps[steps.length - 1];
+    return (last?.arrayState ?? []).join(', ');
+  }, [steps]);
+
+  const recomputeInputState = useCallback(
+    (nextArrayInput: string, nextIndexInput: string, nextValueInput: string) => {
+      const resolved = resolveInsertConfig(nextArrayInput, nextIndexInput, nextValueInput, t);
+      setError(resolved.error);
+      setHasValidConfig(resolved.config !== null);
+      if (resolved.config) {
+        setInsertConfig(resolved.config);
+      }
+    },
+    [t],
+  );
+
+  const syncInputToCompletedArray = useCallback(() => {
+    if (!hasValidConfig || steps.length === 0) {
+      return;
+    }
+
+    if (arrayInput === completedArrayText) {
+      return;
+    }
+
+    reset();
+    setArrayInput(completedArrayText);
+    recomputeInputState(completedArrayText, indexInput, valueInput);
+  }, [arrayInput, completedArrayText, hasValidConfig, indexInput, recomputeInputState, reset, steps.length, valueInput]);
 
   useEffect(() => {
     setTotalSteps(steps.length);
     reset();
-  }, [setTotalSteps, reset, steps.length]);
+  }, [setTotalSteps, reset, steps]);
 
   useEffect(() => {
     if (status !== 'playing') {
@@ -118,6 +88,7 @@ export function ArrayPage() {
       const state = usePlaybackStore.getState();
       if (state.currentStep >= state.totalSteps - 1) {
         state.setStatus('completed');
+        syncInputToCompletedArray();
         window.clearInterval(timer);
         return;
       }
@@ -125,7 +96,35 @@ export function ArrayPage() {
     }, speedMs);
 
     return () => window.clearInterval(timer);
-  }, [status, speedMs]);
+  }, [status, speedMs, syncInputToCompletedArray]);
+
+  useEffect(() => {
+    if (!hasValidConfig || steps.length === 0) {
+      return;
+    }
+
+    if (currentSnapshot?.action !== 'insert' && currentSnapshot?.action !== 'completed') {
+      return;
+    }
+
+    if (arrayInput === completedArrayText) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      syncInputToCompletedArray();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [arrayInput, completedArrayText, currentSnapshot?.action, hasValidConfig, steps.length, syncInputToCompletedArray]);
+
+  const handleNextStep = useCallback(() => {
+    const willComplete = currentStep >= steps.length - 2;
+    nextStep();
+    if (willComplete) {
+      syncInputToCompletedArray();
+    }
+  }, [currentStep, nextStep, steps.length, syncInputToCompletedArray]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -139,34 +138,6 @@ export function ArrayPage() {
     { key: 'module.s01.speed.fast', value: 350 },
   ] as const;
 
-  const applyInsert = () => {
-    const parsedArray = parseNumberArray(arrayInput);
-    if (!parsedArray) {
-      setError(t('module.l01.error.array'));
-      return;
-    }
-
-    const parsedIndex = Number(indexInput);
-    if (!Number.isInteger(parsedIndex) || parsedIndex < 0 || parsedIndex > parsedArray.length) {
-      setError(t('module.l01.error.index'));
-      return;
-    }
-
-    const parsedValue = Number(valueInput);
-    if (Number.isNaN(parsedValue)) {
-      setError(t('module.l01.error.value'));
-      return;
-    }
-
-    setError('');
-    setInsertConfig({
-      array: parsedArray,
-      index: parsedIndex,
-      value: parsedValue,
-    });
-    setStatus('idle');
-  };
-
   return (
     <section className="array-page">
       <h2>{t('module.l01.title')}</h2>
@@ -178,7 +149,11 @@ export function ArrayPage() {
           <input
             id="array-input"
             value={arrayInput}
-            onChange={(event) => setArrayInput(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value;
+              setArrayInput(next);
+              recomputeInputState(next, indexInput, valueInput);
+            }}
             placeholder="3, 8, 1, 5"
           />
         </label>
@@ -188,7 +163,11 @@ export function ArrayPage() {
             id="insert-index"
             type="number"
             value={indexInput}
-            onChange={(event) => setIndexInput(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value;
+              setIndexInput(next);
+              recomputeInputState(arrayInput, next, valueInput);
+            }}
           />
         </label>
         <label htmlFor="insert-value">
@@ -197,12 +176,13 @@ export function ArrayPage() {
             id="insert-value"
             type="number"
             value={valueInput}
-            onChange={(event) => setValueInput(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value;
+              setValueInput(next);
+              recomputeInputState(arrayInput, indexInput, next);
+            }}
           />
         </label>
-        <button type="button" onClick={applyInsert}>
-          {t('module.l01.apply')}
-        </button>
       </div>
 
       {error ? <p className="form-error">{error}</p> : null}
@@ -224,8 +204,8 @@ export function ArrayPage() {
       </div>
 
       <p>
-        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep + 1}/
-        {totalSteps || 0} | {t('playback.status')}: {getStatusLabel(status, t)}
+        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentLogicalStep}/
+        {totalLogicalSteps} | {t('playback.status')}: {getStatusLabel(status, t)}
       </p>
 
       <p>{getStepDescription(currentSnapshot, t)}</p>
@@ -243,15 +223,11 @@ export function ArrayPage() {
         {(currentSnapshot?.arrayState ?? []).map((value, index) => {
           const highlight = highlightMap.get(index) ?? 'default';
           const isEmpty = value === null;
-          const isPrepareTarget =
-            currentSnapshot?.action === 'prepareInsert' && currentSnapshot.indices[0] === index;
-          const pendingValue = isPrepareTarget ? currentSnapshot.pendingValue : undefined;
           const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}`;
 
           return (
             <div key={`${index}-${String(value)}`} className={cellClassName}>
               <span className="array-cell-index">{index}</span>
-              {pendingValue !== undefined ? <span className="pending-insert">{pendingValue}</span> : null}
               <strong>{value ?? '∅'}</strong>
             </div>
           );
@@ -265,19 +241,19 @@ export function ArrayPage() {
       </div>
 
       <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing'}>
+        <button type="button" onClick={play} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
           {t('playback.play')}
         </button>
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
           {t('playback.pause')}
         </button>
-        <button type="button" onClick={prevStep}>
+        <button type="button" onClick={prevStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.prev')}
         </button>
-        <button type="button" onClick={nextStep}>
+        <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.next')}
         </button>
-        <button type="button" onClick={reset}>
+        <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.reset')}
         </button>
       </div>
@@ -289,8 +265,6 @@ export function ArrayPage() {
           <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l01.code.line2')}</li>
           <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l01.code.line3')}</li>
           <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l01.code.line4')}</li>
-          <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l01.code.line5')}</li>
-          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l01.code.line6')}</li>
         </ol>
       </div>
     </section>

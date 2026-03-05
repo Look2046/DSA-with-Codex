@@ -2,9 +2,8 @@ import type { AnimationStep } from '../../types/animation';
 
 export type ArrayInsertStep = AnimationStep & {
   arrayState: Array<number | null>;
-  action: 'initial' | 'expand' | 'shift' | 'prepareInsert' | 'insert' | 'completed';
+  action: 'initial' | 'shift' | 'insert' | 'completed';
   indices: number[];
-  pendingValue?: number;
 };
 
 function cloneArray(values: number[]): number[] {
@@ -20,7 +19,6 @@ export function generateArrayInsertSteps(input: number[], index: number, value: 
     throw new RangeError(`Insert index out of range: ${index}`);
   }
 
-  const working = cloneArray(input);
   const visual: Array<number | null> = cloneArray(input);
   const steps: ArrayInsertStep[] = [];
 
@@ -33,47 +31,26 @@ export function generateArrayInsertSteps(input: number[], index: number, value: 
     indices: [],
   });
 
-  visual.push(null);
-  steps.push({
-    description: '',
-    codeLines: [2],
-    highlights: [{ index: visual.length - 1, type: 'new-node' }],
-    arrayState: cloneVisualArray(visual),
-    action: 'expand',
-    indices: [visual.length - 1],
-  });
-
-  for (let i = visual.length - 1; i > index; i -= 1) {
-    visual[i] = visual[i - 1];
-    visual[i - 1] = null;
+  for (let i = visual.length - 1; i >= index; i -= 1) {
+    visual[i + 1] = visual[i];
+    visual[i] = null;
     steps.push({
       description: '',
-      codeLines: [3],
+      codeLines: [2],
       highlights: [
-        { index: i - 1, type: 'moving' },
         { index: i, type: 'moving' },
+        { index: i + 1, type: 'moving' },
       ],
       arrayState: cloneVisualArray(visual),
       action: 'shift',
-      indices: [i - 1, i],
+      indices: [i, i + 1],
     });
   }
 
-  steps.push({
-    description: '',
-    codeLines: [4],
-    highlights: [{ index, type: 'new-node' }],
-    arrayState: cloneVisualArray(visual),
-    action: 'prepareInsert',
-    indices: [index],
-    pendingValue: value,
-  });
-
   visual[index] = value;
-  working.splice(index, 0, value);
   steps.push({
     description: '',
-    codeLines: [5],
+    codeLines: [3],
     highlights: [{ index, type: 'new-node' }],
     arrayState: cloneVisualArray(visual),
     action: 'insert',
@@ -82,7 +59,7 @@ export function generateArrayInsertSteps(input: number[], index: number, value: 
 
   steps.push({
     description: '',
-    codeLines: [6],
+    codeLines: [4],
     highlights: [],
     arrayState: cloneVisualArray(visual),
     action: 'completed',
