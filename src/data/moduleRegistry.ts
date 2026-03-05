@@ -55,7 +55,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/queue',
     category: 'linear',
     difficulty: 2,
-    implemented: false,
+    implemented: true,
   },
 ];
 

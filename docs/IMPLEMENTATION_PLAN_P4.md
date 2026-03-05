@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P4
 
-Status: proposed for execution
+Status: in progress (`P4-M1` completed, `P4-M2` next)
 Branch model: `feat/*` per milestone
 Primary goal: deliver next two linear modules and raise module-page delivery quality
 

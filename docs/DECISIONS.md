@@ -175,3 +175,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: start ad-hoc module work without milestone boundaries; focus only on UX polish without new module delivery.
 - Consequences: keeps expansion predictable while reserving explicit capacity for delivery-quality hardening before the next phase.
 - Owner: haoyu + codex
+
+## DEC-20260305-19
+- Date: 2026-03-05
+- Status: accepted
+- Context: `L-05 Queue` needs to be shipped quickly with behavior parity against existing linear modules and without introducing a new playback path.
+- Decision: Implement queue module on top of the existing timeline engine and reuse stack/array patterns for validation, JSON import/export, deterministic replay tests, and fixed-capacity canvas interaction.
+- Alternatives considered: build queue with a separate playback runtime; ship queue without JSON/test parity first.
+- Consequences: lower integration risk and faster delivery, at the cost of deferring deeper queue-specific visual sophistication (for example circular-buffer rendering) to later iterations.
+- Owner: haoyu + codex

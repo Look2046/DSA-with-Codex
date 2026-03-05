@@ -2,6 +2,34 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P4-M1 L-05 queue closure)
+
+### Today Done
+- Implemented `L-05 Queue` module end-to-end:
+  - step generator (`enqueue` / `dequeue` / `front`)
+  - timeline adapter and queue page visualization
+  - route registration (`/modules/queue`) and registry mark as implemented
+- Added queue input/config validation and JSON import/export support with schema checks.
+- Added deterministic tests:
+  - queue step generation tests
+  - queue timeline replay test (`seek/speed/resume`)
+  - queue JSON round-trip deterministic test
+- Passed full local quality gate (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P4-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Start P4-M2: `L-02 Dynamic Array` module with resize visualization and deterministic replay.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P4 planning baseline)
 
 ### Today Done

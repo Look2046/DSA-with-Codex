@@ -72,9 +72,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: added L-04 page/route/registry entry, stack step generator, JSON import/export + validation, and deterministic replay tests.
 
 ## P4 (Next Milestone)
-- [ ] P4-M1 Add L-05 queue module
+- [x] P4-M1 Add L-05 queue module
   - DoD: queue step generator + timeline page + validation + JSON import/export + deterministic tests.
   - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
+  - Done: added L-05 page/route/registry entry, queue step generator, JSON import/export + validation, and deterministic replay tests.
 
 - [ ] P4-M2 Add L-02 dynamic array module
   - DoD: dynamic resize visualization + timeline playback + validation + deterministic tests.

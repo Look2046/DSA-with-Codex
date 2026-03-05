@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P4 planning baseline (execution not started)
+- Current phase: P4 in progress (`P4-M1` closed, `P4-M2` next)
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -31,11 +31,12 @@ Use this file as the first thing to read in a new chat/session.
 - `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
 - `S-02 Selection Sort` module landed with timeline playback + deterministic tests
 - `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
+- `L-05 Queue` module landed with timeline playback + JSON import/export + deterministic tests
 
 ## 3) Next Priority
 
-- Start P4-M1: implement `L-05 Queue` module with timeline + JSON parity.
-- Follow-up after P4-M1: implement `L-02 Dynamic Array` and run module UX polish sweep.
+- Start P4-M2: implement `L-02 Dynamic Array` module with resize-focused timeline playback.
+- Follow-up after P4-M2: run P4-M3 module UX polish sweep and Playwright acceptance refresh.
 
 ## 4) Guardrails
 

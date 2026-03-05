@@ -10,6 +10,7 @@ import { BubbleSortPage } from '../pages/modules/BubbleSortPage';
 import { LinkedListPage } from '../pages/modules/LinkedListPage';
 import { SelectionSortPage } from '../pages/modules/SelectionSortPage';
 import { StackPage } from '../pages/modules/StackPage';
+import { QueuePage } from '../pages/modules/QueuePage';
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: 'modules/array', element: <ArrayPage /> },
       { path: 'modules/linked-list', element: <LinkedListPage /> },
       { path: 'modules/stack', element: <StackPage /> },
+      { path: 'modules/queue', element: <QueuePage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
