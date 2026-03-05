@@ -50,5 +50,21 @@ describe('timelineReducer', () => {
     expect(reset.currentFrame).toBe(0);
     expect(reset.status).toBe('idle');
   });
-});
 
+  it('turns completed into paused when seeking backward', () => {
+    const initial = {
+      ...createInitialTimelineState(5),
+      currentFrame: 4,
+      status: 'completed' as const,
+    };
+    const seek = timelineReducer(initial, { type: 'seek', frameIndex: 2 });
+    expect(seek.currentFrame).toBe(2);
+    expect(seek.status).toBe('paused');
+  });
+
+  it('clamps speed to minimum value', () => {
+    const initial = createInitialTimelineState(5);
+    const changed = timelineReducer(initial, { type: 'setSpeed', speedMs: 10 });
+    expect(changed.speedMs).toBe(50);
+  });
+});
