@@ -76,3 +76,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep module-specific canvas styles and tune each page separately.
 - Consequences: Better cross-module consistency and easier future layout maintenance; short-term mixed state remains until S-01 migration completes.
 - Owner: haoyu + codex
+
+## DEC-20260305-08
+- Date: 2026-03-05
+- Status: accepted
+- Context: P2 includes both playback-engine refactor and dataset import/export, but executing both simultaneously increases regression risk.
+- Decision: Sequence P2 as timeline-engine-first (`P2-M1`, `P2-M2`) and dataset import/export second (`P2-M3`), with S-01 as initial migration target before cross-module rollout.
+- Alternatives considered: implement import/export first; parallelize engine refactor and import/export in one branch.
+- Consequences: Slightly longer P2 calendar but lower playback regression risk and clearer PR review boundaries.
+- Owner: haoyu + codex

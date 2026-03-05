@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/l03-v1`
-- Current phase: Cross-module visual regression baseline captured (playwright), preparing PR-ready summary and final manual sanity pass
+- Current phase: P1 closure completed; moving into P2 execution planning
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -23,8 +23,8 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Prepare PR-ready summary grouped by interaction model, visualization standardization, and validation/UX.
-- Run one final manual sanity pass on `/modules/bubble-sort`, `/modules/array`, `/modules/linked-list` using latest local build before opening PR.
+- Start P2-M1 timeline engine implementation (S-01 first) based on `docs/IMPLEMENTATION_PLAN_P2.md`.
+- Keep rollout incremental: S-01 migration -> deterministic tests -> L-01/L-03 migration.
 
 ## 4) Guardrails
 

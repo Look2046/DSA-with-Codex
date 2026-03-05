@@ -40,11 +40,17 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: shared `VisualizationCanvas` landed and migrated on S-01/L-01/L-03.
 
 ## P2 (Could Have / Backlog)
-- [ ] Build reusable animation timeline engine
-  - DoD: supports seek, speed control, and deterministic replay.
+- [ ] P2-M1 Build reusable animation timeline engine (S-01 first)
+  - DoD: shared engine contracts + S-01 migration + deterministic replay tests.
+  - Acceptance: seek/speed/resume produce stable frame sequence on fixed input.
 
-- [ ] Add import/export for example datasets
-  - DoD: JSON import and export works for at least one module.
+- [ ] P2-M2 Migrate L-01/L-03 playback to shared engine
+  - DoD: all three modules use one timeline engine path without UX regression.
+  - Acceptance: `npm run check` passes and cross-module playback behavior remains consistent.
+
+- [ ] P2-M3 Add JSON import/export for example datasets (L-01 first)
+  - DoD: schema-validated JSON import/export with clear invalid-input feedback.
+  - Acceptance: round-trip (`export -> import -> replay`) is deterministic.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
