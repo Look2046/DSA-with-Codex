@@ -259,7 +259,7 @@ export function LinkedListPage() {
   const [valueInput, setValueInput] = useState(String(DEFAULT_OPERATION.value));
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
   const [speedMs, setSpeedMs] = useState(700);
-  const [hasHeadNode, setHasHeadNode] = useState(false);
+  const [hasHeadNode, setHasHeadNode] = useState(true);
   const [displayConfig, setDisplayConfig] = useState<LinkedListConfig>(DEFAULT_CONFIG);
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
