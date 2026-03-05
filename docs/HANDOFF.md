@@ -40,6 +40,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 - Completed S-01 migration to shared large-canvas container, finishing cross-module stage structure unification.
 - Updated translations/styles for stage subtitles and capacity-related feedback.
 - Re-ran local quality gate with passing result (`npm run check`).
+- Completed playwright automated cross-module regression baseline on local dev server:
+  - routes covered: `/modules/bubble-sort`, `/modules/array`, `/modules/linked-list`
+  - artifacts captured: `output/playwright/bubble-sort-full.png`, `output/playwright/array-full.png`, `output/playwright/linked-list-full.png`
+  - observed horizontal overflow: expected in array cells container (`.array-cells`), no additional unexpected page-level overflow detected
+- Re-ran full local quality gate with passing result (`npm run check`).
 
 ### Current State
 - Branch: `feat/l03-v1`
@@ -47,11 +52,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 - Last verified command: `npm run check` (pass)
 
 ### Remaining Focus (Next Session)
-- Run manual cross-module visual regression for canvas size/scroll continuity after full S-01/L-01/L-03 migration.
 - Prepare PR-ready summary grouped by:
   - interaction model changes
   - visualization/canvas standardization
   - validation and UX improvements
+- Do one final manual sanity pass against the latest local build before PR.
 
 ### First Step Next Session
 ```bash
