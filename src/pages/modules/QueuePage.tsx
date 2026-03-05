@@ -163,8 +163,8 @@ export function QueuePage() {
   ] as const;
 
   const currentLength = currentSnapshot?.size ?? 0;
-  const frontIndex = currentSnapshot?.frontIndex ?? -1;
-  const rearIndex = currentSnapshot?.rearIndex ?? -1;
+  const frontIndex = currentSnapshot?.frontIndex ?? 0;
+  const rearIndex = currentSnapshot?.rearIndex ?? 0;
   const isWrapped = currentLength > 0 && frontIndex > rearIndex;
   const modeTabs: Array<{ key: QueueMode; labelKey: Parameters<typeof t>[0] }> = [
     { key: 'normal', labelKey: 'module.l05.tab.normal' },
@@ -346,8 +346,8 @@ export function QueuePage() {
                   const y = centerY + Math.sin(angle) * radius;
                   const value = currentSnapshot?.bufferState[index] ?? null;
                   const highlight = highlightMap.get(index) ?? 'default';
-                  const isFront = currentLength > 0 && index === frontIndex;
-                  const isTail = currentLength > 0 && index === rearIndex;
+                  const isFront = index === frontIndex;
+                  const isTail = index === rearIndex;
                   const isUnused = value === null;
 
                   return (
@@ -370,8 +370,8 @@ export function QueuePage() {
                 {Array.from({ length: QUEUE_CAPACITY }, (_, index) => {
                   const value = currentSnapshot?.bufferState[index] ?? null;
                   const highlight = highlightMap.get(index) ?? 'default';
-                  const isFront = currentLength > 0 && index === frontIndex;
-                  const isTail = currentLength > 0 && index === rearIndex;
+                  const isFront = index === frontIndex;
+                  const isTail = index === rearIndex;
                   const isUnused = value === null;
 
                   return (

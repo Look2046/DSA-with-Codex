@@ -54,8 +54,8 @@ function createRuntime(input: number[]): QueueRuntime {
   return {
     queueState: [...input],
     bufferState,
-    frontIndex: input.length > 0 ? 0 : -1,
-    rearIndex: input.length > 0 ? input.length - 1 : -1,
+    frontIndex: input.length > 0 ? 0 : 0,
+    rearIndex: input.length > 0 ? input.length - 1 : 0,
     size: input.length,
   };
 }
@@ -77,7 +77,7 @@ function createRuntimeFromSnapshot(snapshot: QueueRuntimeSnapshot): QueueRuntime
 }
 
 function occupiedIndices(runtime: QueueRuntime): number[] {
-  if (runtime.size === 0 || runtime.frontIndex < 0 || runtime.rearIndex < 0) {
+  if (runtime.size === 0) {
     return [];
   }
 
@@ -89,9 +89,6 @@ function occupiedIndices(runtime: QueueRuntime): number[] {
 }
 
 function frontRearIndices(runtime: QueueRuntime): number[] {
-  if (runtime.size === 0 || runtime.frontIndex < 0 || runtime.rearIndex < 0) {
-    return [];
-  }
   if (runtime.frontIndex === runtime.rearIndex) {
     return [runtime.frontIndex];
   }
@@ -142,7 +139,7 @@ export function generateQueueSteps(
       throw new RangeError(mode === 'circular' ? 'Enqueue operation on full circular queue' : 'Enqueue operation on full queue');
     }
 
-    const nextRear = runtime.size === 0 ? 0 : (runtime.rearIndex + 1) % QUEUE_CAPACITY;
+    const nextRear = runtime.size === 0 ? runtime.rearIndex : (runtime.rearIndex + 1) % QUEUE_CAPACITY;
     runtime.bufferState[nextRear] = operation.value;
     runtime.rearIndex = nextRear;
     if (runtime.size === 0) {
@@ -158,7 +155,7 @@ export function generateQueueSteps(
       }),
     );
   } else if (operation.type === 'dequeue') {
-    if (runtime.size === 0 || runtime.frontIndex < 0) {
+    if (runtime.size === 0) {
       steps.push(snapshot(runtime, 'completed', [6], []));
       return steps;
     }
@@ -170,8 +167,8 @@ export function generateQueueSteps(
     runtime.size -= 1;
 
     if (runtime.size === 0) {
-      runtime.frontIndex = -1;
-      runtime.rearIndex = -1;
+      runtime.frontIndex = (removedIndex + 1) % QUEUE_CAPACITY;
+      runtime.rearIndex = runtime.frontIndex;
     } else {
       runtime.frontIndex = (removedIndex + 1) % QUEUE_CAPACITY;
     }
@@ -184,7 +181,7 @@ export function generateQueueSteps(
       }),
     );
   } else {
-    if (runtime.size === 0 || runtime.frontIndex < 0) {
+    if (runtime.size === 0) {
       steps.push(snapshot(runtime, 'completed', [6], []));
       return steps;
     }

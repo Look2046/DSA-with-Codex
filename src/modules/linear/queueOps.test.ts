@@ -63,7 +63,19 @@ describe('generateQueueSteps', () => {
 
     expect(dequeueSteps[dequeueSteps.length - 1]?.queueState).toEqual([]);
     expect(dequeueSteps[dequeueSteps.length - 1]?.action).toBe('completed');
+    expect(dequeueSteps[dequeueSteps.length - 1]?.frontIndex).toBe(0);
+    expect(dequeueSteps[dequeueSteps.length - 1]?.rearIndex).toBe(0);
     expect(frontSteps[frontSteps.length - 1]?.queueState).toEqual([]);
     expect(frontSteps[frontSteps.length - 1]?.action).toBe('completed');
+    expect(frontSteps[frontSteps.length - 1]?.frontIndex).toBe(0);
+    expect(frontSteps[frontSteps.length - 1]?.rearIndex).toBe(0);
+  });
+
+  it('keeps front/rear on same empty slot after dequeue-to-empty', () => {
+    const steps = generateQueueSteps([3], { type: 'dequeue' });
+    const last = steps[steps.length - 1];
+    expect(last.queueState).toEqual([]);
+    expect(last.frontIndex).toBe(1);
+    expect(last.rearIndex).toBe(1);
   });
 });
