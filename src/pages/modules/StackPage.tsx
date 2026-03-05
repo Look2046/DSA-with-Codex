@@ -55,11 +55,54 @@ export function StackPage() {
   );
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const completedStackText = useMemo(() => {
+    const last = steps[steps.length - 1];
+    return (last?.stackState ?? []).join(', ');
+  }, [steps]);
 
   useEffect(() => {
     setTotalFrames(steps.length);
     reset();
   }, [setTotalFrames, reset, steps.length]);
+
+  const syncInputToCompletedStack = useCallback(() => {
+    if (!hasValidConfig || steps.length === 0) {
+      return;
+    }
+    if (operationType === 'peek') {
+      return;
+    }
+    if (stackInput === completedStackText) {
+      return;
+    }
+
+    reset();
+    setStackInput(completedStackText);
+    recomputeInputState(completedStackText, operationType, valueInput);
+  }, [completedStackText, hasValidConfig, operationType, recomputeInputState, reset, stackInput, steps.length, valueInput]);
+
+  useEffect(() => {
+    if (!hasValidConfig || steps.length === 0) {
+      return;
+    }
+
+    if (operationType === 'peek') {
+      return;
+    }
+
+    if (currentSnapshot?.action !== 'push' && currentSnapshot?.action !== 'pop' && currentSnapshot?.action !== 'completed') {
+      return;
+    }
+
+    if (stackInput === completedStackText) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      syncInputToCompletedStack();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [completedStackText, currentSnapshot?.action, hasValidConfig, operationType, stackInput, steps.length, syncInputToCompletedStack]);
 
   const handleExportJson = useCallback(() => {
     setJsonInput(serializeStackConfigAsJson(stackConfig));
@@ -88,6 +131,14 @@ export function StackPage() {
     setJsonFeedback(t('module.l04.json.imported'));
   }, [jsonInput, recomputeInputState, reset, t]);
 
+  const handleNextStep = useCallback(() => {
+    const willComplete = currentStep >= steps.length - 2;
+    next();
+    if (willComplete) {
+      syncInputToCompletedStack();
+    }
+  }, [currentStep, next, steps.length, syncInputToCompletedStack]);
+
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
     (currentSnapshot?.highlights ?? []).forEach((item) => map.set(item.index, item.type));
@@ -113,6 +164,7 @@ export function StackPage() {
             value={stackInput}
             onChange={(event) => {
               const next = event.target.value;
+              reset();
               setStackInput(next);
               recomputeInputState(next, operationType, valueInput);
             }}
@@ -126,6 +178,7 @@ export function StackPage() {
             value={operationType}
             onChange={(event) => {
               const next = event.target.value as StackConfig['operation']['type'];
+              reset();
               setOperationType(next);
               const normalized = next === 'push' ? valueInput : '';
               if (next !== 'push') {
@@ -148,6 +201,7 @@ export function StackPage() {
               value={valueInput}
               onChange={(event) => {
                 const next = event.target.value;
+                reset();
                 setValueInput(next);
                 recomputeInputState(stackInput, operationType, next);
               }}
@@ -251,7 +305,7 @@ export function StackPage() {
         <button type="button" onClick={prev} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.prev')}
         </button>
-        <button type="button" onClick={next} disabled={!hasValidConfig || steps.length === 0}>
+        <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.next')}
         </button>
         <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
