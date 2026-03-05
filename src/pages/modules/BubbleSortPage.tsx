@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
-import { generateBubbleSortSteps } from '../../modules/sorting/bubbleSort';
 import type { BubbleSortStep } from '../../modules/sorting/bubbleSort';
+import { buildBubbleSortTimelineFromInput } from '../../modules/sorting/bubbleTimelineAdapter';
 import { usePlaybackStore } from '../../store/playbackStore';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
@@ -78,7 +78,8 @@ export function BubbleSortPage() {
   const { status, currentStep, totalSteps, setTotalSteps, setStatus, play, pause, nextStep, prevStep, reset } =
     usePlaybackStore();
 
-  const steps = useMemo(() => generateBubbleSortSteps(inputData), [inputData]);
+  const timelineFrames = useMemo(() => buildBubbleSortTimelineFromInput(inputData), [inputData]);
+  const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
 
   const maxValue = useMemo(() => {
