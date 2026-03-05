@@ -11,6 +11,11 @@ export type InsertConfig = {
 
 type Translator = (key: TranslationKey) => string;
 
+type JsonParseResult<T> = {
+  config: T | null;
+  error: string;
+};
+
 export function parseNumberArray(raw: string): number[] | null {
   const parts = raw
     .split(',')
@@ -61,6 +66,32 @@ export function resolveInsertConfig(
     },
     error: '',
   };
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function serializeInsertConfigAsJson(config: InsertConfig): string {
+  return JSON.stringify(config, null, 2);
+}
+
+export function resolveInsertConfigFromJson(rawJson: string, t: Translator): JsonParseResult<InsertConfig> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawJson);
+  } catch {
+    return { config: null, error: t('module.l01.json.error.parse') };
+  }
+
+  if (!isObjectRecord(parsed) || !Array.isArray(parsed.array) || typeof parsed.index !== 'number' || typeof parsed.value !== 'number') {
+    return { config: null, error: t('module.l01.json.error.schema') };
+  }
+
+  const arrayInput = parsed.array.join(', ');
+  const indexInput = String(parsed.index);
+  const valueInput = String(parsed.value);
+  return resolveInsertConfig(arrayInput, indexInput, valueInput, t);
 }
 
 export function getStatusLabel(status: PlaybackStatus, t: Translator): string {

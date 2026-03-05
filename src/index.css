@@ -437,12 +437,17 @@ body {
   color: var(--muted);
 }
 
-.array-form input {
+.array-form input,
+.array-form textarea {
   border: 1px solid #bdd4ea;
   border-radius: 8px;
   padding: 8px 10px;
   background: #fff;
   color: var(--text);
+}
+
+.array-form textarea {
+  resize: vertical;
 }
 
 .array-form select {

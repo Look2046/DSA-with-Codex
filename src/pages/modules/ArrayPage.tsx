@@ -4,7 +4,15 @@ import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { ARRAY_CAPACITY, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
-import { getHighlightLabel, getStatusLabel, getStepDescription, resolveInsertConfig, type InsertConfig } from './arrayPageUtils';
+import {
+  getHighlightLabel,
+  getStatusLabel,
+  getStepDescription,
+  resolveInsertConfig,
+  resolveInsertConfigFromJson,
+  serializeInsertConfigAsJson,
+  type InsertConfig,
+} from './arrayPageUtils';
 import type { HighlightType } from '../../types/animation';
 
 const DEFAULT_CONFIG: InsertConfig = {
@@ -23,6 +31,9 @@ export function ArrayPage() {
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
   const [insertConfig, setInsertConfig] = useState<InsertConfig>(DEFAULT_CONFIG);
+  const [jsonInput, setJsonInput] = useState('');
+  const [jsonFeedback, setJsonFeedback] = useState('');
+  const [hasJsonError, setHasJsonError] = useState(false);
 
   const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
   const currentStep = currentFrame;
@@ -120,6 +131,33 @@ export function ArrayPage() {
     }
   }, [currentStep, next, steps.length, syncInputToCompletedArray]);
 
+  const handleExportJson = useCallback(() => {
+    setJsonInput(serializeInsertConfigAsJson(insertConfig));
+    setHasJsonError(false);
+    setJsonFeedback(t('module.l01.json.exported'));
+  }, [insertConfig, t]);
+
+  const handleImportJson = useCallback(() => {
+    const resolved = resolveInsertConfigFromJson(jsonInput, t);
+    if (!resolved.config) {
+      setHasJsonError(true);
+      setJsonFeedback(resolved.error);
+      return;
+    }
+
+    const nextArrayInput = resolved.config.array.join(', ');
+    const nextIndexInput = String(resolved.config.index);
+    const nextValueInput = String(resolved.config.value);
+
+    reset();
+    setArrayInput(nextArrayInput);
+    setIndexInput(nextIndexInput);
+    setValueInput(nextValueInput);
+    recomputeInputState(nextArrayInput, nextIndexInput, nextValueInput);
+    setHasJsonError(false);
+    setJsonFeedback(t('module.l01.json.imported'));
+  }, [jsonInput, recomputeInputState, reset, t]);
+
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
     (currentSnapshot?.highlights ?? []).forEach((item) => map.set(item.index, item.type));
@@ -180,6 +218,28 @@ export function ArrayPage() {
       </div>
 
       {error ? <p className="form-error">{error}</p> : null}
+
+      <div className="array-form">
+        <label htmlFor="array-json-input">
+          <span>{t('module.l01.json.label')}</span>
+          <textarea
+            id="array-json-input"
+            value={jsonInput}
+            onChange={(event) => setJsonInput(event.target.value)}
+            rows={6}
+            placeholder={t('module.l01.json.placeholder')}
+          />
+        </label>
+      </div>
+      <div className="playback-actions">
+        <button type="button" onClick={handleExportJson}>
+          {t('module.l01.json.export')}
+        </button>
+        <button type="button" onClick={handleImportJson}>
+          {t('module.l01.json.import')}
+        </button>
+      </div>
+      {jsonFeedback ? <p className={hasJsonError ? 'form-error' : 'array-preview'}>{jsonFeedback}</p> : null}
 
       <div className="bubble-toolbar">
         <span>{t('module.s01.speed')}</span>
