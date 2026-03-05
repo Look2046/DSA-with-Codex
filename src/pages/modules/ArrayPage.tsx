@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { advancePlaybackTick } from '../../engine/timeline/tick';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
@@ -100,13 +101,16 @@ export function ArrayPage() {
 
     const timer = window.setInterval(() => {
       const state = usePlaybackStore.getState();
-      if (state.currentStep >= state.totalSteps - 1) {
-        state.setStatus('completed');
+      const result = advancePlaybackTick({
+        currentStep: state.currentStep,
+        totalSteps: state.totalSteps,
+        setStatus: state.setStatus,
+        nextStep: state.nextStep,
+      });
+      if (result === 'completed') {
         syncInputToCompletedArray();
         window.clearInterval(timer);
-        return;
       }
-      state.nextStep();
     }, speedMs);
 
     return () => window.clearInterval(timer);
