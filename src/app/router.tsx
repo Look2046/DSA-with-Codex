@@ -8,6 +8,7 @@ import { SortingOverviewPage } from '../pages/SortingOverviewPage';
 import { ArrayPage } from '../pages/modules/ArrayPage';
 import { BubbleSortPage } from '../pages/modules/BubbleSortPage';
 import { LinkedListPage } from '../pages/modules/LinkedListPage';
+import { SelectionSortPage } from '../pages/modules/SelectionSortPage';
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       { path: 'modules', element: <ModulesPage /> },
       { path: 'modules/sorting', element: <SortingOverviewPage /> },
       { path: 'modules/bubble-sort', element: <BubbleSortPage /> },
+      { path: 'modules/selection-sort', element: <SelectionSortPage /> },
       { path: 'modules/array', element: <ArrayPage /> },
       { path: 'modules/linked-list', element: <LinkedListPage /> },
       { path: 'about', element: <AboutPage /> },

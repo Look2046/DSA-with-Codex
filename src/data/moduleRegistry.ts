@@ -15,7 +15,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/selection-sort',
     category: 'sort',
     difficulty: 1,
-    implemented: false,
+    implemented: true,
   },
   {
     id: 'L-01',

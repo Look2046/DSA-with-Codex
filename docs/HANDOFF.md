@@ -2,6 +2,35 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P3-M2 S-02 selection sort closure)
+
+### Today Done
+- Implemented new sorting module `S-02 Selection Sort`:
+  - step generator (`selectionSort.ts`)
+  - timeline adapter (`selectionTimelineAdapter.ts`)
+  - module page (`SelectionSortPage.tsx`)
+  - route registration (`/modules/selection-sort`)
+- Added test coverage:
+  - deterministic step-generation tests
+  - deterministic timeline replay test (`seek/speed/resume`)
+- Added zh/en localized copy for S-02 step descriptions and pseudocode.
+- Marked `S-02` as implemented in module registry so `/modules` discovery can open it directly.
+- Passed full local quality gate (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P3-M2 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Start P3-M3: `L-04 Stack` module (`push`/`pop`/`peek`) with timeline playback and JSON import/export parity.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P3-M1 modules discovery closure)
 
 ### Today Done

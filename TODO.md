@@ -62,8 +62,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: added category-filtered module cards, implemented/pending status badges, disabled action for unimplemented modules, and route-safe navigation.
 
 - [ ] P3-M2 Add S-02 selection sort module
+- [x] P3-M2 Add S-02 selection sort module
   - DoD: step generator + playback page + deterministic tests + zh/en copy.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
+  - Done: added S-02 page/route/registry entry, selection step generator, deterministic replay tests, and zh/en i18n copy.
 
 - [ ] P3-M3 Add L-04 stack module (push/pop/peek)
   - DoD: timeline visualization + validation + JSON import/export + tests.

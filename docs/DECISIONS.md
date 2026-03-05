@@ -139,3 +139,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep placeholder page until S-02 is ready; link all planned routes even when unimplemented.
 - Consequences: users can discover current and upcoming modules safely, with no dead-route confusion; establishes a stable foundation before adding new modules.
 - Owner: haoyu + codex
+
+## DEC-20260305-15
+- Date: 2026-03-05
+- Status: accepted
+- Context: P3-M2 needs to deliver one new module on top of the unified timeline engine to validate extensibility after P2 refactor.
+- Decision: Implement `S-02 Selection Sort` first, reusing S-01 interaction conventions and adding dedicated deterministic step/replay tests.
+- Alternatives considered: implement stack first; add multiple modules in one patch.
+- Consequences: verifies the new-module expansion path with controlled scope and keeps P3 sequencing predictable before entering L-04 stack work.
+- Owner: haoyu + codex
