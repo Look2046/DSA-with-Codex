@@ -121,8 +121,18 @@ export function QueuePage() {
   }, [jsonInput, recomputeInputState, reset, runtimeMode, t]);
 
   const handleNextStep = useCallback(() => {
+    if (status === 'completed' && operationType !== 'front') {
+      const nextQueueInput = completedQueueText;
+      setQueueInput(nextQueueInput);
+      recomputeInputState(nextQueueInput, operationType, valueInput);
+      reset();
+      window.setTimeout(() => {
+        next();
+      }, 0);
+      return;
+    }
     next();
-  }, [next]);
+  }, [completedQueueText, next, operationType, recomputeInputState, reset, status, valueInput]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
