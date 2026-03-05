@@ -61,10 +61,34 @@ export function QueuePage() {
   );
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const completedQueueText = useMemo(() => {
+    const last = steps[steps.length - 1];
+    return (last?.queueState ?? []).join(', ');
+  }, [steps]);
   useEffect(() => {
     setTotalFrames(steps.length);
     reset();
   }, [setTotalFrames, reset, steps.length]);
+
+  useEffect(() => {
+    if (status !== 'completed' || !hasValidConfig || steps.length === 0) {
+      return;
+    }
+    if (operationType === 'front') {
+      return;
+    }
+    if (queueInput === completedQueueText) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      const nextBaseQueue = completedQueueText;
+      setQueueInput(nextBaseQueue);
+      recomputeInputState(nextBaseQueue, operationType, valueInput);
+      reset();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [completedQueueText, hasValidConfig, operationType, queueInput, recomputeInputState, reset, status, steps.length, valueInput]);
 
   useEffect(() => {
     if (mode === 'circular' || mode === 'deque') {
@@ -155,9 +179,11 @@ export function QueuePage() {
             className={`modules-filter-btn${mode === tab.key ? ' modules-filter-btn-active' : ''}`}
             onClick={() => {
               const nextRuntimeMode: QueueRuntimeMode = tab.key === 'circular' ? 'circular' : 'normal';
-              const resolved = resolveQueueConfig(queueInput, operationType, valueInput, nextRuntimeMode, t);
+              const nextQueueInput = status === 'completed' && operationType !== 'front' ? completedQueueText : queueInput;
+              const resolved = resolveQueueConfig(nextQueueInput, operationType, valueInput, nextRuntimeMode, t);
               reset();
               setMode(tab.key);
+              setQueueInput(nextQueueInput);
               setError(resolved.error);
               setHasValidConfig(resolved.config !== null);
               if (resolved.config) {
@@ -196,13 +222,15 @@ export function QueuePage() {
                 value={operationType}
                 onChange={(event) => {
                   const nextValue = event.target.value as QueueConfig['operation']['type'];
+                  const nextQueueInput = status === 'completed' && operationType !== 'front' ? completedQueueText : queueInput;
                   reset();
                   setOperationType(nextValue);
+                  setQueueInput(nextQueueInput);
                   const normalized = nextValue === 'enqueue' ? valueInput : '';
                   if (nextValue !== 'enqueue') {
                     setValueInput('');
                   }
-                  recomputeInputState(queueInput, nextValue, normalized);
+                  recomputeInputState(nextQueueInput, nextValue, normalized);
                 }}
               >
                 <option value="enqueue">{t('module.l05.operation.enqueue')}</option>
