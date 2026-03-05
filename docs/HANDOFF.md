@@ -2,6 +2,34 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P2-M3 L-03 JSON parity closure)
+
+### Today Done
+- Added L-03 JSON dataset import/export workflow in Linked List page:
+  - export current config (`list` + `operation`) to JSON editor
+  - import JSON back into controls with playback/layout reset
+- Added JSON validation for L-03:
+  - parse error handling
+  - schema shape validation for operation variants (`find` / `insertAt` / `deleteAt`)
+  - reuse of existing linked-list input/index/value validation rules
+- Added deterministic round-trip regression test for L-03 (`export -> import -> replay`).
+- Passed full local quality gate (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: docs sync in progress (P2-M3 full closure update)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Enter next milestone planning (P3) and prioritize new scope.
+- Optional tech-debt cleanup: reduce `playbackStore` responsibilities to module metadata only.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P2-M3 L-01 JSON import/export closure)
 
 ### Today Done

@@ -53,7 +53,7 @@ Track actionable tasks here. Keep tasks small and testable.
 - [x] P2-M3 Add JSON import/export for example datasets (L-01 first)
   - DoD: schema-validated JSON import/export with clear invalid-input feedback.
   - Acceptance: round-trip (`export -> import -> replay`) is deterministic.
-  - Done: added L-01 JSON import/export UI, schema validation (`parse` + `schema`), and round-trip deterministic replay tests.
+  - Done: added L-01/L-03 JSON import/export UI, schema validation (`parse` + `schema`), and round-trip deterministic replay tests.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

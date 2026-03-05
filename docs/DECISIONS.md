@@ -112,3 +112,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: only CSV-style text import; JSON import without schema checks; defer tests until L-03 parity.
 - Consequences: L-01 now supports deterministic dataset round-trip and clearer invalid-input feedback with minimal architectural churn; L-03 parity can be added incrementally.
 - Owner: haoyu + codex
+
+## DEC-20260305-12
+- Date: 2026-03-05
+- Status: accepted
+- Context: After L-01 JSON import/export closure, linked-list module would remain behaviorally inconsistent without equivalent dataset portability.
+- Decision: Extend P2-M3 to L-03 with matching JSON import/export UX, per-operation schema validation (`find`/`insertAt`/`deleteAt`), and deterministic round-trip test coverage.
+- Alternatives considered: keep L-03 text-input-only; postpone L-03 parity to a later milestone.
+- Consequences: JSON dataset portability is now consistent across L-01/L-03; P2 is fully closed and next work can focus on new scope plus optional store cleanup.
+- Owner: haoyu + codex

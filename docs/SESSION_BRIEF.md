@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P2-M3 (L-01 first) completed; entering next-scope planning
+- Current phase: P2-M3 completed (L-01 + L-03 JSON import/export)
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -25,11 +25,12 @@ Use this file as the first thing to read in a new chat/session.
 - Deterministic S-01 replay test for seek/speed/resume stability
 - Playwright cross-module regression artifacts refreshed for timeline migration
 - L-01 JSON import/export landed with schema validation and deterministic round-trip tests
+- L-03 JSON import/export landed with schema validation and deterministic round-trip tests
 
 ## 3) Next Priority
 
-- Optional extension: add JSON import/export parity for L-03.
-- Cleanup/standardization follow-up: evaluate whether legacy `playbackStore` can be slimmed to module metadata only.
+- Next milestone planning (P3): prioritize new modules/features now that P2 refactor + dataset portability are closed.
+- Cleanup/standardization follow-up: slim legacy `playbackStore` to module metadata only.
 
 ## 4) Guardrails
 
