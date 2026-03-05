@@ -71,26 +71,6 @@ export function QueuePage() {
   }, [setTotalFrames, reset, steps.length]);
 
   useEffect(() => {
-    if (status !== 'completed' || !hasValidConfig || steps.length === 0) {
-      return;
-    }
-    if (operationType === 'front') {
-      return;
-    }
-    if (queueInput === completedQueueText) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      const nextBaseQueue = completedQueueText;
-      setQueueInput(nextBaseQueue);
-      recomputeInputState(nextBaseQueue, operationType, valueInput);
-      reset();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [completedQueueText, hasValidConfig, operationType, queueInput, recomputeInputState, reset, status, steps.length, valueInput]);
-
-  useEffect(() => {
     if (mode === 'circular' || mode === 'deque') {
       return;
     }
