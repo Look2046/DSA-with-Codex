@@ -1,5 +1,5 @@
 import type { TranslationKey } from '../../i18n/translations';
-import { QUEUE_CAPACITY, type QueueOperation, type QueueStep } from '../../modules/linear/queueOps';
+import { QUEUE_CAPACITY, QUEUE_CIRCULAR_MAX_SIZE, type QueueMode, type QueueOperation, type QueueStep } from '../../modules/linear/queueOps';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 export type QueueConfig = {
@@ -36,19 +36,21 @@ export function resolveQueueConfig(
   queueInput: string,
   operationType: QueueOperation['type'],
   valueInput: string,
+  mode: QueueMode,
   t: Translator,
 ): { config: QueueConfig | null; error: string } {
   const parsedQueue = parseNumberArrayAllowEmpty(queueInput);
   if (!parsedQueue) {
     return { config: null, error: t('module.l05.error.queue') };
   }
-  if (parsedQueue.length > QUEUE_CAPACITY) {
+  const maxSize = mode === 'circular' ? QUEUE_CIRCULAR_MAX_SIZE : QUEUE_CAPACITY;
+  if (parsedQueue.length > maxSize) {
     return { config: null, error: t('module.l05.error.capacity') };
   }
 
   if (operationType === 'enqueue') {
-    if (parsedQueue.length >= QUEUE_CAPACITY) {
-      return { config: null, error: t('module.l05.error.enqueueFull') };
+    if (parsedQueue.length >= maxSize) {
+      return { config: null, error: mode === 'circular' ? t('module.l05.error.circularFull') : t('module.l05.error.enqueueFull') };
     }
     const value = Number(valueInput);
     if (Number.isNaN(value)) {
@@ -80,7 +82,7 @@ export function serializeQueueConfigAsJson(config: QueueConfig): string {
   return JSON.stringify(config, null, 2);
 }
 
-export function resolveQueueConfigFromJson(rawJson: string, t: Translator): JsonParseResult<QueueConfig> {
+export function resolveQueueConfigFromJson(rawJson: string, mode: QueueMode, t: Translator): JsonParseResult<QueueConfig> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawJson);
@@ -97,13 +99,13 @@ export function resolveQueueConfigFromJson(rawJson: string, t: Translator): Json
     if (typeof parsed.operation.value !== 'number') {
       return { config: null, error: t('module.l05.json.error.schema') };
     }
-    return resolveQueueConfig(queueInput, 'enqueue', String(parsed.operation.value), t);
+    return resolveQueueConfig(queueInput, 'enqueue', String(parsed.operation.value), mode, t);
   }
   if (parsed.operation.type === 'dequeue') {
-    return resolveQueueConfig(queueInput, 'dequeue', '', t);
+    return resolveQueueConfig(queueInput, 'dequeue', '', mode, t);
   }
   if (parsed.operation.type === 'front') {
-    return resolveQueueConfig(queueInput, 'front', '', t);
+    return resolveQueueConfig(queueInput, 'front', '', mode, t);
   }
   return { config: null, error: t('module.l05.json.error.schema') };
 }

@@ -1,4 +1,4 @@
-import { generateQueueSteps, type QueueOperation, type QueueStep } from './queueOps';
+import { generateQueueSteps, type QueueMode, type QueueOperation, type QueueStep } from './queueOps';
 import type { TimelineFrame } from '../../engine/timeline/types';
 
 export type QueueTimelineFrame = TimelineFrame<QueueStep>;
@@ -11,7 +11,11 @@ export function buildQueueTimelineFrames(steps: QueueStep[]): QueueTimelineFrame
   }));
 }
 
-export function buildQueueTimelineFromInput(inputData: number[], operation: QueueOperation): QueueTimelineFrame[] {
-  const steps = generateQueueSteps(inputData, operation);
+export function buildQueueTimelineFromInput(
+  inputData: number[],
+  operation: QueueOperation,
+  mode: QueueMode = 'normal',
+): QueueTimelineFrame[] {
+  const steps = generateQueueSteps(inputData, operation, mode);
   return buildQueueTimelineFrames(steps);
 }

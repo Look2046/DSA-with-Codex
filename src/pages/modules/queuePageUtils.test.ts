@@ -40,15 +40,15 @@ describe('queuePageUtils', () => {
   });
 
   it('validates queue operation input', () => {
-    expect(resolveQueueConfig('', 'enqueue', '9', t)).toEqual({
+    expect(resolveQueueConfig('', 'enqueue', '9', 'normal', t)).toEqual({
       config: { queue: [], operation: { type: 'enqueue', value: 9 } },
       error: '',
     });
-    expect(resolveQueueConfig('1,2', 'enqueue', 'x', t)).toEqual({
+    expect(resolveQueueConfig('1,2', 'enqueue', 'x', 'normal', t)).toEqual({
       config: null,
       error: 'module.l05.error.value',
     });
-    expect(resolveQueueConfig('', 'dequeue', '', t)).toEqual({
+    expect(resolveQueueConfig('', 'dequeue', '', 'normal', t)).toEqual({
       config: { queue: [], operation: { type: 'dequeue' } },
       error: 'module.l05.error.dequeueEmpty',
     });
@@ -68,18 +68,18 @@ describe('queuePageUtils', () => {
 
   it('serializes and resolves queue JSON config', () => {
     const serialized = serializeQueueConfigAsJson({ queue: [3, 8, 1], operation: { type: 'enqueue', value: 9 } });
-    expect(resolveQueueConfigFromJson(serialized, t)).toEqual({
+    expect(resolveQueueConfigFromJson(serialized, 'normal', t)).toEqual({
       config: { queue: [3, 8, 1], operation: { type: 'enqueue', value: 9 } },
       error: '',
     });
   });
 
   it('rejects invalid queue JSON and schema', () => {
-    expect(resolveQueueConfigFromJson('{oops}', t)).toEqual({
+    expect(resolveQueueConfigFromJson('{oops}', 'normal', t)).toEqual({
       config: null,
       error: 'module.l05.json.error.parse',
     });
-    expect(resolveQueueConfigFromJson('{"queue":[1,2],"operation":{"kind":"enqueue"}}', t)).toEqual({
+    expect(resolveQueueConfigFromJson('{"queue":[1,2],"operation":{"kind":"enqueue"}}', 'normal', t)).toEqual({
       config: null,
       error: 'module.l05.json.error.schema',
     });
@@ -87,7 +87,7 @@ describe('queuePageUtils', () => {
 
   it('keeps replay deterministic after queue export/import round-trip', () => {
     const raw = serializeQueueConfigAsJson({ queue: [3, 8, 1], operation: { type: 'enqueue', value: 9 } });
-    const resolved = resolveQueueConfigFromJson(raw, t);
+    const resolved = resolveQueueConfigFromJson(raw, 'normal', t);
     expect(resolved.config).not.toBeNull();
 
     const direct = generateQueueSteps([3, 8, 1], { type: 'enqueue', value: 9 });
@@ -96,5 +96,12 @@ describe('queuePageUtils', () => {
       resolved.config?.operation ?? { type: 'enqueue', value: 0 },
     );
     expect(replay).toEqual(direct);
+  });
+
+  it('uses one-empty-slot full rule for circular queue', () => {
+    expect(resolveQueueConfig(Array.from({ length: 19 }, (_, index) => index).join(','), 'enqueue', '9', 'circular', t)).toEqual({
+      config: null,
+      error: 'module.l05.error.circularFull',
+    });
   });
 });

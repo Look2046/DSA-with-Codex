@@ -47,6 +47,16 @@ describe('generateQueueSteps', () => {
     ).toThrow();
   });
 
+  it('keeps one slot empty for circular queue full condition', () => {
+    expect(() =>
+      generateQueueSteps(
+        Array.from({ length: QUEUE_CAPACITY - 1 }, (_, index) => index),
+        { type: 'enqueue', value: 99 },
+        'circular',
+      ),
+    ).toThrow();
+  });
+
   it('keeps empty queue state for dequeue/front on empty input', () => {
     const dequeueSteps = generateQueueSteps([], { type: 'dequeue' });
     const frontSteps = generateQueueSteps([], { type: 'front' });

@@ -3,7 +3,7 @@ import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
-import { QUEUE_CAPACITY } from '../../modules/linear/queueOps';
+import { QUEUE_CAPACITY, type QueueMode as QueueRuntimeMode } from '../../modules/linear/queueOps';
 import { buildQueueTimelineFromInput } from '../../modules/linear/queueTimelineAdapter';
 import {
   getHighlightLabel,
@@ -38,33 +38,29 @@ export function QueuePage() {
   const [jsonFeedback, setJsonFeedback] = useState('');
   const [hasJsonError, setHasJsonError] = useState(false);
   const queueCellsRef = useRef<HTMLDivElement | null>(null);
+  const runtimeMode: QueueRuntimeMode = mode === 'circular' ? 'circular' : 'normal';
 
   const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
   const currentStep = currentFrame;
 
   const recomputeInputState = useCallback(
     (nextQueueInput: string, nextOperationType: QueueConfig['operation']['type'], nextValueInput: string) => {
-      const resolved = resolveQueueConfig(nextQueueInput, nextOperationType, nextValueInput, t);
+      const resolved = resolveQueueConfig(nextQueueInput, nextOperationType, nextValueInput, runtimeMode, t);
       setError(resolved.error);
       setHasValidConfig(resolved.config !== null);
       if (resolved.config) {
         setQueueConfig(resolved.config);
       }
     },
-    [t],
+    [runtimeMode, t],
   );
 
   const timelineFrames = useMemo(
-    () => buildQueueTimelineFromInput(queueConfig.queue, queueConfig.operation),
-    [queueConfig],
+    () => buildQueueTimelineFromInput(queueConfig.queue, queueConfig.operation, runtimeMode),
+    [queueConfig, runtimeMode],
   );
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
-  const completedQueueText = useMemo(() => {
-    const last = steps[steps.length - 1];
-    return (last?.queueState ?? []).join(', ');
-  }, [steps]);
-
   useEffect(() => {
     setTotalFrames(steps.length);
     reset();
@@ -93,45 +89,6 @@ export function QueuePage() {
     target.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
   }, [currentStep, currentSnapshot, mode]);
 
-  const syncInputToCompletedQueue = useCallback(() => {
-    if (!hasValidConfig || steps.length === 0) {
-      return;
-    }
-    if (operationType === 'front') {
-      return;
-    }
-    if (queueInput === completedQueueText) {
-      return;
-    }
-
-    reset();
-    setQueueInput(completedQueueText);
-    recomputeInputState(completedQueueText, operationType, valueInput);
-  }, [completedQueueText, hasValidConfig, operationType, queueInput, recomputeInputState, reset, steps.length, valueInput]);
-
-  useEffect(() => {
-    if (!hasValidConfig || steps.length === 0) {
-      return;
-    }
-
-    if (operationType === 'front') {
-      return;
-    }
-
-    if (currentSnapshot?.action !== 'enqueue' && currentSnapshot?.action !== 'dequeue' && currentSnapshot?.action !== 'completed') {
-      return;
-    }
-
-    if (queueInput === completedQueueText) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      syncInputToCompletedQueue();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [completedQueueText, currentSnapshot?.action, hasValidConfig, operationType, queueInput, steps.length, syncInputToCompletedQueue]);
-
   const handleExportJson = useCallback(() => {
     setJsonInput(serializeQueueConfigAsJson(queueConfig));
     setHasJsonError(false);
@@ -139,7 +96,7 @@ export function QueuePage() {
   }, [queueConfig, t]);
 
   const handleImportJson = useCallback(() => {
-    const resolved = resolveQueueConfigFromJson(jsonInput, t);
+    const resolved = resolveQueueConfigFromJson(jsonInput, runtimeMode, t);
     if (!resolved.config) {
       setHasJsonError(true);
       setJsonFeedback(resolved.error);
@@ -157,15 +114,11 @@ export function QueuePage() {
     recomputeInputState(nextQueueInput, nextOperationType, nextValueInput);
     setHasJsonError(false);
     setJsonFeedback(t('module.l05.json.imported'));
-  }, [jsonInput, recomputeInputState, reset, t]);
+  }, [jsonInput, recomputeInputState, reset, runtimeMode, t]);
 
   const handleNextStep = useCallback(() => {
-    const willComplete = currentStep >= steps.length - 2;
     next();
-    if (willComplete) {
-      syncInputToCompletedQueue();
-    }
-  }, [currentStep, next, steps.length, syncInputToCompletedQueue]);
+  }, [next]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -201,8 +154,15 @@ export function QueuePage() {
             type="button"
             className={`modules-filter-btn${mode === tab.key ? ' modules-filter-btn-active' : ''}`}
             onClick={() => {
+              const nextRuntimeMode: QueueRuntimeMode = tab.key === 'circular' ? 'circular' : 'normal';
+              const resolved = resolveQueueConfig(queueInput, operationType, valueInput, nextRuntimeMode, t);
               reset();
               setMode(tab.key);
+              setError(resolved.error);
+              setHasValidConfig(resolved.config !== null);
+              if (resolved.config) {
+                setQueueConfig(resolved.config);
+              }
             }}
           >
             {t(tab.labelKey)}

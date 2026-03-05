@@ -1,6 +1,8 @@
 import type { AnimationStep } from '../../types/animation';
 
 export const QUEUE_CAPACITY = 20;
+export const QUEUE_CIRCULAR_MAX_SIZE = QUEUE_CAPACITY - 1;
+export type QueueMode = 'normal' | 'circular';
 
 export type QueueOperation = { type: 'enqueue'; value: number } | { type: 'dequeue' } | { type: 'front' };
 
@@ -29,6 +31,10 @@ function assertQueueRange(values: number[]): void {
   if (values.length < 0 || values.length > QUEUE_CAPACITY) {
     throw new RangeError(`Queue length must be within [0, ${QUEUE_CAPACITY}]`);
   }
+}
+
+function getQueueMaxSize(mode: QueueMode): number {
+  return mode === 'circular' ? QUEUE_CIRCULAR_MAX_SIZE : QUEUE_CAPACITY;
 }
 
 function createRuntime(input: number[]): QueueRuntime {
@@ -90,17 +96,21 @@ function snapshot(
   };
 }
 
-export function generateQueueSteps(input: number[], operation: QueueOperation): QueueStep[] {
+export function generateQueueSteps(input: number[], operation: QueueOperation, mode: QueueMode = 'normal'): QueueStep[] {
   assertQueueRange(input);
 
   const runtime = createRuntime(input);
   const steps: QueueStep[] = [];
+  const maxSize = getQueueMaxSize(mode);
+  if (runtime.size > maxSize) {
+    throw new RangeError(mode === 'circular' ? 'Circular queue keeps one slot empty' : 'Queue input exceeds capacity');
+  }
 
   steps.push(snapshot(runtime, 'initial', [1], []));
 
   if (operation.type === 'enqueue') {
-    if (runtime.size >= QUEUE_CAPACITY) {
-      throw new RangeError('Enqueue operation on full queue');
+    if (runtime.size >= maxSize) {
+      throw new RangeError(mode === 'circular' ? 'Enqueue operation on full circular queue' : 'Enqueue operation on full queue');
     }
 
     const nextRear = runtime.size === 0 ? 0 : (runtime.rearIndex + 1) % QUEUE_CAPACITY;
