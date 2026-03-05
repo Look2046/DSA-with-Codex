@@ -11,6 +11,7 @@ function createStep(action: ArrayInsertStep['action'], indices: number[] = []): 
     codeLines: [],
     highlights: [],
     arrayState: [],
+    logicalLength: 0,
     action,
     indices,
   };
@@ -25,6 +26,10 @@ describe('arrayPageUtils', () => {
 
   it('validates array/index/value in insert config resolver', () => {
     expect(resolveInsertConfig('', '1', '9', t)).toEqual({ config: null, error: 'module.l01.error.array' });
+    expect(resolveInsertConfig(Array.from({ length: 20 }, () => '1').join(','), '1', '9', t)).toEqual({
+      config: null,
+      error: 'module.l01.error.capacity',
+    });
     expect(resolveInsertConfig('3,8,1', '9', '9', t)).toEqual({ config: null, error: 'module.l01.error.index' });
     expect(resolveInsertConfig('3,8,1', '1', 'x', t)).toEqual({ config: null, error: 'module.l01.error.value' });
     expect(resolveInsertConfig('3,8,1', '1', '9', t)).toEqual({

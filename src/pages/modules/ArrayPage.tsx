@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
-import { generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
+import { ARRAY_CAPACITY, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
 import { getHighlightLabel, getStatusLabel, getStepDescription, resolveInsertConfig, type InsertConfig } from './arrayPageUtils';
 import { usePlaybackStore } from '../../store/playbackStore';
 import type { HighlightType } from '../../types/animation';
 
 const DEFAULT_CONFIG: InsertConfig = {
-  array: [3, 8, 1, 5],
+  array: [3, 8, 1, 5, 6],
   index: 2,
   value: 9,
 };
@@ -45,8 +45,14 @@ export function ArrayPage() {
   const totalLogicalSteps = logicalStepByIndex[logicalStepByIndex.length - 1] ?? 0;
   const completedArrayText = useMemo(() => {
     const last = steps[steps.length - 1];
-    return (last?.arrayState ?? []).join(', ');
+    const used = (last?.arrayState ?? []).slice(0, last?.logicalLength ?? 0).filter((value): value is number => value !== null);
+    return used.join(', ');
   }, [steps]);
+  const usedArrayPreview = useMemo(() => {
+    return (currentSnapshot?.arrayState ?? [])
+      .slice(0, currentSnapshot?.logicalLength ?? 0)
+      .filter((value): value is number => value !== null);
+  }, [currentSnapshot]);
 
   const recomputeInputState = useCallback(
     (nextArrayInput: string, nextIndexInput: string, nextValueInput: string) => {
@@ -154,7 +160,7 @@ export function ArrayPage() {
               setArrayInput(next);
               recomputeInputState(next, indexInput, valueInput);
             }}
-            placeholder="3, 8, 1, 5"
+            placeholder="3, 8, 1, 5, 6"
           />
         </label>
         <label htmlFor="insert-index">
@@ -210,8 +216,9 @@ export function ArrayPage() {
 
       <p>{getStepDescription(currentSnapshot, t)}</p>
       <p className="array-preview">
-        {t('module.l01.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+        {t('module.l01.currentArray')}: [{usedArrayPreview.join(', ')}]
       </p>
+      <p className="array-preview">Length/Capacity: {currentSnapshot?.logicalLength ?? 0}/{ARRAY_CAPACITY}</p>
       <p>
         {t('module.s01.highlight')}:{' '}
         {(currentSnapshot?.highlights ?? [])
@@ -223,7 +230,8 @@ export function ArrayPage() {
         {(currentSnapshot?.arrayState ?? []).map((value, index) => {
           const highlight = highlightMap.get(index) ?? 'default';
           const isEmpty = value === null;
-          const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}`;
+          const isUnused = index >= (currentSnapshot?.logicalLength ?? 0);
+          const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}${isUnused ? ' array-cell-unused' : ''}`;
 
           return (
             <div key={`${index}-${String(value)}`} className={cellClassName}>

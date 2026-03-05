@@ -1,4 +1,5 @@
 import type { TranslationKey } from '../../i18n/translations';
+import { ARRAY_CAPACITY } from '../../modules/linear/arrayInsert';
 import type { ArrayInsertStep } from '../../modules/linear/arrayInsert';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
@@ -37,6 +38,9 @@ export function resolveInsertConfig(
   const parsedArray = parseNumberArray(arrayInput);
   if (!parsedArray) {
     return { config: null, error: t('module.l01.error.array') };
+  }
+  if (parsedArray.length >= ARRAY_CAPACITY) {
+    return { config: null, error: t('module.l01.error.capacity') };
   }
 
   const parsedIndex = Number(indexInput);

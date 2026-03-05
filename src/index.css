@@ -451,6 +451,11 @@ body {
   color: #7b8fa6;
 }
 
+.array-cell-unused {
+  opacity: 0.62;
+  background: #f7fafc;
+}
+
 .array-cell-index {
   font-size: 0.72rem;
   color: #5b728d;
