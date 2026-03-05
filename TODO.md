@@ -79,3 +79,4 @@ Track actionable tasks here. Keep tasks small and testable.
 - [x] Close S-01 milestone (M0 + M1 + M2 + M3) on `feat/m0-scaffold` (2026-03-03)
 - [x] Close L-01 milestone (array insert v1 + playback + tests) on `feat/l01-v1` (2026-03-03)
 - [x] Capture cross-module playwright visual regression baseline artifacts for S-01/L-01/L-03 (2026-03-05)
+- [x] Simplify `playbackStore` to module metadata only and keep timeline state in engine hook (2026-03-05)

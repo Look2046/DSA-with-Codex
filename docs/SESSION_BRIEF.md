@@ -34,7 +34,7 @@ Use this file as the first thing to read in a new chat/session.
 ## 3) Next Priority
 
 - Next milestone planning: define P4 scope from remaining backlog.
-- Optional cleanup follow-up: simplify legacy `playbackStore` responsibilities.
+- Optional cleanup follow-up: completed (`playbackStore` now stores module metadata only).
 
 ## 4) Guardrails
 

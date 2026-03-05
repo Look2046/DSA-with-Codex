@@ -2,6 +2,29 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (optional playbackStore cleanup closure)
+
+### Today Done
+- Simplified `src/store/playbackStore.ts` to module metadata role only:
+  - kept `currentModule`
+  - kept `setCurrentModule`
+  - removed legacy playback/timeline fields from the store
+- Re-verified full local quality gate (`npm run check`) after refactor.
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (optional cleanup closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Define and start P4 scope from backlog (next module batch or UX polish tranche).
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P3-M3 L-04 stack closure)
 
 ### Today Done

@@ -157,3 +157,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: defer JSON support to later; implement stack with operation-only demo and no test parity.
 - Consequences: P3 closes with both new-module delivery and consistency against P2 standards; future modules can reuse stack page/tooling patterns.
 - Owner: haoyu + codex
+
+## DEC-20260305-17
+- Date: 2026-03-05
+- Status: accepted
+- Context: After timeline-engine migration, `playbackStore` still carried legacy playback responsibility and no longer matched runtime usage.
+- Decision: Reduce `playbackStore` to module metadata only (`currentModule`, `setCurrentModule`) and keep timeline state exclusively in `useTimelinePlayer`.
+- Alternatives considered: keep mixed store/engine responsibilities; reintroduce global playback store wiring.
+- Consequences: lower state duplication and fewer cross-module coupling points; future module work can focus on timeline adapters and page-level controls only.
+- Owner: haoyu + codex
