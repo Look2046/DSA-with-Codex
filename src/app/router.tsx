@@ -9,6 +9,7 @@ import { ArrayPage } from '../pages/modules/ArrayPage';
 import { BubbleSortPage } from '../pages/modules/BubbleSortPage';
 import { LinkedListPage } from '../pages/modules/LinkedListPage';
 import { SelectionSortPage } from '../pages/modules/SelectionSortPage';
+import { StackPage } from '../pages/modules/StackPage';
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: 'modules/selection-sort', element: <SelectionSortPage /> },
       { path: 'modules/array', element: <ArrayPage /> },
       { path: 'modules/linked-list', element: <LinkedListPage /> },
+      { path: 'modules/stack', element: <StackPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

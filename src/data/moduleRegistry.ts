@@ -47,7 +47,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/stack',
     category: 'linear',
     difficulty: 2,
-    implemented: false,
+    implemented: true,
   },
   {
     id: 'L-05',

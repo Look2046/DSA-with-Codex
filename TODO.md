@@ -67,9 +67,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
   - Done: added S-02 page/route/registry entry, selection step generator, deterministic replay tests, and zh/en i18n copy.
 
-- [ ] P3-M3 Add L-04 stack module (push/pop/peek)
+- [x] P3-M3 Add L-04 stack module (push/pop/peek)
   - DoD: timeline visualization + validation + JSON import/export + tests.
   - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
+  - Done: added L-04 page/route/registry entry, stack step generator, JSON import/export + validation, and deterministic replay tests.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

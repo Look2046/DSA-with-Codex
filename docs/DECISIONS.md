@@ -148,3 +148,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: implement stack first; add multiple modules in one patch.
 - Consequences: verifies the new-module expansion path with controlled scope and keeps P3 sequencing predictable before entering L-04 stack work.
 - Owner: haoyu + codex
+
+## DEC-20260305-16
+- Date: 2026-03-05
+- Status: accepted
+- Context: P3-M3 requires a new linear module that follows the same playback and data-portability standards established in P2.
+- Decision: Implement `L-04 Stack` with `push/pop/peek` operations, shared timeline playback, JSON import/export with schema+business validation, and deterministic replay/round-trip tests.
+- Alternatives considered: defer JSON support to later; implement stack with operation-only demo and no test parity.
+- Consequences: P3 closes with both new-module delivery and consistency against P2 standards; future modules can reuse stack page/tooling patterns.
+- Owner: haoyu + codex

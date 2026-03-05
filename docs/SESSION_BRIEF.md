@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P3-M2 completed; entering P3-M3 implementation
+- Current phase: P3 completed (M1/M2/M3 all closed)
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -29,10 +29,12 @@ Use this file as the first thing to read in a new chat/session.
 - P3 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P3.md`
 - `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
 - `S-02 Selection Sort` module landed with timeline playback + deterministic tests
+- `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
 
 ## 3) Next Priority
 
-- Start P3-M3: implement `L-04 Stack` module (`push`/`pop`/`peek`) using shared timeline engine and JSON import/export pattern.
+- Next milestone planning: define P4 scope from remaining backlog.
+- Optional cleanup follow-up: simplify legacy `playbackStore` responsibilities.
 
 ## 4) Guardrails
 
