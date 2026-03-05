@@ -430,6 +430,8 @@ body {
   justify-content: flex-start;
   gap: 8px;
   overflow-x: auto;
+  overflow-y: visible;
+  padding-top: 18px;
   padding-bottom: 4px;
 }
 
@@ -459,6 +461,16 @@ body {
 .array-cell-index {
   font-size: 0.72rem;
   color: #5b728d;
+}
+
+.array-insert-pointer {
+  position: absolute;
+  top: -16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b4f90;
+  line-height: 1;
+  z-index: 2;
 }
 
 .pending-insert {

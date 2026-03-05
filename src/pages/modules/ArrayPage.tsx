@@ -53,6 +53,13 @@ export function ArrayPage() {
       .slice(0, currentSnapshot?.logicalLength ?? 0)
       .filter((value): value is number => value !== null);
   }, [currentSnapshot]);
+  const visualUsedLength = useMemo(() => {
+    const logicalLength = currentSnapshot?.logicalLength ?? 0;
+    if (currentSnapshot?.action === 'shift') {
+      return Math.min(logicalLength + 1, ARRAY_CAPACITY);
+    }
+    return logicalLength;
+  }, [currentSnapshot]);
 
   const recomputeInputState = useCallback(
     (nextArrayInput: string, nextIndexInput: string, nextValueInput: string) => {
@@ -230,11 +237,13 @@ export function ArrayPage() {
         {(currentSnapshot?.arrayState ?? []).map((value, index) => {
           const highlight = highlightMap.get(index) ?? 'default';
           const isEmpty = value === null;
-          const isUnused = index >= (currentSnapshot?.logicalLength ?? 0);
+          const isUnused = index >= visualUsedLength;
+          const isInsertTarget = index === insertConfig.index;
           const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}${isUnused ? ' array-cell-unused' : ''}`;
 
           return (
             <div key={`${index}-${String(value)}`} className={cellClassName}>
+              {isInsertTarget ? <span className="array-insert-pointer">↓</span> : null}
               <span className="array-cell-index">{index}</span>
               <strong>{value ?? '∅'}</strong>
             </div>
