@@ -32,13 +32,21 @@ describe('generateStackSteps', () => {
   });
 
   it('throws on invalid operations', () => {
-    expect(() => generateStackSteps([], { type: 'pop' })).toThrow();
-    expect(() => generateStackSteps([], { type: 'peek' })).toThrow();
     expect(() =>
       generateStackSteps(
         Array.from({ length: STACK_CAPACITY }, (_, index) => index),
         { type: 'push', value: 1 },
       ),
     ).toThrow();
+  });
+
+  it('keeps empty stack state for pop/peek on empty input', () => {
+    const popSteps = generateStackSteps([], { type: 'pop' });
+    const peekSteps = generateStackSteps([], { type: 'peek' });
+
+    expect(popSteps[popSteps.length - 1]?.stackState).toEqual([]);
+    expect(popSteps[popSteps.length - 1]?.action).toBe('completed');
+    expect(peekSteps[peekSteps.length - 1]?.stackState).toEqual([]);
+    expect(peekSteps[peekSteps.length - 1]?.action).toBe('completed');
   });
 });

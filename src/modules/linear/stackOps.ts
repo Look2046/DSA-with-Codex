@@ -52,7 +52,15 @@ export function generateStackSteps(input: number[], operation: StackOperation): 
     });
   } else if (operation.type === 'pop') {
     if (stack.length === 0) {
-      throw new RangeError('Pop operation on empty stack');
+      steps.push({
+        description: '',
+        codeLines: [6],
+        highlights: [],
+        stackState: cloneStack(stack),
+        action: 'completed',
+        indices: [],
+      });
+      return steps;
     }
     const poppedValue = stack[stack.length - 1];
     stack.pop();
@@ -67,7 +75,15 @@ export function generateStackSteps(input: number[], operation: StackOperation): 
     });
   } else {
     if (stack.length === 0) {
-      throw new RangeError('Peek operation on empty stack');
+      steps.push({
+        description: '',
+        codeLines: [6],
+        highlights: [],
+        stackState: cloneStack(stack),
+        action: 'completed',
+        indices: [],
+      });
+      return steps;
     }
     const peekValue = stack[stack.length - 1];
     steps.push({

@@ -58,7 +58,11 @@ export function resolveStackConfig(
   }
 
   if (parsedStack.length === 0) {
-    return { config: null, error: operationType === 'pop' ? t('module.l04.error.popEmpty') : t('module.l04.error.peekEmpty') };
+    const operation: StackOperation = operationType === 'pop' ? { type: 'pop' } : { type: 'peek' };
+    return {
+      config: { stack: parsedStack, operation },
+      error: operationType === 'pop' ? t('module.l04.error.popEmpty') : t('module.l04.error.peekEmpty'),
+    };
   }
 
   const operation: StackOperation = operationType === 'pop' ? { type: 'pop' } : { type: 'peek' };

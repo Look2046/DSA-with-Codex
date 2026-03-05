@@ -44,7 +44,7 @@ describe('stackPageUtils', () => {
       error: 'module.l04.error.value',
     });
     expect(resolveStackConfig('', 'pop', '', t)).toEqual({
-      config: null,
+      config: { stack: [], operation: { type: 'pop' } },
       error: 'module.l04.error.popEmpty',
     });
   });
