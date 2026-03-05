@@ -20,9 +20,14 @@ function createStep(action: QueueStep['action']): QueueStep {
     codeLines: [],
     highlights: [],
     queueState: [3, 8, 1],
+    bufferState: [3, 8, 1, ...Array.from({ length: 17 }, () => null)],
+    frontIndex: 0,
+    rearIndex: 2,
+    size: 3,
     action,
     indices: [0, 2],
     dequeuedValue: 3,
+    enqueuedValue: 9,
     frontValue: 3,
   };
 }
@@ -52,7 +57,7 @@ describe('queuePageUtils', () => {
   it('maps playback status and step/highlight labels', () => {
     expect(getStatusLabel('idle', t)).toBe('playback.status.idle');
     expect(getStepDescription(createStep('initial'), t)).toBe('module.l05.step.initial');
-    expect(getStepDescription(createStep('enqueue'), t)).toBe('module.l05.step.enqueue 1');
+    expect(getStepDescription(createStep('enqueue'), t)).toBe('module.l05.step.enqueue 9');
     expect(getStepDescription(createStep('dequeue'), t)).toBe('module.l05.step.dequeue 3');
     expect(getStepDescription(createStep('front'), t)).toBe('module.l05.step.front 3');
     expect(getStepDescription(createStep('completed'), t)).toBe('module.l05.step.completed');

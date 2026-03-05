@@ -131,7 +131,7 @@ export function getStepDescription(step: QueueStep | undefined, t: Translator): 
     return t('module.l05.step.initial');
   }
   if (step.action === 'enqueue') {
-    return `${t('module.l05.step.enqueue')} ${step.queueState[step.queueState.length - 1] ?? ''}`.trim();
+    return `${t('module.l05.step.enqueue')} ${step.enqueuedValue ?? step.queueState[step.queueState.length - 1] ?? ''}`.trim();
   }
   if (step.action === 'dequeue') {
     return `${t('module.l05.step.dequeue')} ${step.dequeuedValue ?? ''}`.trim();

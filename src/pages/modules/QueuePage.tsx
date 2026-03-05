@@ -172,7 +172,9 @@ export function QueuePage() {
     { key: 'module.s01.speed.fast', value: 350 },
   ] as const;
 
-  const currentLength = (currentSnapshot?.queueState ?? []).length;
+  const currentLength = currentSnapshot?.size ?? 0;
+  const frontIndex = currentSnapshot?.frontIndex ?? -1;
+  const rearIndex = currentSnapshot?.rearIndex ?? -1;
 
   return (
     <section className="array-page">
@@ -299,10 +301,10 @@ export function QueuePage() {
       >
         <div ref={queueCellsRef} className="array-cells queue-cells" aria-label="queue-cells">
           {Array.from({ length: QUEUE_CAPACITY }, (_, index) => {
-            const value = currentSnapshot?.queueState[index] ?? null;
+            const value = currentSnapshot?.bufferState[index] ?? null;
             const highlight = highlightMap.get(index) ?? 'default';
-            const isFront = currentLength > 0 && index === 0;
-            const isTail = currentLength > 0 && index === currentLength - 1;
+            const isFront = currentLength > 0 && index === frontIndex;
+            const isTail = currentLength > 0 && index === rearIndex;
             const isUnused = value === null;
 
             return (

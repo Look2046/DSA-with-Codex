@@ -6,15 +6,24 @@ export type QueueOperation = { type: 'enqueue'; value: number } | { type: 'deque
 
 export type QueueStep = AnimationStep & {
   queueState: number[];
+  bufferState: Array<number | null>;
+  frontIndex: number;
+  rearIndex: number;
+  size: number;
   action: 'initial' | 'enqueue' | 'dequeue' | 'front' | 'completed';
   indices: number[];
   dequeuedValue?: number;
+  enqueuedValue?: number;
   frontValue?: number;
 };
 
-function cloneQueue(values: number[]): number[] {
-  return [...values];
-}
+type QueueRuntime = {
+  queueState: number[];
+  bufferState: Array<number | null>;
+  frontIndex: number;
+  rearIndex: number;
+  size: number;
+};
 
 function assertQueueRange(values: number[]): void {
   if (values.length < 0 || values.length > QUEUE_CAPACITY) {
@@ -22,92 +31,142 @@ function assertQueueRange(values: number[]): void {
   }
 }
 
+function createRuntime(input: number[]): QueueRuntime {
+  const bufferState: Array<number | null> = Array.from({ length: QUEUE_CAPACITY }, () => null);
+  input.forEach((value, index) => {
+    bufferState[index] = value;
+  });
+
+  return {
+    queueState: [...input],
+    bufferState,
+    frontIndex: input.length > 0 ? 0 : -1,
+    rearIndex: input.length > 0 ? input.length - 1 : -1,
+    size: input.length,
+  };
+}
+
+function occupiedIndices(runtime: QueueRuntime): number[] {
+  if (runtime.size === 0 || runtime.frontIndex < 0 || runtime.rearIndex < 0) {
+    return [];
+  }
+
+  const indices: number[] = [];
+  for (let offset = 0; offset < runtime.size; offset += 1) {
+    indices.push((runtime.frontIndex + offset) % QUEUE_CAPACITY);
+  }
+  return indices;
+}
+
+function frontRearIndices(runtime: QueueRuntime): number[] {
+  if (runtime.size === 0 || runtime.frontIndex < 0 || runtime.rearIndex < 0) {
+    return [];
+  }
+  if (runtime.frontIndex === runtime.rearIndex) {
+    return [runtime.frontIndex];
+  }
+  return [runtime.frontIndex, runtime.rearIndex];
+}
+
+function snapshot(
+  runtime: QueueRuntime,
+  action: QueueStep['action'],
+  codeLines: number[],
+  highlights: QueueStep['highlights'],
+  details?: Pick<QueueStep, 'dequeuedValue' | 'frontValue' | 'enqueuedValue'>,
+): QueueStep {
+  return {
+    description: '',
+    codeLines,
+    highlights,
+    queueState: [...runtime.queueState],
+    bufferState: [...runtime.bufferState],
+    frontIndex: runtime.frontIndex,
+    rearIndex: runtime.rearIndex,
+    size: runtime.size,
+    action,
+    indices: frontRearIndices(runtime),
+    ...details,
+  };
+}
+
 export function generateQueueSteps(input: number[], operation: QueueOperation): QueueStep[] {
   assertQueueRange(input);
 
-  const queue = cloneQueue(input);
+  const runtime = createRuntime(input);
   const steps: QueueStep[] = [];
 
-  steps.push({
-    description: '',
-    codeLines: [1],
-    highlights: [],
-    queueState: cloneQueue(queue),
-    action: 'initial',
-    indices: queue.length > 0 ? [0, queue.length - 1] : [],
-  });
+  steps.push(snapshot(runtime, 'initial', [1], []));
 
   if (operation.type === 'enqueue') {
-    if (queue.length >= QUEUE_CAPACITY) {
+    if (runtime.size >= QUEUE_CAPACITY) {
       throw new RangeError('Enqueue operation on full queue');
     }
-    queue.push(operation.value);
-    steps.push({
-      description: '',
-      codeLines: [3],
-      highlights: [{ index: queue.length - 1, type: 'new-node' }],
-      queueState: cloneQueue(queue),
-      action: 'enqueue',
-      indices: [0, queue.length - 1],
-      frontValue: queue[0],
-    });
+
+    const nextRear = runtime.size === 0 ? 0 : (runtime.rearIndex + 1) % QUEUE_CAPACITY;
+    runtime.bufferState[nextRear] = operation.value;
+    runtime.rearIndex = nextRear;
+    if (runtime.size === 0) {
+      runtime.frontIndex = nextRear;
+    }
+    runtime.size += 1;
+    runtime.queueState.push(operation.value);
+
+    steps.push(
+      snapshot(runtime, 'enqueue', [3], [{ index: nextRear, type: 'new-node' }], {
+        enqueuedValue: operation.value,
+        frontValue: runtime.queueState[0],
+      }),
+    );
   } else if (operation.type === 'dequeue') {
-    if (queue.length === 0) {
-      steps.push({
-        description: '',
-        codeLines: [6],
-        highlights: [],
-        queueState: cloneQueue(queue),
-        action: 'completed',
-        indices: [],
-      });
+    if (runtime.size === 0 || runtime.frontIndex < 0) {
+      steps.push(snapshot(runtime, 'completed', [6], []));
       return steps;
     }
-    const dequeuedValue = queue[0];
-    queue.shift();
-    steps.push({
-      description: '',
-      codeLines: [4],
-      highlights: queue.length > 0 ? [{ index: 0, type: 'moving' }] : [],
-      queueState: cloneQueue(queue),
-      action: 'dequeue',
-      indices: queue.length > 0 ? [0, queue.length - 1] : [],
-      dequeuedValue,
-      frontValue: queue[0],
-    });
+
+    const removedIndex = runtime.frontIndex;
+    const dequeuedValue = runtime.bufferState[removedIndex] ?? runtime.queueState[0];
+    runtime.bufferState[removedIndex] = null;
+    runtime.queueState.shift();
+    runtime.size -= 1;
+
+    if (runtime.size === 0) {
+      runtime.frontIndex = -1;
+      runtime.rearIndex = -1;
+    } else {
+      runtime.frontIndex = (removedIndex + 1) % QUEUE_CAPACITY;
+    }
+
+    const dequeueHighlights = runtime.size > 0 ? [{ index: runtime.frontIndex, type: 'moving' as const }] : [];
+    steps.push(
+      snapshot(runtime, 'dequeue', [4], dequeueHighlights, {
+        dequeuedValue,
+        frontValue: runtime.queueState[0],
+      }),
+    );
   } else {
-    if (queue.length === 0) {
-      steps.push({
-        description: '',
-        codeLines: [6],
-        highlights: [],
-        queueState: cloneQueue(queue),
-        action: 'completed',
-        indices: [],
-      });
+    if (runtime.size === 0 || runtime.frontIndex < 0) {
+      steps.push(snapshot(runtime, 'completed', [6], []));
       return steps;
     }
-    const frontValue = queue[0];
-    steps.push({
-      description: '',
-      codeLines: [5],
-      highlights: [{ index: 0, type: 'matched' }],
-      queueState: cloneQueue(queue),
-      action: 'front',
-      indices: [0, queue.length - 1],
-      frontValue,
-    });
+
+    const frontValue = runtime.bufferState[runtime.frontIndex] ?? runtime.queueState[0];
+    steps.push(
+      snapshot(runtime, 'front', [5], [{ index: runtime.frontIndex, type: 'matched' }], {
+        frontValue,
+      }),
+    );
   }
 
-  steps.push({
-    description: '',
-    codeLines: [6],
-    highlights: queue.map((_, index) => ({ index, type: 'default' as const })),
-    queueState: cloneQueue(queue),
-    action: 'completed',
-    indices: queue.length > 0 ? [0, queue.length - 1] : [],
-    frontValue: queue[0],
-  });
+  steps.push(
+    snapshot(
+      runtime,
+      'completed',
+      [6],
+      occupiedIndices(runtime).map((index) => ({ index, type: 'default' as const })),
+      { frontValue: runtime.queueState[0] },
+    ),
+  );
 
   return steps;
 }

@@ -13,14 +13,21 @@ describe('generateQueueSteps', () => {
     const last = steps[steps.length - 1];
     expect(last.action).toBe('completed');
     expect(last.queueState).toEqual([3, 8, 1, 9]);
+    expect(last.frontIndex).toBe(0);
+    expect(last.rearIndex).toBe(3);
   });
 
-  it('applies dequeue and reports dequeued value', () => {
+  it('dequeue moves front pointer forward instead of shifting whole buffer', () => {
     const steps = generateQueueSteps([3, 8, 1], { type: 'dequeue' });
     const dequeueStep = steps.find((step) => step.action === 'dequeue');
     const last = steps[steps.length - 1];
+
     expect(dequeueStep?.dequeuedValue).toBe(3);
     expect(last.queueState).toEqual([8, 1]);
+    expect(last.frontIndex).toBe(1);
+    expect(last.rearIndex).toBe(2);
+    expect(last.bufferState[1]).toBe(8);
+    expect(last.bufferState[2]).toBe(1);
   });
 
   it('applies front without changing queue', () => {
