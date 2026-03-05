@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { advancePlaybackTick } from '../../engine/timeline/tick';
+import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { ARRAY_CAPACITY, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
 import { getHighlightLabel, getStatusLabel, getStepDescription, resolveInsertConfig, type InsertConfig } from './arrayPageUtils';
-import { usePlaybackStore } from '../../store/playbackStore';
 import type { HighlightType } from '../../types/animation';
 
 const DEFAULT_CONFIG: InsertConfig = {
@@ -25,8 +24,8 @@ export function ArrayPage() {
   const [hasValidConfig, setHasValidConfig] = useState(true);
   const [insertConfig, setInsertConfig] = useState<InsertConfig>(DEFAULT_CONFIG);
 
-  const { status, speedMs, currentStep, setSpeed, setTotalSteps, play, pause, nextStep, prevStep, reset } =
-    usePlaybackStore();
+  const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
+  const currentStep = currentFrame;
 
   const steps = useMemo(
     () => generateArrayInsertSteps(insertConfig.array, insertConfig.index, insertConfig.value),
@@ -89,31 +88,9 @@ export function ArrayPage() {
   }, [arrayInput, completedArrayText, hasValidConfig, indexInput, recomputeInputState, reset, steps.length, valueInput]);
 
   useEffect(() => {
-    setTotalSteps(steps.length);
+    setTotalFrames(steps.length);
     reset();
-  }, [setTotalSteps, reset, steps]);
-
-  useEffect(() => {
-    if (status !== 'playing') {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      const state = usePlaybackStore.getState();
-      const result = advancePlaybackTick({
-        currentStep: state.currentStep,
-        totalSteps: state.totalSteps,
-        setStatus: state.setStatus,
-        nextStep: state.nextStep,
-      });
-      if (result === 'completed') {
-        syncInputToCompletedArray();
-        window.clearInterval(timer);
-      }
-    }, speedMs);
-
-    return () => window.clearInterval(timer);
-  }, [status, speedMs, syncInputToCompletedArray]);
+  }, [setTotalFrames, reset, steps]);
 
   useEffect(() => {
     if (!hasValidConfig || steps.length === 0) {
@@ -137,11 +114,11 @@ export function ArrayPage() {
 
   const handleNextStep = useCallback(() => {
     const willComplete = currentStep >= steps.length - 2;
-    nextStep();
+    next();
     if (willComplete) {
       syncInputToCompletedArray();
     }
-  }, [currentStep, nextStep, steps.length, syncInputToCompletedArray]);
+  }, [currentStep, next, steps.length, syncInputToCompletedArray]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -276,7 +253,7 @@ export function ArrayPage() {
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
           {t('playback.pause')}
         </button>
-        <button type="button" onClick={prevStep} disabled={!hasValidConfig || steps.length === 0}>
+        <button type="button" onClick={prev} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.prev')}
         </button>
         <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>

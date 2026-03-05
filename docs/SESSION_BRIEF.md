@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/l03-v1`
-- Current phase: P1 closure completed; moving into P2 execution planning
+- Active branch (expected): `feat/p2-timeline-engine`
+- Current phase: P2-M2 completed; moving into P2-M3 JSON import/export
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -20,11 +20,15 @@ Use this file as the first thing to read in a new chat/session.
 - CI workflow and unified local quality gate
 - L-01 array insert v1 with validated input, timeline playback, explicit empty-slot shift steps, and insertion animation
 - Unit tests for array insert step generation (deterministic + edge cases)
+- Reusable timeline engine hook (`useTimelinePlayer`) with reducer-driven playback tick loop
+- S-01/L-01/L-03 migrated to timeline engine path (no direct playback store dependency in module pages)
+- Deterministic S-01 replay test for seek/speed/resume stability
+- Playwright cross-module regression artifacts refreshed for timeline migration
 
 ## 3) Next Priority
 
-- Start P2-M1 timeline engine implementation (S-01 first) based on `docs/IMPLEMENTATION_PLAN_P2.md`.
-- Keep rollout incremental: S-01 migration -> deterministic tests -> L-01/L-03 migration.
+- Start P2-M3 JSON import/export (L-01 first) with schema validation + clear error feedback.
+- Keep rollout incremental: L-01 import/export -> deterministic round-trip tests -> optional extension to L-03.
 
 ## 4) Guardrails
 
@@ -39,7 +43,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ```bash
 git fetch
-git switch feat/l03-v1
+git switch feat/p2-timeline-engine
 git pull
 npm install
 npm run dev

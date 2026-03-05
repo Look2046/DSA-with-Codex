@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { advancePlaybackTick } from '../../engine/timeline/tick';
+import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
@@ -7,7 +7,6 @@ import type { TranslationKey } from '../../i18n/translations';
 import { generateLinkedListSteps } from '../../modules/linear/linkedListOps';
 import type { LinkedListOperation, LinkedListStep } from '../../modules/linear/linkedListOps';
 import { buildLogicalStepByIndex, getFindResultText, resolveLinkedListConfig, type LinkedListConfig } from './linkedListPageUtils';
-import { usePlaybackStore } from '../../store/playbackStore';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 type ArrowSegment = {
@@ -275,8 +274,8 @@ export function LinkedListPage() {
   const prevNodeRects = useRef<Map<string, DOMRect>>(new Map());
   const skipNextLayoutAnimationRef = useRef(false);
 
-  const { status, speedMs, currentStep, setSpeed, setTotalSteps, play, pause, nextStep, prevStep, reset } =
-    usePlaybackStore();
+  const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
+  const currentStep = currentFrame;
 
   const recomputeInputState = useCallback(
     (nextListInput: string, nextOperationType: LinkedListOperation['type'], nextValueInput: string, nextIndexInput: string) => {
@@ -326,39 +325,17 @@ export function LinkedListPage() {
   }, [completedListText, hasValidConfig, listInput, steps, reset, recomputeInputState, operationType, valueInput, indexInput]);
 
   useEffect(() => {
-    setTotalSteps(steps.length);
+    setTotalFrames(steps.length);
     reset();
-  }, [setTotalSteps, reset, steps]);
-
-  useEffect(() => {
-    if (status !== 'playing') {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      const state = usePlaybackStore.getState();
-      const result = advancePlaybackTick({
-        currentStep: state.currentStep,
-        totalSteps: state.totalSteps,
-        setStatus: state.setStatus,
-        nextStep: state.nextStep,
-      });
-      if (result === 'completed') {
-        syncInputToCompletedList();
-        window.clearInterval(timer);
-      }
-    }, speedMs);
-
-    return () => window.clearInterval(timer);
-  }, [status, speedMs, syncInputToCompletedList]);
+  }, [setTotalFrames, reset, steps]);
 
   const handleNextStep = useCallback(() => {
     const willComplete = currentStep >= steps.length - 2;
-    nextStep();
+    next();
     if (willComplete) {
       syncInputToCompletedList();
     }
-  }, [currentStep, nextStep, steps.length, syncInputToCompletedList]);
+  }, [currentStep, next, steps.length, syncInputToCompletedList]);
 
   const handlePlay = useCallback(() => {
     play();
@@ -374,14 +351,14 @@ export function LinkedListPage() {
 
     if (currentSnapshot.operation === 'insertAt' && currentSnapshot.action === 'shiftForInsert') {
       const timer = window.setTimeout(() => {
-        nextStep();
+        next();
       }, 420);
       return () => window.clearTimeout(timer);
     }
 
     if (currentSnapshot.operation === 'deleteAt' && currentSnapshot.action === 'delete') {
       const timer = window.setTimeout(() => {
-        nextStep();
+        next();
       }, 420);
       return () => window.clearTimeout(timer);
     }
@@ -395,7 +372,7 @@ export function LinkedListPage() {
       }, 260);
       return () => window.clearTimeout(timer);
     }
-  }, [status, currentSnapshot, nextStep, syncInputToCompletedList]);
+  }, [status, currentSnapshot, next, syncInputToCompletedList]);
 
   useEffect(() => {
     if (currentSnapshot?.action !== 'movePointerRoot') {
@@ -1021,7 +998,7 @@ export function LinkedListPage() {
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
           {t('playback.pause')}
         </button>
-        <button type="button" onClick={prevStep} disabled={!hasValidConfig || steps.length === 0}>
+        <button type="button" onClick={prev} disabled={!hasValidConfig || steps.length === 0}>
           {t('playback.prev')}
         </button>
         <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>

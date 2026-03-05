@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { advancePlaybackTick } from '../../engine/timeline/tick';
+import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
 import type { BubbleSortStep } from '../../modules/sorting/bubbleSort';
 import { buildBubbleSortTimelineFromInput } from '../../modules/sorting/bubbleTimelineAdapter';
-import { usePlaybackStore } from '../../store/playbackStore';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 const DEFAULT_SIZE = 8;
@@ -75,11 +74,13 @@ export function BubbleSortPage() {
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
 
-  const { status, speedMs, currentStep, totalSteps, setTotalSteps, setStatus, setSpeed, play, pause, nextStep, prevStep, reset } =
-    usePlaybackStore();
+  const { status, speedMs, currentFrame, totalFrames, setTotalFrames, setStatus, setSpeed, play, pause, next, prev, reset } =
+    useTimelinePlayer(0);
 
   const timelineFrames = useMemo(() => buildBubbleSortTimelineFromInput(inputData), [inputData]);
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
+  const currentStep = currentFrame;
+  const totalSteps = totalFrames;
   const currentSnapshot = steps[currentStep] ?? steps[0];
 
   const maxValue = useMemo(() => {
@@ -94,30 +95,9 @@ export function BubbleSortPage() {
   }, [currentSnapshot]);
 
   useEffect(() => {
-    setTotalSteps(steps.length);
+    setTotalFrames(steps.length);
     reset();
-  }, [setTotalSteps, reset, steps.length]);
-
-  useEffect(() => {
-    if (status !== 'playing') {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      const state = usePlaybackStore.getState();
-      const result = advancePlaybackTick({
-        currentStep: state.currentStep,
-        totalSteps: state.totalSteps,
-        setStatus: state.setStatus,
-        nextStep: state.nextStep,
-      });
-      if (result === 'completed') {
-        window.clearInterval(timer);
-      }
-    }, speedMs);
-
-    return () => window.clearInterval(timer);
-  }, [status, speedMs]);
+  }, [setTotalFrames, reset, steps.length]);
 
   const regenerateData = () => {
     setInputData(createRandomDataset(datasetSize));
@@ -221,10 +201,10 @@ export function BubbleSortPage() {
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
           {t('playback.pause')}
         </button>
-        <button type="button" onClick={prevStep}>
+        <button type="button" onClick={prev}>
           {t('playback.prev')}
         </button>
-        <button type="button" onClick={nextStep}>
+        <button type="button" onClick={next}>
           {t('playback.next')}
         </button>
         <button type="button" onClick={reset}>

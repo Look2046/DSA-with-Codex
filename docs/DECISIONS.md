@@ -85,3 +85,21 @@ Record architecture or workflow decisions here.
 - Alternatives considered: implement import/export first; parallelize engine refactor and import/export in one branch.
 - Consequences: Slightly longer P2 calendar but lower playback regression risk and clearer PR review boundaries.
 - Owner: haoyu + codex
+
+## DEC-20260305-09
+- Date: 2026-03-05
+- Status: accepted
+- Context: S-01 should migrate first to a reusable timeline engine path without forcing immediate L-01/L-03 rewrites in the same patch.
+- Decision: Introduce a shared hook-based timeline player (`useTimelinePlayer`) on top of timeline reducer contracts, migrate S-01 to this path, and validate with deterministic replay tests before cross-module rollout.
+- Alternatives considered: keep store-based page timers in all modules; migrate all modules in one large refactor.
+- Consequences: Cleaner incremental migration boundary and stronger replay determinism evidence; temporary mixed playback paths remain until P2-M2 completes.
+- Owner: haoyu + codex
+
+## DEC-20260305-10
+- Date: 2026-03-05
+- Status: accepted
+- Context: L-01/L-03 still relied on per-page playback timer wiring and global store primitives, creating mixed playback code paths after S-01 migration.
+- Decision: Complete P2-M2 by migrating L-01/L-03 to `useTimelinePlayer` and removing page-level manual tick loops, while preserving existing operation-specific UX effects.
+- Alternatives considered: keep mixed implementation until P2-M3; rewrite all playback behavior into one new global engine store.
+- Consequences: All V1 modules now share one timeline-engine control path, reducing drift risk ahead of import/export work; global playback store remains for module metadata only and can be refactored separately later.
+- Owner: haoyu + codex

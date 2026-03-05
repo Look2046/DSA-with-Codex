@@ -40,13 +40,15 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: shared `VisualizationCanvas` landed and migrated on S-01/L-01/L-03.
 
 ## P2 (Could Have / Backlog)
-- [ ] P2-M1 Build reusable animation timeline engine (S-01 first)
+- [x] P2-M1 Build reusable animation timeline engine (S-01 first)
   - DoD: shared engine contracts + S-01 migration + deterministic replay tests.
   - Acceptance: seek/speed/resume produce stable frame sequence on fixed input.
+  - Done: added `useTimelinePlayer`, migrated S-01 playback to timeline engine path, and landed deterministic replay test (`bubbleTimelineReplay.test.ts`).
 
-- [ ] P2-M2 Migrate L-01/L-03 playback to shared engine
+- [x] P2-M2 Migrate L-01/L-03 playback to shared engine
   - DoD: all three modules use one timeline engine path without UX regression.
   - Acceptance: `npm run check` passes and cross-module playback behavior remains consistent.
+  - Done: migrated L-01/L-03 pages to `useTimelinePlayer`, removed page-level store/tick loops, and captured Playwright regression artifacts for S-01/L-01/L-03.
 
 - [ ] P2-M3 Add JSON import/export for example datasets (L-01 first)
   - DoD: schema-validated JSON import/export with clear invalid-input feedback.

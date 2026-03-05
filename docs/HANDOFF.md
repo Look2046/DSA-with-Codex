@@ -2,6 +2,62 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P2-M2 cross-module migration closure)
+
+### Today Done
+- Migrated L-01 and L-03 playback control to shared timeline engine hook:
+  - `src/pages/modules/ArrayPage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+- Removed page-level store/tick interval loops from both pages and switched to reducer-driven engine controls (`setTotalFrames`, `next`, `prev`, `play`, `pause`, `reset`).
+- Re-verified S-01 on the same engine path (already migrated in P2-M1).
+- Completed local quality gate with passing result (`npm run check`).
+- Ran playwright-based cross-module smoke regression on local dev server:
+  - `/modules/bubble-sort`
+  - `/modules/array`
+  - `/modules/linked-list`
+  - artifacts: `output/playwright/bubble-sort-p2m2.png`, `output/playwright/array-p2m2.png`, `output/playwright/linked-list-p2m2.png`
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P2-M2 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Start P2-M3 JSON import/export (L-01 first) with schema validation and deterministic round-trip behavior.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+## 2026-03-05 (P2-M1 timeline engine closure)
+
+### Today Done
+- Added reusable timeline player hook `src/engine/timeline/useTimelinePlayer.ts` (reducer-driven state/actions + interval tick while `playing`).
+- Migrated S-01 page to the shared timeline engine path:
+  - `src/pages/modules/BubbleSortPage.tsx` now uses `useTimelinePlayer`.
+  - Removed direct dependency on `playbackStore` and `advancePlaybackTick` in S-01.
+- Added deterministic replay regression test:
+  - `src/modules/sorting/bubbleTimelineReplay.test.ts`
+  - Validates stable frame sequence under seek/speed/resume for fixed input.
+- Ran full local quality gate with passing result (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P2-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Start P2-M2: migrate L-01 and L-03 playback logic to shared timeline engine path.
+- Keep existing UX behavior unchanged while replacing store-driven tick loops.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P2 planning kickoff)
 
 ### Today Done
