@@ -121,3 +121,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep L-03 text-input-only; postpone L-03 parity to a later milestone.
 - Consequences: JSON dataset portability is now consistent across L-01/L-03; P2 is fully closed and next work can focus on new scope plus optional store cleanup.
 - Owner: haoyu + codex
+
+## DEC-20260305-13
+- Date: 2026-03-05
+- Status: accepted
+- Context: After closing P2, the next step needs concrete execution boundaries rather than open-ended feature exploration.
+- Decision: Define P3 as a three-milestone sequence: modules discovery upgrade (`P3-M1`), new sorting module `S-02` (`P3-M2`), and new linear module `L-04` stack (`P3-M3`), tracked in `docs/IMPLEMENTATION_PLAN_P3.md`.
+- Alternatives considered: jump directly to random new modules; perform only refactor cleanup without new module delivery.
+- Consequences: clearer delivery order and acceptance boundaries; preserves momentum from stable P2 foundation while controlling scope.
+- Owner: haoyu + codex

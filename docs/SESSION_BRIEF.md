@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P2-M3 completed (L-01 + L-03 JSON import/export)
+- Current phase: P2 closed; entering P3 execution planning
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -26,11 +26,12 @@ Use this file as the first thing to read in a new chat/session.
 - Playwright cross-module regression artifacts refreshed for timeline migration
 - L-01 JSON import/export landed with schema validation and deterministic round-trip tests
 - L-03 JSON import/export landed with schema validation and deterministic round-trip tests
+- P3 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P3.md`
 
 ## 3) Next Priority
 
-- Next milestone planning (P3): prioritize new modules/features now that P2 refactor + dataset portability are closed.
-- Cleanup/standardization follow-up: slim legacy `playbackStore` to module metadata only.
+- Start P3-M1: upgrade `/modules` into practical module discovery view.
+- After P3-M1, continue P3-M2 (`S-02`) and P3-M3 (`L-04`) per `docs/IMPLEMENTATION_PLAN_P3.md`.
 
 ## 4) Guardrails
 

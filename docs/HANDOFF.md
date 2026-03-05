@@ -2,6 +2,31 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P3 planning baseline)
+
+### Today Done
+- Confirmed P2 is fully closed (timeline engine unification + JSON import/export parity for L-01/L-03).
+- Added `docs/IMPLEMENTATION_PLAN_P3.md` with executable milestones:
+  - P3-M1 modules page discovery upgrade
+  - P3-M2 new sorting module `S-02`
+  - P3-M3 new linear module `L-04` stack
+- Updated `TODO.md` with P3 actionable backlog and acceptance criteria.
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: docs planning sync in progress
+- Last verified command: `./scripts/check-doc-links.sh` (pass)
+
+### Remaining Focus (Next Session)
+- Start P3-M1 implementation on current branch or a dedicated `feat/p3-modules-page` branch.
+- Keep route-level behavior stable while introducing discovery/filter UX.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P2-M3 L-03 JSON parity closure)
 
 ### Today Done

@@ -55,6 +55,19 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: round-trip (`export -> import -> replay`) is deterministic.
   - Done: added L-01/L-03 JSON import/export UI, schema validation (`parse` + `schema`), and round-trip deterministic replay tests.
 
+## P3 (Next Milestone)
+- [ ] P3-M1 Upgrade `/modules` page to practical discovery view
+  - DoD: category filters + module cards + safe navigation to implemented routes.
+  - Acceptance: user can filter and navigate from `/modules` to current implemented modules without dead-end confusion.
+
+- [ ] P3-M2 Add S-02 selection sort module
+  - DoD: step generator + playback page + deterministic tests + zh/en copy.
+  - Acceptance: fixed input replay deterministic; `npm run check` passes.
+
+- [ ] P3-M3 Add L-04 stack module (push/pop/peek)
+  - DoD: timeline visualization + validation + JSON import/export + tests.
+  - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
+
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
 - [x] Establish daily handoff/decision/todo documentation workflow (2026-03-03)
