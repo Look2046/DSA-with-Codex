@@ -31,8 +31,9 @@ Track actionable tasks here. Keep tasks small and testable.
 - [x] Add L-01 array module page with minimal interactions (next milestone: `feat/l01-v1`)
   - DoD: supports data input and step preview for at least one array operation.
 
-- [ ] Add L-03 linked list module page with basic node operations
+- [x] Add L-03 linked list module page with basic node operations
   - DoD: insert/delete visual steps can be played in timeline.
+  - Done: playwright-assisted manual walkthrough completed (invalid input behavior, step semantics, continuity verified).
 
 ## P2 (Could Have / Backlog)
 - [ ] Build reusable animation timeline engine

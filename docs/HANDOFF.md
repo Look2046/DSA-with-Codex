@@ -19,15 +19,22 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - keep last valid diagram visible
   - disable playback controls while input is invalid
 - Re-ran local gate multiple times with passing result (`npm run check`).
+- Added L-03 regression-focused unit tests for:
+  - input/config validation paths
+  - find-result completed-state semantics
+  - logical step index continuity for insert/delete visual tail frames
+- Refactored linked-list page pure helper logic into reusable/testable utility module.
+- Completed playwright-assisted manual walkthrough on local dev server:
+  - invalid input keeps last valid diagram and disables playback controls
+  - insert/delete trailing display-only frames auto-advance with continuity
+  - find result feedback confirms matched index and not-found index range
 
 ### Current State
 - Branch: `feat/l03-v1`
-- Working tree status: clean
+- Working tree status: local changes in progress (L-03 regression utility + tests + doc sync)
 - Last verified command: `npm run check` (pass)
 
 ### Remaining Focus (Next Session)
-- Re-verify latest invalid-input and step-index behavior by manual walkthrough.
-- If behavior is confirmed stable, update `TODO.md` to mark L-03 as completed.
 - Prepare PR-ready summary grouped by:
   - interaction model changes
   - animation/render fixes

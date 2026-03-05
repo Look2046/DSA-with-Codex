@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/l03-v1`
-- Current phase: L-03 interaction/animation stabilization and regression wrap-up
+- Current phase: L-03 regression closed, preparing PR-ready summary
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -23,9 +23,8 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Finish L-03 regression validation (step semantics + invalid-input behavior + continuity)
-- Update handoff/todo after final verification
-- Prepare PR-ready change summary
+- Prepare PR-ready summary grouped by interaction model, animation/render fixes, and validation/UX
+- Optional: add focused screenshot evidence under `output/playwright/` for PR description
 
 ## 4) Guardrails
 
