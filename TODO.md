@@ -55,13 +55,12 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: round-trip (`export -> import -> replay`) is deterministic.
   - Done: added L-01/L-03 JSON import/export UI, schema validation (`parse` + `schema`), and round-trip deterministic replay tests.
 
-## P3 (Next Milestone)
+## P3 (Closed)
 - [x] P3-M1 Upgrade `/modules` page to practical discovery view
   - DoD: category filters + module cards + safe navigation to implemented routes.
   - Acceptance: user can filter and navigate from `/modules` to current implemented modules without dead-end confusion.
   - Done: added category-filtered module cards, implemented/pending status badges, disabled action for unimplemented modules, and route-safe navigation.
 
-- [ ] P3-M2 Add S-02 selection sort module
 - [x] P3-M2 Add S-02 selection sort module
   - DoD: step generator + playback page + deterministic tests + zh/en copy.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
@@ -71,6 +70,19 @@ Track actionable tasks here. Keep tasks small and testable.
   - DoD: timeline visualization + validation + JSON import/export + tests.
   - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
   - Done: added L-04 page/route/registry entry, stack step generator, JSON import/export + validation, and deterministic replay tests.
+
+## P4 (Next Milestone)
+- [ ] P4-M1 Add L-05 queue module
+  - DoD: queue step generator + timeline page + validation + JSON import/export + deterministic tests.
+  - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
+
+- [ ] P4-M2 Add L-02 dynamic array module
+  - DoD: dynamic resize visualization + timeline playback + validation + deterministic tests.
+  - Acceptance: fixed input can deterministically replay resize path; `npm run check` passes.
+
+- [ ] P4-M3 Module UX/acceptance polish across implemented modules
+  - DoD: side-panel/workflow consistency sweep + Playwright acceptance artifacts refresh.
+  - Acceptance: interaction walkthrough stable across implemented modules and quality gate remains green.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

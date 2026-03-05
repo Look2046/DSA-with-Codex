@@ -2,6 +2,30 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P4 planning baseline)
+
+### Today Done
+- Declared P3 closed and opened P4 planning baseline.
+- Added `docs/IMPLEMENTATION_PLAN_P4.md` with three executable milestones:
+  - P4-M1 `L-05 Queue`
+  - P4-M2 `L-02 Dynamic Array`
+  - P4-M3 module-level UX/acceptance polish
+- Synced milestone state across `SESSION_BRIEF`, `DECISIONS`, and `TODO`.
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: docs updates in progress (P4 planning sync)
+- Last verified command: pending (`./scripts/check-doc-links.sh`)
+
+### Remaining Focus (Next Session)
+- Start P4-M1 implementation (`L-05 Queue`) with timeline + JSON parity.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (optional playbackStore cleanup closure)
 
 ### Today Done

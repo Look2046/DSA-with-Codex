@@ -166,3 +166,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep mixed store/engine responsibilities; reintroduce global playback store wiring.
 - Consequences: lower state duplication and fewer cross-module coupling points; future module work can focus on timeline adapters and page-level controls only.
 - Owner: haoyu + codex
+
+## DEC-20260305-18
+- Date: 2026-03-05
+- Status: accepted
+- Context: P3 is fully closed and backlog still contains two planned linear modules plus cross-module delivery consistency debt.
+- Decision: Define P4 as a three-milestone sequence: `L-05 Queue` (`P4-M1`), `L-02 Dynamic Array` (`P4-M2`), and module-level UX/acceptance polish (`P4-M3`), tracked in `docs/IMPLEMENTATION_PLAN_P4.md`.
+- Alternatives considered: start ad-hoc module work without milestone boundaries; focus only on UX polish without new module delivery.
+- Consequences: keeps expansion predictable while reserving explicit capacity for delivery-quality hardening before the next phase.
+- Owner: haoyu + codex

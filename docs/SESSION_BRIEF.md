@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P3 completed (M1/M2/M3 all closed)
+- Current phase: P4 planning baseline (execution not started)
 - Last local quality gate: `npm run check` (passed, 2026-03-05)
 
 ## 2) What Is Already Done
@@ -27,14 +27,15 @@ Use this file as the first thing to read in a new chat/session.
 - L-01 JSON import/export landed with schema validation and deterministic round-trip tests
 - L-03 JSON import/export landed with schema validation and deterministic round-trip tests
 - P3 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P3.md`
+- P4 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P4.md`
 - `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
 - `S-02 Selection Sort` module landed with timeline playback + deterministic tests
 - `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
 
 ## 3) Next Priority
 
-- Next milestone planning: define P4 scope from remaining backlog.
-- Optional cleanup follow-up: completed (`playbackStore` now stores module metadata only).
+- Start P4-M1: implement `L-05 Queue` module with timeline + JSON parity.
+- Follow-up after P4-M1: implement `L-02 Dynamic Array` and run module UX polish sweep.
 
 ## 4) Guardrails
 
