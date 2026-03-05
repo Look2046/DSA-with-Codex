@@ -103,3 +103,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep mixed implementation until P2-M3; rewrite all playback behavior into one new global engine store.
 - Consequences: All V1 modules now share one timeline-engine control path, reducing drift risk ahead of import/export work; global playback store remains for module metadata only and can be refactored separately later.
 - Owner: haoyu + codex
+
+## DEC-20260305-11
+- Date: 2026-03-05
+- Status: accepted
+- Context: P2-M3 requires dataset portability for L-01 while keeping existing input-validation behavior and replay determinism unchanged.
+- Decision: Add JSON import/export directly in L-01 page, validate with two layers (JSON parse + schema shape), then reuse existing insert-config validation to enforce capacity/index/value rules.
+- Alternatives considered: only CSV-style text import; JSON import without schema checks; defer tests until L-03 parity.
+- Consequences: L-01 now supports deterministic dataset round-trip and clearer invalid-input feedback with minimal architectural churn; L-03 parity can be added incrementally.
+- Owner: haoyu + codex

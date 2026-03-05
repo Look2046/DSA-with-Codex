@@ -50,9 +50,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `npm run check` passes and cross-module playback behavior remains consistent.
   - Done: migrated L-01/L-03 pages to `useTimelinePlayer`, removed page-level store/tick loops, and captured Playwright regression artifacts for S-01/L-01/L-03.
 
-- [ ] P2-M3 Add JSON import/export for example datasets (L-01 first)
+- [x] P2-M3 Add JSON import/export for example datasets (L-01 first)
   - DoD: schema-validated JSON import/export with clear invalid-input feedback.
   - Acceptance: round-trip (`export -> import -> replay`) is deterministic.
+  - Done: added L-01 JSON import/export UI, schema validation (`parse` + `schema`), and round-trip deterministic replay tests.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

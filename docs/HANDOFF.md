@@ -2,6 +2,39 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P2-M3 L-01 JSON import/export closure)
+
+### Today Done
+- Added L-01 JSON dataset import/export workflow in Array page:
+  - export current dataset config to JSON editor
+  - import JSON back into input controls with playback reset
+- Added JSON validation layers:
+  - parse error handling
+  - schema shape validation (`array`, `index`, `value`)
+  - existing insert config validation reuse (capacity/index/value rules)
+- Added deterministic round-trip test:
+  - `export -> import -> replay` produces identical step sequence for fixed input
+- Passed full local quality gate (`npm run check`).
+- Added local ignore rules for session/runtime artifacts:
+  - `.playwright-cli/`
+  - `AGENTS.md`
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: docs + ignore sync updates in progress (P2-M3 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Decide next scope:
+  - Option A: extend JSON import/export to L-03 for parity
+  - Option B: enter next milestone planning and backlog refinement
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P2-M2 cross-module migration closure)
 
 ### Today Done
