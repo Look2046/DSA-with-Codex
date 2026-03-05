@@ -130,3 +130,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: jump directly to random new modules; perform only refactor cleanup without new module delivery.
 - Consequences: clearer delivery order and acceptance boundaries; preserves momentum from stable P2 foundation while controlling scope.
 - Owner: haoyu + codex
+
+## DEC-20260305-14
+- Date: 2026-03-05
+- Status: accepted
+- Context: `/modules` page was still a placeholder, which prevented category-level discovery and made planned modules invisible in navigation.
+- Decision: Implement P3-M1 by adding filterable module cards with explicit implemented/pending status, and allow navigation only for implemented routes.
+- Alternatives considered: keep placeholder page until S-02 is ready; link all planned routes even when unimplemented.
+- Consequences: users can discover current and upcoming modules safely, with no dead-route confusion; establishes a stable foundation before adding new modules.
+- Owner: haoyu + codex

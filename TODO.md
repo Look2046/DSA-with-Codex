@@ -56,9 +56,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: added L-01/L-03 JSON import/export UI, schema validation (`parse` + `schema`), and round-trip deterministic replay tests.
 
 ## P3 (Next Milestone)
-- [ ] P3-M1 Upgrade `/modules` page to practical discovery view
+- [x] P3-M1 Upgrade `/modules` page to practical discovery view
   - DoD: category filters + module cards + safe navigation to implemented routes.
   - Acceptance: user can filter and navigate from `/modules` to current implemented modules without dead-end confusion.
+  - Done: added category-filtered module cards, implemented/pending status badges, disabled action for unimplemented modules, and route-safe navigation.
 
 - [ ] P3-M2 Add S-02 selection sort module
   - DoD: step generator + playback page + deterministic tests + zh/en copy.

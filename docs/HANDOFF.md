@@ -2,6 +2,32 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-05 (P3-M1 modules discovery closure)
+
+### Today Done
+- Upgraded `/modules` from placeholder to practical discovery page:
+  - category filters (`all`, `linear`, `sort`)
+  - module cards with difficulty/status metadata
+  - safe actions for implemented routes and disabled "coming soon" for pending modules
+- Expanded module registry with planned-but-unimplemented items for discovery continuity.
+- Added utility tests for module filtering and difficulty formatting.
+- Completed local quality gate with passing result (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P3-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-05)
+
+### Remaining Focus (Next Session)
+- Start P3-M2 implementation: `S-02 Selection Sort` module.
+- Reuse shared timeline engine and existing sorting UX conventions from S-01.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-05 (P3 planning baseline)
 
 ### Today Done
