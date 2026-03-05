@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { createInitialTimelineState, timelineReducer } from '../engine/timeline/reducer';
+import type { TimelineState } from '../engine/timeline/types';
 import type { PlaybackStatus } from '../types/animation';
 import type { ModuleMetadata } from '../types/module';
 
@@ -18,54 +20,82 @@ type PlaybackStore = {
   reset: () => void;
 };
 
+function toTimelineState(state: Pick<PlaybackStore, 'totalSteps' | 'currentStep' | 'status'>): TimelineState {
+  return {
+    totalFrames: state.totalSteps,
+    currentFrame: state.currentStep,
+    status: state.status,
+    speedMs: createInitialTimelineState().speedMs,
+  };
+}
+
+function fromTimelineState(next: TimelineState): Pick<PlaybackStore, 'totalSteps' | 'currentStep' | 'status'> {
+  return {
+    totalSteps: next.totalFrames,
+    currentStep: next.currentFrame,
+    status: next.status,
+  };
+}
+
 export const usePlaybackStore = create<PlaybackStore>((set) => ({
   currentModule: null,
-  totalSteps: 0,
-  currentStep: 0,
-  status: 'idle',
+  ...fromTimelineState(createInitialTimelineState()),
   setStatus: (status) => set({ status }),
 
   setCurrentModule: (moduleItem) => {
     set({
       currentModule: moduleItem,
-      totalSteps: 0,
-      currentStep: 0,
-      status: 'idle',
+      ...fromTimelineState(createInitialTimelineState()),
     });
   },
 
   setTotalSteps: (total) => {
-    set({ totalSteps: Math.max(0, total) });
+    set((state) => {
+      const next = timelineReducer(toTimelineState(state), {
+        type: 'setTotalFrames',
+        totalFrames: total,
+      });
+      return fromTimelineState(next);
+    });
   },
 
   goToStep: (step) => {
     set((state) => {
-      const clamped = Math.max(0, Math.min(step, state.totalSteps > 0 ? state.totalSteps - 1 : 0));
-      return { currentStep: clamped };
+      const next = timelineReducer(toTimelineState(state), {
+        type: 'seek',
+        frameIndex: step,
+      });
+      return fromTimelineState(next);
     });
   },
   nextStep: () => {
     set((state) => {
-      if (state.totalSteps === 0) {
-        return state;
-      }
-      const next = Math.min(state.currentStep + 1, state.totalSteps - 1);
-      const nextStatus: PlaybackStatus = next >= state.totalSteps - 1 ? 'completed' : state.status;
-      return { currentStep: next, status: nextStatus };
+      const next = timelineReducer(toTimelineState(state), { type: 'next' });
+      return fromTimelineState(next);
     });
   },
   prevStep: () => {
     set((state) => {
-      const prev = Math.max(state.currentStep - 1, 0);
-      const nextStatus: PlaybackStatus = state.status === 'completed' ? 'paused' : state.status;
-      return { currentStep: prev, status: nextStatus };
+      const next = timelineReducer(toTimelineState(state), { type: 'prev' });
+      return fromTimelineState(next);
     });
   },
 
-  play: () => set({ status: 'playing' }),
-  pause: () => set({ status: 'paused' }),
+  play: () =>
+    set((state) => {
+      const next = timelineReducer(toTimelineState(state), { type: 'play' });
+      return fromTimelineState(next);
+    }),
+  pause: () =>
+    set((state) => {
+      const next = timelineReducer(toTimelineState(state), { type: 'pause' });
+      return fromTimelineState(next);
+    }),
 
   reset: () => {
-    set({ currentStep: 0, status: 'idle' });
+    set((state) => {
+      const next = timelineReducer(toTimelineState(state), { type: 'reset' });
+      return fromTimelineState(next);
+    });
   },
 }));
