@@ -2,6 +2,35 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-06 (P6-M1 SR-01 linear-search closure)
+
+### Today Done
+- Implemented `SR-01 Linear Search` module end-to-end:
+  - step generator (`linearSearch.ts`)
+  - timeline adapter (`linearSearchTimelineAdapter.ts`)
+  - module page (`LinearSearchPage.tsx`)
+  - route registration (`/modules/linear-search`) and registry mark as implemented
+- Added linear-search input/config validation and JSON import/export support with schema checks.
+- Added deterministic tests:
+  - linear-search step generation tests
+  - linear-search timeline replay test (`seek/speed/resume`)
+  - linear-search page-utils JSON/validation deterministic round-trip tests
+- Passed full local quality gate (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P6-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-06)
+
+### Remaining Focus (Next Session)
+- Start P6-M2: `S-04 Shell Sort` module with gap-based timeline playback and deterministic tests.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-06 (P6 planning baseline closed)
 
 ### Today Done

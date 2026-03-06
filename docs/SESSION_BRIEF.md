@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P6 planned (`P6-M1` next)
+- Current phase: P6 in progress (`P6-M2` next)
 - Last local quality gate: `npm run check` (passed, 2026-03-06)
 
 ## 2) What Is Already Done
@@ -31,6 +31,7 @@ Use this file as the first thing to read in a new chat/session.
 - P5 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P5.md`
 - `S-03 Insertion Sort` module landed with timeline playback + deterministic tests
 - `SR-02 Binary Search` module landed with pointer visualization + JSON import/export + deterministic tests
+- `SR-01 Linear Search` module landed with pointer progression + JSON import/export + deterministic tests
 - `/modules` category filter expanded to include `search`
 - P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
@@ -50,7 +51,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P6-M1 implementation: `SR-01 Linear Search` module (pointer progression + JSON import/export + deterministic tests).
+- Start P6-M2 implementation: `S-04 Shell Sort` module (gap-based timeline + deterministic tests + zh/en copy).
 - Keep quality gates and acceptance evidence workflow unchanged (`npm run check` + Playwright refresh before milestone close).
 
 ## 4) Guardrails

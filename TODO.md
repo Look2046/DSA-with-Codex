@@ -122,9 +122,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
   - Done: added `docs/IMPLEMENTATION_PLAN_P6.md` and synced milestone state docs.
 
-- [ ] P6-M1 Add SR-01 linear search module
+- [x] P6-M1 Add SR-01 linear search module
   - DoD: step generator + pointer progression visualization + validation + JSON import/export + deterministic tests.
   - Acceptance: found/not-found deterministic; `export -> import -> replay` deterministic; `npm run check` passes.
+  - Done: added `SR-01` step generator/timeline adapter/page/route/registry entry + JSON import/export validation + deterministic tests (`linearSearch.test.ts`, `linearSearchTimelineReplay.test.ts`, `linearSearchPageUtils.test.ts`).
 
 - [ ] P6-M2 Add S-04 shell sort module
   - DoD: gap-based timeline visualization + deterministic tests + zh/en copy.

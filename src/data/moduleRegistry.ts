@@ -26,6 +26,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'SR-01',
+    name: 'Linear Search',
+    route: '/modules/linear-search',
+    category: 'search',
+    difficulty: 1,
+    implemented: true,
+  },
+  {
     id: 'SR-02',
     name: 'Binary Search',
     route: '/modules/binary-search',

@@ -256,3 +256,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: jump directly to tree modules; continue ad-hoc UX tweaks without new module delivery.
 - Consequences: preserves predictable execution cadence and quality gates while expanding both search and sorting coverage incrementally.
 - Owner: haoyu + codex
+
+## DEC-20260306-28
+- Date: 2026-03-06
+- Status: accepted
+- Context: `SR-01 Linear Search` needs to be introduced with minimal regression risk while preserving the established timeline-engine and dataset-portability conventions.
+- Decision: Implement `SR-01` by reusing `SR-02` page/utils architecture, but with unsorted-array validation, sequential pointer progression (`i`), first-match stop semantics, JSON import/export schema checks, and deterministic step/replay tests.
+- Alternatives considered: deliver SR-01 without JSON parity first; introduce a separate playback runtime for search modules.
+- Consequences: fast delivery with consistent UX/testing standards across search modules; minor duplicated patterns between SR-01/SR-02 remain acceptable for milestone speed.
+- Owner: haoyu + codex
