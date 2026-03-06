@@ -85,6 +85,11 @@ Track actionable tasks here. Keep tasks small and testable.
 - [ ] P4-M3 Module UX/acceptance polish across implemented modules
   - DoD: side-panel/workflow consistency sweep + Playwright acceptance artifacts refresh.
   - Acceptance: interaction walkthrough stable across implemented modules and quality gate remains green.
+  - Progress (2026-03-06):
+    - aligned S-01/S-02 playback status and controls behavior with linear modules
+    - stabilized status block layout in L-03/L-05 to reduce layout jump
+    - hardened L-05 circular queue progression path to avoid app-level runtime crash
+    - unified randomized insertion/push/enqueue value flow across L-01/L-05
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

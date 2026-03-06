@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P4 in progress (`P4-M1` + `P4-M2` closed, `P4-M3` next)
+- Current phase: P4 in progress (`P4-M1` + `P4-M2` closed, `P4-M3` in progress)
 - Last local quality gate: `npm run check` (passed, 2026-03-06)
 
 ## 2) What Is Already Done
@@ -33,11 +33,17 @@ Use this file as the first thing to read in a new chat/session.
 - `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
 - `L-05 Queue` module landed with timeline playback + JSON import/export + deterministic tests
 - `L-02 Dynamic Array` module landed with resize-focused timeline playback + JSON import/export + deterministic tests
+- P4-M3 consistency pass in progress:
+  - S-01/S-02 playback status/step display aligned with linear modules
+  - L-03/L-05 status block layout stabilized to reduce page jitter
+  - L-05 circular queue runtime hardening added (no app crash on full enqueue path)
+  - L-05 circular queue ring pointer positioning refined (F outer / R inner)
+  - auto-randomized insert/push/enqueue value flow aligned across L-01/L-02/L-03(insertAt)/L-04/L-05
 
 ## 3) Next Priority
 
-- Start P4-M3: run module UX polish sweep and Playwright acceptance refresh across implemented modules.
-- Follow-up after P4-M3: close P4 and define next milestone scope.
+- Continue P4-M3: run final acceptance sweep across implemented modules and close remaining UX edge cases.
+- Follow-up after acceptance sweep: close P4 and define next milestone scope.
 
 ## 4) Guardrails
 

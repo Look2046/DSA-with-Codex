@@ -193,3 +193,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: add multiple dynamic-array operations in first iteration; animate resize without explicit migration steps.
 - Consequences: resize semantics are easy to replay and test deterministically, with lower implementation risk; richer operation coverage is deferred to future milestones.
 - Owner: haoyu + codex
+
+## DEC-20260306-21
+- Date: 2026-03-06
+- Status: accepted
+- Context: During P4-M3 interaction polish, queue circular-mode progression (`completed -> next` with full enqueue) surfaced a runtime exception that propagated to route-level crash UI.
+- Decision: Enforce page-level runtime safety for module timeline builds by guarding queue timeline construction and converting runtime failures into form-level feedback, plus pre-validation before completed-to-next progression.
+- Alternatives considered: allow thrown errors to bubble to global route error UI; patch only reducer/playback layer without page-level guards.
+- Consequences: improved resilience and user-facing error clarity under edge operations; slight increase in page-level guard logic.
+- Owner: haoyu + codex
