@@ -23,6 +23,10 @@ const DEFAULT_CONFIG: QueueConfig = {
 
 type QueueMode = 'normal' | 'circular' | 'deque';
 
+function createRandomQueueValue(): number {
+  return Math.floor(Math.random() * 90) + 10;
+}
+
 export function QueuePage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -56,10 +60,23 @@ export function QueuePage() {
     [runtimeMode, t],
   );
 
-  const timelineFrames = useMemo(
-    () => buildQueueTimelineFromInput(queueConfig.queue, queueConfig.operation, runtimeMode, runtimeSeed ?? undefined),
-    [queueConfig, runtimeMode, runtimeSeed],
-  );
+  const timelineResult = useMemo(() => {
+    try {
+      return {
+        frames: buildQueueTimelineFromInput(queueConfig.queue, queueConfig.operation, runtimeMode, runtimeSeed ?? undefined),
+        runtimeError: '',
+      };
+    } catch (caughtError) {
+      return {
+        frames: [],
+        runtimeError: caughtError instanceof Error ? caughtError.message : 'Queue timeline build failed',
+      };
+    }
+  }, [queueConfig, runtimeMode, runtimeSeed]);
+  const timelineFrames = timelineResult.frames;
+  const runtimeError = timelineResult.runtimeError;
+  const effectiveError = error || runtimeError;
+  const isPlayableConfig = hasValidConfig && runtimeError.length === 0;
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const completedQueueText = useMemo(() => {
@@ -138,9 +155,24 @@ export function QueuePage() {
   const handleNextStep = useCallback(() => {
     if (status === 'completed' && operationType !== 'front') {
       const nextQueueInput = completedQueueText;
+      const nextValueInput = operationType === 'enqueue' ? String(createRandomQueueValue()) : valueInput;
+      const resolved = resolveQueueConfig(nextQueueInput, operationType, nextValueInput, runtimeMode, t);
+      if (!resolved.config) {
+        setQueueInput(nextQueueInput);
+        setRuntimeSeed(null);
+        setError(resolved.error);
+        setHasValidConfig(false);
+        return;
+      }
+
       setQueueInput(nextQueueInput);
+      if (operationType === 'enqueue') {
+        setValueInput(nextValueInput);
+      }
       setRuntimeSeed(completedRuntimeSeed);
-      recomputeInputState(nextQueueInput, operationType, valueInput);
+      setError(resolved.error);
+      setHasValidConfig(true);
+      setQueueConfig(resolved.config);
       reset();
       window.setTimeout(() => {
         next();
@@ -148,7 +180,7 @@ export function QueuePage() {
       return;
     }
     next();
-  }, [completedQueueText, completedRuntimeSeed, next, operationType, recomputeInputState, reset, status, valueInput]);
+  }, [completedQueueText, completedRuntimeSeed, next, operationType, reset, runtimeMode, status, t, valueInput]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -237,9 +269,11 @@ export function QueuePage() {
                   setOperationType(nextValue);
                   setQueueInput(nextQueueInput);
                   setRuntimeSeed(nextSeed);
-                  const normalized = nextValue === 'enqueue' ? valueInput : '';
+                  const normalized = nextValue === 'enqueue' ? String(createRandomQueueValue()) : '';
                   if (nextValue !== 'enqueue') {
                     setValueInput('');
+                  } else {
+                    setValueInput(normalized);
                   }
                   recomputeInputState(nextQueueInput, nextValue, normalized);
                 }}
@@ -268,7 +302,7 @@ export function QueuePage() {
             ) : null}
           </div>
 
-          {error ? <p className="form-error">{error}</p> : null}
+          {effectiveError ? <p className="form-error">{effectiveError}</p> : null}
 
           <div className="array-form">
             <label htmlFor="queue-json-input">
@@ -313,16 +347,18 @@ export function QueuePage() {
             {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
           </p>
 
-          <p>{getStepDescription(currentSnapshot, t)}</p>
-          <p className="array-preview">
-            {t('module.l05.currentQueue')}: [{(currentSnapshot?.queueState ?? []).join(', ')}]
-          </p>
-          <p className="array-preview">
-            {t('module.l01.lengthCapacity')}: {currentLength}/{QUEUE_CAPACITY} | FRONT={frontIndex} | REAR={rearIndex}
-          </p>
-          {mode === 'circular' ? (
-            <p className="array-preview">{isWrapped ? t('module.l05.circular.wrapped') : t('module.l05.circular.tip')}</p>
-          ) : null}
+          <div className="module-status-block">
+            <p className="module-status-line">{getStepDescription(currentSnapshot, t)}</p>
+            <p className="array-preview module-status-line">
+              {t('module.l05.currentQueue')}: [{(currentSnapshot?.queueState ?? []).join(', ')}]
+            </p>
+            <p className="array-preview module-status-line">
+              {t('module.l01.lengthCapacity')}: {currentLength}/{QUEUE_CAPACITY} | FRONT={frontIndex} | REAR={rearIndex}
+            </p>
+            <p className={mode === 'circular' ? 'array-preview module-status-line' : 'array-preview module-status-line module-status-placeholder'}>
+              {mode === 'circular' ? (isWrapped ? t('module.l05.circular.wrapped') : t('module.l05.circular.tip')) : '-'}
+            </p>
+          </div>
           <p>
             {t('module.s01.highlight')}:{' '}
             {(currentSnapshot?.highlights ?? [])
@@ -344,6 +380,10 @@ export function QueuePage() {
                   const centerY = 200;
                   const x = centerX + Math.cos(angle) * radius;
                   const y = centerY + Math.sin(angle) * radius;
+                  const ux = Math.cos(angle);
+                  const uy = Math.sin(angle);
+                  const innerOffset = 34;
+                  const outerOffset = 26;
                   const value = currentSnapshot?.bufferState[index] ?? null;
                   const highlight = highlightMap.get(index) ?? 'default';
                   const isFront = index === frontIndex;
@@ -357,8 +397,22 @@ export function QueuePage() {
                       className={`queue-ring-slot bar-${highlight}${isUnused ? ' queue-ring-slot-unused' : ''}`}
                       style={{ left: `${x}px`, top: `${y}px` }}
                     >
-                      {isFront ? <span className="queue-ring-pointer queue-ring-pointer-front">F</span> : null}
-                      {isTail ? <span className="queue-ring-pointer queue-ring-pointer-rear">R</span> : null}
+                      {isFront ? (
+                        <span
+                          className="queue-ring-pointer queue-ring-pointer-front"
+                          style={{ left: `calc(50% + ${ux * outerOffset}px)`, top: `calc(50% + ${uy * outerOffset}px)` }}
+                        >
+                          F
+                        </span>
+                      ) : null}
+                      {isTail ? (
+                        <span
+                          className="queue-ring-pointer queue-ring-pointer-rear"
+                          style={{ left: `calc(50% - ${ux * innerOffset}px)`, top: `calc(50% - ${uy * innerOffset}px)` }}
+                        >
+                          R
+                        </span>
+                      ) : null}
                       <span className="array-cell-index">{index}</span>
                       <strong>{value ?? '∅'}</strong>
                     </div>
@@ -399,19 +453,19 @@ export function QueuePage() {
           </div>
 
           <div className="playback-actions">
-            <button type="button" onClick={play} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
+            <button type="button" onClick={play} disabled={status === 'playing' || !isPlayableConfig || steps.length === 0}>
               {t('playback.play')}
             </button>
             <button type="button" onClick={pause} disabled={status !== 'playing'}>
               {t('playback.pause')}
             </button>
-            <button type="button" onClick={prev} disabled={!hasValidConfig || steps.length === 0}>
+            <button type="button" onClick={prev} disabled={!isPlayableConfig || steps.length === 0}>
               {t('playback.prev')}
             </button>
-            <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>
+            <button type="button" onClick={handleNextStep} disabled={!isPlayableConfig || steps.length === 0}>
               {t('playback.next')}
             </button>
-            <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
+            <button type="button" onClick={reset} disabled={!isPlayableConfig || steps.length === 0}>
               {t('playback.reset')}
             </button>
           </div>

@@ -82,13 +82,11 @@ export function SelectionSortPage() {
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
 
-  const { status, speedMs, currentFrame, totalFrames, setTotalFrames, setStatus, setSpeed, play, pause, next, prev, reset } =
-    useTimelinePlayer(0);
+  const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
   const timelineFrames = useMemo(() => buildSelectionSortTimelineFromInput(inputData), [inputData]);
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
-  const totalSteps = totalFrames;
   const currentSnapshot = steps[currentStep] ?? steps[0];
 
   const maxValue = useMemo(() => {
@@ -109,7 +107,7 @@ export function SelectionSortPage() {
 
   const regenerateData = () => {
     setInputData(createRandomDataset(datasetSize));
-    setStatus('idle');
+    reset();
   };
 
   const speedOptions = [
@@ -158,8 +156,8 @@ export function SelectionSortPage() {
       </div>
 
       <p>
-        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep + 1}/
-        {totalSteps || 0} | {t('playback.status')}: {getStatusLabel(status, t)}
+        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
+        {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
       </p>
 
       <p>
@@ -202,19 +200,19 @@ export function SelectionSortPage() {
       </p>
 
       <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing'}>
+        <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
           {t('playback.play')}
         </button>
         <button type="button" onClick={pause} disabled={status !== 'playing'}>
           {t('playback.pause')}
         </button>
-        <button type="button" onClick={prev}>
+        <button type="button" onClick={prev} disabled={steps.length === 0}>
           {t('playback.prev')}
         </button>
-        <button type="button" onClick={next}>
+        <button type="button" onClick={next} disabled={steps.length === 0}>
           {t('playback.next')}
         </button>
-        <button type="button" onClick={reset}>
+        <button type="button" onClick={reset} disabled={steps.length === 0}>
           {t('playback.reset')}
         </button>
       </div>

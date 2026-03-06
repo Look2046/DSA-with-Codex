@@ -356,6 +356,21 @@ body {
   padding: 4px 8px;
 }
 
+.module-status-block {
+  display: grid;
+  gap: 6px;
+  min-height: 98px;
+  align-content: start;
+}
+
+.module-status-line {
+  margin: 0;
+}
+
+.module-status-placeholder {
+  visibility: hidden;
+}
+
 .bubble-page {
   display: grid;
   gap: 12px;
@@ -614,14 +629,15 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   color: #0b4f90;
+  transform: translate(-50%, -50%);
 }
 
 .queue-ring-pointer-front {
-  top: -16px;
+  color: #0b4f90;
 }
 
 .queue-ring-pointer-rear {
-  bottom: -16px;
+  color: #0b4f90;
 }
 
 .stack-cells {

@@ -935,11 +935,15 @@ export function LinkedListPage() {
         | {t('playback.status')}: {getStatusLabel(status, t)}
       </p>
 
-      <p>{getStepDescription(currentSnapshot, t)}</p>
-      {findResultText ? <p className="array-preview">{findResultText}</p> : null}
-      <p className="array-preview">
-        {t('module.l03.currentList')}: [{currentChainValues.join(', ')}]
-      </p>
+      <div className="module-status-block">
+        <p className="module-status-line">{getStepDescription(currentSnapshot, t)}</p>
+        <p className={findResultText ? 'array-preview module-status-line' : 'array-preview module-status-line module-status-placeholder'}>
+          {findResultText || '-'}
+        </p>
+        <p className="array-preview module-status-line">
+          {t('module.l03.currentList')}: [{currentChainValues.join(', ')}]
+        </p>
+      </div>
       <p>
         {t('module.s01.highlight')}:{' '}
         {(currentSnapshot?.highlights ?? [])
