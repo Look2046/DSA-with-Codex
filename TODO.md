@@ -117,9 +117,22 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: refreshed Playwright acceptance screenshots/report for all implemented modules (`output/playwright/p5m3-*.png`, `output/playwright/p5m3-acceptance-report.txt`) and synced P5 closure docs.
 
 ## P6 (Next Milestone)
-- [ ] P6 planning baseline
+- [x] P6 planning baseline
   - DoD: define P6 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done: added `docs/IMPLEMENTATION_PLAN_P6.md` and synced milestone state docs.
+
+- [ ] P6-M1 Add SR-01 linear search module
+  - DoD: step generator + pointer progression visualization + validation + JSON import/export + deterministic tests.
+  - Acceptance: found/not-found deterministic; `export -> import -> replay` deterministic; `npm run check` passes.
+
+- [ ] P6-M2 Add S-04 shell sort module
+  - DoD: gap-based timeline visualization + deterministic tests + zh/en copy.
+  - Acceptance: fixed input replay deterministic and sorted; `npm run check` passes.
+
+- [ ] P6-M3 Discovery/acceptance refresh after SR-01/S-04
+  - DoD: modules discovery consistency pass + Playwright acceptance artifacts refresh + docs closure sync.
+  - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

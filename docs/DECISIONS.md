@@ -247,3 +247,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: close P5 based on local unit/lint/build checks only; sample-check only newly added modules.
 - Consequences: stronger release confidence and reproducible acceptance evidence; slight extra execution time per milestone closure.
 - Owner: haoyu + codex
+
+## DEC-20260306-27
+- Date: 2026-03-06
+- Status: accepted
+- Context: After P5 closure, next scope needs a clear sequence that balances continued sorting expansion with search-track completeness and keeps closure discipline stable.
+- Decision: Define P6 as a three-milestone sequence: `SR-01 Linear Search` (`P6-M1`), `S-04 Shell Sort` (`P6-M2`), and discovery/acceptance closure refresh (`P6-M3`), tracked in `docs/IMPLEMENTATION_PLAN_P6.md`.
+- Alternatives considered: jump directly to tree modules; continue ad-hoc UX tweaks without new module delivery.
+- Consequences: preserves predictable execution cadence and quality gates while expanding both search and sorting coverage incrementally.
+- Owner: haoyu + codex

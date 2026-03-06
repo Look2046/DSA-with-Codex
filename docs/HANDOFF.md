@@ -2,6 +2,29 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-06 (P6 planning baseline closed)
+
+### Today Done
+- Added `docs/IMPLEMENTATION_PLAN_P6.md` with three executable milestones:
+  - P6-M1 `SR-01 Linear Search`
+  - P6-M2 `S-04 Shell Sort`
+  - P6-M3 discovery/acceptance closure refresh
+- Synced milestone planning state across `SESSION_BRIEF`, `DECISIONS`, and `TODO`.
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: docs planning sync in progress
+- Last verified command: `./scripts/check-doc-links.sh` (pass, 2026-03-06)
+
+### Remaining Focus (Next Session)
+- Start P6-M1 implementation (`SR-01 Linear Search`) with timeline + JSON parity + deterministic tests.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-06 (P5-M3 acceptance closure + P5 closed)
 
 ### Today Done
