@@ -21,6 +21,10 @@ const DEFAULT_CONFIG: StackConfig = {
   operation: { type: 'push', value: 9 },
 };
 
+function createRandomPushValue(): number {
+  return Math.floor(Math.random() * 90) + 10;
+}
+
 export function StackPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -86,7 +90,7 @@ export function StackPage() {
     target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [currentStep, currentSnapshot]);
 
-  const syncInputToCompletedStack = useCallback(() => {
+  const syncInputToCompletedStack = useCallback((nextValueInput = valueInput) => {
     if (!hasValidConfig || steps.length === 0) {
       return;
     }
@@ -99,7 +103,7 @@ export function StackPage() {
 
     reset();
     setStackInput(completedStackText);
-    recomputeInputState(completedStackText, operationType, valueInput);
+    recomputeInputState(completedStackText, operationType, nextValueInput);
   }, [completedStackText, hasValidConfig, operationType, recomputeInputState, reset, stackInput, steps.length, valueInput]);
 
   useEffect(() => {
@@ -156,9 +160,15 @@ export function StackPage() {
     const willComplete = currentStep >= steps.length - 2;
     next();
     if (willComplete) {
+      if (operationType === 'push') {
+        const nextValueInput = String(createRandomPushValue());
+        setValueInput(nextValueInput);
+        syncInputToCompletedStack(nextValueInput);
+        return;
+      }
       syncInputToCompletedStack();
     }
-  }, [currentStep, next, steps.length, syncInputToCompletedStack]);
+  }, [currentStep, next, operationType, steps.length, syncInputToCompletedStack]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -201,9 +211,11 @@ export function StackPage() {
               const next = event.target.value as StackConfig['operation']['type'];
               reset();
               setOperationType(next);
-              const normalized = next === 'push' ? valueInput : '';
+              const normalized = next === 'push' ? String(createRandomPushValue()) : '';
               if (next !== 'push') {
                 setValueInput('');
+              } else {
+                setValueInput(normalized);
               }
               recomputeInputState(stackInput, next, normalized);
             }}

@@ -21,6 +21,10 @@ const DEFAULT_CONFIG: InsertConfig = {
   value: 9,
 };
 
+function createRandomInsertValue(): number {
+  return Math.floor(Math.random() * 90) + 10;
+}
+
 export function ArrayPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -84,7 +88,7 @@ export function ArrayPage() {
     [t],
   );
 
-  const syncInputToCompletedArray = useCallback(() => {
+  const syncInputToCompletedArray = useCallback((nextValueInput = valueInput) => {
     if (!hasValidConfig || steps.length === 0) {
       return;
     }
@@ -95,7 +99,7 @@ export function ArrayPage() {
 
     reset();
     setArrayInput(completedArrayText);
-    recomputeInputState(completedArrayText, indexInput, valueInput);
+    recomputeInputState(completedArrayText, indexInput, nextValueInput);
   }, [arrayInput, completedArrayText, hasValidConfig, indexInput, recomputeInputState, reset, steps.length, valueInput]);
 
   useEffect(() => {
@@ -127,7 +131,9 @@ export function ArrayPage() {
     const willComplete = currentStep >= steps.length - 2;
     next();
     if (willComplete) {
-      syncInputToCompletedArray();
+      const nextValueInput = String(createRandomInsertValue());
+      setValueInput(nextValueInput);
+      syncInputToCompletedArray(nextValueInput);
     }
   }, [currentStep, next, steps.length, syncInputToCompletedArray]);
 

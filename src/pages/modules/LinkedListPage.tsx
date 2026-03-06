@@ -46,6 +46,10 @@ const HEAD_NODE_ID = '__head_node__';
 const NODE_WIDTH = 126;
 const NODE_GAP = 16;
 
+function createRandomLinkedValue(): number {
+  return Math.floor(Math.random() * 90) + 10;
+}
+
 function getStatusLabel(status: PlaybackStatus, t: ReturnType<typeof useI18n>['t']): string {
   switch (status) {
     case 'idle':
@@ -314,7 +318,7 @@ export function LinkedListPage() {
   const currentLogicalStep = logicalStepByIndex[currentStep] ?? 0;
   const totalLogicalSteps = logicalStepByIndex[logicalStepByIndex.length - 1] ?? 0;
 
-  const syncInputToCompletedList = useCallback(() => {
+  const syncInputToCompletedList = useCallback((nextValueInput = valueInput) => {
     if (!hasValidConfig || steps.length === 0) {
       return;
     }
@@ -331,7 +335,7 @@ export function LinkedListPage() {
     // Prepare for a clean next-round step-0 state.
     reset();
     setListInput(completedListText);
-    recomputeInputState(completedListText, operationType, valueInput, indexInput);
+    recomputeInputState(completedListText, operationType, nextValueInput, indexInput);
   }, [completedListText, hasValidConfig, listInput, steps, reset, recomputeInputState, operationType, valueInput, indexInput]);
 
   useEffect(() => {
@@ -343,9 +347,15 @@ export function LinkedListPage() {
     const willComplete = currentStep >= steps.length - 2;
     next();
     if (willComplete) {
+      if (operationType === 'insertAt') {
+        const nextValueInput = String(createRandomLinkedValue());
+        setValueInput(nextValueInput);
+        syncInputToCompletedList(nextValueInput);
+        return;
+      }
       syncInputToCompletedList();
     }
-  }, [currentStep, next, steps.length, syncInputToCompletedList]);
+  }, [currentStep, next, operationType, steps.length, syncInputToCompletedList]);
 
   const handlePlay = useCallback(() => {
     play();
@@ -826,11 +836,15 @@ export function LinkedListPage() {
             value={operationType}
             onChange={(event) => {
               const nextOperationType = event.target.value as LinkedListOperation['type'];
+              const normalizedValueInput = nextOperationType === 'insertAt' ? String(createRandomLinkedValue()) : valueInput;
               reset();
               prevNodeRects.current = new Map();
               skipNextLayoutAnimationRef.current = true;
               setOperationType(nextOperationType);
-              recomputeInputState(listInput, nextOperationType, valueInput, indexInput);
+              if (nextOperationType === 'insertAt') {
+                setValueInput(normalizedValueInput);
+              }
+              recomputeInputState(listInput, nextOperationType, normalizedValueInput, indexInput);
             }}
           >
             <option value="find">{t('module.l03.operation.find')}</option>

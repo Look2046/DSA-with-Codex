@@ -21,6 +21,10 @@ const DEFAULT_CONFIG: DynamicArrayConfig = {
   operation: { type: 'append', value: 9 },
 };
 
+function createRandomAppendValue(): number {
+  return Math.floor(Math.random() * 90) + 10;
+}
+
 export function DynamicArrayPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -94,7 +98,7 @@ export function DynamicArrayPage() {
     target.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'auto' });
   }, [currentStep, currentSnapshot]);
 
-  const syncInputToCompletedState = useCallback(() => {
+  const syncInputToCompletedState = useCallback((nextValueInput = valueInput) => {
     if (!hasValidConfig || steps.length === 0) {
       return;
     }
@@ -106,7 +110,7 @@ export function DynamicArrayPage() {
     reset();
     setArrayInput(completedArrayText);
     setCapacityInput(completedCapacityText);
-    recomputeInputState(completedArrayText, completedCapacityText, valueInput);
+    recomputeInputState(completedArrayText, completedCapacityText, nextValueInput);
   }, [arrayInput, capacityInput, completedArrayText, completedCapacityText, hasValidConfig, recomputeInputState, reset, steps.length, valueInput]);
 
   useEffect(() => {
@@ -182,7 +186,9 @@ export function DynamicArrayPage() {
     const willComplete = currentStep >= steps.length - 2;
     next();
     if (willComplete) {
-      syncInputToCompletedState();
+      const nextValueInput = String(createRandomAppendValue());
+      setValueInput(nextValueInput);
+      syncInputToCompletedState(nextValueInput);
       return;
     }
 
