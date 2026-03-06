@@ -362,7 +362,7 @@ export function DynamicArrayPage() {
         >
           {t('module.l02.meta.currentCapacity')}: {currentCapacity} | {t('module.l02.meta.size')}: {currentLength}
         </p>
-        <p className={isCapacityFull ? 'form-error dynamic-array-status-line' : 'dynamic-array-status-line dynamic-array-status-placeholder'}>
+        <p className={isCapacityFull ? 'dynamic-array-capacity-full dynamic-array-status-line' : 'dynamic-array-status-line dynamic-array-status-placeholder'}>
           {isCapacityFull ? t('module.l02.fullWarning') : '-'}
         </p>
         <p className={isResizePhase || isPromotePhase ? 'array-preview dynamic-array-status-line' : 'array-preview dynamic-array-status-line dynamic-array-status-placeholder'}>

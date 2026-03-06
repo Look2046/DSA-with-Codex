@@ -202,3 +202,39 @@ Record architecture or workflow decisions here.
 - Alternatives considered: allow thrown errors to bubble to global route error UI; patch only reducer/playback layer without page-level guards.
 - Consequences: improved resilience and user-facing error clarity under edge operations; slight increase in page-level guard logic.
 - Owner: haoyu + codex
+
+## DEC-20260306-22
+- Date: 2026-03-06
+- Status: accepted
+- Context: Final P4-M3 acceptance sweep showed `L-02` reused validation-error styling for a non-blocking capacity-full hint, causing cross-module UX semantics drift and false-positive error signals in automated checks.
+- Decision: Keep capacity-full copy as informative warning, but render it with module status-warning style (`dynamic-array-capacity-full`) instead of `form-error`; then close P4 after full Playwright acceptance artifact refresh and green local quality gate.
+- Alternatives considered: keep warning in `form-error`; remove capacity-full hint entirely.
+- Consequences: clearer error-vs-warning semantics and cleaner acceptance signals while preserving user guidance before resize.
+- Owner: haoyu + codex
+
+## DEC-20260306-23
+- Date: 2026-03-06
+- Status: accepted
+- Context: After closing P4, next work needs explicit sequencing to avoid ad-hoc expansion and keep delivery quality stable while introducing a new module category.
+- Decision: Define P5 as a three-milestone sequence: `S-03 Insertion Sort` (`P5-M1`), `SR-02 Binary Search` (`P5-M2`), and discovery/acceptance refresh for search-track expansion (`P5-M3`), tracked in `docs/IMPLEMENTATION_PLAN_P5.md`.
+- Alternatives considered: continue polishing existing modules only; start tree modules directly before adding search baseline.
+- Consequences: preserves momentum with controlled scope, introduces search-category baseline safely, and keeps acceptance discipline explicit before P5 closure.
+- Owner: haoyu + codex
+
+## DEC-20260306-24
+- Date: 2026-03-06
+- Status: accepted
+- Context: P5 first implementation milestone should extend sorting coverage with minimal architecture churn and maintain playback determinism conventions from S-01/S-02.
+- Decision: Implement `S-03 Insertion Sort` by reusing existing sorting-page interaction patterns, timeline adapter contracts, and deterministic replay tests; register it as implemented in module routing/registry.
+- Alternatives considered: start binary-search module first; bundle S-03 and SR-02 in one larger patch.
+- Consequences: controlled milestone scope and low regression risk, with immediate coverage expansion in sorting track before introducing new search-category behavior in P5-M2.
+- Owner: haoyu + codex
+
+## DEC-20260306-25
+- Date: 2026-03-06
+- Status: accepted
+- Context: P5-M2 introduces the first dedicated search module and requires both new interaction semantics (low/mid/high pointers) and dataset portability consistency.
+- Decision: Implement `SR-02 Binary Search` with sorted-input prevalidation, pointer-state timeline steps, JSON import/export schema checks, and deterministic replay tests; extend module category model to include `search` so discovery metadata remains semantically correct.
+- Alternatives considered: model SR-02 under `sort` category temporarily; defer JSON parity or category extension to P5-M3.
+- Consequences: cleaner taxonomy and lower behavior ambiguity for search modules; small incremental complexity added to modules filter/category handling.
+- Owner: haoyu + codex

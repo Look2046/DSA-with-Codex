@@ -9,14 +9,28 @@ export function ModulesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const filter = (searchParams.get('category') as ModuleFilter | null) ?? 'all';
-  const activeFilter: ModuleFilter = filter === 'linear' || filter === 'sort' ? filter : 'all';
+  const activeFilter: ModuleFilter = filter === 'linear' || filter === 'sort' || filter === 'search' ? filter : 'all';
   const visibleModules = useMemo(() => filterModules(moduleRegistry, activeFilter), [activeFilter]);
 
   const filterOptions: Array<{ value: ModuleFilter; label: string }> = [
     { value: 'all', label: t('modules.filter.all') },
     { value: 'linear', label: t('modules.filter.linear') },
     { value: 'sort', label: t('modules.filter.sort') },
+    { value: 'search', label: t('modules.filter.search') },
   ];
+
+  const getCategoryLabel = (category: ModuleFilter): string => {
+    if (category === 'linear') {
+      return t('modules.filter.linear');
+    }
+    if (category === 'sort') {
+      return t('modules.filter.sort');
+    }
+    if (category === 'search') {
+      return t('modules.filter.search');
+    }
+    return t('modules.filter.all');
+  };
 
   const updateFilter = (value: ModuleFilter) => {
     if (value === 'all') {
@@ -60,7 +74,7 @@ export function ModulesPage() {
                 </span>
               </header>
               <p className="module-meta">
-                {t('modules.meta.category')}: {moduleItem.category === 'linear' ? t('modules.filter.linear') : t('modules.filter.sort')}
+                {t('modules.meta.category')}: {getCategoryLabel(moduleItem.category)}
                 {' | '}
                 {t('modules.meta.difficulty')}: {formatDifficulty(moduleItem.difficulty)}
               </p>

@@ -71,7 +71,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
   - Done: added L-04 page/route/registry entry, stack step generator, JSON import/export + validation, and deterministic replay tests.
 
-## P4 (Next Milestone)
+## P4 (Closed)
 - [x] P4-M1 Add L-05 queue module
   - DoD: queue step generator + timeline page + validation + JSON import/export + deterministic tests.
   - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
@@ -82,7 +82,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: fixed input can deterministically replay resize path; `npm run check` passes.
   - Done: added L-02 page/route/registry entry, resize+migration step generator, JSON import/export + validation, and deterministic replay/round-trip tests.
 
-- [ ] P4-M3 Module UX/acceptance polish across implemented modules
+- [x] P4-M3 Module UX/acceptance polish across implemented modules
   - DoD: side-panel/workflow consistency sweep + Playwright acceptance artifacts refresh.
   - Acceptance: interaction walkthrough stable across implemented modules and quality gate remains green.
   - Progress (2026-03-06):
@@ -90,6 +90,30 @@ Track actionable tasks here. Keep tasks small and testable.
     - stabilized status block layout in L-03/L-05 to reduce layout jump
     - hardened L-05 circular queue progression path to avoid app-level runtime crash
     - unified randomized insertion/push/enqueue value flow across L-01/L-05
+  - Done (2026-03-06):
+    - refreshed Playwright acceptance screenshots and report across all implemented modules (`output/playwright/p4m3-*.png`, `output/playwright/p4m3-acceptance-report.txt`)
+    - adjusted L-02 capacity-full warning semantics (status-style warning instead of validation-error style)
+    - local quality gate re-verified (`npm run check` pass)
+
+## P5 (Next Milestone)
+- [x] P5 planning baseline
+  - DoD: define P5 milestone scope/order and acceptance criteria in docs.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done: added `docs/IMPLEMENTATION_PLAN_P5.md` and synced milestone state docs.
+
+- [x] P5-M1 Add S-03 insertion sort module
+  - DoD: step generator + timeline page + deterministic tests + zh/en copy.
+  - Acceptance: fixed input replay deterministic; `npm run check` passes.
+  - Done: added `S-03` step generator/timeline adapter/page/route/registry entry + deterministic tests (`insertionSort.test.ts`, `insertionTimelineReplay.test.ts`) + zh/en i18n copy.
+
+- [x] P5-M2 Add SR-02 binary search module
+  - DoD: binary-search pointer visualization + validation + JSON import/export + deterministic tests.
+  - Acceptance: found/not-found cases deterministic; `export -> import -> replay` deterministic; `npm run check` passes.
+  - Done: added `SR-02` step generator/timeline adapter/page/route/registry entry + JSON import/export validation + deterministic tests (`binarySearch.test.ts`, `binarySearchTimelineReplay.test.ts`, `binarySearchPageUtils.test.ts`).
+
+- [ ] P5-M3 Discovery/acceptance refresh for search-track expansion
+  - DoD: `/modules` category coverage update + Playwright acceptance artifacts refresh + docs closure sync.
+  - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

@@ -2,6 +2,117 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-06 (P5-M2 SR-02 binary-search closure)
+
+### Today Done
+- Implemented `SR-02 Binary Search` module end-to-end:
+  - step generator (`binarySearch.ts`)
+  - timeline adapter (`binarySearchTimelineAdapter.ts`)
+  - module page (`BinarySearchPage.tsx`)
+  - route registration (`/modules/binary-search`) and registry mark as implemented
+- Added binary-search input/config validation and JSON import/export support with schema checks.
+- Added deterministic tests:
+  - binary-search step generation tests
+  - binary-search timeline replay test (`seek/speed/resume`)
+  - binary-search page-utils JSON/validation deterministic round-trip tests
+- Expanded `/modules` category filter support with `search` category label/path behavior.
+- Passed full local quality gate (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P5-M2 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-06)
+
+### Remaining Focus (Next Session)
+- Execute P5-M3 closure:
+  - refresh Playwright acceptance artifacts across all implemented modules (including S-03/SR-02)
+  - finalize docs sync and close P5 milestone
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+## 2026-03-06 (P5-M1 S-03 insertion-sort closure)
+
+### Today Done
+- Implemented `S-03 Insertion Sort` module end-to-end:
+  - step generator (`insertionSort.ts`)
+  - timeline adapter (`insertionTimelineAdapter.ts`)
+  - module page (`InsertionSortPage.tsx`)
+  - route registration (`/modules/insertion-sort`) and registry mark as implemented
+- Added deterministic tests:
+  - insertion-sort step generation tests
+  - insertion-sort timeline replay test (`seek/speed/resume`)
+- Added zh/en localized copy for S-03 step descriptions and pseudocode.
+- Passed full local quality gate (`npm run check`).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + docs updates in progress (P5-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-06)
+
+### Remaining Focus (Next Session)
+- Start P5-M2: `SR-02 Binary Search` module with pointer visualization, validation, and JSON import/export parity.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+## 2026-03-06 (P5 planning baseline closed)
+
+### Today Done
+- Defined and recorded P5 execution baseline in `docs/IMPLEMENTATION_PLAN_P5.md`:
+  - P5-M1 `S-03 Insertion Sort`
+  - P5-M2 `SR-02 Binary Search`
+  - P5-M3 discovery/acceptance refresh for search-track expansion
+- Synced milestone tracking state in `SESSION_BRIEF`, `DECISIONS`, and `TODO`.
+- Re-verified docs quality gate (`./scripts/check-doc-links.sh` pass).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: docs planning sync in progress
+- Last verified command: `./scripts/check-doc-links.sh` (pass, 2026-03-06)
+
+### Remaining Focus (Next Session)
+- Start P5-M1 implementation (`S-03 Insertion Sort`) with deterministic step/replay tests and route/registry updates.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+## 2026-03-06 (P4-M3 acceptance closure + P4 closed)
+
+### Today Done
+- Completed final P4-M3 acceptance refresh across all implemented modules:
+  - generated Playwright screenshots for `S-01`/`S-02`/`L-01`/`L-02`/`L-03`/`L-04`/`L-05` under `output/playwright/p4m3-*.png`
+  - generated consolidated acceptance report `output/playwright/p4m3-acceptance-report.txt`
+- Closed one remaining UX semantics gap in `L-02 Dynamic Array`:
+  - switched capacity-full hint from validation-error style (`form-error`) to status-warning style (`dynamic-array-capacity-full`)
+  - avoided acceptance false positives while preserving visual emphasis
+- Re-verified full local quality gate after patch (`npm run check` pass, 2026-03-06).
+
+### Current State
+- Branch: `feat/p2-timeline-engine`
+- Working tree status: code + acceptance artifacts + docs sync in progress
+- Last verified command: `npm run check` (pass, 2026-03-06)
+
+### Remaining Focus (Next Session)
+- Start P5 planning baseline:
+  - define milestone order and acceptance boundaries for next module/UX tranche
+  - sync planning state across `SESSION_BRIEF`, `DECISIONS`, and `TODO`
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p2-timeline-engine
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-06 (P4-M3 consistency pass in progress)
 
 ### Today Done

@@ -10,6 +10,8 @@ import { BubbleSortPage } from '../pages/modules/BubbleSortPage';
 import { DynamicArrayPage } from '../pages/modules/DynamicArrayPage';
 import { LinkedListPage } from '../pages/modules/LinkedListPage';
 import { SelectionSortPage } from '../pages/modules/SelectionSortPage';
+import { InsertionSortPage } from '../pages/modules/InsertionSortPage';
+import { BinarySearchPage } from '../pages/modules/BinarySearchPage';
 import { StackPage } from '../pages/modules/StackPage';
 import { QueuePage } from '../pages/modules/QueuePage';
 
@@ -23,6 +25,8 @@ export const router = createBrowserRouter([
       { path: 'modules/sorting', element: <SortingOverviewPage /> },
       { path: 'modules/bubble-sort', element: <BubbleSortPage /> },
       { path: 'modules/selection-sort', element: <SelectionSortPage /> },
+      { path: 'modules/insertion-sort', element: <InsertionSortPage /> },
+      { path: 'modules/binary-search', element: <BinarySearchPage /> },
       { path: 'modules/array', element: <ArrayPage /> },
       { path: 'modules/dynamic-array', element: <DynamicArrayPage /> },
       { path: 'modules/linked-list', element: <LinkedListPage /> },

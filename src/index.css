@@ -431,6 +431,7 @@ body {
   min-height: 22px;
   border-radius: 8px 8px 4px 4px;
   display: flex;
+  position: relative;
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 4px;
@@ -508,6 +509,23 @@ body {
 
 .legend-inserted {
   background: #e4f1ff;
+}
+
+.binary-search-stage-head {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.binary-bar-pointer {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0b4f90;
+  line-height: 1;
 }
 
 .array-page {

@@ -18,6 +18,22 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'S-03',
+    name: 'Insertion Sort',
+    route: '/modules/insertion-sort',
+    category: 'sort',
+    difficulty: 1,
+    implemented: true,
+  },
+  {
+    id: 'SR-02',
+    name: 'Binary Search',
+    route: '/modules/binary-search',
+    category: 'search',
+    difficulty: 1,
+    implemented: true,
+  },
+  {
     id: 'L-01',
     name: 'Array',
     route: '/modules/array',
