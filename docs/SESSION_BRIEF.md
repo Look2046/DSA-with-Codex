@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P5 in progress (`P5-M1` + `P5-M2` closed, `P5-M3` next)
+- Current phase: P5 closed; P6 planning next
 - Last local quality gate: `npm run check` (passed, 2026-03-06)
 
 ## 2) What Is Already Done
@@ -32,6 +32,7 @@ Use this file as the first thing to read in a new chat/session.
 - `S-03 Insertion Sort` module landed with timeline playback + deterministic tests
 - `SR-02 Binary Search` module landed with pointer visualization + JSON import/export + deterministic tests
 - `/modules` category filter expanded to include `search`
+- P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
 - `S-02 Selection Sort` module landed with timeline playback + deterministic tests
 - `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
@@ -48,8 +49,8 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Execute P5-M3 closure pass: refresh cross-module acceptance artifacts (including S-03/SR-02) and finalize docs for P5 closure.
-- Keep quality gates and acceptance evidence workflow unchanged (`npm run check` + Playwright refresh before milestone close).
+- Start P6 planning baseline: define next module/UX scope, boundaries, and acceptance criteria.
+- Keep current delivery quality gates stable while planning next milestones.
 
 ## 4) Guardrails
 

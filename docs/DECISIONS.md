@@ -238,3 +238,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: model SR-02 under `sort` category temporarily; defer JSON parity or category extension to P5-M3.
 - Consequences: cleaner taxonomy and lower behavior ambiguity for search modules; small incremental complexity added to modules filter/category handling.
 - Owner: haoyu + codex
+
+## DEC-20260306-26
+- Date: 2026-03-06
+- Status: accepted
+- Context: After landing `S-03` and `SR-02`, P5 needs explicit acceptance evidence before closure to avoid hidden cross-module regressions.
+- Decision: Close P5 only after a full Playwright walkthrough over all implemented modules and archive artifacts under `output/playwright/p5m3-*.png` with a consolidated acceptance report.
+- Alternatives considered: close P5 based on local unit/lint/build checks only; sample-check only newly added modules.
+- Consequences: stronger release confidence and reproducible acceptance evidence; slight extra execution time per milestone closure.
+- Owner: haoyu + codex

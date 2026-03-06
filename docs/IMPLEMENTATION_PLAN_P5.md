@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P5
 
-Status: in progress (`P5-M1` + `P5-M2` completed, `P5-M3` next)
+Status: closed (`P5-M1` + `P5-M2` + `P5-M3` completed)
 Branch model: `feat/*` per milestone
 Primary goal: expand beyond current linear baseline with one new sorting module + one search module, while keeping cross-module delivery quality stable
 

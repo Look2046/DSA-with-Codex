@@ -95,7 +95,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - adjusted L-02 capacity-full warning semantics (status-style warning instead of validation-error style)
     - local quality gate re-verified (`npm run check` pass)
 
-## P5 (Next Milestone)
+## P5 (Closed)
 - [x] P5 planning baseline
   - DoD: define P5 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -111,9 +111,15 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: found/not-found cases deterministic; `export -> import -> replay` deterministic; `npm run check` passes.
   - Done: added `SR-02` step generator/timeline adapter/page/route/registry entry + JSON import/export validation + deterministic tests (`binarySearch.test.ts`, `binarySearchTimelineReplay.test.ts`, `binarySearchPageUtils.test.ts`).
 
-- [ ] P5-M3 Discovery/acceptance refresh for search-track expansion
+- [x] P5-M3 Discovery/acceptance refresh for search-track expansion
   - DoD: `/modules` category coverage update + Playwright acceptance artifacts refresh + docs closure sync.
   - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
+  - Done: refreshed Playwright acceptance screenshots/report for all implemented modules (`output/playwright/p5m3-*.png`, `output/playwright/p5m3-acceptance-report.txt`) and synced P5 closure docs.
+
+## P6 (Next Milestone)
+- [ ] P6 planning baseline
+  - DoD: define P6 milestone scope/order and acceptance criteria in docs.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
