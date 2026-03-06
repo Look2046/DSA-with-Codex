@@ -112,7 +112,7 @@ export function ArrayPage() {
       return;
     }
 
-    if (currentSnapshot?.action !== 'insert' && currentSnapshot?.action !== 'completed') {
+    if (currentSnapshot?.action !== 'completed') {
       return;
     }
 
@@ -121,7 +121,9 @@ export function ArrayPage() {
     }
 
     const timer = window.setTimeout(() => {
-      syncInputToCompletedArray();
+      const nextValueInput = String(createRandomInsertValue());
+      setValueInput(nextValueInput);
+      syncInputToCompletedArray(nextValueInput);
     }, 0);
 
     return () => window.clearTimeout(timer);

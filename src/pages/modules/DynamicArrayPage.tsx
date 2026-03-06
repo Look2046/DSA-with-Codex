@@ -127,7 +127,9 @@ export function DynamicArrayPage() {
     }
 
     const timer = window.setTimeout(() => {
-      syncInputToCompletedState();
+      const nextValueInput = String(createRandomAppendValue());
+      setValueInput(nextValueInput);
+      syncInputToCompletedState(nextValueInput);
     }, 0);
 
     return () => window.clearTimeout(timer);
