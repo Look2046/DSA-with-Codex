@@ -7,6 +7,7 @@ import { NotFoundPage } from '../pages/NotFoundPage';
 import { SortingOverviewPage } from '../pages/SortingOverviewPage';
 import { ArrayPage } from '../pages/modules/ArrayPage';
 import { BubbleSortPage } from '../pages/modules/BubbleSortPage';
+import { DynamicArrayPage } from '../pages/modules/DynamicArrayPage';
 import { LinkedListPage } from '../pages/modules/LinkedListPage';
 import { SelectionSortPage } from '../pages/modules/SelectionSortPage';
 import { StackPage } from '../pages/modules/StackPage';
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: 'modules/bubble-sort', element: <BubbleSortPage /> },
       { path: 'modules/selection-sort', element: <SelectionSortPage /> },
       { path: 'modules/array', element: <ArrayPage /> },
+      { path: 'modules/dynamic-array', element: <DynamicArrayPage /> },
       { path: 'modules/linked-list', element: <LinkedListPage /> },
       { path: 'modules/stack', element: <StackPage /> },
       { path: 'modules/queue', element: <QueuePage /> },

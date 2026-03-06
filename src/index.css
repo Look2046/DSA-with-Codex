@@ -696,6 +696,88 @@ body {
   background: #f7fafc;
 }
 
+.dynamic-array-cell-out {
+  border-style: dashed;
+  opacity: 0.42;
+  background: #f3f6fa;
+}
+
+.dynamic-array-dual {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dynamic-array-promote {
+  animation: dynamic-array-promote-up 0.45s ease;
+  width: 100%;
+  min-width: 0;
+}
+
+.dynamic-array-row-label {
+  margin: 0 0 4px;
+}
+
+.dynamic-array-capacity-full {
+  font-weight: 700;
+  color: #b42318;
+}
+
+.dynamic-array-capacity-flash {
+  animation: dynamic-array-flash 0.7s ease;
+}
+
+.dynamic-array-status-lines {
+  display: grid;
+  gap: 6px;
+  min-height: 132px;
+  align-content: start;
+}
+
+.dynamic-array-status-line {
+  margin: 0;
+}
+
+.dynamic-array-status-placeholder {
+  visibility: hidden;
+}
+
+.dynamic-array-stage-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.dynamic-array-cells-row {
+  width: max-content;
+  min-width: 100%;
+  overflow: visible;
+}
+
+@keyframes dynamic-array-promote-up {
+  from {
+    transform: translateY(12px);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dynamic-array-flash {
+  0%,
+  100% {
+    background: transparent;
+  }
+  50% {
+    background: #ffe8e8;
+  }
+}
+
 .array-cell-index {
   font-size: 0.72rem;
   color: #5b728d;

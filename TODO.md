@@ -77,9 +77,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `export -> import -> replay` deterministic; `npm run check` passes.
   - Done: added L-05 page/route/registry entry, queue step generator, JSON import/export + validation, and deterministic replay tests.
 
-- [ ] P4-M2 Add L-02 dynamic array module
+- [x] P4-M2 Add L-02 dynamic array module
   - DoD: dynamic resize visualization + timeline playback + validation + deterministic tests.
   - Acceptance: fixed input can deterministically replay resize path; `npm run check` passes.
+  - Done: added L-02 page/route/registry entry, resize+migration step generator, JSON import/export + validation, and deterministic replay/round-trip tests.
 
 - [ ] P4-M3 Module UX/acceptance polish across implemented modules
   - DoD: side-panel/workflow consistency sweep + Playwright acceptance artifacts refresh.

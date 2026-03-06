@@ -31,7 +31,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/dynamic-array',
     category: 'linear',
     difficulty: 2,
-    implemented: false,
+    implemented: true,
   },
   {
     id: 'L-03',

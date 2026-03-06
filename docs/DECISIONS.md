@@ -184,3 +184,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: build queue with a separate playback runtime; ship queue without JSON/test parity first.
 - Consequences: lower integration risk and faster delivery, at the cost of deferring deeper queue-specific visual sophistication (for example circular-buffer rendering) to later iterations.
 - Owner: haoyu + codex
+
+## DEC-20260306-20
+- Date: 2026-03-06
+- Status: accepted
+- Context: `L-02 Dynamic Array` must clearly demonstrate resize behavior while staying compatible with existing module delivery conventions (timeline engine, JSON portability, deterministic replay tests).
+- Decision: Model `L-02` as append-focused runtime with boundary-triggered doubling resize and explicit migration steps, then deliver it through the existing timeline/page/utils/testing pattern used by L-04/L-05.
+- Alternatives considered: add multiple dynamic-array operations in first iteration; animate resize without explicit migration steps.
+- Consequences: resize semantics are easy to replay and test deterministically, with lower implementation risk; richer operation coverage is deferred to future milestones.
+- Owner: haoyu + codex
