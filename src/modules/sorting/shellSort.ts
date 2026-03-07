@@ -6,6 +6,7 @@ export type ShellSortStep = AnimationStep & {
   indices: number[];
   gap: number;
   currentValue: number | null;
+  holeIndex: number | null;
 };
 
 function cloneArray(values: number[]): number[] {
@@ -26,6 +27,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
     indices: [],
     gap: n <= 1 ? 0 : Math.floor(n / 2),
     currentValue: null,
+    holeIndex: null,
   });
 
   if (n <= 1) {
@@ -38,6 +40,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
       indices: [],
       gap: 0,
       currentValue: null,
+      holeIndex: null,
     });
     return steps;
   }
@@ -54,6 +57,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
       indices: [],
       gap,
       currentValue: null,
+      holeIndex: null,
     });
 
     for (let i = gap; i < n; i += 1) {
@@ -69,6 +73,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
         indices: [i],
         gap,
         currentValue,
+        holeIndex: i,
       });
 
       while (j >= gap) {
@@ -84,6 +89,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
           indices: [j - gap, j],
           gap,
           currentValue,
+          holeIndex: j,
         });
 
         if (arr[j - gap] <= currentValue) {
@@ -95,14 +101,15 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
           description: '',
           codeLines: [6],
           highlights: [
-            { index: j - gap, type: 'swapping' },
-            { index: j, type: 'swapping' },
+            { index: j - gap, type: 'moving' },
+            { index: j, type: 'new-node' },
           ],
           arrayState: cloneArray(arr),
           action: 'shift',
           indices: [j - gap, j],
           gap,
           currentValue,
+          holeIndex: j - gap,
         });
 
         j -= gap;
@@ -112,12 +119,13 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
       steps.push({
         description: '',
         codeLines: [7],
-        highlights: [{ index: j, type: 'swapping' }],
+        highlights: [{ index: j, type: 'new-node' }],
         arrayState: cloneArray(arr),
         action: 'insert',
         indices: [j],
         gap,
         currentValue,
+        holeIndex: null,
       });
     }
 
@@ -133,6 +141,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
     indices: [],
     gap: 0,
     currentValue: null,
+    holeIndex: null,
   });
 
   return steps;

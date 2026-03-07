@@ -10,6 +10,7 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 const DEFAULT_SIZE = 8;
 const MIN_SIZE = 5;
 const MAX_SIZE = 20;
+const SHIFT_FOCUS_MIN_SPEED = 900;
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
@@ -52,7 +53,7 @@ function getStepDescription(step: ShellSortStep | undefined, t: ReturnType<typeo
   }
 
   if (step.action === 'shift') {
-    return `${t('module.s04.step.shift')} ${step.indices[0]} ${t('module.s01.step.and')} ${step.indices[1]}`;
+    return `${t('module.s04.step.shift')} ${step.indices[0]} -> ${step.indices[1]}`;
   }
 
   if (step.action === 'insert') {
@@ -72,6 +73,12 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   if (type === 'sorted') {
     return t('module.s01.highlight.sorted');
   }
+  if (type === 'moving') {
+    return t('module.s04.highlight.shifting');
+  }
+  if (type === 'new-node') {
+    return t('module.s04.highlight.inserting');
+  }
   return t('module.s01.highlight.default');
 }
 
@@ -81,6 +88,7 @@ export function ShellSortPage() {
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
+  const [manualSpeedMs, setManualSpeedMs] = useState(700);
 
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
@@ -88,6 +96,14 @@ export function ShellSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const isShiftFocusStage =
+    currentSnapshot?.holeIndex !== null && (currentSnapshot?.action === 'compare' || currentSnapshot?.action === 'shift');
+  const shouldFocusShift = status === 'playing' && isShiftFocusStage;
+  const targetSpeedMs = shouldFocusShift ? Math.max(manualSpeedMs, SHIFT_FOCUS_MIN_SPEED) : manualSpeedMs;
+  const isAutoSlowActive = shouldFocusShift && targetSpeedMs !== manualSpeedMs;
+  const holeIndex = currentSnapshot?.holeIndex ?? null;
+  const shiftFrom = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[0] : null;
+  const shiftTo = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[1] : null;
 
   const maxValue = useMemo(() => {
     const values = currentSnapshot?.arrayState ?? inputData;
@@ -104,6 +120,12 @@ export function ShellSortPage() {
     setTotalFrames(steps.length);
     reset();
   }, [reset, setTotalFrames, steps.length]);
+
+  useEffect(() => {
+    if (speedMs !== targetSpeedMs) {
+      setSpeed(targetSpeedMs);
+    }
+  }, [setSpeed, speedMs, targetSpeedMs]);
 
   const regenerateData = () => {
     setInputData(createRandomDataset(datasetSize));
@@ -146,8 +168,11 @@ export function ShellSortPage() {
             <button
               key={option.key}
               type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
+              className={manualSpeedMs === option.value ? 'speed-active' : ''}
+              onClick={() => {
+                setManualSpeedMs(option.value);
+                setSpeed(option.value);
+              }}
             >
               {t(option.key)}
             </button>
@@ -166,8 +191,16 @@ export function ShellSortPage() {
       <p>{getStepDescription(currentSnapshot, t)}</p>
       <p>
         {t('module.s04.meta.gap')}: {currentSnapshot?.gap ?? '-'} | {t('module.s04.meta.heldValue')}:{' '}
-        {currentSnapshot?.currentValue ?? '-'}
+        {currentSnapshot?.currentValue ?? '-'} | {t('module.s04.meta.hole')}: {holeIndex ?? '-'}
       </p>
+      {shiftFrom !== null && shiftTo !== null ? (
+        <p className="shell-shift-hint">
+          {t('module.s04.meta.shiftPath')}: {shiftFrom}
+          {' -> '}
+          {shiftTo}
+        </p>
+      ) : null}
+      {isAutoSlowActive ? <p className="shell-speed-hint">{t('module.s04.speed.autoSlow')}</p> : null}
 
       <VisualizationCanvas
         title={t('module.s04.title')}
@@ -177,9 +210,14 @@ export function ShellSortPage() {
         <div className="array-bars" aria-label="array-visualizer-s04">
           {(currentSnapshot?.arrayState ?? []).map((value, index) => {
             const highlight = highlightMap.get(index) ?? 'default';
+            const isHole = holeIndex === index;
             return (
-              <div key={`${index}-${value}`} className={`array-bar bar-${highlight}`} style={{ height: `${(value / maxValue) * 100}%` }}>
-                <span>{value}</span>
+              <div
+                key={`${index}-${value}-${isHole ? 'hole' : 'filled'}`}
+                className={isHole ? 'array-bar bar-hole' : `array-bar bar-${highlight}`}
+                style={{ height: isHole ? '28%' : `${(value / maxValue) * 100}%` }}
+              >
+                <span>{isHole ? t('module.s04.hole.label') : value}</span>
               </div>
             );
           })}
@@ -188,7 +226,8 @@ export function ShellSortPage() {
 
       <div className="legend-row">
         <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
-        <span className="legend-item legend-swapping">{t('module.s01.legend.swapping')}</span>
+        <span className="legend-item legend-moving">{t('module.s04.legend.shifting')}</span>
+        <span className="legend-item legend-inserted">{t('module.s04.legend.inserting')}</span>
         <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
         <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
       </div>

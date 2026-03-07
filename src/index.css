@@ -474,6 +474,25 @@ body {
   background: #8fc9ff;
 }
 
+.bar-hole {
+  background: #fff5d8;
+  border: 2px dashed #c88b2a;
+  color: #8f5c08;
+  transform: translateY(-2px);
+}
+
+.shell-shift-hint {
+  margin: 0;
+  color: #8f5c08;
+  font-weight: 600;
+}
+
+.shell-speed-hint {
+  margin: 0;
+  color: #8f5c08;
+  font-size: 0.85rem;
+}
+
 .legend-row {
   display: flex;
   gap: 8px;

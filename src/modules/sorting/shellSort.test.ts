@@ -27,6 +27,45 @@ describe('generateShellSortSteps', () => {
     expect(steps.some((step) => step.action === 'insert')).toBe(true);
   });
 
+  it('uses shift/insert highlight semantics instead of swap semantics', () => {
+    const steps = generateShellSortSteps([23, 12, 1, 8, 34, 54, 2, 3]);
+    const shiftStep = steps.find((step) => step.action === 'shift');
+    const insertStep = steps.find((step) => step.action === 'insert');
+
+    expect(shiftStep).toBeDefined();
+    expect(insertStep).toBeDefined();
+    if (!shiftStep || !insertStep) {
+      return;
+    }
+
+    expect(shiftStep.highlights).toEqual([
+      { index: shiftStep.indices[0], type: 'moving' },
+      { index: shiftStep.indices[1], type: 'new-node' },
+    ]);
+    expect(insertStep.highlights).toEqual([{ index: insertStep.indices[0], type: 'new-node' }]);
+  });
+
+  it('tracks hole position through select/compare/shift/insert steps', () => {
+    const steps = generateShellSortSteps([23, 12, 1, 8, 34, 54, 2, 3]);
+    const selectStep = steps.find((step) => step.action === 'selectCurrent');
+    const compareStep = steps.find((step) => step.action === 'compare' && step.currentValue !== null);
+    const shiftStep = steps.find((step) => step.action === 'shift');
+    const insertStep = steps.find((step) => step.action === 'insert');
+
+    expect(selectStep).toBeDefined();
+    expect(compareStep).toBeDefined();
+    expect(shiftStep).toBeDefined();
+    expect(insertStep).toBeDefined();
+    if (!selectStep || !compareStep || !shiftStep || !insertStep) {
+      return;
+    }
+
+    expect(selectStep.holeIndex).toBe(selectStep.indices[0]);
+    expect(compareStep.holeIndex).toBe(compareStep.indices[1]);
+    expect(shiftStep.holeIndex).toBe(shiftStep.indices[0]);
+    expect(insertStep.holeIndex).toBeNull();
+  });
+
   it('handles single-element arrays', () => {
     const steps = generateShellSortSteps([42]);
     expect(steps[0].arrayState).toEqual([42]);
