@@ -116,7 +116,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
   - Done: refreshed Playwright acceptance screenshots/report for all implemented modules (`output/playwright/p5m3-*.png`, `output/playwright/p5m3-acceptance-report.txt`) and synced P5 closure docs.
 
-## P6 (Next Milestone)
+## P6 (In Progress)
 - [x] P6 planning baseline
   - DoD: define P6 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -127,9 +127,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: found/not-found deterministic; `export -> import -> replay` deterministic; `npm run check` passes.
   - Done: added `SR-01` step generator/timeline adapter/page/route/registry entry + JSON import/export validation + deterministic tests (`linearSearch.test.ts`, `linearSearchTimelineReplay.test.ts`, `linearSearchPageUtils.test.ts`).
 
-- [ ] P6-M2 Add S-04 shell sort module
+- [x] P6-M2 Add S-04 shell sort module
   - DoD: gap-based timeline visualization + deterministic tests + zh/en copy.
   - Acceptance: fixed input replay deterministic and sorted; `npm run check` passes.
+  - Done: added `S-04` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`shellSort.test.ts`, `shellTimelineReplay.test.ts`) and local Playwright walkthrough evidence (`output/playwright/p6m2-shell-sort.png`).
 
 - [ ] P6-M3 Discovery/acceptance refresh after SR-01/S-04
   - DoD: modules discovery consistency pass + Playwright acceptance artifacts refresh + docs closure sync.

@@ -26,6 +26,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'S-04',
+    name: 'Shell Sort',
+    route: '/modules/shell-sort',
+    category: 'sort',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'SR-01',
     name: 'Linear Search',
     route: '/modules/linear-search',

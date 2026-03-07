@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run",
+    "pw:cli": "./scripts/playwright-cli.sh",
+    "pw:open": "./scripts/playwright-cli.sh open",
     "check:docs": "./scripts/check-doc-links.sh",
     "check": "npm run check:docs && npm test && npm run lint && npm run build",
     "preview": "vite preview"
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/cli": "0.1.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

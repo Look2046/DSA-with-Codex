@@ -265,3 +265,21 @@ Record architecture or workflow decisions here.
 - Alternatives considered: deliver SR-01 without JSON parity first; introduce a separate playback runtime for search modules.
 - Consequences: fast delivery with consistent UX/testing standards across search modules; minor duplicated patterns between SR-01/SR-02 remain acceptable for milestone speed.
 - Owner: haoyu + codex
+
+## DEC-20260307-29
+- Date: 2026-03-07
+- Status: accepted
+- Context: `S-04 Shell Sort` must make gap transitions and gap-based insertion movement understandable while staying on the existing sorting-page and timeline-engine path.
+- Decision: Implement `S-04` on the current sorting scaffold with explicit `gapChange -> selectCurrent -> compare -> shift -> insert` timeline steps, plus page-level `gap` and `held value` status metadata and deterministic step/replay tests.
+- Alternatives considered: model shell sort as swap-only animation; hide held-value/gap state until later UX polish; build a custom stage separate from existing sorting pages.
+- Consequences: shell-sort pass boundaries and insertion effects are visible without architectural churn; richer group-level styling is deferred to future polish.
+- Owner: haoyu + codex
+
+## DEC-20260307-30
+- Date: 2026-03-07
+- Status: accepted
+- Context: Ad-hoc Playwright CLI usage was drifting between temporary package versions and default browser targets (`chrome` vs `firefox`/`chromium`), causing repeated browser-install prompts and non-reproducible WSL setup behavior.
+- Decision: Pin `@playwright/cli` in `package.json`, add repo-local wrapper `scripts/playwright-cli.sh`, and set `playwright-cli.json` to default to `firefox` with shared browser cache under `~/.cache/ms-playwright`.
+- Alternatives considered: continue using `npx --package @playwright/cli ...` directly; install only system Chrome under `/opt/google/chrome/chrome`; leave browser choice per-session.
+- Consequences: Playwright automation in this repo now has one stable CLI entrypoint and one default browser target; future browser setup in the same WSL user can be reused instead of rediscovered ad hoc.
+- Owner: haoyu + codex

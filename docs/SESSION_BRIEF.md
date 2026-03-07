@@ -6,8 +6,8 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P6 in progress (`P6-M2` next)
-- Last local quality gate: `npm run check` (passed, 2026-03-06)
+- Current phase: P6 in progress (`P6-M3` next)
+- Last local quality gate: `npm run check` (passed, 2026-03-07)
 
 ## 2) What Is Already Done
 
@@ -30,11 +30,13 @@ Use this file as the first thing to read in a new chat/session.
 - P4 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P4.md`
 - P5 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P5.md`
 - `S-03 Insertion Sort` module landed with timeline playback + deterministic tests
+- `S-04 Shell Sort` module landed with gap-based timeline playback + deterministic tests
 - `SR-02 Binary Search` module landed with pointer visualization + JSON import/export + deterministic tests
 - `SR-01 Linear Search` module landed with pointer progression + JSON import/export + deterministic tests
 - `/modules` category filter expanded to include `search`
 - P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
+- P6-M2 local browser walkthrough captured for `S-04` (`output/playwright/p6m2-shell-sort.png`)
 - `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
 - `S-02 Selection Sort` module landed with timeline playback + deterministic tests
 - `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
@@ -51,7 +53,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P6-M2 implementation: `S-04 Shell Sort` module (gap-based timeline + deterministic tests + zh/en copy).
+- Start P6-M3: discovery consistency pass + Playwright acceptance refresh after `SR-01`/`S-04`.
 - Keep quality gates and acceptance evidence workflow unchanged (`npm run check` + Playwright refresh before milestone close).
 
 ## 4) Guardrails
