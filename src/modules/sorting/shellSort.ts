@@ -63,6 +63,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
     for (let i = gap; i < n; i += 1) {
       const currentValue = arr[i];
       let j = i;
+      let hasShifted = false;
 
       steps.push({
         description: '',
@@ -73,23 +74,26 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
         indices: [i],
         gap,
         currentValue,
-        holeIndex: i,
+        holeIndex: null,
       });
 
       while (j >= gap) {
+        const compareHighlights = hasShifted
+          ? [{ index: j - gap, type: 'comparing' as const }]
+          : [
+              { index: j - gap, type: 'comparing' as const },
+              { index: j, type: 'comparing' as const },
+            ];
         steps.push({
           description: '',
           codeLines: [5],
-          highlights: [
-            { index: j - gap, type: 'comparing' },
-            { index: j, type: 'comparing' },
-          ],
+          highlights: compareHighlights,
           arrayState: cloneArray(arr),
           action: 'compare',
           indices: [j - gap, j],
           gap,
           currentValue,
-          holeIndex: j,
+          holeIndex: hasShifted ? j : null,
         });
 
         if (arr[j - gap] <= currentValue) {
@@ -100,10 +104,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
         steps.push({
           description: '',
           codeLines: [6],
-          highlights: [
-            { index: j - gap, type: 'moving' },
-            { index: j, type: 'new-node' },
-          ],
+          highlights: [{ index: j, type: 'moving' }],
           arrayState: cloneArray(arr),
           action: 'shift',
           indices: [j - gap, j],
@@ -113,6 +114,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
         });
 
         j -= gap;
+        hasShifted = true;
       }
 
       arr[j] = currentValue;

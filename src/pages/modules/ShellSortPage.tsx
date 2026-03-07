@@ -10,7 +10,6 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 const DEFAULT_SIZE = 8;
 const MIN_SIZE = 5;
 const MAX_SIZE = 20;
-const SHIFT_FOCUS_MIN_SPEED = 900;
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
@@ -63,6 +62,30 @@ function getStepDescription(step: ShellSortStep | undefined, t: ReturnType<typeo
   return t('module.s04.step.completed');
 }
 
+function getOperationExpression(step: ShellSortStep | undefined): string | null {
+  if (!step) {
+    return null;
+  }
+
+  if (step.action === 'compare') {
+    const fromIndex = step.indices[0];
+    const fromValue = step.arrayState[fromIndex];
+    return `arr[${fromIndex}] (${fromValue}) > current (${step.currentValue}) ?`;
+  }
+
+  if (step.action === 'shift') {
+    const [fromIndex, toIndex] = step.indices;
+    return `arr[${toIndex}] <- arr[${fromIndex}]`;
+  }
+
+  if (step.action === 'insert') {
+    const toIndex = step.indices[0];
+    return `arr[${toIndex}] <- current (${step.currentValue})`;
+  }
+
+  return null;
+}
+
 function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t']): string {
   if (type === 'comparing') {
     return t('module.s01.highlight.comparing');
@@ -82,13 +105,19 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   return t('module.s01.highlight.default');
 }
 
+function getBarHeightPercent(value: number, maxValue: number): number {
+  if (maxValue <= 0) {
+    return 0;
+  }
+  return (value / maxValue) * 100;
+}
+
 export function ShellSortPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
-  const [manualSpeedMs, setManualSpeedMs] = useState(700);
 
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
@@ -96,36 +125,40 @@ export function ShellSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
-  const isShiftFocusStage =
-    currentSnapshot?.holeIndex !== null && (currentSnapshot?.action === 'compare' || currentSnapshot?.action === 'shift');
-  const shouldFocusShift = status === 'playing' && isShiftFocusStage;
-  const targetSpeedMs = shouldFocusShift ? Math.max(manualSpeedMs, SHIFT_FOCUS_MIN_SPEED) : manualSpeedMs;
-  const isAutoSlowActive = shouldFocusShift && targetSpeedMs !== manualSpeedMs;
+  const tempValue = currentSnapshot?.currentValue ?? null;
   const holeIndex = currentSnapshot?.holeIndex ?? null;
-  const shiftFrom = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[0] : null;
-  const shiftTo = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[1] : null;
+  const showReferenceLine =
+    currentSnapshot?.action === 'selectCurrent' || currentSnapshot?.action === 'compare' || currentSnapshot?.action === 'shift';
 
   const maxValue = useMemo(() => {
     const values = currentSnapshot?.arrayState ?? inputData;
-    return Math.max(...values, 1);
-  }, [currentSnapshot?.arrayState, inputData]);
+    return Math.max(...values, tempValue ?? 1, 1);
+  }, [currentSnapshot?.arrayState, inputData, tempValue]);
+  const referenceLinePercent = tempValue === null ? null : getBarHeightPercent(tempValue, maxValue);
+  const operationExpression = getOperationExpression(currentSnapshot);
+  const shiftFrom = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[0] : null;
+  const shiftTo = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[1] : null;
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, ShellSortStep['highlights'][number]['type']>();
     (currentSnapshot?.highlights ?? []).forEach((item) => map.set(item.index, item.type));
     return map;
   }, [currentSnapshot]);
+  const previewArray = useMemo(
+    () =>
+      (currentSnapshot?.arrayState ?? []).map((value, index) => {
+        if (holeIndex === index) {
+          return '_';
+        }
+        return String(value);
+      }),
+    [currentSnapshot?.arrayState, holeIndex],
+  );
 
   useEffect(() => {
     setTotalFrames(steps.length);
     reset();
   }, [reset, setTotalFrames, steps.length]);
-
-  useEffect(() => {
-    if (speedMs !== targetSpeedMs) {
-      setSpeed(targetSpeedMs);
-    }
-  }, [setSpeed, speedMs, targetSpeedMs]);
 
   const regenerateData = () => {
     setInputData(createRandomDataset(datasetSize));
@@ -168,11 +201,8 @@ export function ShellSortPage() {
             <button
               key={option.key}
               type="button"
-              className={manualSpeedMs === option.value ? 'speed-active' : ''}
-              onClick={() => {
-                setManualSpeedMs(option.value);
-                setSpeed(option.value);
-              }}
+              className={speedMs === option.value ? 'speed-active' : ''}
+              onClick={() => setSpeed(option.value)}
             >
               {t(option.key)}
             </button>
@@ -188,35 +218,40 @@ export function ShellSortPage() {
       <p>
         {t('module.s01.sample')}: [{inputData.join(', ')}]
       </p>
-      <p>{getStepDescription(currentSnapshot, t)}</p>
-      <p>
-        {t('module.s04.meta.gap')}: {currentSnapshot?.gap ?? '-'} | {t('module.s04.meta.heldValue')}:{' '}
-        {currentSnapshot?.currentValue ?? '-'} | {t('module.s04.meta.hole')}: {holeIndex ?? '-'}
-      </p>
-      {shiftFrom !== null && shiftTo !== null ? (
-        <p className="shell-shift-hint">
-          {t('module.s04.meta.shiftPath')}: {shiftFrom}
-          {' -> '}
-          {shiftTo}
+      <div className="shell-status-lines">
+        <p className="shell-status-line">{getStepDescription(currentSnapshot, t)}</p>
+        <p className="shell-status-line">
+          {t('module.s04.meta.temp')}: {tempValue ?? '-'} | {t('module.s04.meta.gap')}: {currentSnapshot?.gap ?? '-'} |{' '}
+          {t('module.s04.meta.hole')}: {holeIndex ?? '-'}
         </p>
-      ) : null}
-      {isAutoSlowActive ? <p className="shell-speed-hint">{t('module.s04.speed.autoSlow')}</p> : null}
+        <p className={`shell-status-line shell-operation-hint${operationExpression ? '' : ' shell-status-placeholder'}`}>
+          {operationExpression ? `${t('module.s04.meta.operation')}: ${operationExpression}` : '-'}
+        </p>
+        <p className={`shell-status-line shell-shift-hint${shiftFrom !== null && shiftTo !== null ? '' : ' shell-status-placeholder'}`}>
+          {shiftFrom !== null && shiftTo !== null ? `${t('module.s04.meta.shiftPath')}: ${shiftFrom} -> ${shiftTo}` : '-'}
+        </p>
+      </div>
 
       <VisualizationCanvas
         title={t('module.s04.title')}
         subtitle={t('module.canvas.sortingStage')}
         stageClassName="viz-canvas-stage-sorting"
       >
-        <div className="array-bars" aria-label="array-visualizer-s04">
+        <div className="array-bars shell-array-bars" aria-label="array-visualizer-s04">
+          {showReferenceLine && referenceLinePercent !== null ? (
+            <div className="shell-reference-line" style={{ bottom: `${referenceLinePercent}%` }}>
+              <span>{t('module.s04.meta.referenceLine')}</span>
+            </div>
+          ) : null}
           {(currentSnapshot?.arrayState ?? []).map((value, index) => {
             const highlight = highlightMap.get(index) ?? 'default';
-            const isHole = holeIndex === index;
+            const isHole = holeIndex === index && tempValue !== null;
+            const barClassName = isHole ? 'array-bar bar-hole' : `array-bar bar-${highlight}`;
+            const valueHeightPercent = getBarHeightPercent(value, maxValue);
+            const holeHeightPercent = tempValue === null ? valueHeightPercent : getBarHeightPercent(tempValue, maxValue);
+            const barHeight = isHole ? `${holeHeightPercent}%` : `${valueHeightPercent}%`;
             return (
-              <div
-                key={`${index}-${value}-${isHole ? 'hole' : 'filled'}`}
-                className={isHole ? 'array-bar bar-hole' : `array-bar bar-${highlight}`}
-                style={{ height: isHole ? '28%' : `${(value / maxValue) * 100}%` }}
-              >
+              <div key={index} className={barClassName} style={{ height: barHeight }}>
                 <span>{isHole ? t('module.s04.hole.label') : value}</span>
               </div>
             );
@@ -233,7 +268,7 @@ export function ShellSortPage() {
       </div>
 
       <p className="array-preview">
-        {t('module.s01.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+        {t('module.s01.currentArray')}: [{previewArray.join(', ')}]
       </p>
       <p>
         {t('module.s01.highlight')}:{' '}

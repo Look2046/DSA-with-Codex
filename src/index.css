@@ -475,22 +475,74 @@ body {
 }
 
 .bar-hole {
-  background: #fff5d8;
   border: 2px dashed #c88b2a;
+  background: #fff7e6;
   color: #8f5c08;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
-.shell-shift-hint {
+.shell-status-lines {
+  display: grid;
+  gap: 4px;
+  grid-template-rows: repeat(4, 1fr);
+  height: 108px;
+}
+
+.shell-status-line {
   margin: 0;
+  min-height: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+.shell-status-placeholder {
+  visibility: hidden;
+}
+
+.shell-operation-hint,
+.shell-shift-hint {
   color: #8f5c08;
   font-weight: 600;
 }
 
-.shell-speed-hint {
-  margin: 0;
-  color: #8f5c08;
-  font-size: 0.85rem;
+.shell-array-bars {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shell-array-bars .array-bar {
+  z-index: 1;
+  min-height: 0;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.shell-reference-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px dashed #f08a8a;
+  z-index: 50;
+  transform: translateY(-1px);
+  pointer-events: none;
+}
+
+.shell-reference-line span {
+  position: absolute;
+  left: 0;
+  top: -18px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9e3f3f;
+  background: #fff5f5;
+  padding: 1px 5px;
+  border-radius: 999px;
+  border: 1px solid #ffd3d3;
 }
 
 .legend-row {

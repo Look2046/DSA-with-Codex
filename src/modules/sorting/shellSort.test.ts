@@ -38,17 +38,14 @@ describe('generateShellSortSteps', () => {
       return;
     }
 
-    expect(shiftStep.highlights).toEqual([
-      { index: shiftStep.indices[0], type: 'moving' },
-      { index: shiftStep.indices[1], type: 'new-node' },
-    ]);
+    expect(shiftStep.highlights).toEqual([{ index: shiftStep.indices[1], type: 'moving' }]);
     expect(insertStep.highlights).toEqual([{ index: insertStep.indices[0], type: 'new-node' }]);
   });
 
-  it('tracks hole position through select/compare/shift/insert steps', () => {
+  it('tracks hole index across select, compare, shift, and insert steps', () => {
     const steps = generateShellSortSteps([23, 12, 1, 8, 34, 54, 2, 3]);
     const selectStep = steps.find((step) => step.action === 'selectCurrent');
-    const compareStep = steps.find((step) => step.action === 'compare' && step.currentValue !== null);
+    const compareStep = steps.find((step) => step.action === 'compare' && step.holeIndex !== null);
     const shiftStep = steps.find((step) => step.action === 'shift');
     const insertStep = steps.find((step) => step.action === 'insert');
 
@@ -60,10 +57,22 @@ describe('generateShellSortSteps', () => {
       return;
     }
 
-    expect(selectStep.holeIndex).toBe(selectStep.indices[0]);
+    expect(selectStep.holeIndex).toBeNull();
     expect(compareStep.holeIndex).toBe(compareStep.indices[1]);
     expect(shiftStep.holeIndex).toBe(shiftStep.indices[0]);
     expect(insertStep.holeIndex).toBeNull();
+  });
+
+  it('compares against j-gap only after hole appears', () => {
+    const steps = generateShellSortSteps([23, 12, 1, 8, 34, 54, 2, 3]);
+    const compareWithHole = steps.find((step) => step.action === 'compare' && step.holeIndex !== null);
+
+    expect(compareWithHole).toBeDefined();
+    if (!compareWithHole) {
+      return;
+    }
+
+    expect(compareWithHole.highlights).toEqual([{ index: compareWithHole.indices[0], type: 'comparing' }]);
   });
 
   it('handles single-element arrays', () => {
