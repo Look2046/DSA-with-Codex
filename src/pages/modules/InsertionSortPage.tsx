@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
@@ -10,6 +10,7 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 const DEFAULT_SIZE = 10;
 const MIN_SIZE = 5;
 const MAX_SIZE = 20;
+const INSERTION_BASE_COLOR = '#cfe1f3';
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
@@ -65,12 +66,20 @@ function getStepDescription(step: InsertionSortStep | undefined, t: ReturnType<t
     return `${t('module.s03.step.selectKey')} ${step.indices[0]}`;
   }
 
+  if (step.action === 'lift') {
+    return `${t('module.s03.step.lift')} ${step.indices[0]}`;
+  }
+
   if (step.action === 'compare') {
     return `${t('module.s03.step.compare')} ${step.indices[0]} ${t('module.s01.step.and')} ${step.indices[1]}`;
   }
 
-  if (step.action === 'swap') {
-    return `${t('module.s03.step.swap')} ${step.indices[0]} ${t('module.s01.step.and')} ${step.indices[1]}`;
+  if (step.action === 'shift') {
+    return `${t('module.s03.step.shift')} ${step.indices[0]} -> ${step.indices[1]}`;
+  }
+
+  if (step.action === 'insert') {
+    return `${t('module.s03.step.insert')} ${step.indices[0]}`;
   }
 
   if (step.action === 'sortedMark') {
@@ -80,12 +89,44 @@ function getStepDescription(step: InsertionSortStep | undefined, t: ReturnType<t
   return t('module.s03.step.completed');
 }
 
+function getOperationExpression(step: InsertionSortStep | undefined): string | null {
+  if (!step) {
+    return null;
+  }
+
+  if (step.action === 'compare') {
+    const fromIndex = step.indices[0];
+    const fromValue = step.arrayState[fromIndex];
+    return `arr[${fromIndex}] (${fromValue}) > key (${step.currentValue}) ?`;
+  }
+
+  if (step.action === 'lift') {
+    const fromIndex = step.indices[0];
+    return `temp <- arr[${fromIndex}] (${step.currentValue})`;
+  }
+
+  if (step.action === 'shift') {
+    const [fromIndex, toIndex] = step.indices;
+    return `arr[${toIndex}] <- arr[${fromIndex}]`;
+  }
+
+  if (step.action === 'insert') {
+    const toIndex = step.indices[0];
+    return `arr[${toIndex}] <- key (${step.currentValue})`;
+  }
+
+  return null;
+}
+
 function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t']): string {
   if (type === 'comparing') {
     return t('module.s01.highlight.comparing');
   }
-  if (type === 'swapping') {
-    return t('module.s01.highlight.swapping');
+  if (type === 'moving') {
+    return t('module.s03.highlight.shifting');
+  }
+  if (type === 'new-node') {
+    return t('module.s03.highlight.inserting');
   }
   if (type === 'sorted') {
     return t('module.s01.highlight.sorted');
@@ -93,25 +134,38 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   return t('module.s01.highlight.default');
 }
 
-function buildBarOrderByFrame(steps: InsertionSortStep[]): number[][] {
-  if (steps.length === 0) {
-    return [];
+function getBarHeightPercent(value: number, maxValue: number): number {
+  if (maxValue <= 0) {
+    return 0;
   }
-
-  const initialOrder = steps[0].arrayState.map((_, index) => index);
-  const order = [...initialOrder];
-
-  return steps.map((step) => {
-    if (step.action === 'swap' && step.indices.length === 2) {
-      const [leftIndex, rightIndex] = step.indices;
-      if (order[leftIndex] !== undefined && order[rightIndex] !== undefined) {
-        [order[leftIndex], order[rightIndex]] = [order[rightIndex], order[leftIndex]];
-      }
-    }
-
-    return [...order];
-  });
+  return (value / maxValue) * 100;
 }
+
+function getInsertionBarStateClass(highlight: HighlightType | 'default'): string {
+  if (highlight === 'comparing') {
+    return 'shell-bar-comparing';
+  }
+  if (highlight === 'moving') {
+    return 'shell-bar-moving';
+  }
+  if (highlight === 'new-node') {
+    return 'shell-bar-inserting';
+  }
+  if (highlight === 'sorted') {
+    return 'shell-bar-sorted';
+  }
+  return '';
+}
+
+type GhostEndpoint = { kind: 'front' } | { kind: 'bar'; index: number };
+
+type MotionGhostSpec = {
+  className: string;
+  value: number;
+  heightPercent: number;
+  source: GhostEndpoint;
+  target: GhostEndpoint;
+};
 
 export function InsertionSortPage() {
   const { t } = useI18n();
@@ -119,6 +173,9 @@ export function InsertionSortPage() {
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
+  const ghostRef = useRef<HTMLDivElement | null>(null);
+  const frontSlotRef = useRef<HTMLDivElement | null>(null);
+  const barRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
@@ -126,22 +183,117 @@ export function InsertionSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
-  const initialValues = useMemo(() => steps[0]?.arrayState ?? [], [steps]);
-  const barIds = useMemo(() => initialValues.map((_, index) => index), [initialValues]);
-  const barOrdersByFrame = useMemo(() => buildBarOrderByFrame(steps), [steps]);
-  const currentBarOrder = useMemo(
-    () => barOrdersByFrame[currentStep] ?? barOrdersByFrame[0] ?? [],
-    [barOrdersByFrame, currentStep]
-  );
-  const isFinaleFrame = currentSnapshot?.action === 'completed';
+  const currentAction = currentSnapshot?.action;
+  const keyLifted = currentSnapshot?.keyLifted ?? false;
+  const tempValue = currentSnapshot?.currentValue ?? null;
+  const stepHoleIndex = currentSnapshot?.holeIndex ?? null;
+  const effectiveHoleIndex = useMemo(() => {
+    if (tempValue === null) {
+      return null;
+    }
+    if (currentAction === 'lift' || currentAction === 'insert') {
+      return null;
+    }
+    if (keyLifted && currentAction === 'compare' && currentSnapshot.indices.length > 1) {
+      return currentSnapshot.indices[1];
+    }
+    return stepHoleIndex;
+  }, [currentAction, currentSnapshot, keyLifted, stepHoleIndex, tempValue]);
 
-  const barPositionMap = useMemo(() => {
-    const positions = new Map<number, number>();
-    currentBarOrder.forEach((barId, position) => positions.set(barId, position));
-    return positions;
-  }, [currentBarOrder]);
+  const maxValue = useMemo(() => {
+    const values = currentSnapshot?.arrayState ?? inputData;
+    return Math.max(...values, tempValue ?? 1, 1);
+  }, [currentSnapshot?.arrayState, inputData, tempValue]);
+  const operationExpression = getOperationExpression(currentSnapshot);
+  const shiftFrom = currentAction === 'shift' ? currentSnapshot.indices[0] : null;
+  const shiftTo = currentAction === 'shift' ? currentSnapshot.indices[1] : null;
+  const insertTargetIndex = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] : null;
+  const arrayState = currentSnapshot?.arrayState ?? [];
+  const barCount = arrayState.length;
+  const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
+  const showHeldBar = tempValue !== null && keyLifted && currentAction !== 'lift' && currentAction !== 'insert';
+  const heldTargetOffset = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] + 1 : 0;
+  const heldBarHeightPercent = tempValue === null ? 0 : getBarHeightPercent(tempValue, maxValue);
+  const heldBarStyle = {
+    height: `${heldBarHeightPercent}%`,
+    '--shell-held-offset': heldTargetOffset,
+  } as CSSProperties;
+  const heldBarClassName = [
+    'shell-held-bar',
+    currentAction === 'insert' ? 'shell-held-bar-insert' : '',
+    currentAction === 'compare' ? 'shell-held-bar-comparing' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-  const maxValue = useMemo(() => Math.max(...initialValues, 1), [initialValues]);
+  const motionGhost = useMemo<MotionGhostSpec | null>(() => {
+    if (currentAction === 'lift' && tempValue !== null && currentSnapshot.indices.length > 0) {
+      const sourceIndex = currentSnapshot.indices[0];
+      return {
+        className: 'shell-motion-ghost shell-motion-ghost-lift',
+        value: tempValue,
+        heightPercent: getBarHeightPercent(tempValue, maxValue),
+        source: { kind: 'bar', index: sourceIndex },
+        target: { kind: 'front' },
+      };
+    }
+
+    if (currentAction === 'shift' && currentSnapshot.indices.length > 1) {
+      const sourceIndex = currentSnapshot.indices[0];
+      const targetIndex = currentSnapshot.indices[1];
+      const movedValue = currentSnapshot.arrayState[targetIndex];
+      return {
+        className: 'shell-motion-ghost shell-motion-ghost-shift',
+        value: movedValue,
+        heightPercent: getBarHeightPercent(movedValue, maxValue),
+        source: { kind: 'bar', index: sourceIndex },
+        target: { kind: 'bar', index: targetIndex },
+      };
+    }
+
+    if (currentAction === 'insert' && tempValue !== null && currentSnapshot.indices.length > 0) {
+      const targetIndex = currentSnapshot.indices[0];
+      return {
+        className: 'shell-motion-ghost shell-motion-ghost-insert',
+        value: tempValue,
+        heightPercent: getBarHeightPercent(tempValue, maxValue),
+        source: { kind: 'front' },
+        target: { kind: 'bar', index: targetIndex },
+      };
+    }
+
+    return null;
+  }, [currentAction, currentSnapshot, maxValue, tempValue]);
+
+  useLayoutEffect(() => {
+    const ghostElement = ghostRef.current;
+    if (!ghostElement || !motionGhost) {
+      return;
+    }
+
+    const resolveElement = (endpoint: GhostEndpoint): HTMLDivElement | null => {
+      if (endpoint.kind === 'front') {
+        return frontSlotRef.current;
+      }
+      return barRefs.current[endpoint.index] ?? null;
+    };
+
+    const sourceElement = resolveElement(motionGhost.source);
+    const targetElement = resolveElement(motionGhost.target);
+    if (!sourceElement || !targetElement) {
+      return;
+    }
+
+    const startLeft = sourceElement.offsetLeft;
+    const deltaX = targetElement.offsetLeft - sourceElement.offsetLeft;
+    ghostElement.style.setProperty('--shell-ghost-start-left', `${startLeft}px`);
+    ghostElement.style.setProperty('--shell-ghost-delta-x', `${deltaX}px`);
+  }, [motionGhost]);
+
+  const motionGhostKey =
+    motionGhost === null
+      ? null
+      : `ghost-${currentStep}-${currentAction}-${motionGhost.source.kind}-${motionGhost.target.kind}-${motionGhost.value}`;
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, InsertionSortStep['highlights'][number]['type']>();
@@ -149,31 +301,37 @@ export function InsertionSortPage() {
     return map;
   }, [currentSnapshot]);
 
-  const sortedBarIdSet = useMemo(() => {
+  const sortedIndexSet = useMemo(() => {
     const sorted = new Set<number>();
     for (let frameIndex = 0; frameIndex <= currentStep && frameIndex < steps.length; frameIndex += 1) {
       const step = steps[frameIndex];
-      const barOrder = barOrdersByFrame[frameIndex] ?? [];
       if (!step) {
         continue;
       }
       if (step.action === 'sortedMark') {
         step.highlights.forEach((highlight) => {
-          if (highlight.type !== 'sorted') {
-            return;
-          }
-          const barId = barOrder[highlight.index];
-          if (barId !== undefined) {
-            sorted.add(barId);
+          if (highlight.type === 'sorted') {
+            sorted.add(highlight.index);
           }
         });
       }
       if (step.action === 'completed') {
-        barOrder.forEach((barId) => sorted.add(barId));
+        step.arrayState.forEach((_, index) => sorted.add(index));
       }
     }
     return sorted;
-  }, [steps, currentStep, barOrdersByFrame]);
+  }, [steps, currentStep]);
+
+  const previewArray = useMemo(
+    () =>
+      (currentSnapshot?.arrayState ?? []).map((value, index) => {
+        if (effectiveHoleIndex === index) {
+          return '_';
+        }
+        return String(value);
+      }),
+    [currentSnapshot?.arrayState, effectiveHoleIndex],
+  );
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -251,49 +409,110 @@ export function InsertionSortPage() {
       <p>
         {t('module.s01.sample')}: [{inputData.join(', ')}]
       </p>
-      <p>{getStepDescription(currentSnapshot, t)}</p>
+
+      <div className="shell-status-lines">
+        <p className="shell-status-line">{getStepDescription(currentSnapshot, t)}</p>
+        <p className="shell-status-line">
+          {t('module.s03.meta.temp')}: {tempValue ?? '-'} | {t('module.s03.meta.hole')}: {effectiveHoleIndex ?? '-'}
+        </p>
+        <p className={`shell-status-line shell-operation-hint${operationExpression ? '' : ' shell-status-placeholder'}`}>
+          {operationExpression ? `${t('module.s03.meta.operation')}: ${operationExpression}` : '-'}
+        </p>
+        <p className={`shell-status-line shell-shift-hint${shiftFrom !== null && shiftTo !== null ? '' : ' shell-status-placeholder'}`}>
+          {shiftFrom !== null && shiftTo !== null ? `${t('module.s03.meta.shiftPath')}: ${shiftFrom} -> ${shiftTo}` : '-'}
+        </p>
+      </div>
 
       <VisualizationCanvas
         title={t('module.s03.title')}
         subtitle={t('module.canvas.sortingStage')}
         stageClassName="viz-canvas-stage-sorting"
       >
-        <div className="array-bars bubble-array-bars" aria-label="array-visualizer-s03" style={{ '--bubble-count': Math.max(barIds.length, 1) } as CSSProperties}>
-          {barIds.map((barId) => {
-            const position = barPositionMap.get(barId) ?? barId;
-            const frameHighlight = highlightMap.get(position);
-            const highlight = frameHighlight ?? (sortedBarIdSet.has(barId) ? 'sorted' : 'default');
-            const value = initialValues[barId] ?? 0;
-            const barStyle = {
-              height: `${(value / maxValue) * 100}%`,
-              '--bubble-offset': position - barId,
-              '--bubble-z': highlight === 'swapping' ? 3 : highlight === 'comparing' ? 2 : 1,
-              '--piano-order': position,
-            } as CSSProperties;
-            return (
-              <div key={barId} className={`array-bar bubble-sort-bar bar-${highlight}${isFinaleFrame ? ' bar-finale' : ''}`} style={barStyle}>
-                <span>{value}</span>
+        <div
+          className="shell-stage-track"
+          style={
+            {
+              '--shell-count': Math.max(barCount, 1),
+              '--shell-front-slots': 1,
+              '--shell-motion-duration': `${motionDurationMs}ms`,
+            } as CSSProperties
+          }
+        >
+          <div className="array-bars shell-array-bars" aria-label="array-visualizer-s03">
+            {motionGhost ? (
+              <div
+                ref={ghostRef}
+                key={motionGhostKey ?? undefined}
+                className={motionGhost.className}
+                style={
+                  {
+                    height: `${motionGhost.heightPercent}%`,
+                  } as CSSProperties
+                }
+              >
+                <span>{motionGhost.value}</span>
               </div>
-            );
-          })}
+            ) : null}
+            <div ref={frontSlotRef} className="shell-front-slot" aria-hidden="true">
+              {showHeldBar ? (
+                <div className={heldBarClassName} style={heldBarStyle}>
+                  <span>{tempValue}</span>
+                </div>
+              ) : null}
+            </div>
+            {arrayState.map((value, index) => {
+              const frameHighlight = highlightMap.get(index);
+              const highlight = frameHighlight ?? (sortedIndexSet.has(index) ? 'sorted' : 'default');
+              const isHole = effectiveHoleIndex === index && tempValue !== null;
+              const barStateClass = getInsertionBarStateClass(highlight);
+              const hiddenDuringMotion =
+                (currentAction === 'lift' && currentSnapshot.indices[0] === index) ||
+                (currentAction === 'shift' && shiftTo === index) ||
+                (currentAction === 'insert' && insertTargetIndex === index);
+              const barClassName = isHole
+                ? 'array-bar bar-hole'
+                : `array-bar shell-bar${barStateClass ? ` ${barStateClass}` : ''}${hiddenDuringMotion ? ' shell-motion-hidden' : ''}`;
+              const valueHeightPercent = getBarHeightPercent(value, maxValue);
+              const holeHeightPercent = valueHeightPercent;
+              const barHeight = isHole ? `${holeHeightPercent}%` : `${valueHeightPercent}%`;
+              const barStyle = isHole
+                ? { height: barHeight }
+                : ({
+                    height: barHeight,
+                    '--shell-group-color': 'transparent',
+                    '--shell-base-color': INSERTION_BASE_COLOR,
+                  } as CSSProperties);
+              return (
+                <div
+                  key={index}
+                  ref={(node) => {
+                    barRefs.current[index] = node;
+                  }}
+                  className={barClassName}
+                  style={barStyle}
+                >
+                  <span>{isHole ? t('module.s03.hole.label') : value}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </VisualizationCanvas>
 
       <div className="legend-row">
         <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
-        <span className="legend-item legend-swapping">{t('module.s01.legend.swapping')}</span>
+        <span className="legend-item legend-moving">{t('module.s03.legend.shifting')}</span>
+        <span className="legend-item legend-inserted">{t('module.s03.legend.inserting')}</span>
         <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
         <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
       </div>
 
       <p className="array-preview">
-        {t('module.s01.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+        {t('module.s01.currentArray')}: [{previewArray.join(', ')}]
       </p>
       <p>
         {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? [])
-          .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
-          .join(' | ') || t('module.s01.none')}
+        {(currentSnapshot?.highlights ?? []).map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`).join(' | ') || t('module.s01.none')}
       </p>
 
       <div className="playback-actions">
@@ -324,6 +543,8 @@ export function InsertionSortPage() {
           <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.s03.code.line5')}</li>
           <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.s03.code.line6')}</li>
           <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.s03.code.line7')}</li>
+          <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.s03.code.line8')}</li>
+          <li className={currentSnapshot?.codeLines.includes(9) ? 'code-active' : ''}>{t('module.s03.code.line9')}</li>
         </ol>
       </div>
     </section>

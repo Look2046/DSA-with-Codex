@@ -26,6 +26,13 @@ describe('generateInsertionSortSteps', () => {
     expect(steps.some((step) => step.action === 'compare')).toBe(true);
   });
 
+  it('uses temp-lift/shift/insert steps for unsorted input', () => {
+    const steps = generateInsertionSortSteps([5, 1, 4]);
+    expect(steps.some((step) => step.action === 'lift')).toBe(true);
+    expect(steps.some((step) => step.action === 'shift')).toBe(true);
+    expect(steps.some((step) => step.action === 'insert')).toBe(true);
+  });
+
   it('handles single-element arrays', () => {
     const steps = generateInsertionSortSteps([42]);
     expect(steps[0].arrayState).toEqual([42]);
