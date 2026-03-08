@@ -496,6 +496,14 @@ export function InsertionSortPage() {
               );
             })}
           </div>
+          <div className="shell-index-row" aria-hidden="true">
+            <span className="shell-index-spacer" />
+            {arrayState.map((_, index) => (
+              <span key={index} className="shell-index-cell">
+                {index}
+              </span>
+            ))}
+          </div>
         </div>
       </VisualizationCanvas>
 

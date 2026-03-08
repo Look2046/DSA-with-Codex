@@ -338,6 +338,13 @@ export function BubbleSortPage() {
               );
             })}
           </div>
+          <div className="shell-index-row" aria-hidden="true">
+            {arrayState.map((_, index) => (
+              <span key={index} className="shell-index-cell">
+                {index}
+              </span>
+            ))}
+          </div>
         </div>
       </VisualizationCanvas>
 
