@@ -472,6 +472,11 @@ body {
   animation-delay: calc(var(--piano-order, 0) * 45ms);
 }
 
+.shell-array-bars .array-bar.bar-finale {
+  animation: bubble-piano-tap 220ms ease-in-out;
+  animation-delay: calc(var(--piano-order, 0) * 45ms);
+}
+
 @keyframes bubble-piano-tap {
   0% {
     filter: brightness(1);

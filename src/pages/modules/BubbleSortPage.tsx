@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
@@ -81,7 +81,7 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
     return t('module.s01.highlight.comparing');
   }
   if (type === 'swapping') {
-    return t('module.s01.highlight.swapping');
+    return t('module.s04.highlight.shifting');
   }
   if (type === 'sorted') {
     return t('module.s01.highlight.sorted');
@@ -89,25 +89,32 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   return t('module.s01.highlight.default');
 }
 
-function buildBarOrderByFrame(steps: BubbleSortStep[]): number[][] {
-  if (steps.length === 0) {
-    return [];
+function getBarHeightPercent(value: number, maxValue: number): number {
+  if (maxValue <= 0) {
+    return 0;
   }
-
-  const initialOrder = steps[0].arrayState.map((_, index) => index);
-  const order = [...initialOrder];
-
-  return steps.map((step) => {
-    if (step.action === 'swap' && step.indices.length === 2) {
-      const [leftIndex, rightIndex] = step.indices;
-      if (order[leftIndex] !== undefined && order[rightIndex] !== undefined) {
-        [order[leftIndex], order[rightIndex]] = [order[rightIndex], order[leftIndex]];
-      }
-    }
-
-    return [...order];
-  });
+  return (value / maxValue) * 100;
 }
+
+function getBubbleBarStateClass(highlight: HighlightType | 'default'): string {
+  if (highlight === 'comparing') {
+    return 'shell-bar-comparing';
+  }
+  if (highlight === 'swapping') {
+    return 'shell-bar-moving';
+  }
+  if (highlight === 'sorted') {
+    return 'shell-bar-sorted';
+  }
+  return '';
+}
+
+type MotionGhostSpec = {
+  key: string;
+  value: number;
+  sourceIndex: number;
+  targetIndex: number;
+};
 
 export function BubbleSortPage() {
   const { t } = useI18n();
@@ -115,6 +122,8 @@ export function BubbleSortPage() {
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
+  const barRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const ghostRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
@@ -122,23 +131,11 @@ export function BubbleSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
-  const initialValues = useMemo(() => steps[0]?.arrayState ?? [], [steps]);
-  const barIds = useMemo(() => initialValues.map((_, index) => index), [initialValues]);
-  const barOrdersByFrame = useMemo(() => buildBarOrderByFrame(steps), [steps]);
-  const currentBarOrder = useMemo(
-    () => barOrdersByFrame[currentStep] ?? barOrdersByFrame[0] ?? [],
-    [barOrdersByFrame, currentStep]
-  );
-
-  const barPositionMap = useMemo(() => {
-    const positions = new Map<number, number>();
-    currentBarOrder.forEach((barId, position) => positions.set(barId, position));
-    return positions;
-  }, [currentBarOrder]);
-
-  const maxValue = useMemo(() => {
-    return Math.max(...initialValues, 1);
-  }, [initialValues]);
+  const currentAction = currentSnapshot?.action;
+  const arrayState = currentSnapshot?.arrayState ?? inputData;
+  const barCount = arrayState.length;
+  const maxValue = useMemo(() => Math.max(...arrayState, 1), [arrayState]);
+  const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, BubbleSortStep['highlights'][number]['type']>();
@@ -146,6 +143,50 @@ export function BubbleSortPage() {
     return map;
   }, [currentSnapshot]);
   const isFinaleFrame = currentSnapshot?.action === 'completed';
+  const hiddenIndexSet = useMemo(() => {
+    if (currentAction === 'swap' && currentSnapshot.indices.length === 2) {
+      return new Set(currentSnapshot.indices);
+    }
+    return new Set<number>();
+  }, [currentAction, currentSnapshot.indices]);
+
+  const motionGhosts = useMemo<MotionGhostSpec[]>(() => {
+    if (currentAction !== 'swap' || currentSnapshot.indices.length !== 2) {
+      return [];
+    }
+    const [leftIndex, rightIndex] = currentSnapshot.indices;
+    const leftToRightValue = currentSnapshot.arrayState[rightIndex];
+    const rightToLeftValue = currentSnapshot.arrayState[leftIndex];
+    return [
+      {
+        key: `swap-lr-${currentStep}-${leftIndex}-${rightIndex}-${leftToRightValue}`,
+        value: leftToRightValue,
+        sourceIndex: leftIndex,
+        targetIndex: rightIndex,
+      },
+      {
+        key: `swap-rl-${currentStep}-${leftIndex}-${rightIndex}-${rightToLeftValue}`,
+        value: rightToLeftValue,
+        sourceIndex: rightIndex,
+        targetIndex: leftIndex,
+      },
+    ];
+  }, [currentAction, currentSnapshot, currentStep]);
+
+  useLayoutEffect(() => {
+    motionGhosts.forEach((ghost) => {
+      const ghostElement = ghostRefs.current[ghost.key];
+      const sourceElement = barRefs.current[ghost.sourceIndex];
+      const targetElement = barRefs.current[ghost.targetIndex];
+      if (!ghostElement || !sourceElement || !targetElement) {
+        return;
+      }
+      const startLeft = sourceElement.offsetLeft;
+      const deltaX = targetElement.offsetLeft - sourceElement.offsetLeft;
+      ghostElement.style.setProperty('--shell-ghost-start-left', `${startLeft}px`);
+      ghostElement.style.setProperty('--shell-ghost-delta-x', `${deltaX}px`);
+    });
+  }, [motionGhosts]);
 
   const sortedIndexSet = useMemo(() => {
     const sorted = new Set<number>();
@@ -248,34 +289,61 @@ export function BubbleSortPage() {
         subtitle={t('module.canvas.sortingStage')}
         stageClassName="viz-canvas-stage-sorting"
       >
-        <div className="array-bars bubble-array-bars" aria-label="array-visualizer" style={{ '--bubble-count': Math.max(barIds.length, 1) } as CSSProperties}>
-          {barIds.map((barId) => {
-            const position = barPositionMap.get(barId) ?? barId;
-            const frameHighlight = highlightMap.get(position);
-            const highlight = frameHighlight ?? (sortedIndexSet.has(position) ? 'sorted' : 'default');
-            const value = initialValues[barId] ?? 0;
-            const barStyle = {
-              height: `${(value / maxValue) * 100}%`,
-              '--bubble-offset': position - barId,
-              '--bubble-z': highlight === 'swapping' ? 3 : highlight === 'comparing' ? 2 : 1,
-              '--piano-order': position,
-            } as CSSProperties;
-            return (
+        <div
+          className="shell-stage-track"
+          style={
+            {
+              '--shell-count': Math.max(barCount, 1),
+              '--shell-front-slots': 0,
+              '--shell-motion-duration': `${motionDurationMs}ms`,
+            } as CSSProperties
+          }
+        >
+          <div className="array-bars shell-array-bars" aria-label="array-visualizer">
+            {motionGhosts.map((ghost) => (
               <div
-                key={barId}
-                className={`array-bar bubble-sort-bar bar-${highlight}${isFinaleFrame ? ' bar-finale' : ''}`}
-                style={barStyle}
+                key={ghost.key}
+                ref={(node) => {
+                  ghostRefs.current[ghost.key] = node;
+                }}
+                className="shell-motion-ghost shell-motion-ghost-shift"
+                style={{ height: `${getBarHeightPercent(ghost.value, maxValue)}%` }}
               >
-                <span>{value}</span>
+                <span>{ghost.value}</span>
               </div>
-            );
-          })}
+            ))}
+            {arrayState.map((value, index) => {
+              const frameHighlight = highlightMap.get(index);
+              const highlight = frameHighlight ?? (sortedIndexSet.has(index) ? 'sorted' : 'default');
+              const barStateClass = getBubbleBarStateClass(highlight);
+              const barClassName = `array-bar shell-bar${barStateClass ? ` ${barStateClass}` : ''}${
+                hiddenIndexSet.has(index) ? ' shell-motion-hidden' : ''
+              }${isFinaleFrame ? ' bar-finale' : ''}`;
+              const barStyle = {
+                height: `${getBarHeightPercent(value, maxValue)}%`,
+                '--shell-group-color': 'transparent',
+                '--piano-order': index,
+              } as CSSProperties;
+              return (
+                <div
+                  key={index}
+                  ref={(node) => {
+                    barRefs.current[index] = node;
+                  }}
+                  className={barClassName}
+                  style={barStyle}
+                >
+                  <span>{value}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </VisualizationCanvas>
 
       <div className="legend-row">
         <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
-        <span className="legend-item legend-swapping">{t('module.s01.legend.swapping')}</span>
+        <span className="legend-item legend-moving">{t('module.s01.legend.swapping')}</span>
         <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
         <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
       </div>
