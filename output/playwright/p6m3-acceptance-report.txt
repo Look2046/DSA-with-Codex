@@ -1,0 +1,33 @@
+# P6-M3 Acceptance Report
+
+Date: 2026-03-08
+Local Dev URL: http://127.0.0.1:5174
+Browser: Firefox (repo-local `./scripts/playwright-cli.sh`)
+
+## Discovery Consistency (/modules)
+
+- Total module cards: 11
+- Filter counts: Sorting=4, Linear=5, Search=2, All=11
+- Ready badges: 11
+- Open links: 11
+- Screenshot: `output/playwright/p6m3-modules.png`
+
+## Module Runtime Smoke (route + playback controls present + no route/runtime error)
+
+- `S-01` `/modules/bubble-sort` -> `output/playwright/p6m3-s01-bubble-sort.png`
+- `S-02` `/modules/selection-sort` -> `output/playwright/p6m3-s02-selection-sort.png`
+- `S-03` `/modules/insertion-sort` -> `output/playwright/p6m3-s03-insertion-sort.png`
+- `S-04` `/modules/shell-sort` -> `output/playwright/p6m3-s04-shell-sort.png`
+- `SR-01` `/modules/linear-search` -> `output/playwright/p6m3-sr01-linear-search.png`
+- `SR-02` `/modules/binary-search` -> `output/playwright/p6m3-sr02-binary-search.png`
+- `L-01` `/modules/array` -> `output/playwright/p6m3-l01-array.png`
+- `L-02` `/modules/dynamic-array` -> `output/playwright/p6m3-l02-dynamic-array.png`
+- `L-03` `/modules/linked-list` -> `output/playwright/p6m3-l03-linked-list.png`
+- `L-04` `/modules/stack` -> `output/playwright/p6m3-l04-stack.png`
+- `L-05` `/modules/queue` -> `output/playwright/p6m3-l05-queue.png`
+
+## Conclusion
+
+- All implemented modules are reachable from `/modules` and route safely.
+- No route-level runtime error was detected in this smoke pass.
+- Playback action controls are present on all implemented module pages.

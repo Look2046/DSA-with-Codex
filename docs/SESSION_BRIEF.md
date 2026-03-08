@@ -5,9 +5,9 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p2-timeline-engine`
-- Current phase: P6 in progress (`P6-M3` next)
-- Last local quality gate: `npm run check` (passed, 2026-03-07)
+- Active branch (expected): `main` (new milestone work still uses `feat/*` branches)
+- Current phase: P6 closed, P7 planning baseline ready (`P7-M1` next)
+- Last local quality gate: `npm run check` (passed, 2026-03-08)
 
 ## 2) What Is Already Done
 
@@ -36,12 +36,20 @@ Use this file as the first thing to read in a new chat/session.
 - `/modules` category filter expanded to include `search`
 - P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
+- P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
 - P6-M2 local browser walkthrough captured for `S-04` (`output/playwright/p6m2-shell-sort.png`)
+- P6-M3 discovery + acceptance refresh completed:
+  - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p6m3-*.png`)
+  - added acceptance report `output/playwright/p6m3-acceptance-report.txt`
 - `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
 - `S-02 Selection Sort` module landed with timeline playback + deterministic tests
 - `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
 - `L-05 Queue` module landed with timeline playback + JSON import/export + deterministic tests
 - `L-02 Dynamic Array` module landed with resize-focused timeline playback + JSON import/export + deterministic tests
+- `S-01`/`S-02`/`S-03`/`S-04` sorting visuals received focused UX iteration:
+  - swap/shift animation semantics aligned toward temp/hole choreography
+  - default dataset size and preset controls aligned
+  - sorted persistence + finale polish + index rows aligned across `S-01`~`S-04`
 - P4-M3 consistency pass closed:
   - S-01/S-02 playback status/step display aligned with linear modules
   - L-03/L-05 status block layout stabilized to reduce page jitter
@@ -53,8 +61,11 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P6-M3: discovery consistency pass + Playwright acceptance refresh after `SR-01`/`S-04`.
-- Keep quality gates and acceptance evidence workflow unchanged (`npm run check` + Playwright refresh before milestone close).
+- Start P7-M1 (`S-05 Quick Sort`):
+  - deliver step generator + timeline adapter + module page + route/registry entry
+  - follow current sorting UI conventions (status lines, playback controls, index row)
+  - add deterministic step/replay tests
+- Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails
 
@@ -69,7 +80,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ```bash
 git fetch
-git switch feat/p2-timeline-engine
+git switch main
 git pull
 npm install
 npm run dev

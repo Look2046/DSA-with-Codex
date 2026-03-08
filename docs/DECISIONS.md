@@ -283,3 +283,21 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue using `npx --package @playwright/cli ...` directly; install only system Chrome under `/opt/google/chrome/chrome`; leave browser choice per-session.
 - Consequences: Playwright automation in this repo now has one stable CLI entrypoint and one default browser target; future browser setup in the same WSL user can be reused instead of rediscovered ad hoc.
 - Owner: haoyu + codex
+
+## DEC-20260308-31
+- Date: 2026-03-08
+- Status: accepted
+- Context: P6-M2 (`S-04`) is complete, and recent `S-01`~`S-04` animation refinements changed acceptance surface; milestone closure needs fresh discovery/runtime evidence rather than inheriting older artifacts.
+- Decision: Close P6 only after a new full discovery consistency pass and Playwright acceptance refresh over `/modules` and all implemented routes, archived as `output/playwright/p6m3-*.png` + `p6m3-acceptance-report.txt`.
+- Alternatives considered: mark P6 closed using existing P5/P6-M2 artifacts only; refresh only new routes (`SR-01`, `S-04`) instead of full implemented set.
+- Consequences: stronger closure confidence for P6 with reproducible evidence after sorting UX changes; small extra local execution overhead for each closure.
+- Owner: haoyu + codex
+
+## DEC-20260308-32
+- Date: 2026-03-08
+- Status: accepted
+- Context: With P6 closed, next expansion should stay aligned with the current user focus on sorting interaction semantics and avoid jumping context to trees/graphs too early.
+- Decision: Define P7 as sorting-track expansion in three milestones: `S-05 Quick Sort` (`P7-M1`), `S-06 Merge Sort` (`P7-M2`), and sorting consistency + acceptance closure (`P7-M3`), documented in `docs/IMPLEMENTATION_PLAN_P7.md`.
+- Alternatives considered: start tree modules immediately; deliver only ad-hoc sorting polish without new module milestones.
+- Consequences: keeps momentum and design consistency in the existing sorting workflow, while preserving explicit acceptance boundaries before broader category expansion.
+- Owner: haoyu + codex

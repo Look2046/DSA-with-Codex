@@ -116,7 +116,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
   - Done: refreshed Playwright acceptance screenshots/report for all implemented modules (`output/playwright/p5m3-*.png`, `output/playwright/p5m3-acceptance-report.txt`) and synced P5 closure docs.
 
-## P6 (In Progress)
+## P6 (Closed)
 - [x] P6 planning baseline
   - DoD: define P6 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -132,9 +132,28 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: fixed input replay deterministic and sorted; `npm run check` passes.
   - Done: added `S-04` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`shellSort.test.ts`, `shellTimelineReplay.test.ts`) and local Playwright walkthrough evidence (`output/playwright/p6m2-shell-sort.png`).
 
-- [ ] P6-M3 Discovery/acceptance refresh after SR-01/S-04
+- [x] P6-M3 Discovery/acceptance refresh after SR-01/S-04
   - DoD: modules discovery consistency pass + Playwright acceptance artifacts refresh + docs closure sync.
   - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
+  - Done: refreshed Playwright artifacts for `/modules` + all implemented modules (`output/playwright/p6m3-*.png`), generated `output/playwright/p6m3-acceptance-report.txt`, added replay guardrail tests for `S-03/S-04` temp/hole choreography, and synced closure docs.
+
+## P7 (Planned)
+- [x] P7 planning baseline
+  - DoD: define P7 milestone scope/order and acceptance criteria in docs.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done: added `docs/IMPLEMENTATION_PLAN_P7.md` and synced next milestone state docs.
+
+- [ ] P7-M1 Add S-05 quick sort module
+  - DoD: quick-sort partition visualization + timeline playback + deterministic tests + zh/en copy.
+  - Acceptance: fixed input replay deterministic; `npm run check` passes.
+
+- [ ] P7-M2 Add S-06 merge sort module
+  - DoD: split/merge stage visualization + timeline playback + deterministic tests + zh/en copy.
+  - Acceptance: fixed input replay deterministic; `npm run check` passes.
+
+- [ ] P7-M3 Sorting-track consistency + acceptance refresh
+  - DoD: align S-01~S-06 interaction semantics + Playwright acceptance artifacts/report refresh + docs closure sync.
+  - Acceptance: route/runtime stability confirmed and quality gate remains green.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

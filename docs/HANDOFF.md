@@ -2,6 +2,39 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P6-M3 closure + P7 planning baseline)
+
+### Today Done
+- Completed `P6-M3` discovery/acceptance closure:
+  - validated `/modules` discovery consistency (11 cards, filter counts: sorting=4 / linear=5 / search=2)
+  - refreshed Playwright artifacts for `/modules` + all implemented module routes under `output/playwright/p6m3-*.png`
+  - added consolidated acceptance report `output/playwright/p6m3-acceptance-report.txt`
+- Landed sorting replay guardrail tests for temp/hole choreography:
+  - `src/modules/sorting/insertionTimelineReplay.test.ts`
+  - `src/modules/sorting/shellTimelineReplay.test.ts`
+- Synced milestone docs and closed P6:
+  - updated `SESSION_BRIEF`, `TODO`, `DECISIONS`
+- Defined P7 planning baseline:
+  - added `docs/IMPLEMENTATION_PLAN_P7.md`
+  - synced P7 next-priority state in `SESSION_BRIEF` and `TODO`
+
+### Current State
+- Branch: `main`
+- Working tree status: code + docs + acceptance artifact updates in progress (P6 closure + P7 baseline sync)
+- Last verified command: `npm run check` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Start P7-M1 (`S-05 Quick Sort`):
+  - implement step generator + timeline adapter + page/route/registry wiring
+  - follow `S-01`~`S-04` interaction conventions (highlight/move/sorted/index)
+  - add deterministic step/replay tests and zh/en copy
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch main
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-07 (P6-M2 S-04 shell-sort closure)
 
 ### Today Done
