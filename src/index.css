@@ -440,6 +440,32 @@ body {
   transition: height 0.35s ease, background-color 0.25s ease, transform 0.2s ease;
 }
 
+.bubble-array-bars {
+  --bubble-gap: 6px;
+  --bubble-count: 8;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--bubble-gap);
+  overflow: hidden;
+}
+
+.bubble-array-bars .bubble-sort-bar {
+  flex: 0 0 calc((100% - (var(--bubble-count) - 1) * var(--bubble-gap)) / var(--bubble-count));
+  width: calc((100% - (var(--bubble-count) - 1) * var(--bubble-gap)) / var(--bubble-count));
+  transform: translateX(calc(var(--bubble-offset, 0) * (100% + var(--bubble-gap))));
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), height 0.35s ease, background-color 0.25s ease;
+  will-change: transform;
+  z-index: var(--bubble-z, 1);
+}
+
+.bubble-array-bars .bubble-sort-bar.bar-comparing {
+  transform: translateX(calc(var(--bubble-offset, 0) * (100% + var(--bubble-gap)))) translateY(-2px);
+}
+
+.bubble-array-bars .bubble-sort-bar.bar-swapping {
+  transform: translateX(calc(var(--bubble-offset, 0) * (100% + var(--bubble-gap)))) translateY(-3px);
+}
+
 .bar-default {
   background: #cfe1f3;
 }

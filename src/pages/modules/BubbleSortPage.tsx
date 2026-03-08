@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
@@ -67,6 +67,26 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   return t('module.s01.highlight.default');
 }
 
+function buildBarOrderByFrame(steps: BubbleSortStep[]): number[][] {
+  if (steps.length === 0) {
+    return [];
+  }
+
+  const initialOrder = steps[0].arrayState.map((_, index) => index);
+  const order = [...initialOrder];
+
+  return steps.map((step) => {
+    if (step.action === 'swap' && step.indices.length === 2) {
+      const [leftIndex, rightIndex] = step.indices;
+      if (order[leftIndex] !== undefined && order[rightIndex] !== undefined) {
+        [order[leftIndex], order[rightIndex]] = [order[rightIndex], order[leftIndex]];
+      }
+    }
+
+    return [...order];
+  });
+}
+
 export function BubbleSortPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -80,11 +100,23 @@ export function BubbleSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const initialValues = useMemo(() => steps[0]?.arrayState ?? [], [steps]);
+  const barIds = useMemo(() => initialValues.map((_, index) => index), [initialValues]);
+  const barOrdersByFrame = useMemo(() => buildBarOrderByFrame(steps), [steps]);
+  const currentBarOrder = useMemo(
+    () => barOrdersByFrame[currentStep] ?? barOrdersByFrame[0] ?? [],
+    [barOrdersByFrame, currentStep]
+  );
+
+  const barPositionMap = useMemo(() => {
+    const positions = new Map<number, number>();
+    currentBarOrder.forEach((barId, position) => positions.set(barId, position));
+    return positions;
+  }, [currentBarOrder]);
 
   const maxValue = useMemo(() => {
-    const values = currentSnapshot?.arrayState ?? inputData;
-    return Math.max(...values, 1);
-  }, [currentSnapshot?.arrayState, inputData]);
+    return Math.max(...initialValues, 1);
+  }, [initialValues]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, BubbleSortStep['highlights'][number]['type']>();
@@ -163,11 +195,18 @@ export function BubbleSortPage() {
         subtitle={t('module.canvas.sortingStage')}
         stageClassName="viz-canvas-stage-sorting"
       >
-        <div className="array-bars" aria-label="array-visualizer">
-          {(currentSnapshot?.arrayState ?? []).map((value, index) => {
-            const highlight = highlightMap.get(index) ?? 'default';
+        <div className="array-bars bubble-array-bars" aria-label="array-visualizer" style={{ '--bubble-count': Math.max(barIds.length, 1) } as CSSProperties}>
+          {barIds.map((barId) => {
+            const position = barPositionMap.get(barId) ?? barId;
+            const highlight = highlightMap.get(position) ?? 'default';
+            const value = initialValues[barId] ?? 0;
+            const barStyle = {
+              height: `${(value / maxValue) * 100}%`,
+              '--bubble-offset': position - barId,
+              '--bubble-z': highlight === 'swapping' ? 3 : highlight === 'comparing' ? 2 : 1,
+            } as CSSProperties;
             return (
-              <div key={`${index}-${value}`} className={`array-bar bar-${highlight}`} style={{ height: `${(value / maxValue) * 100}%` }}>
+              <div key={barId} className={`array-bar bubble-sort-bar bar-${highlight}`} style={barStyle}>
                 <span>{value}</span>
               </div>
             );
