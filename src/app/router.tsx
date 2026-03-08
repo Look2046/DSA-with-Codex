@@ -18,6 +18,7 @@ import { BinarySearchPage } from '../pages/modules/BinarySearchPage';
 import { LinearSearchPage } from '../pages/modules/LinearSearchPage';
 import { StackPage } from '../pages/modules/StackPage';
 import { QueuePage } from '../pages/modules/QueuePage';
+import { BinaryTreeTraversalPage } from '../pages/modules/BinaryTreeTraversalPage';
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       { path: 'modules/linked-list', element: <LinkedListPage /> },
       { path: 'modules/stack', element: <StackPage /> },
       { path: 'modules/queue', element: <QueuePage /> },
+      { path: 'modules/binary-tree', element: <BinaryTreeTraversalPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

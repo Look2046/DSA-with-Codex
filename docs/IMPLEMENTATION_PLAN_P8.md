@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P8
 
-Status: proposed for execution
+Status: in progress (`P8-M1` completed; `P8-M2` next)
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: start tree-track delivery with the same timeline-engine, deterministic testing, and acceptance discipline used in P5~P7
 
@@ -31,7 +31,7 @@ Out of scope
 
 ## Milestones
 
-### P8-M1 Tree onboarding + T-01
+### P8-M1 Tree onboarding + T-01 (Completed 2026-03-08)
 
 Deliverables
 - `tree` category support in module discovery (filters + labels)

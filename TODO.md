@@ -158,15 +158,16 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: route/runtime stability confirmed and quality gate remains green.
   - Done: refreshed `/modules` + all implemented-module Playwright artifacts (`output/playwright/p7m3-*.png`), generated `output/playwright/p7m3-acceptance-report.txt`, recorded detailed smoke evidence (`output/playwright/p7m3-runtime-smoke.txt`), and completed P7 closure docs sync.
 
-## P8 (Planned)
+## P8 (In Progress)
 - [x] P8 planning baseline
   - DoD: define P8 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
   - Done: added `docs/IMPLEMENTATION_PLAN_P8.md` and synced P8 next-priority state docs.
 
-- [ ] P8-M1 Tree onboarding + T-01 binary tree traversal
+- [x] P8-M1 Tree onboarding + T-01 binary tree traversal
   - DoD: tree category/registry wiring + `T-01` module (timeline/page/route/tests/i18n) landed.
   - Acceptance: `npm run check` passes and `/modules -> T-01 -> play/pause/next/reset` smoke flow is stable.
+  - Done: landed tree category wiring in discovery + registry entries `T-01`~`T-06` (`T-01` implemented), added `T-01` generator/timeline/page/route/tests/i18n, and captured smoke artifacts (`output/playwright/p8m1-modules-tree-filter.png`, `output/playwright/p8m1-t01-binary-tree-smoke.png`).
 
 - [ ] P8-M2 T-02 BST module
   - DoD: BST insert/find/delete timeline semantics + page/route/tests landed.

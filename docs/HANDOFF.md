@@ -2,6 +2,41 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P8-M1 tree onboarding + T-01 closure)
+
+### Today Done
+- Implemented tree-track onboarding in discovery and metadata:
+  - extended module category to include `tree`
+  - added `/modules` tree filter + i18n labels
+  - registered `T-01`~`T-06` (`T-01` implemented, `T-02`~`T-06` pending)
+- Delivered `T-01 Binary Tree Traversal` end-to-end:
+  - step generator (`src/modules/tree/binaryTreeTraversal.ts`)
+  - timeline adapter (`src/modules/tree/binaryTreeTraversalTimelineAdapter.ts`)
+  - module page (`src/pages/modules/BinaryTreeTraversalPage.tsx`)
+  - route wiring (`/modules/binary-tree`)
+- Added deterministic tests:
+  - `src/modules/tree/binaryTreeTraversal.test.ts`
+  - `src/modules/tree/binaryTreeTraversalTimelineReplay.test.ts`
+- Captured local Playwright smoke evidence:
+  - `output/playwright/p8m1-modules-tree-filter.png`
+  - `output/playwright/p8m1-t01-binary-tree-smoke.png`
+- Re-verified local quality gate: `npm run check` (pass, 2026-03-08).
+
+### Current State
+- Branch: `feat/p8-m1-tree-onboarding`
+- Working tree status: code + docs updates in progress (P8-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Commit and merge current `P8-M1` branch.
+- Start `P8-M2` implementation (`T-02 BST`).
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m1-tree-onboarding
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-08 (P8 planning baseline defined)
 
 ### Today Done

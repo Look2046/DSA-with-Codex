@@ -337,3 +337,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue ad-hoc sorting polish only; jump directly into multiple tree/graph modules without milestone boundaries.
 - Consequences: immediate actionable backlog with clear DoD/acceptance boundaries; AVL/Heap/Trie/Graph remain deferred to later phases.
 - Owner: haoyu + codex
+
+## DEC-20260308-37
+- Date: 2026-03-08
+- Status: accepted
+- Context: `P8-M1` needed to establish tree-category onboarding and deliver the first tree module (`T-01`) with the same deterministic playback/testing discipline as prior phases.
+- Decision: Land `P8-M1` by adding `tree` discovery/category wiring (`/modules` filter + i18n + registry `T-01`~`T-06`) and implementing `T-01 Binary Tree Traversal` with four traversal modes (preorder/inorder/postorder/level-order), deterministic step/replay tests, and local Playwright smoke evidence.
+- Alternatives considered: start `T-02 BST` before discovery onboarding; ship `T-01` without replay determinism coverage; defer `/modules` category integration to a later milestone.
+- Consequences: tree track now has a route-safe discoverable entrypoint and reproducible baseline module behavior; P8 next focus can move directly to `T-02 BST` implementation.
+- Owner: haoyu + codex

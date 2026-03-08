@@ -372,6 +372,11 @@ body {
   overflow-x: hidden;
 }
 
+.viz-canvas-stage-tree {
+  min-height: 520px;
+  overflow: hidden;
+}
+
 .array-preview {
   font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   background: #f8fbff;
@@ -1139,6 +1144,79 @@ body {
   gap: 12px;
 }
 
+.tree-page {
+  min-width: 0;
+}
+
+.tree-stage {
+  position: relative;
+  height: 100%;
+  min-height: 460px;
+  width: 100%;
+  border: 1px solid #d7e8f8;
+  border-radius: 12px;
+  background: #f8fbff;
+  overflow: hidden;
+}
+
+.tree-edge-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.tree-edge {
+  stroke: #9fc0df;
+  stroke-width: 0.55;
+}
+
+.tree-node-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.tree-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  border: 1px solid #bfd5ea;
+  background: #edf5fd;
+  box-shadow: 0 6px 12px rgba(31, 96, 163, 0.12);
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  color: #1b456f;
+}
+
+.tree-node.bar-visiting {
+  border-color: #ecb253;
+  box-shadow:
+    0 0 0 2px rgba(249, 198, 107, 0.44),
+    0 8px 14px rgba(227, 161, 47, 0.2);
+}
+
+.tree-node.bar-matched {
+  border-color: #56b66d;
+  background: #daf5e3;
+  box-shadow: 0 8px 14px rgba(53, 131, 75, 0.18);
+}
+
+.tree-node-value {
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tree-node-index {
+  font-size: 0.66rem;
+  color: #5f7894;
+  line-height: 1;
+}
+
 .array-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1706,7 +1784,8 @@ body {
   .viz-canvas-stage,
   .viz-canvas-stage-array,
   .viz-canvas-stage-sorting,
-  .viz-canvas-stage-linked {
+  .viz-canvas-stage-linked,
+  .viz-canvas-stage-tree {
     min-height: 380px;
   }
 
@@ -1734,5 +1813,14 @@ body {
 
   .linked-diagram-canvas {
     min-height: 296px;
+  }
+
+  .tree-stage {
+    min-height: 340px;
+  }
+
+  .tree-node {
+    width: 52px;
+    height: 52px;
   }
 }

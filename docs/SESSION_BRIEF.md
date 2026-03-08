@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `docs/p8-baseline` (pending merge), then `main`/next `feat/p8-m1-tree-onboarding`
-- Current phase: P8 planning baseline completed; next is P8-M1 implementation
+- Active branch (expected): `feat/p8-m1-tree-onboarding` (pending merge), then `main`/next `feat/p8-m2-bst`
+- Current phase: P8-M1 implemented and pending merge; next is P8-M2
 - Last local quality gate: `npm run check` (passed, 2026-03-08)
 
 ## 2) What Is Already Done
@@ -40,6 +40,12 @@ Use this file as the first thing to read in a new chat/session.
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
 - P8 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P8.md`
+- P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
+  - added `tree` category support in `/modules` filter + i18n labels
+  - registered `T-01`~`T-06` in module registry (`T-01` implemented)
+  - added `T-01` timeline/page/route (`/modules/binary-tree`) with four traversal modes
+  - added deterministic tests (`binaryTreeTraversal.test.ts`, `binaryTreeTraversalTimelineReplay.test.ts`)
+  - captured local Playwright smoke artifacts (`output/playwright/p8m1-modules-tree-filter.png`, `output/playwright/p8m1-t01-binary-tree-smoke.png`)
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
@@ -67,10 +73,10 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P8-M1 (tree onboarding + `T-01` binary tree traversal):
-  - add `tree` category/registry/route-safe discovery wiring
-  - implement `T-01` timeline/page/route/tests/i18n
-  - capture local smoke evidence for `/modules -> T-01`
+- Start P8-M2 (`T-02` BST module):
+  - implement BST timeline semantics for `searchPath` / `insert` / `delete`
+  - wire page + route (`/modules/bst`) and mark `T-02` as implemented
+  - add deterministic tests (step generation + replay) and zh/en copy
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails
