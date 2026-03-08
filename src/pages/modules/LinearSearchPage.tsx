@@ -24,7 +24,15 @@ const MIN_SIZE = 5;
 const MAX_SIZE = 20;
 
 function createRandomDataset(size: number): number[] {
-  return Array.from({ length: size }, () => Math.floor(Math.random() * 99) + 1);
+  const poolSize = Math.max(99, size);
+  const values = Array.from({ length: poolSize }, (_, index) => index + 1);
+
+  for (let index = values.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
+  }
+
+  return values.slice(0, size);
 }
 
 export function LinearSearchPage() {

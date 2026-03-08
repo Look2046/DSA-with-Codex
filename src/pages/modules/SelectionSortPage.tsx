@@ -12,7 +12,15 @@ const MIN_SIZE = 5;
 const MAX_SIZE = 20;
 
 function createRandomDataset(size: number): number[] {
-  return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  const poolSize = Math.max(90, size);
+  const values = Array.from({ length: poolSize }, (_, index) => 10 + index);
+
+  for (let index = values.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
+  }
+
+  return values.slice(0, size);
 }
 
 function createAscendingDataset(size: number): number[] {
@@ -229,6 +237,10 @@ export function SelectionSortPage() {
     { key: 'module.s01.speed.fast', value: 350 },
     { key: 'module.s01.speed.faster', value: 175 },
     { key: 'module.s01.speed.fastest', value: 88 },
+    { key: 'module.s01.speed.ultra', value: 44 },
+    { key: 'module.s01.speed.extreme', value: 22 },
+    { key: 'module.s01.speed.hyper', value: 11 },
+    { key: 'module.s01.speed.insane', value: 6 },
   ] as const;
 
   return (

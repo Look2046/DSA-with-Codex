@@ -64,7 +64,7 @@ describe('timelineReducer', () => {
 
   it('clamps speed to minimum value', () => {
     const initial = createInitialTimelineState(5);
-    const changed = timelineReducer(initial, { type: 'setSpeed', speedMs: 10 });
-    expect(changed.speedMs).toBe(50);
+    const changed = timelineReducer(initial, { type: 'setSpeed', speedMs: 1 });
+    expect(changed.speedMs).toBe(5);
   });
 });

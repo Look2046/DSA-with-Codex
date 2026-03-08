@@ -573,7 +573,7 @@ body {
   --shell-content-padding: 10px;
   --shell-gap: clamp(0.5px, calc(6px - var(--shell-total-count) * 0.055px), 6px);
   --shell-slot-min-width: 1px;
-  --shell-slot-max-width: 32px;
+  --shell-slot-max-width: 160px;
   --shell-slot-width-raw: calc(
     (100% - (var(--shell-total-count) - 1) * var(--shell-gap) - 2 * var(--shell-content-padding)) / var(--shell-total-count)
   );
@@ -596,6 +596,7 @@ body {
   isolation: isolate;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: var(--shell-gap);
   width: var(--shell-track-width);
   max-width: 100%;
@@ -683,6 +684,16 @@ body {
   box-shadow: 0 10px 16px rgba(53, 131, 75, 0.2);
 }
 
+.shell-array-bars.shell-array-bars-compact .array-bar {
+  min-height: 14px;
+  border-radius: 6px 6px 3px 3px;
+  padding-bottom: 0;
+}
+
+.shell-array-bars.shell-array-bars-compact .array-bar > span {
+  display: none;
+}
+
 .shell-array-bars .array-bar.shell-motion-hidden {
   opacity: 0;
   transform: none;
@@ -691,6 +702,7 @@ body {
 .shell-index-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--shell-gap);
   width: var(--shell-track-width);
   max-width: 100%;
@@ -707,6 +719,10 @@ body {
   color: #4f6f91;
   line-height: 1.2;
   font-weight: 600;
+}
+
+.shell-index-row.shell-index-row-compact .shell-index-cell {
+  font-size: 0.62rem;
 }
 
 .shell-held-bar {

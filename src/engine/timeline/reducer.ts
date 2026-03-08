@@ -2,7 +2,7 @@ import type { PlaybackStatus } from '../../types/animation';
 import type { TimelineAction, TimelineState } from './types';
 
 const DEFAULT_SPEED_MS = 700;
-const MIN_SPEED_MS = 50;
+const MIN_SPEED_MS = 5;
 
 function clampFrame(frameIndex: number, totalFrames: number): number {
   if (totalFrames <= 0) {
@@ -73,4 +73,3 @@ export function timelineReducer(state: TimelineState, action: TimelineAction): T
     }
   }
 }
-

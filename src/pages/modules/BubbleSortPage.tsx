@@ -10,9 +10,18 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 const DEFAULT_SIZE = 10;
 const MIN_SIZE = 5;
 const MAX_SIZE = 100;
+const COMPACT_BAR_LABEL_THRESHOLD = 32;
 
 function createRandomDataset(size: number): number[] {
-  return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+  const poolSize = Math.max(90, size);
+  const values = Array.from({ length: poolSize }, (_, index) => 10 + index);
+
+  for (let index = values.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
+  }
+
+  return values.slice(0, size);
 }
 
 function createAscendingDataset(size: number): number[] {
@@ -96,6 +105,17 @@ function getBarHeightPercent(value: number, maxValue: number): number {
   return (value / maxValue) * 100;
 }
 
+function formatArrayPreview(values: number[], maxVisible = 24): string {
+  if (values.length <= maxVisible) {
+    return values.join(', ');
+  }
+  const leftCount = Math.floor(maxVisible / 2);
+  const rightCount = maxVisible - leftCount;
+  const leftPart = values.slice(0, leftCount).join(', ');
+  const rightPart = values.slice(-rightCount).join(', ');
+  return `${leftPart}, ..., ${rightPart} (n=${values.length})`;
+}
+
 function getBubbleBarStateClass(highlight: HighlightType | 'default'): string {
   if (highlight === 'comparing') {
     return 'shell-bar-comparing';
@@ -134,6 +154,9 @@ export function BubbleSortPage() {
   const currentAction = currentSnapshot?.action;
   const arrayState = currentSnapshot?.arrayState ?? inputData;
   const barCount = arrayState.length;
+  const isCompactBarMode = barCount > COMPACT_BAR_LABEL_THRESHOLD;
+  const indexLabelStep =
+    barCount <= 24 ? 1 : barCount <= 40 ? 2 : barCount <= 70 ? 5 : 10;
   const maxValue = useMemo(() => Math.max(...arrayState, 1), [arrayState]);
   const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
 
@@ -221,6 +244,10 @@ export function BubbleSortPage() {
     { key: 'module.s01.speed.fast', value: 350 },
     { key: 'module.s01.speed.faster', value: 175 },
     { key: 'module.s01.speed.fastest', value: 88 },
+    { key: 'module.s01.speed.ultra', value: 44 },
+    { key: 'module.s01.speed.extreme', value: 22 },
+    { key: 'module.s01.speed.hyper', value: 11 },
+    { key: 'module.s01.speed.insane', value: 6 },
   ] as const;
 
   return (
@@ -280,7 +307,7 @@ export function BubbleSortPage() {
       </p>
 
       <p>
-        {t('module.s01.sample')}: [{inputData.join(', ')}]
+        {t('module.s01.sample')}: [{formatArrayPreview(inputData)}]
       </p>
       <p>{getStepDescription(currentSnapshot, t)}</p>
 
@@ -299,7 +326,10 @@ export function BubbleSortPage() {
             } as CSSProperties
           }
         >
-          <div className="array-bars shell-array-bars" aria-label="array-visualizer">
+          <div
+            className={`array-bars shell-array-bars${isCompactBarMode ? ' shell-array-bars-compact' : ''}`}
+            aria-label="array-visualizer"
+          >
             {motionGhosts.map((ghost) => (
               <div
                 key={ghost.key}
@@ -332,16 +362,17 @@ export function BubbleSortPage() {
                   }}
                   className={barClassName}
                   style={barStyle}
+                  aria-label={`index-${index}-value-${value}`}
                 >
-                  <span>{value}</span>
+                  {!isCompactBarMode ? <span>{value}</span> : null}
                 </div>
               );
             })}
           </div>
-          <div className="shell-index-row" aria-hidden="true">
+          <div className={`shell-index-row${isCompactBarMode ? ' shell-index-row-compact' : ''}`} aria-hidden="true">
             {arrayState.map((_, index) => (
               <span key={index} className="shell-index-cell">
-                {index}
+                {index % indexLabelStep === 0 ? index : ''}
               </span>
             ))}
           </div>
@@ -356,7 +387,7 @@ export function BubbleSortPage() {
       </div>
 
       <p className="array-preview">
-        {t('module.s01.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+        {t('module.s01.currentArray')}: [{formatArrayPreview(currentSnapshot?.arrayState ?? [])}]
       </p>
       <p>
         {t('module.s01.highlight')}:{' '}
