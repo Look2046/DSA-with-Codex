@@ -7,12 +7,34 @@ import type { BubbleSortStep } from '../../modules/sorting/bubbleSort';
 import { buildBubbleSortTimelineFromInput } from '../../modules/sorting/bubbleTimelineAdapter';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
-const DEFAULT_SIZE = 8;
+const DEFAULT_SIZE = 10;
 const MIN_SIZE = 5;
 const MAX_SIZE = 20;
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+}
+
+function createAscendingDataset(size: number): number[] {
+  const step = Math.max(1, Math.floor(80 / Math.max(size - 1, 1)));
+  return Array.from({ length: size }, (_, index) => 10 + index * step);
+}
+
+function createDescendingDataset(size: number): number[] {
+  return [...createAscendingDataset(size)].reverse();
+}
+
+function createNearlySortedDataset(size: number): number[] {
+  const values = createAscendingDataset(size);
+  const swapCount = Math.max(1, Math.floor(size / 5));
+
+  for (let index = 0; index < swapCount; index += 1) {
+    const leftIndex = Math.floor(Math.random() * (size - 1));
+    const rightIndex = Math.min(size - 1, leftIndex + 1 + Math.floor(Math.random() * 2));
+    [values[leftIndex], values[rightIndex]] = [values[rightIndex], values[leftIndex]];
+  }
+
+  return values;
 }
 
 function getStatusLabel(status: PlaybackStatus, t: ReturnType<typeof useI18n>['t']): string {
@@ -129,8 +151,8 @@ export function BubbleSortPage() {
     reset();
   }, [setTotalFrames, reset, steps.length]);
 
-  const regenerateData = () => {
-    setInputData(createRandomDataset(datasetSize));
+  const regenerateData = (generator: (size: number) => number[]) => {
+    setInputData(generator(datasetSize));
     reset();
   };
 
@@ -138,6 +160,8 @@ export function BubbleSortPage() {
     { key: 'module.s01.speed.slow', value: 1200 },
     { key: 'module.s01.speed.normal', value: 700 },
     { key: 'module.s01.speed.fast', value: 350 },
+    { key: 'module.s01.speed.faster', value: 175 },
+    { key: 'module.s01.speed.fastest', value: 88 },
   ] as const;
 
   return (
@@ -158,9 +182,20 @@ export function BubbleSortPage() {
           />
           <strong>{datasetSize}</strong>
         </label>
-        <button type="button" onClick={regenerateData}>
-          {t('module.s01.regenerate')}
-        </button>
+        <div className="speed-group">
+          <button type="button" onClick={() => regenerateData(createRandomDataset)}>
+            {t('module.s01.generate.random')}
+          </button>
+          <button type="button" onClick={() => regenerateData(createNearlySortedDataset)}>
+            {t('module.s01.generate.nearlySorted')}
+          </button>
+          <button type="button" onClick={() => regenerateData(createAscendingDataset)}>
+            {t('module.s01.generate.ascending')}
+          </button>
+          <button type="button" onClick={() => regenerateData(createDescendingDataset)}>
+            {t('module.s01.generate.descending')}
+          </button>
+        </div>
       </div>
 
       <div className="bubble-toolbar">

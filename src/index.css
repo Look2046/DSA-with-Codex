@@ -392,6 +392,7 @@ body {
 .speed-group {
   display: inline-flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .speed-group button,
