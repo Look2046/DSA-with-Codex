@@ -230,6 +230,7 @@ export function InsertionSortPage() {
   const insertTargetIndex = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] : null;
   const arrayState = currentSnapshot?.arrayState ?? [];
   const barCount = arrayState.length;
+  const isFinaleFrame = currentSnapshot?.action === 'completed';
   const isCompactBarMode = barCount > COMPACT_BAR_LABEL_THRESHOLD;
   const indexLabelStep =
     barCount <= 24 ? 1 : barCount <= 40 ? 2 : barCount <= 70 ? 5 : 10;
@@ -501,7 +502,9 @@ export function InsertionSortPage() {
                 (currentAction === 'insert' && insertTargetIndex === index);
               const barClassName = isHole
                 ? 'array-bar bar-hole'
-                : `array-bar shell-bar${barStateClass ? ` ${barStateClass}` : ''}${hiddenDuringMotion ? ' shell-motion-hidden' : ''}`;
+                : `array-bar shell-bar${barStateClass ? ` ${barStateClass}` : ''}${hiddenDuringMotion ? ' shell-motion-hidden' : ''}${
+                    isFinaleFrame ? ' bar-finale' : ''
+                  }`;
               const valueHeightPercent = getBarHeightPercent(value, maxValue);
               const holeHeightPercent = valueHeightPercent;
               const barHeight = isHole ? `${holeHeightPercent}%` : `${valueHeightPercent}%`;
