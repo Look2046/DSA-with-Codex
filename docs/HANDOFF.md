@@ -2,6 +2,32 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P8 planning baseline defined)
+
+### Today Done
+- Added concrete P8 execution plan `docs/IMPLEMENTATION_PLAN_P8.md` with three milestones:
+  - `P8-M1` tree onboarding + `T-01 Binary Tree Traversal`
+  - `P8-M2` `T-02 BST`
+  - `P8-M3` tree-track consistency + acceptance closure
+- Expanded plan details from methodology to executable task lists:
+  - explicit target files, routes, tests, DoD, and acceptance criteria per milestone
+- Synced planning state docs (`SESSION_BRIEF`, `TODO`, `DECISIONS`).
+
+### Current State
+- Branch: `docs/p8-baseline`
+- Working tree status: docs planning sync in progress
+- Last verified command: `./scripts/check-doc-links.sh` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Merge `docs/p8-baseline` into `main`.
+- Start implementation branch `feat/p8-m1-tree-onboarding` and execute `P8-M1`.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch docs/p8-baseline
+./scripts/check-doc-links.sh
+```
+
 ## 2026-03-08 (P7-M3 sorting consistency + acceptance closure)
 
 ### Today Done

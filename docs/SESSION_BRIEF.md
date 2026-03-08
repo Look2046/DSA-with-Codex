@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p7-m2-merge-sort` (pending merge), then `main`/next `feat/*`
-- Current phase: P7 fully delivered locally (`P7-M1`~`P7-M3`) with refreshed acceptance evidence; pending merge
+- Active branch (expected): `docs/p8-baseline` (pending merge), then `main`/next `feat/p8-m1-tree-onboarding`
+- Current phase: P8 planning baseline completed; next is P8-M1 implementation
 - Last local quality gate: `npm run check` (passed, 2026-03-08)
 
 ## 2) What Is Already Done
@@ -39,6 +39,7 @@ Use this file as the first thing to read in a new chat/session.
 - P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
+- P8 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P8.md`
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
@@ -66,9 +67,10 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P8 planning baseline:
-  - define next executable milestone sequence and acceptance boundaries
-  - sync planning state across `SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`
+- Start P8-M1 (tree onboarding + `T-01` binary tree traversal):
+  - add `tree` category/registry/route-safe discovery wiring
+  - implement `T-01` timeline/page/route/tests/i18n
+  - capture local smoke evidence for `/modules -> T-01`
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails
