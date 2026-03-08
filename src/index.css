@@ -1148,6 +1148,10 @@ body {
   min-width: 0;
 }
 
+.bst-page {
+  min-width: 0;
+}
+
 .tree-stage {
   position: relative;
   height: 100%;
@@ -1157,6 +1161,13 @@ body {
   border-radius: 12px;
   background: #f8fbff;
   overflow: hidden;
+}
+
+.bst-stage {
+  background:
+    radial-gradient(circle at 20% 12%, rgba(102, 162, 219, 0.12), transparent 36%),
+    radial-gradient(circle at 82% 18%, rgba(85, 149, 211, 0.1), transparent 34%),
+    #f8fbff;
 }
 
 .tree-edge-layer {
@@ -1205,6 +1216,36 @@ body {
   box-shadow: 0 8px 14px rgba(53, 131, 75, 0.18);
 }
 
+.tree-node.bar-new-node {
+  border-color: #5e96d5;
+  background: #e6f1ff;
+  box-shadow:
+    0 0 0 2px rgba(94, 150, 213, 0.28),
+    0 8px 14px rgba(64, 111, 170, 0.2);
+}
+
+.bst-node-path {
+  box-shadow:
+    0 0 0 2px rgba(110, 137, 163, 0.22),
+    0 6px 12px rgba(31, 96, 163, 0.12);
+}
+
+.tree-node-tag {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 20px;
+  border-radius: 999px;
+  background: #1f5e9c;
+  color: #f5fbff;
+  font-size: 0.56rem;
+  line-height: 1.2;
+  padding: 1px 5px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
 .tree-node-value {
   font-size: 0.96rem;
   font-weight: 700;
@@ -1215,6 +1256,19 @@ body {
   font-size: 0.66rem;
   color: #5f7894;
   line-height: 1;
+}
+
+.bst-input-form {
+  grid-template-columns: minmax(160px, 220px) auto;
+}
+
+.bst-empty {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  width: fit-content;
+  color: #5f7894;
 }
 
 .array-form {
@@ -1822,5 +1876,11 @@ body {
   .tree-node {
     width: 52px;
     height: 52px;
+  }
+
+  .tree-node-tag {
+    font-size: 0.52rem;
+    min-width: 18px;
+    padding: 1px 4px;
   }
 }

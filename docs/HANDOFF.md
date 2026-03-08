@@ -2,6 +2,41 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P8-M2 T-02 BST closure)
+
+### Today Done
+- Delivered `T-02 Binary Search Tree (BST)` end-to-end:
+  - step generator (`src/modules/tree/bst.ts`)
+  - timeline adapter (`src/modules/tree/bstTimelineAdapter.ts`)
+  - module page (`src/pages/modules/BstPage.tsx`)
+  - route wiring (`/modules/bst`) + registry status update (`T-02` implemented)
+- Added deterministic tests:
+  - `src/modules/tree/bst.test.ts`
+  - `src/modules/tree/bstTimelineReplay.test.ts`
+- Added zh/en localized copy and tree-stage visual states for BST:
+  - operation labels (`searchPath`/`insert`/`delete`)
+  - explicit delete-case semantics (`leaf`/`oneChild`/`twoChildren`)
+  - successor/current markers and new-node/path legend
+- Captured local Playwright smoke evidence:
+  - `output/playwright/p8m2-modules-tree-filter.png`
+  - `output/playwright/p8m2-t02-bst-smoke.png`
+- Re-verified local quality gate: `npm run check` (pass, 2026-03-08).
+
+### Current State
+- Branch: `feat/p8-m2-bst`
+- Working tree status: code + docs updates in progress (P8-M2 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Commit and merge current `P8-M2` branch.
+- Start `P8-M3` tree consistency + acceptance closure.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m2-bst
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-08 (P8-M1 tree onboarding + T-01 closure)
 
 ### Today Done

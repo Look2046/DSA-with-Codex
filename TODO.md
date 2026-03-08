@@ -169,9 +169,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `npm run check` passes and `/modules -> T-01 -> play/pause/next/reset` smoke flow is stable.
   - Done: landed tree category wiring in discovery + registry entries `T-01`~`T-06` (`T-01` implemented), added `T-01` generator/timeline/page/route/tests/i18n, and captured smoke artifacts (`output/playwright/p8m1-modules-tree-filter.png`, `output/playwright/p8m1-t01-binary-tree-smoke.png`).
 
-- [ ] P8-M2 T-02 BST module
+- [x] P8-M2 T-02 BST module
   - DoD: BST insert/find/delete timeline semantics + page/route/tests landed.
   - Acceptance: deterministic fixed-input replay with explicit delete-case behavior and `npm run check` pass.
+  - Done: added `bst.ts` + `bstTimelineAdapter.ts` + `BstPage.tsx`, enabled route `/modules/bst` and registry `T-02 implemented=true`, landed deterministic tests (`bst.test.ts`, `bstTimelineReplay.test.ts`), and captured smoke artifacts (`output/playwright/p8m2-modules-tree-filter.png`, `output/playwright/p8m2-t02-bst-smoke.png`).
 
 - [ ] P8-M3 Tree-track consistency + acceptance refresh
   - DoD: `T-01`/`T-02` consistency pass + full implemented-route Playwright refresh + docs closure sync.

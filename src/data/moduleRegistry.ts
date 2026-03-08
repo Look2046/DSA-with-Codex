@@ -119,7 +119,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/bst',
     category: 'tree',
     difficulty: 2,
-    implemented: false,
+    implemented: true,
   },
   {
     id: 'T-03',

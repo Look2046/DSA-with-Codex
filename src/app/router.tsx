@@ -19,6 +19,7 @@ import { LinearSearchPage } from '../pages/modules/LinearSearchPage';
 import { StackPage } from '../pages/modules/StackPage';
 import { QueuePage } from '../pages/modules/QueuePage';
 import { BinaryTreeTraversalPage } from '../pages/modules/BinaryTreeTraversalPage';
+import { BstPage } from '../pages/modules/BstPage';
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'modules/stack', element: <StackPage /> },
       { path: 'modules/queue', element: <QueuePage /> },
       { path: 'modules/binary-tree', element: <BinaryTreeTraversalPage /> },
+      { path: 'modules/bst', element: <BstPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P8
 
-Status: in progress (`P8-M1` completed; `P8-M2` next)
+Status: in progress (`P8-M1` and `P8-M2` completed; `P8-M3` next)
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: start tree-track delivery with the same timeline-engine, deterministic testing, and acceptance discipline used in P5~P7
 
@@ -55,7 +55,7 @@ Acceptance
 - `npm run check` passes
 - local smoke evidence: `/modules -> T-01 -> play/pause/next/reset`
 
-### P8-M2 T-02 BST
+### P8-M2 T-02 BST (Completed 2026-03-08)
 
 Deliverables
 - BST generator + timeline adapter + page + route (`/modules/bst`)

@@ -346,3 +346,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: start `T-02 BST` before discovery onboarding; ship `T-01` without replay determinism coverage; defer `/modules` category integration to a later milestone.
 - Consequences: tree track now has a route-safe discoverable entrypoint and reproducible baseline module behavior; P8 next focus can move directly to `T-02 BST` implementation.
 - Owner: haoyu + codex
+
+## DEC-20260308-38
+- Date: 2026-03-08
+- Status: accepted
+- Context: `P8-M2` required a concrete BST teaching path with explicit operation semantics (`searchPath`/`insert`/`delete`) and delete-case explainability while keeping timeline determinism and existing module UX conventions.
+- Decision: Implement `T-02 BST` with dedicated step actions for search traversal, insertion, delete-case classification (`leaf`/`oneChild`/`twoChildren`) and successor replacement flow, plus deterministic step/replay tests, route `/modules/bst`, and Playwright smoke artifacts for `/modules` tree discovery + BST playback.
+- Alternatives considered: model BST with search-only first; defer delete-case explicit states; skip route discovery update until P8-M3.
+- Consequences: tree track now has two implemented modules with operation-level clarity and deterministic replay evidence, enabling P8-M3 to focus on consistency and full acceptance refresh.
+- Owner: haoyu + codex
