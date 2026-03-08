@@ -137,7 +137,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: route-safe navigation stable across implemented modules and quality gate remains green.
   - Done: refreshed Playwright artifacts for `/modules` + all implemented modules (`output/playwright/p6m3-*.png`), generated `output/playwright/p6m3-acceptance-report.txt`, added replay guardrail tests for `S-03/S-04` temp/hole choreography, and synced closure docs.
 
-## P7 (Planned)
+## P7 (Closed)
 - [x] P7 planning baseline
   - DoD: define P7 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -148,13 +148,20 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
   - Done: added `S-05` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`quickSort.test.ts`, `quickTimelineReplay.test.ts`) and local Playwright smoke artifact (`output/playwright/p7m1-s05-quick-sort-smoke.png`).
 
-- [ ] P7-M2 Add S-06 merge sort module
+- [x] P7-M2 Add S-06 merge sort module
   - DoD: split/merge stage visualization + timeline playback + deterministic tests + zh/en copy.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
+  - Done: added `S-06` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`mergeSort.test.ts`, `mergeTimelineReplay.test.ts`) and local Playwright smoke artifact (`output/playwright/p7m2-s06-merge-sort-smoke.png`).
 
-- [ ] P7-M3 Sorting-track consistency + acceptance refresh
+- [x] P7-M3 Sorting-track consistency + acceptance refresh
   - DoD: align S-01~S-06 interaction semantics + Playwright acceptance artifacts/report refresh + docs closure sync.
   - Acceptance: route/runtime stability confirmed and quality gate remains green.
+  - Done: refreshed `/modules` + all implemented-module Playwright artifacts (`output/playwright/p7m3-*.png`), generated `output/playwright/p7m3-acceptance-report.txt`, recorded detailed smoke evidence (`output/playwright/p7m3-runtime-smoke.txt`), and completed P7 closure docs sync.
+
+## P8 (Planned)
+- [ ] P8 planning baseline
+  - DoD: define P8 milestone scope/order and acceptance criteria in docs.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

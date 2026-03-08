@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p7-m1-quick-sort` (pending merge), then `main`/next `feat/*`
-- Current phase: P7-M1 (`S-05 Quick Sort`) delivered locally with green gates; next is P7-M2
+- Active branch (expected): `feat/p7-m2-merge-sort` (pending merge), then `main`/next `feat/*`
+- Current phase: P7 fully delivered locally (`P7-M1`~`P7-M3`) with refreshed acceptance evidence; pending merge
 - Last local quality gate: `npm run check` (passed, 2026-03-08)
 
 ## 2) What Is Already Done
@@ -32,12 +32,16 @@ Use this file as the first thing to read in a new chat/session.
 - `S-03 Insertion Sort` module landed with timeline playback + deterministic tests
 - `S-04 Shell Sort` module landed with gap-based timeline playback + deterministic tests
 - `S-05 Quick Sort` module landed with partition/pivot visualization + deterministic tests
+- `S-06 Merge Sort` module landed with split/merge buffer visualization + deterministic tests
 - `SR-02 Binary Search` module landed with pointer visualization + JSON import/export + deterministic tests
 - `SR-01 Linear Search` module landed with pointer progression + JSON import/export + deterministic tests
 - `/modules` category filter expanded to include `search`
 - P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
+- P7-M3 sorting consistency/acceptance closure completed:
+  - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
+  - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
 - P6-M2 local browser walkthrough captured for `S-04` (`output/playwright/p6m2-shell-sort.png`)
 - P6-M3 discovery + acceptance refresh completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p6m3-*.png`)
@@ -62,10 +66,9 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P7-M2 (`S-06 Merge Sort`):
-  - deliver merge-sort step generator + timeline adapter + module page + route/registry entry
-  - keep sorting UI semantics aligned with `S-01`~`S-05`
-  - add deterministic step/replay tests and zh/en copy
+- Start P8 planning baseline:
+  - define next executable milestone sequence and acceptance boundaries
+  - sync planning state across `SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails

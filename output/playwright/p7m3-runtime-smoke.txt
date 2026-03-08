@@ -1,0 +1,221 @@
+[S-01] /modules/bubble-sort
+### Result
+{
+  "url": "/modules/bubble-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[S-02] /modules/selection-sort
+### Result
+{
+  "url": "/modules/selection-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[S-03] /modules/insertion-sort
+### Result
+{
+  "url": "/modules/insertion-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[S-04] /modules/shell-sort
+### Result
+{
+  "url": "/modules/shell-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[S-05] /modules/quick-sort
+### Result
+{
+  "url": "/modules/quick-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[S-06] /modules/merge-sort
+### Result
+{
+  "url": "/modules/merge-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[SR-01] /modules/linear-search
+### Result
+{
+  "url": "/modules/linear-search",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[SR-02] /modules/binary-search
+### Result
+{
+  "url": "/modules/binary-search",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[L-01] /modules/array
+### Result
+{
+  "url": "/modules/array",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[L-02] /modules/dynamic-array
+### Result
+{
+  "url": "/modules/dynamic-array",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[L-03] /modules/linked-list
+### Result
+{
+  "url": "/modules/linked-list",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[L-04] /modules/stack
+### Result
+{
+  "url": "/modules/stack",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
+[L-05] /modules/queue
+### Result
+{
+  "url": "/modules/queue",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPlay": true,
+  "hasPause": true,
+  "hasPrev": true,
+  "hasNext": true,
+  "hasReset": true
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => { const bodyText = document.body?.innerText || \'\'; const hasRuntimeError = /Unexpected Application Error|Something went wrong|ErrorBoundary|TypeError|ReferenceError/.test(bodyText); const controls = Array.from(document.querySelectorAll(\'button\')).map((b) => (b.textContent||\'\').trim()); const hasPlay = controls.some((t) => t === \'Play\' || t === \'播放\'); const hasPause = controls.some((t) => t === \'Pause\' || t === \'暂停\'); const hasPrev = controls.some((t) => t === \'Prev\' || t === \'上一步\'); const hasNext = controls.some((t) => t === \'Next\' || t === \'下一步\'); const hasReset = controls.some((t) => t === \'Reset\' || t === \'重置\'); const hasHeading = Boolean(document.querySelector(\'main h2\')); return { url: location.pathname + location.search, hasRuntimeError, hasHeading, hasPlay, hasPause, hasPrev, hasNext, hasReset }; }');
+```
+---
