@@ -10,6 +10,7 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 const DEFAULT_SIZE = 8;
 const MIN_SIZE = 5;
 const MAX_SIZE = 20;
+const SHELL_BASE_UNIFORM_COLOR = '#cfe1f3';
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
@@ -125,6 +126,33 @@ function getBarHeightPercent(value: number, maxValue: number): number {
   return (value / maxValue) * 100;
 }
 
+function getShellGroupColor(index: number, gap: number): string {
+  const safeGap = gap > 0 ? gap : 1;
+  const groupId = ((index % safeGap) + safeGap) % safeGap;
+  const hue = (groupId * 47) % 360;
+  return `hsl(${hue} 72% 74%)`;
+}
+
+function isShellGroupingVisible(action: ShellSortStep['action']): boolean {
+  return action !== 'initial' && action !== 'gapChange' && action !== 'completed';
+}
+
+function getShellBarStateClass(highlight: HighlightType | 'default'): string {
+  if (highlight === 'comparing') {
+    return 'shell-bar-comparing';
+  }
+  if (highlight === 'moving') {
+    return 'shell-bar-moving';
+  }
+  if (highlight === 'new-node') {
+    return 'shell-bar-inserting';
+  }
+  if (highlight === 'sorted') {
+    return 'shell-bar-sorted';
+  }
+  return '';
+}
+
 type GhostEndpoint = { kind: 'front' } | { kind: 'bar'; index: number };
 
 type MotionGhostSpec = {
@@ -167,14 +195,11 @@ export function ShellSortPage() {
     }
     return stepHoleIndex;
   }, [currentAction, currentSnapshot, keyLifted, stepHoleIndex, tempValue]);
-  const showReferenceLine =
-    keyLifted && (currentAction === 'lift' || currentAction === 'compare' || currentAction === 'shift' || currentAction === 'insert');
 
   const maxValue = useMemo(() => {
     const values = currentSnapshot?.arrayState ?? inputData;
     return Math.max(...values, tempValue ?? 1, 1);
   }, [currentSnapshot?.arrayState, inputData, tempValue]);
-  const referenceLinePercent = tempValue === null ? null : getBarHeightPercent(tempValue, maxValue);
   const operationExpression = getOperationExpression(currentSnapshot);
   const shiftFrom = currentAction === 'shift' ? currentSnapshot.indices[0] : null;
   const shiftTo = currentAction === 'shift' ? currentSnapshot.indices[1] : null;
@@ -381,8 +406,7 @@ export function ShellSortPage() {
         stageClassName="viz-canvas-stage-sorting"
       >
         <div
-          className="array-bars shell-array-bars"
-          aria-label="array-visualizer-s04"
+          className="shell-stage-track"
           style={
             {
               '--shell-count': Math.max(barCount, 1),
@@ -391,57 +415,75 @@ export function ShellSortPage() {
             } as CSSProperties
           }
         >
-          {motionGhost ? (
-            <div
-              ref={ghostRef}
-              key={motionGhostKey ?? undefined}
-              className={motionGhost.className}
-              style={
-                {
-                  height: `${motionGhost.heightPercent}%`,
-                } as CSSProperties
-              }
-            >
-              <span>{motionGhost.value}</span>
-            </div>
-          ) : null}
-          <div ref={frontSlotRef} className="shell-front-slot" aria-hidden="true">
-            {showHeldBar ? (
-              <div className={heldBarClassName} style={heldBarStyle}>
-                <span>{tempValue}</span>
+          <div className="array-bars shell-array-bars" aria-label="array-visualizer-s04">
+            {motionGhost ? (
+              <div
+                ref={ghostRef}
+                key={motionGhostKey ?? undefined}
+                className={motionGhost.className}
+                style={
+                  {
+                    height: `${motionGhost.heightPercent}%`,
+                  } as CSSProperties
+                }
+              >
+                <span>{motionGhost.value}</span>
               </div>
             ) : null}
-          </div>
-          {showReferenceLine && referenceLinePercent !== null ? (
-            <div className="shell-reference-line" style={{ bottom: `${referenceLinePercent}%` }}>
-              <span>{t('module.s04.meta.referenceLine')}</span>
+            <div ref={frontSlotRef} className="shell-front-slot" aria-hidden="true">
+              {showHeldBar ? (
+                <div className={heldBarClassName} style={heldBarStyle}>
+                  <span>{tempValue}</span>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-          {arrayState.map((value, index) => {
-            const frameHighlight = highlightMap.get(index);
-            const highlight = frameHighlight ?? (sortedIndexSet.has(index) ? 'sorted' : 'default');
-            const isHole = effectiveHoleIndex === index && tempValue !== null;
-            const hiddenDuringMotion =
-              (currentAction === 'lift' && currentSnapshot.indices[0] === index) ||
-              (currentAction === 'shift' && shiftTo === index) || (currentAction === 'insert' && insertTargetIndex === index);
-            const barClassName = isHole ? 'array-bar bar-hole' : `array-bar bar-${highlight}${hiddenDuringMotion ? ' shell-motion-hidden' : ''}`;
-            const valueHeightPercent = getBarHeightPercent(value, maxValue);
-            const holeHeightPercent = valueHeightPercent;
-            const barHeight = isHole ? `${holeHeightPercent}%` : `${valueHeightPercent}%`;
-            const barStyle = { height: barHeight };
-            return (
-              <div
-                key={index}
-                ref={(node) => {
-                  barRefs.current[index] = node;
-                }}
-                className={barClassName}
-                style={barStyle}
-              >
-                <span>{isHole ? t('module.s04.hole.label') : value}</span>
-              </div>
-            );
-          })}
+            {arrayState.map((value, index) => {
+              const frameHighlight = highlightMap.get(index);
+              const highlight = frameHighlight ?? (sortedIndexSet.has(index) ? 'sorted' : 'default');
+              const isHole = effectiveHoleIndex === index && tempValue !== null;
+              const groupVisible = isShellGroupingVisible(currentSnapshot.action);
+              const groupColor = groupVisible ? getShellGroupColor(index, currentSnapshot.gap) : 'transparent';
+              const barStateClass = getShellBarStateClass(highlight);
+              const hiddenDuringMotion =
+                (currentAction === 'lift' && currentSnapshot.indices[0] === index) ||
+                (currentAction === 'shift' && shiftTo === index) || (currentAction === 'insert' && insertTargetIndex === index);
+              const barClassName = isHole
+                ? 'array-bar bar-hole'
+                : `array-bar shell-bar${groupVisible ? ' shell-group-active' : ''}${barStateClass ? ` ${barStateClass}` : ''}${
+                    hiddenDuringMotion ? ' shell-motion-hidden' : ''
+                  }`;
+              const valueHeightPercent = getBarHeightPercent(value, maxValue);
+              const holeHeightPercent = valueHeightPercent;
+              const barHeight = isHole ? `${holeHeightPercent}%` : `${valueHeightPercent}%`;
+              const barStyle = isHole
+                ? { height: barHeight }
+                : ({
+                    height: barHeight,
+                    '--shell-group-color': groupColor,
+                    '--shell-base-color': SHELL_BASE_UNIFORM_COLOR,
+                  } as CSSProperties);
+              return (
+                <div
+                  key={index}
+                  ref={(node) => {
+                    barRefs.current[index] = node;
+                  }}
+                  className={barClassName}
+                  style={barStyle}
+                >
+                  <span>{isHole ? t('module.s04.hole.label') : value}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="shell-index-row" aria-hidden="true">
+            <span className="shell-index-spacer" />
+            {arrayState.map((_, index) => (
+              <span key={index} className="shell-index-cell">
+                {index}
+              </span>
+            ))}
+          </div>
         </div>
       </VisualizationCanvas>
 
