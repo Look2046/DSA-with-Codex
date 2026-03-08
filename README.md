@@ -4,14 +4,14 @@ This repository tracks design and implementation artifacts for the project.
 
 ## Current Phase
 
-- Phase: design review
-- Scope: `docs/*.md`
+- Phase: M3 quality gates
+- Scope: docs + frontend implementation
 
-## Git Workflow (Docs First)
+## Git Workflow
 
-1. Create a branch for each review topic, e.g. `docs/review-architecture`.
-2. Make focused edits for one document set.
-3. Commit with clear scope, e.g. `docs: refine state management constraints`.
+1. Create a branch for each scope, e.g. `docs/*` or `feat/*`.
+2. Keep each branch focused on one milestone.
+3. Commit with clear scope, e.g. `docs: ...` or `feat: ...`.
 4. Merge back to `main` after review.
 
 ## Useful Commands
@@ -24,8 +24,20 @@ git diff
 # validate local markdown links in docs
 ./scripts/check-doc-links.sh
 
-# create branch for one design topic
-git switch -c docs/review-<topic>
+# install dependencies
+npm install
+
+# run dev server
+npm run dev
+
+# lint
+npm run lint
+
+# run full quality gate
+npm run check
+
+# create branch for one scope
+git switch -c <docs-or-feat>/<topic>
 
 # stage and commit
 git add docs

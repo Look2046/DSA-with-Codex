@@ -21,3 +21,7 @@ dist/
 build/
 .cache/
 coverage/
+
+# Local automation / session artifacts
+.playwright-cli/
+AGENTS.md
