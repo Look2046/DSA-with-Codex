@@ -34,6 +34,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'S-05',
+    name: 'Quick Sort',
+    route: '/modules/quick-sort',
+    category: 'sort',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'SR-01',
     name: 'Linear Search',
     route: '/modules/linear-search',

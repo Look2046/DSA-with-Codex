@@ -12,6 +12,7 @@ import { LinkedListPage } from '../pages/modules/LinkedListPage';
 import { SelectionSortPage } from '../pages/modules/SelectionSortPage';
 import { InsertionSortPage } from '../pages/modules/InsertionSortPage';
 import { ShellSortPage } from '../pages/modules/ShellSortPage';
+import { QuickSortPage } from '../pages/modules/QuickSortPage';
 import { BinarySearchPage } from '../pages/modules/BinarySearchPage';
 import { LinearSearchPage } from '../pages/modules/LinearSearchPage';
 import { StackPage } from '../pages/modules/StackPage';
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: 'modules/selection-sort', element: <SelectionSortPage /> },
       { path: 'modules/insertion-sort', element: <InsertionSortPage /> },
       { path: 'modules/shell-sort', element: <ShellSortPage /> },
+      { path: 'modules/quick-sort', element: <QuickSortPage /> },
       { path: 'modules/linear-search', element: <LinearSearchPage /> },
       { path: 'modules/binary-search', element: <BinarySearchPage /> },
       { path: 'modules/array', element: <ArrayPage /> },

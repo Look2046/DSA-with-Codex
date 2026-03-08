@@ -301,3 +301,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: start tree modules immediately; deliver only ad-hoc sorting polish without new module milestones.
 - Consequences: keeps momentum and design consistency in the existing sorting workflow, while preserving explicit acceptance boundaries before broader category expansion.
 - Owner: haoyu + codex
+
+## DEC-20260308-33
+- Date: 2026-03-08
+- Status: accepted
+- Context: `S-05 Quick Sort` needs clear partition-state readability while remaining compatible with the existing sorting timeline UI conventions (`S-01`~`S-04`).
+- Decision: Model quick sort as explicit timeline actions (`partitionStart`, `pivotSelect`, `compare`, `swap`, `pivotPlace`, `rangeSorted`) with page-level partition-range tint + pivot marker + `i/j` pointer hints, and guard determinism with dedicated step/replay tests.
+- Alternatives considered: emit swap-only quick-sort frames without partition metadata; use a fully custom canvas separate from existing sorting page semantics.
+- Consequences: quick-sort progression is easier to track and stays consistent with current controls/status layout, at the cost of a few quick-specific CSS classes and i18n keys.
+- Owner: haoyu + codex

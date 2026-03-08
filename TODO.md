@@ -143,9 +143,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
   - Done: added `docs/IMPLEMENTATION_PLAN_P7.md` and synced next milestone state docs.
 
-- [ ] P7-M1 Add S-05 quick sort module
+- [x] P7-M1 Add S-05 quick sort module
   - DoD: quick-sort partition visualization + timeline playback + deterministic tests + zh/en copy.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
+  - Done: added `S-05` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`quickSort.test.ts`, `quickTimelineReplay.test.ts`) and local Playwright smoke artifact (`output/playwright/p7m1-s05-quick-sort-smoke.png`).
 
 - [ ] P7-M2 Add S-06 merge sort module
   - DoD: split/merge stage visualization + timeline playback + deterministic tests + zh/en copy.

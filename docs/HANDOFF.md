@@ -2,6 +2,36 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P7-M1 S-05 quick-sort closure)
+
+### Today Done
+- Implemented `S-05 Quick Sort` module end-to-end:
+  - step generator (`quickSort.ts`)
+  - timeline adapter (`quickTimelineAdapter.ts`)
+  - module page (`QuickSortPage.tsx`)
+  - route registration (`/modules/quick-sort`) and registry mark as implemented
+- Added zh/en localized copy for quick-sort step descriptions, partition/pivot metadata, legend, and pseudocode.
+- Added quick-sort visual styles for active partition range, pivot marker, and `i/j` pointer hints.
+- Added deterministic tests:
+  - quick-sort step generation tests
+  - quick-sort timeline replay test (`seek/speed/resume`)
+- Passed full local quality gate (`npm run check`).
+- Captured local Playwright smoke evidence for `/modules -> S-05 -> play/pause/next/reset` at `output/playwright/p7m1-s05-quick-sort-smoke.png`.
+
+### Current State
+- Branch: `feat/p7-m1-quick-sort`
+- Working tree status: code + docs + acceptance artifact updates in progress (P7-M1 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Commit and merge `P7-M1` (`S-05 Quick Sort`) into `main`, then start `P7-M2` (`S-06 Merge Sort`).
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p7-m1-quick-sort
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-08 (P6-M3 closure + P7 planning baseline)
 
 ### Today Done
