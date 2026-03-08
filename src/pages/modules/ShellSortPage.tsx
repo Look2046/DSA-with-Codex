@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
@@ -47,6 +47,10 @@ function getStepDescription(step: ShellSortStep | undefined, t: ReturnType<typeo
     return `${t('module.s04.step.selectCurrent')} ${step.indices[0]}`;
   }
 
+  if (step.action === 'lift') {
+    return `${t('module.s04.step.lift')} ${step.indices[0]}`;
+  }
+
   if (step.action === 'compare') {
     return `${t('module.s04.step.compare')} ${step.indices[0]} ${t('module.s01.step.and')} ${step.indices[1]}`;
   }
@@ -57,6 +61,10 @@ function getStepDescription(step: ShellSortStep | undefined, t: ReturnType<typeo
 
   if (step.action === 'insert') {
     return `${t('module.s04.step.insert')} ${step.indices[0]}`;
+  }
+
+  if (step.action === 'groupMark') {
+    return t('module.s04.step.groupMark');
   }
 
   return t('module.s04.step.completed');
@@ -71,6 +79,11 @@ function getOperationExpression(step: ShellSortStep | undefined): string | null 
     const fromIndex = step.indices[0];
     const fromValue = step.arrayState[fromIndex];
     return `arr[${fromIndex}] (${fromValue}) > current (${step.currentValue}) ?`;
+  }
+
+  if (step.action === 'lift') {
+    const fromIndex = step.indices[0];
+    return `temp <- arr[${fromIndex}] (${step.currentValue})`;
   }
 
   if (step.action === 'shift') {
@@ -112,12 +125,25 @@ function getBarHeightPercent(value: number, maxValue: number): number {
   return (value / maxValue) * 100;
 }
 
+type GhostEndpoint = { kind: 'front' } | { kind: 'bar'; index: number };
+
+type MotionGhostSpec = {
+  className: string;
+  value: number;
+  heightPercent: number;
+  source: GhostEndpoint;
+  target: GhostEndpoint;
+};
+
 export function ShellSortPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
+  const ghostRef = useRef<HTMLDivElement | null>(null);
+  const frontSlotRef = useRef<HTMLDivElement | null>(null);
+  const barRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
@@ -125,10 +151,24 @@ export function ShellSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const currentAction = currentSnapshot?.action;
+  const keyLifted = currentSnapshot?.keyLifted ?? false;
   const tempValue = currentSnapshot?.currentValue ?? null;
-  const holeIndex = currentSnapshot?.holeIndex ?? null;
+  const stepHoleIndex = currentSnapshot?.holeIndex ?? null;
+  const effectiveHoleIndex = useMemo(() => {
+    if (tempValue === null) {
+      return null;
+    }
+    if (currentAction === 'lift' || currentAction === 'insert') {
+      return null;
+    }
+    if (keyLifted && currentAction === 'compare' && currentSnapshot.indices.length > 1) {
+      return currentSnapshot.indices[1];
+    }
+    return stepHoleIndex;
+  }, [currentAction, currentSnapshot, keyLifted, stepHoleIndex, tempValue]);
   const showReferenceLine =
-    currentSnapshot?.action === 'selectCurrent' || currentSnapshot?.action === 'compare' || currentSnapshot?.action === 'shift';
+    keyLifted && (currentAction === 'lift' || currentAction === 'compare' || currentAction === 'shift' || currentAction === 'insert');
 
   const maxValue = useMemo(() => {
     const values = currentSnapshot?.arrayState ?? inputData;
@@ -136,23 +176,126 @@ export function ShellSortPage() {
   }, [currentSnapshot?.arrayState, inputData, tempValue]);
   const referenceLinePercent = tempValue === null ? null : getBarHeightPercent(tempValue, maxValue);
   const operationExpression = getOperationExpression(currentSnapshot);
-  const shiftFrom = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[0] : null;
-  const shiftTo = currentSnapshot?.action === 'shift' ? currentSnapshot.indices[1] : null;
+  const shiftFrom = currentAction === 'shift' ? currentSnapshot.indices[0] : null;
+  const shiftTo = currentAction === 'shift' ? currentSnapshot.indices[1] : null;
+  const insertTargetIndex = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] : null;
+  const arrayState = currentSnapshot?.arrayState ?? [];
+  const barCount = arrayState.length;
+  const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
+  const showHeldBar = tempValue !== null && keyLifted && currentAction !== 'lift' && currentAction !== 'insert';
+  const heldTargetOffset = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] + 1 : 0;
+  const heldBarHeightPercent = tempValue === null ? 0 : getBarHeightPercent(tempValue, maxValue);
+  const heldBarStyle = {
+    height: `${heldBarHeightPercent}%`,
+    '--shell-held-offset': heldTargetOffset,
+  } as CSSProperties;
+  const heldBarClassName = [
+    'shell-held-bar',
+    currentAction === 'insert' ? 'shell-held-bar-insert' : '',
+    currentAction === 'compare' ? 'shell-held-bar-comparing' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const motionGhost = useMemo<MotionGhostSpec | null>(() => {
+    if (currentAction === 'lift' && tempValue !== null && currentSnapshot.indices.length > 0) {
+      const sourceIndex = currentSnapshot.indices[0];
+      return {
+        className: 'shell-motion-ghost shell-motion-ghost-lift',
+        value: tempValue,
+        heightPercent: getBarHeightPercent(tempValue, maxValue),
+        source: { kind: 'bar', index: sourceIndex },
+        target: { kind: 'front' },
+      };
+    }
+
+    if (currentAction === 'shift' && currentSnapshot.indices.length > 1) {
+      const sourceIndex = currentSnapshot.indices[0];
+      const targetIndex = currentSnapshot.indices[1];
+      const movedValue = currentSnapshot.arrayState[targetIndex];
+      return {
+        className: 'shell-motion-ghost shell-motion-ghost-shift',
+        value: movedValue,
+        heightPercent: getBarHeightPercent(movedValue, maxValue),
+        source: { kind: 'bar', index: sourceIndex },
+        target: { kind: 'bar', index: targetIndex },
+      };
+    }
+
+    if (currentAction === 'insert' && tempValue !== null && currentSnapshot.indices.length > 0) {
+      const targetIndex = currentSnapshot.indices[0];
+      return {
+        className: 'shell-motion-ghost shell-motion-ghost-insert',
+        value: tempValue,
+        heightPercent: getBarHeightPercent(tempValue, maxValue),
+        source: { kind: 'front' },
+        target: { kind: 'bar', index: targetIndex },
+      };
+    }
+
+    return null;
+  }, [currentAction, currentSnapshot, maxValue, tempValue]);
+  useLayoutEffect(() => {
+    const ghostElement = ghostRef.current;
+    if (!ghostElement || !motionGhost) {
+      return;
+    }
+
+    const resolveElement = (endpoint: GhostEndpoint): HTMLDivElement | null => {
+      if (endpoint.kind === 'front') {
+        return frontSlotRef.current;
+      }
+      return barRefs.current[endpoint.index] ?? null;
+    };
+
+    const sourceElement = resolveElement(motionGhost.source);
+    const targetElement = resolveElement(motionGhost.target);
+    if (!sourceElement || !targetElement) {
+      return;
+    }
+
+    const startLeft = sourceElement.offsetLeft;
+    const deltaX = targetElement.offsetLeft - sourceElement.offsetLeft;
+    ghostElement.style.setProperty('--shell-ghost-start-left', `${startLeft}px`);
+    ghostElement.style.setProperty('--shell-ghost-delta-x', `${deltaX}px`);
+  }, [motionGhost]);
+  const motionGhostKey =
+    motionGhost === null
+      ? null
+      : `ghost-${currentStep}-${currentAction}-${motionGhost.source.kind}-${motionGhost.target.kind}-${motionGhost.value}`;
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, ShellSortStep['highlights'][number]['type']>();
     (currentSnapshot?.highlights ?? []).forEach((item) => map.set(item.index, item.type));
     return map;
   }, [currentSnapshot]);
+  const sortedIndexSet = useMemo(() => {
+    const sorted = new Set<number>();
+    for (let frameIndex = 0; frameIndex <= currentStep && frameIndex < steps.length; frameIndex += 1) {
+      const step = steps[frameIndex];
+      if (!step) {
+        continue;
+      }
+      if (step.action === 'gapChange') {
+        sorted.clear();
+      }
+      if (step.action === 'groupMark') {
+        step.indices.forEach((index) => sorted.add(index));
+      }
+      if (step.action === 'completed') {
+        step.arrayState.forEach((_, index) => sorted.add(index));
+      }
+    }
+    return sorted;
+  }, [steps, currentStep]);
   const previewArray = useMemo(
     () =>
       (currentSnapshot?.arrayState ?? []).map((value, index) => {
-        if (holeIndex === index) {
+        if (effectiveHoleIndex === index) {
           return '_';
         }
         return String(value);
       }),
-    [currentSnapshot?.arrayState, holeIndex],
+    [currentSnapshot?.arrayState, effectiveHoleIndex],
   );
 
   useEffect(() => {
@@ -222,7 +365,7 @@ export function ShellSortPage() {
         <p className="shell-status-line">{getStepDescription(currentSnapshot, t)}</p>
         <p className="shell-status-line">
           {t('module.s04.meta.temp')}: {tempValue ?? '-'} | {t('module.s04.meta.gap')}: {currentSnapshot?.gap ?? '-'} |{' '}
-          {t('module.s04.meta.hole')}: {holeIndex ?? '-'}
+          {t('module.s04.meta.hole')}: {effectiveHoleIndex ?? '-'}
         </p>
         <p className={`shell-status-line shell-operation-hint${operationExpression ? '' : ' shell-status-placeholder'}`}>
           {operationExpression ? `${t('module.s04.meta.operation')}: ${operationExpression}` : '-'}
@@ -237,21 +380,64 @@ export function ShellSortPage() {
         subtitle={t('module.canvas.sortingStage')}
         stageClassName="viz-canvas-stage-sorting"
       >
-        <div className="array-bars shell-array-bars" aria-label="array-visualizer-s04">
+        <div
+          className="array-bars shell-array-bars"
+          aria-label="array-visualizer-s04"
+          style={
+            {
+              '--shell-count': Math.max(barCount, 1),
+              '--shell-front-slots': 1,
+              '--shell-motion-duration': `${motionDurationMs}ms`,
+            } as CSSProperties
+          }
+        >
+          {motionGhost ? (
+            <div
+              ref={ghostRef}
+              key={motionGhostKey ?? undefined}
+              className={motionGhost.className}
+              style={
+                {
+                  height: `${motionGhost.heightPercent}%`,
+                } as CSSProperties
+              }
+            >
+              <span>{motionGhost.value}</span>
+            </div>
+          ) : null}
+          <div ref={frontSlotRef} className="shell-front-slot" aria-hidden="true">
+            {showHeldBar ? (
+              <div className={heldBarClassName} style={heldBarStyle}>
+                <span>{tempValue}</span>
+              </div>
+            ) : null}
+          </div>
           {showReferenceLine && referenceLinePercent !== null ? (
             <div className="shell-reference-line" style={{ bottom: `${referenceLinePercent}%` }}>
               <span>{t('module.s04.meta.referenceLine')}</span>
             </div>
           ) : null}
-          {(currentSnapshot?.arrayState ?? []).map((value, index) => {
-            const highlight = highlightMap.get(index) ?? 'default';
-            const isHole = holeIndex === index && tempValue !== null;
-            const barClassName = isHole ? 'array-bar bar-hole' : `array-bar bar-${highlight}`;
+          {arrayState.map((value, index) => {
+            const frameHighlight = highlightMap.get(index);
+            const highlight = frameHighlight ?? (sortedIndexSet.has(index) ? 'sorted' : 'default');
+            const isHole = effectiveHoleIndex === index && tempValue !== null;
+            const hiddenDuringMotion =
+              (currentAction === 'lift' && currentSnapshot.indices[0] === index) ||
+              (currentAction === 'shift' && shiftTo === index) || (currentAction === 'insert' && insertTargetIndex === index);
+            const barClassName = isHole ? 'array-bar bar-hole' : `array-bar bar-${highlight}${hiddenDuringMotion ? ' shell-motion-hidden' : ''}`;
             const valueHeightPercent = getBarHeightPercent(value, maxValue);
-            const holeHeightPercent = tempValue === null ? valueHeightPercent : getBarHeightPercent(tempValue, maxValue);
+            const holeHeightPercent = valueHeightPercent;
             const barHeight = isHole ? `${holeHeightPercent}%` : `${valueHeightPercent}%`;
+            const barStyle = { height: barHeight };
             return (
-              <div key={index} className={barClassName} style={{ height: barHeight }}>
+              <div
+                key={index}
+                ref={(node) => {
+                  barRefs.current[index] = node;
+                }}
+                className={barClassName}
+                style={barStyle}
+              >
                 <span>{isHole ? t('module.s04.hole.label') : value}</span>
               </div>
             );

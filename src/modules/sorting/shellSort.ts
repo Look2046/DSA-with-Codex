@@ -2,15 +2,25 @@ import type { AnimationStep } from '../../types/animation';
 
 export type ShellSortStep = AnimationStep & {
   arrayState: number[];
-  action: 'initial' | 'gapChange' | 'selectCurrent' | 'compare' | 'shift' | 'insert' | 'completed';
+  action: 'initial' | 'gapChange' | 'selectCurrent' | 'lift' | 'compare' | 'shift' | 'insert' | 'groupMark' | 'completed';
   indices: number[];
   gap: number;
   currentValue: number | null;
   holeIndex: number | null;
+  keyLifted: boolean;
 };
 
 function cloneArray(values: number[]): number[] {
   return [...values];
+}
+
+function buildGapSequenceIndices(gap: number, endIndex: number): number[] {
+  const remainder = endIndex % gap;
+  const indices: number[] = [];
+  for (let index = remainder; index <= endIndex; index += gap) {
+    indices.push(index);
+  }
+  return indices;
 }
 
 export function generateShellSortSteps(input: number[]): ShellSortStep[] {
@@ -28,6 +38,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
     gap: n <= 1 ? 0 : Math.floor(n / 2),
     currentValue: null,
     holeIndex: null,
+    keyLifted: false,
   });
 
   if (n <= 1) {
@@ -41,6 +52,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
       gap: 0,
       currentValue: null,
       holeIndex: null,
+      keyLifted: false,
     });
     return steps;
   }
@@ -58,12 +70,12 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
       gap,
       currentValue: null,
       holeIndex: null,
+      keyLifted: false,
     });
 
     for (let i = gap; i < n; i += 1) {
       const currentValue = arr[i];
       let j = i;
-      let hasShifted = false;
 
       steps.push({
         description: '',
@@ -75,59 +87,104 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
         gap,
         currentValue,
         holeIndex: null,
+        keyLifted: false,
       });
 
-      while (j >= gap) {
-        const compareHighlights = hasShifted
-          ? [{ index: j - gap, type: 'comparing' as const }]
-          : [
-              { index: j - gap, type: 'comparing' as const },
-              { index: j, type: 'comparing' as const },
-            ];
-        steps.push({
-          description: '',
-          codeLines: [5],
-          highlights: compareHighlights,
-          arrayState: cloneArray(arr),
-          action: 'compare',
-          indices: [j - gap, j],
-          gap,
-          currentValue,
-          holeIndex: hasShifted ? j : null,
-        });
-
-        if (arr[j - gap] <= currentValue) {
-          break;
-        }
-
-        arr[j] = arr[j - gap];
-        steps.push({
-          description: '',
-          codeLines: [6],
-          highlights: [{ index: j, type: 'moving' }],
-          arrayState: cloneArray(arr),
-          action: 'shift',
-          indices: [j - gap, j],
-          gap,
-          currentValue,
-          holeIndex: j - gap,
-        });
-
-        j -= gap;
-        hasShifted = true;
-      }
-
-      arr[j] = currentValue;
       steps.push({
         description: '',
-        codeLines: [7],
-        highlights: [{ index: j, type: 'new-node' }],
+        codeLines: [5],
+        highlights: [
+          { index: j - gap, type: 'comparing' },
+          { index: j, type: 'comparing' },
+        ],
         arrayState: cloneArray(arr),
-        action: 'insert',
-        indices: [j],
+        action: 'compare',
+        indices: [j - gap, j],
         gap,
         currentValue,
         holeIndex: null,
+        keyLifted: false,
+      });
+
+      if (arr[j - gap] > currentValue) {
+        steps.push({
+          description: '',
+          codeLines: [4, 5],
+          highlights: [{ index: j, type: 'new-node' }],
+          arrayState: cloneArray(arr),
+          action: 'lift',
+          indices: [j],
+          gap,
+          currentValue,
+          holeIndex: j,
+          keyLifted: true,
+        });
+
+        while (j >= gap && arr[j - gap] > currentValue) {
+          const fromIndex = j - gap;
+          const toIndex = j;
+          arr[j] = arr[j - gap];
+          steps.push({
+            description: '',
+            codeLines: [6],
+            highlights: [{ index: toIndex, type: 'moving' }],
+            arrayState: cloneArray(arr),
+            action: 'shift',
+            indices: [fromIndex, toIndex],
+            gap,
+            currentValue,
+            holeIndex: fromIndex,
+            keyLifted: true,
+          });
+
+          j -= gap;
+
+          if (j >= gap) {
+            steps.push({
+              description: '',
+              codeLines: [5],
+              highlights: [
+                { index: j - gap, type: 'comparing' },
+                { index: j, type: 'comparing' },
+              ],
+              arrayState: cloneArray(arr),
+              action: 'compare',
+              indices: [j - gap, j],
+              gap,
+              currentValue,
+              holeIndex: j,
+              keyLifted: true,
+            });
+          }
+        }
+
+        arr[j] = currentValue;
+        steps.push({
+          description: '',
+          codeLines: [7],
+          highlights: [{ index: j, type: 'new-node' }],
+          arrayState: cloneArray(arr),
+          action: 'insert',
+          indices: [j],
+          gap,
+          currentValue,
+          holeIndex: null,
+          keyLifted: true,
+        });
+      }
+
+      const sequenceIndices = buildGapSequenceIndices(gap, i);
+      steps.push({
+        description: '',
+        codeLines: [8],
+        highlights: sequenceIndices.map((index) => ({ index, type: 'sorted' as const })),
+        arrayState: cloneArray(arr),
+        action: 'groupMark',
+        indices: sequenceIndices,
+        gap,
+        currentValue: null,
+        holeIndex: null,
+        keyLifted: false,
       });
     }
 
@@ -144,6 +201,7 @@ export function generateShellSortSteps(input: number[]): ShellSortStep[] {
     gap: 0,
     currentValue: null,
     holeIndex: null,
+    keyLifted: false,
   });
 
   return steps;
