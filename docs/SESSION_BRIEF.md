@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p7-m2-merge-sort` (pending merge), then `main`/next `feat/*`
-- Current phase: P7-M2 (`S-06 Merge Sort`) delivered locally with green gates; next is P7-M3
+- Current phase: P7 fully delivered locally (`P7-M1`~`P7-M3`) with refreshed acceptance evidence; pending merge
 - Last local quality gate: `npm run check` (passed, 2026-03-08)
 
 ## 2) What Is Already Done
@@ -39,6 +39,9 @@ Use this file as the first thing to read in a new chat/session.
 - P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
+- P7-M3 sorting consistency/acceptance closure completed:
+  - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
+  - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
 - P6-M2 local browser walkthrough captured for `S-04` (`output/playwright/p6m2-shell-sort.png`)
 - P6-M3 discovery + acceptance refresh completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p6m3-*.png`)
@@ -63,10 +66,9 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P7-M3 (sorting consistency + acceptance refresh):
-  - align interaction semantics across `S-01`~`S-06`
-  - refresh Playwright acceptance artifacts/report for all implemented modules
-  - sync P7 closure docs (`SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`)
+- Start P8 planning baseline:
+  - define next executable milestone sequence and acceptance boundaries
+  - sync planning state across `SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails

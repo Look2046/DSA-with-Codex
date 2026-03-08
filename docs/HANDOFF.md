@@ -2,6 +2,34 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P7-M3 sorting consistency + acceptance closure)
+
+### Today Done
+- Closed `P7-M3` consistency/acceptance scope:
+  - completed cross-module sorting consistency sweep (`S-01`~`S-06`)
+  - refined `S-06` merge buffer pointer visual by removing standalone `W` label to reduce algorithm-meaning ambiguity
+- Refreshed full Playwright acceptance evidence for current implemented scope:
+  - `/modules` discovery screenshot: `output/playwright/p7m3-modules.png`
+  - implemented-module screenshots: `output/playwright/p7m3-*.png`
+  - consolidated report: `output/playwright/p7m3-acceptance-report.txt`
+  - detailed smoke log: `output/playwright/p7m3-runtime-smoke.txt`
+- Synced P7 closure docs state (`SESSION_BRIEF`/`TODO`/`DECISIONS`).
+
+### Current State
+- Branch: `feat/p7-m2-merge-sort`
+- Working tree status: code + docs + acceptance artifact updates in progress (P7 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Merge current P7 branch into `main`.
+- Start P8 planning baseline and document executable milestone boundaries.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p7-m2-merge-sort
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-08 (P7-M2 S-06 merge-sort closure)
 
 ### Today Done

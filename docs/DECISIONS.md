@@ -319,3 +319,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: visualize only final write-back without showing buffer state; reuse quick-sort stage semantics without split/merge stage cues.
 - Consequences: merge-sort reasoning becomes clearer (especially buffer semantics), at the cost of a small set of merge-specific CSS classes and i18n keys.
 - Owner: haoyu + codex
+
+## DEC-20260308-35
+- Date: 2026-03-08
+- Status: accepted
+- Context: P7 closure required both cross-sorting consistency and reproducible acceptance evidence across the expanded implemented set (13 modules after `S-05`/`S-06`), and merge-buffer pointer labels risked being misread as algorithm actions.
+- Decision: Close P7 only after a full Playwright refresh over `/modules` + all implemented routes under `output/playwright/p7m3-*.png` with consolidated `p7m3-acceptance-report.txt`; simplify S-06 buffer-pointer visual by removing standalone `W` glyph and relying on pointer highlight + status-line metadata.
+- Alternatives considered: keep older P6 acceptance artifacts; keep `W` marker and rely on explanatory text only.
+- Consequences: stronger milestone closure evidence and lower learner confusion in merge visualization; slight additional local acceptance execution time.
+- Owner: haoyu + codex

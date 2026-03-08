@@ -921,17 +921,6 @@ body {
   position: relative;
 }
 
-.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar.merge-buffer-bar-pointer::before {
-  content: 'W';
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.62rem;
-  color: #2a6ba4;
-  font-weight: 700;
-}
-
 .merge-sort-canvas .array-bars.shell-array-bars.merge-buffer-bars.merge-buffer-bars-compact {
   min-height: 120px;
   height: 120px;
