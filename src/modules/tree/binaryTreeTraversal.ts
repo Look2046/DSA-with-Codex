@@ -2,42 +2,90 @@ import type { AnimationStep, HighlightEntry } from '../../types/animation';
 
 export type BinaryTreeTraversalMode = 'preorder' | 'inorder' | 'postorder' | 'levelorder';
 
+export type BinaryTreeGuideMoveSide = 'L' | 'R' | 'UP';
+
+export type BinaryTreeGuideEvent =
+  | { type: 'start'; toIndex: number }
+  | { type: 'move'; fromIndex: number; toIndex: number; side: BinaryTreeGuideMoveSide }
+  | { type: 'toNull'; fromIndex: number; side: 'L' | 'R' }
+  | { type: 'fromNull'; toIndex: number; side: 'L' | 'R' };
+
+export type BinaryTreeGuideNullHint = {
+  parentIndex: number;
+  side: 'L' | 'R';
+};
+
 export type BinaryTreeTraversalStep = AnimationStep & {
   treeState: number[];
-  action: 'initial' | 'visit' | 'traversalDone' | 'completed';
+  action:
+    | 'initial'
+    | 'guideStart'
+    | 'visit'
+    | 'descendLeft'
+    | 'descendRight'
+    | 'nullLeft'
+    | 'nullRight'
+    | 'backtrack'
+    | 'backtrackFromNull'
+    | 'traversalDone'
+    | 'completed';
   mode: BinaryTreeTraversalMode;
   currentIndex: number | null;
   currentValue: number | null;
   visitedIndices: number[];
   outputOrder: number[];
+  guideEvents: BinaryTreeGuideEvent[];
+  activeGuideEventIndex: number | null;
+  guideRoleD: number | null;
+  guideRoleL: number | null;
+  guideRoleR: number | null;
+  guideNull: BinaryTreeGuideNullHint | null;
 };
 
 function cloneArray(values: number[]): number[] {
   return [...values];
 }
 
-function createStep(
-  action: BinaryTreeTraversalStep['action'],
-  treeState: number[],
-  mode: BinaryTreeTraversalMode,
-  codeLines: number[],
-  highlights: HighlightEntry[],
-  currentIndex: number | null,
-  currentValue: number | null,
-  visitedIndices: number[],
-  outputOrder: number[],
-): BinaryTreeTraversalStep {
+function cloneGuideEvents(events: BinaryTreeGuideEvent[]): BinaryTreeGuideEvent[] {
+  return events.map((event) => ({ ...event }));
+}
+
+type CreateTraversalStepConfig = {
+  action: BinaryTreeTraversalStep['action'];
+  treeState: number[];
+  mode: BinaryTreeTraversalMode;
+  codeLines: number[];
+  highlights: HighlightEntry[];
+  currentIndex: number | null;
+  currentValue: number | null;
+  visitedIndices: number[];
+  outputOrder: number[];
+  guideEvents?: BinaryTreeGuideEvent[];
+  activeGuideEventIndex?: number | null;
+  guideRoleD?: number | null;
+  guideRoleL?: number | null;
+  guideRoleR?: number | null;
+  guideNull?: BinaryTreeGuideNullHint | null;
+};
+
+function createStep(config: CreateTraversalStepConfig): BinaryTreeTraversalStep {
   return {
     description: '',
-    codeLines,
-    highlights,
-    treeState: cloneArray(treeState),
-    action,
-    mode,
-    currentIndex,
-    currentValue,
-    visitedIndices: cloneArray(visitedIndices),
-    outputOrder: cloneArray(outputOrder),
+    codeLines: cloneArray(config.codeLines),
+    highlights: config.highlights.map((item) => ({ ...item })),
+    treeState: cloneArray(config.treeState),
+    action: config.action,
+    mode: config.mode,
+    currentIndex: config.currentIndex,
+    currentValue: config.currentValue,
+    visitedIndices: cloneArray(config.visitedIndices),
+    outputOrder: cloneArray(config.outputOrder),
+    guideEvents: cloneGuideEvents(config.guideEvents ?? []),
+    activeGuideEventIndex: config.activeGuideEventIndex ?? null,
+    guideRoleD: config.guideRoleD ?? null,
+    guideRoleL: config.guideRoleL ?? null,
+    guideRoleR: config.guideRoleR ?? null,
+    guideNull: config.guideNull ? { ...config.guideNull } : null,
   };
 }
 
@@ -145,14 +193,37 @@ function getVisitCodeLines(mode: BinaryTreeTraversalMode): number[] {
   return [7];
 }
 
-export function generateBinaryTreeTraversalSteps(input: number[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
-  const tree = cloneArray(input);
+function generateSimpleTraversalSteps(tree: number[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
   const steps: BinaryTreeTraversalStep[] = [];
 
-  steps.push(createStep('initial', tree, mode, [1, 2], [], null, null, [], []));
+  steps.push(
+    createStep({
+      action: 'initial',
+      treeState: tree,
+      mode,
+      codeLines: [1, 2],
+      highlights: [],
+      currentIndex: null,
+      currentValue: null,
+      visitedIndices: [],
+      outputOrder: [],
+    }),
+  );
 
   if (tree.length === 0) {
-    steps.push(createStep('completed', tree, mode, [9], [], null, null, [], []));
+    steps.push(
+      createStep({
+        action: 'completed',
+        treeState: tree,
+        mode,
+        codeLines: [9],
+        highlights: [],
+        currentIndex: null,
+        currentValue: null,
+        visitedIndices: [],
+        outputOrder: [],
+      }),
+    );
     return steps;
   }
 
@@ -162,27 +233,280 @@ export function generateBinaryTreeTraversalSteps(input: number[], mode: BinaryTr
 
   traversalIndices.forEach((index) => {
     const value = tree[index];
+    const leftIndex = index * 2 + 1;
+    const rightIndex = index * 2 + 2;
+
     visitedIndices.push(index);
     outputOrder.push(value);
 
     steps.push(
-      createStep(
-        'visit',
-        tree,
+      createStep({
+        action: 'visit',
+        treeState: tree,
         mode,
-        getVisitCodeLines(mode),
-        [{ index, type: 'visiting' }],
-        index,
-        value,
+        codeLines: getVisitCodeLines(mode),
+        highlights: [{ index, type: 'visiting' }],
+        currentIndex: index,
+        currentValue: value,
         visitedIndices,
         outputOrder,
-      ),
+        guideRoleD: index,
+        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+      }),
     );
   });
 
   const doneHighlights = visitedIndices.map((index) => ({ index, type: 'matched' as const }));
-  steps.push(createStep('traversalDone', tree, mode, [8], doneHighlights, null, null, visitedIndices, outputOrder));
-  steps.push(createStep('completed', tree, mode, [9], doneHighlights, null, null, visitedIndices, outputOrder));
+
+  steps.push(
+    createStep({
+      action: 'traversalDone',
+      treeState: tree,
+      mode,
+      codeLines: [8],
+      highlights: doneHighlights,
+      currentIndex: null,
+      currentValue: null,
+      visitedIndices,
+      outputOrder,
+    }),
+  );
+  steps.push(
+    createStep({
+      action: 'completed',
+      treeState: tree,
+      mode,
+      codeLines: [9],
+      highlights: doneHighlights,
+      currentIndex: null,
+      currentValue: null,
+      visitedIndices,
+      outputOrder,
+    }),
+  );
 
   return steps;
+}
+
+function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
+  const mode: BinaryTreeTraversalMode = 'preorder';
+  const steps: BinaryTreeTraversalStep[] = [];
+  const visitedIndices: number[] = [];
+  const outputOrder: number[] = [];
+  const guideEvents: BinaryTreeGuideEvent[] = [];
+
+  const pushStep = (config: Omit<CreateTraversalStepConfig, 'treeState' | 'mode' | 'visitedIndices' | 'outputOrder'>) => {
+    steps.push(
+      createStep({
+        ...config,
+        treeState: tree,
+        mode,
+        visitedIndices,
+        outputOrder,
+        guideEvents,
+      }),
+    );
+  };
+
+  const pushGuideEvent = (event: BinaryTreeGuideEvent): number => {
+    guideEvents.push(event);
+    return guideEvents.length - 1;
+  };
+
+  pushStep({
+    action: 'initial',
+    codeLines: [1, 2],
+    highlights: [],
+    currentIndex: null,
+    currentValue: null,
+  });
+
+  if (tree.length === 0) {
+    pushStep({
+      action: 'completed',
+      codeLines: [9],
+      highlights: [],
+      currentIndex: null,
+      currentValue: null,
+    });
+    return steps;
+  }
+
+  const traverse = (index: number, parentIndex: number | null, entrySide: 'L' | 'R' | 'ROOT') => {
+    if (index >= tree.length) {
+      return;
+    }
+
+    const value = tree[index];
+    const leftIndex = index * 2 + 1;
+    const rightIndex = index * 2 + 2;
+
+    if (parentIndex === null) {
+      const eventIndex = pushGuideEvent({ type: 'start', toIndex: index });
+      visitedIndices.push(index);
+      outputOrder.push(value);
+      pushStep({
+        action: 'guideStart',
+        codeLines: [3],
+        highlights: [{ index, type: 'visiting' }],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: eventIndex,
+        guideRoleD: index,
+        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+      });
+    } else {
+      const moveSide: BinaryTreeGuideMoveSide = entrySide === 'L' ? 'L' : 'R';
+      const eventIndex = pushGuideEvent({
+        type: 'move',
+        fromIndex: parentIndex,
+        toIndex: index,
+        side: moveSide,
+      });
+      visitedIndices.push(index);
+      outputOrder.push(value);
+      pushStep({
+        action: entrySide === 'L' ? 'descendLeft' : 'descendRight',
+        codeLines: [3],
+        highlights: [
+          { index: parentIndex, type: 'visiting' },
+          { index, type: 'visiting' },
+        ],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: eventIndex,
+        guideRoleD: index,
+        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+      });
+    }
+
+    if (leftIndex < tree.length) {
+      traverse(leftIndex, index, 'L');
+      const eventIndex = pushGuideEvent({ type: 'move', fromIndex: leftIndex, toIndex: index, side: 'UP' });
+      pushStep({
+        action: 'backtrack',
+        codeLines: [4],
+        highlights: [
+          { index: leftIndex, type: 'visiting' },
+          { index, type: 'comparing' },
+        ],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: eventIndex,
+        guideRoleD: index,
+        guideRoleL: leftIndex,
+        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+      });
+    } else {
+      const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'L' });
+      pushStep({
+        action: 'nullLeft',
+        codeLines: [4],
+        highlights: [{ index, type: 'comparing' }],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: toNullEventIndex,
+        guideRoleD: index,
+        guideRoleL: null,
+        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideNull: { parentIndex: index, side: 'L' },
+      });
+
+      const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'L' });
+      pushStep({
+        action: 'backtrackFromNull',
+        codeLines: [4],
+        highlights: [{ index, type: 'comparing' }],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: fromNullEventIndex,
+        guideRoleD: index,
+        guideRoleL: null,
+        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideNull: { parentIndex: index, side: 'L' },
+      });
+    }
+
+    if (rightIndex < tree.length) {
+      traverse(rightIndex, index, 'R');
+      const eventIndex = pushGuideEvent({ type: 'move', fromIndex: rightIndex, toIndex: index, side: 'UP' });
+      pushStep({
+        action: 'backtrack',
+        codeLines: [4],
+        highlights: [
+          { index: rightIndex, type: 'visiting' },
+          { index, type: 'comparing' },
+        ],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: eventIndex,
+        guideRoleD: index,
+        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleR: rightIndex,
+      });
+    } else {
+      const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'R' });
+      pushStep({
+        action: 'nullRight',
+        codeLines: [4],
+        highlights: [{ index, type: 'comparing' }],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: toNullEventIndex,
+        guideRoleD: index,
+        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleR: null,
+        guideNull: { parentIndex: index, side: 'R' },
+      });
+
+      const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'R' });
+      pushStep({
+        action: 'backtrackFromNull',
+        codeLines: [4],
+        highlights: [{ index, type: 'comparing' }],
+        currentIndex: index,
+        currentValue: value,
+        activeGuideEventIndex: fromNullEventIndex,
+        guideRoleD: index,
+        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleR: null,
+        guideNull: { parentIndex: index, side: 'R' },
+      });
+    }
+  };
+
+  traverse(0, null, 'ROOT');
+
+  const doneHighlights = visitedIndices.map((index) => ({ index, type: 'matched' as const }));
+
+  pushStep({
+    action: 'traversalDone',
+    codeLines: [8],
+    highlights: doneHighlights,
+    currentIndex: null,
+    currentValue: null,
+  });
+
+  pushStep({
+    action: 'completed',
+    codeLines: [9],
+    highlights: doneHighlights,
+    currentIndex: null,
+    currentValue: null,
+  });
+
+  return steps;
+}
+
+export function generateBinaryTreeTraversalSteps(input: number[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
+  const tree = cloneArray(input);
+
+  if (mode === 'preorder') {
+    return generatePreorderGuideSteps(tree);
+  }
+
+  return generateSimpleTraversalSteps(tree, mode);
 }

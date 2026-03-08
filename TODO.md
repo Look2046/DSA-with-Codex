@@ -177,6 +177,14 @@ Track actionable tasks here. Keep tasks small and testable.
 - [ ] P8-M3 Tree-track consistency + acceptance refresh
   - DoD: `T-01`/`T-02` consistency pass + full implemented-route Playwright refresh + docs closure sync.
   - Acceptance: runtime stability confirmed across implemented routes and quality gate remains green.
+  - Progress (2026-03-09):
+    - `T-01` added traversal sequence panel and node value mode toggle (`number`/`letter`)
+    - preorder guide-step timing refinement landed (arrival + D/L/R in one step)
+    - dashed trace style was thinned, but arrowhead visibility regressed
+  - Next (2026-03-10):
+    - restore arrowhead clarity on trace path
+    - continue dashed-path beautification toward hand-drawn style
+    - evaluate if a lightweight hand-drawn animation library should be introduced for tree traversal path rendering
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

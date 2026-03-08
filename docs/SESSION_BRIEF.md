@@ -5,9 +5,9 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p8-m2-bst` (pending merge), then `main`/next `feat/p8-m3-tree-consistency`
-- Current phase: P8-M2 implemented and pending merge; next is P8-M3
-- Last local quality gate: `npm run check` (passed, 2026-03-08)
+- Active branch (expected): `feat/p8-m2-bst` (P8-M3 polish work in progress)
+- Current phase: P8-M3 in progress (tree consistency + acceptance closure)
+- Last local quality gate: `npm run check` (passed, 2026-03-09)
 
 ## 2) What Is Already Done
 
@@ -52,6 +52,11 @@ Use this file as the first thing to read in a new chat/session.
   - added deterministic tests (`bst.test.ts`, `bstTimelineReplay.test.ts`)
   - marked `T-02` as implemented in module registry
   - captured local Playwright smoke artifacts (`output/playwright/p8m2-modules-tree-filter.png`, `output/playwright/p8m2-t02-bst-smoke.png`)
+- P8-M3 tree-track polish (in progress):
+  - `T-01` added traversal output sequence panel and node value display toggle (`number`/`letter`)
+  - preorder guide-step timing refined (arrival + D/L/R shown in one step)
+  - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
+  - known carry-over issue: dashed traversal trace style currently has arrowhead visibility regression
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
@@ -79,7 +84,9 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P8-M3 (tree consistency + acceptance refresh):
+- Continue P8-M3 (tree consistency + acceptance refresh):
+  - fix `T-01` traversal trace arrowhead visibility and continue dashed style beautification
+  - optionally evaluate a lightweight hand-drawn path library if native SVG styling cannot reach target quality
   - align `T-01`/`T-02` controls, legend semantics, and status layout
   - refresh Playwright acceptance artifacts for `/modules` + all implemented routes
   - sync closure docs (`SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`)

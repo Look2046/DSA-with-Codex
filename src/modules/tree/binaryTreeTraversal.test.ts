@@ -37,6 +37,19 @@ describe('generateBinaryTreeTraversalSteps', () => {
     expect(steps.some((step) => step.action === 'traversalDone')).toBe(true);
   });
 
+  it('preorder includes guide actions for descend/null/backtrack flow', () => {
+    const steps = generateBinaryTreeTraversalSteps(FIXED_TREE, 'preorder');
+
+    expect(steps.some((step) => step.action === 'guideStart')).toBe(true);
+    expect(steps.some((step) => step.action === 'descendLeft')).toBe(true);
+    expect(steps.some((step) => step.action === 'descendRight')).toBe(true);
+    expect(steps.some((step) => step.action === 'nullLeft')).toBe(true);
+    expect(steps.some((step) => step.action === 'nullRight')).toBe(true);
+    expect(steps.some((step) => step.action === 'backtrack')).toBe(true);
+    expect(steps.some((step) => step.action === 'backtrackFromNull')).toBe(true);
+    expect(steps.some((step) => step.guideEvents.length > 0)).toBe(true);
+  });
+
   it('handles empty input with initial and completed steps', () => {
     const steps = generateBinaryTreeTraversalSteps([], 'inorder');
 

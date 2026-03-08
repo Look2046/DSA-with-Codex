@@ -2,6 +2,37 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-09 (P8-M3 tree visual polish checkpoint)
+
+### Today Done
+- Continued `T-01 Binary Tree Traversal` visual/interaction polish on branch `feat/p8-m2-bst`:
+  - preorder guide-step merge refinement landed (arrival + D/L/R role exposure in one step)
+  - added traversal output sequence panel (live update while stepping/playing)
+  - added node-value display mode toggle (`number` / `letter`) and synchronized it across node labels + status line + output sequence
+  - adjusted traversal trace style to thinner dashed stroke
+- Captured local UI artifact:
+  - `output/playwright/p8m3-t01-traversal-sequence-letter.png`
+- Local quality gate verified:
+  - `npm run check` (pass, 2026-03-09)
+
+### Current State
+- Branch: `feat/p8-m2-bst`
+- Working tree status: code + docs updates in progress, pending commit
+- Known issue to carry forward: latest dashed-trace styling degraded arrowhead visibility in `T-01` (needs visual fix)
+
+### Remaining Focus (Next Session)
+- Continue `T-01` trace visual polish:
+  - restore clear arrowhead rendering on traversal trace
+  - iterate dashed style toward a cleaner hand-drawn look
+  - evaluate whether introducing a small hand-drawn animation library is worthwhile for this module
+- Continue `P8-M3` consistency/acceptance closure after trace style stabilizes.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m2-bst
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-08 (P8-M2 T-02 BST closure)
 
 ### Today Done
