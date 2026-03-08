@@ -9,7 +9,7 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 const DEFAULT_SIZE = 10;
 const MIN_SIZE = 5;
-const MAX_SIZE = 20;
+const MAX_SIZE = 100;
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);

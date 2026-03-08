@@ -104,7 +104,7 @@ body {
 }
 
 .app-main {
-  max-width: 960px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   padding: 26px 16px 36px;
@@ -340,6 +340,7 @@ body {
 .viz-canvas-stage-sorting {
   min-height: 420px;
   display: grid;
+  overflow: hidden;
 }
 
 .viz-canvas-stage-linked {
@@ -566,16 +567,27 @@ body {
 }
 
 .shell-stage-track {
-  --shell-gap: 6px;
   --shell-count: 8;
   --shell-front-slots: 1;
   --shell-total-count: calc(var(--shell-count) + var(--shell-front-slots));
   --shell-content-padding: 10px;
-  --shell-slot-width: calc((100% - (var(--shell-total-count) - 1) * var(--shell-gap)) / var(--shell-total-count));
+  --shell-gap: clamp(0.5px, calc(6px - var(--shell-total-count) * 0.055px), 6px);
+  --shell-slot-min-width: 1px;
+  --shell-slot-max-width: 32px;
+  --shell-slot-width-raw: calc(
+    (100% - (var(--shell-total-count) - 1) * var(--shell-gap) - 2 * var(--shell-content-padding)) / var(--shell-total-count)
+  );
+  --shell-slot-width: clamp(var(--shell-slot-min-width), var(--shell-slot-width-raw), var(--shell-slot-max-width));
+  --shell-track-width: calc(
+    var(--shell-total-count) * var(--shell-slot-width) + (var(--shell-total-count) - 1) * var(--shell-gap) + 2 * var(--shell-content-padding)
+  );
   display: grid;
   align-content: start;
+  justify-items: center;
   gap: 6px;
   padding-bottom: 6px;
+  width: 100%;
+  min-width: 0;
 }
 
 .shell-array-bars {
@@ -585,6 +597,10 @@ body {
   display: flex;
   align-items: flex-end;
   gap: var(--shell-gap);
+  width: var(--shell-track-width);
+  max-width: 100%;
+  margin-inline: auto;
+  padding: var(--shell-content-padding);
 }
 
 .shell-front-slot {
@@ -676,7 +692,10 @@ body {
   display: flex;
   align-items: center;
   gap: var(--shell-gap);
-  padding: 2px 10px 6px;
+  width: var(--shell-track-width);
+  max-width: 100%;
+  margin-inline: auto;
+  padding: 2px var(--shell-content-padding) 6px;
 }
 
 .shell-index-spacer,
