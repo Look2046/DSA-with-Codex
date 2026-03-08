@@ -145,6 +145,24 @@ export function BubbleSortPage() {
     (currentSnapshot?.highlights ?? []).forEach((item) => map.set(item.index, item.type));
     return map;
   }, [currentSnapshot]);
+  const isFinaleFrame = currentSnapshot?.action === 'completed';
+
+  const sortedIndexSet = useMemo(() => {
+    const sorted = new Set<number>();
+    for (let frameIndex = 0; frameIndex <= currentStep && frameIndex < steps.length; frameIndex += 1) {
+      const step = steps[frameIndex];
+      if (!step) {
+        continue;
+      }
+      if (step.action === 'sortedMark' && step.indices.length > 0) {
+        sorted.add(step.indices[0]);
+      }
+      if (step.action === 'completed') {
+        step.arrayState.forEach((_, index) => sorted.add(index));
+      }
+    }
+    return sorted;
+  }, [steps, currentStep]);
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -233,15 +251,21 @@ export function BubbleSortPage() {
         <div className="array-bars bubble-array-bars" aria-label="array-visualizer" style={{ '--bubble-count': Math.max(barIds.length, 1) } as CSSProperties}>
           {barIds.map((barId) => {
             const position = barPositionMap.get(barId) ?? barId;
-            const highlight = highlightMap.get(position) ?? 'default';
+            const frameHighlight = highlightMap.get(position);
+            const highlight = frameHighlight ?? (sortedIndexSet.has(position) ? 'sorted' : 'default');
             const value = initialValues[barId] ?? 0;
             const barStyle = {
               height: `${(value / maxValue) * 100}%`,
               '--bubble-offset': position - barId,
               '--bubble-z': highlight === 'swapping' ? 3 : highlight === 'comparing' ? 2 : 1,
+              '--piano-order': position,
             } as CSSProperties;
             return (
-              <div key={barId} className={`array-bar bubble-sort-bar bar-${highlight}`} style={barStyle}>
+              <div
+                key={barId}
+                className={`array-bar bubble-sort-bar bar-${highlight}${isFinaleFrame ? ' bar-finale' : ''}`}
+                style={barStyle}
+              >
                 <span>{value}</span>
               </div>
             );
