@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
@@ -7,12 +7,34 @@ import type { SelectionSortStep } from '../../modules/sorting/selectionSort';
 import { buildSelectionSortTimelineFromInput } from '../../modules/sorting/selectionTimelineAdapter';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
-const DEFAULT_SIZE = 8;
+const DEFAULT_SIZE = 10;
 const MIN_SIZE = 5;
 const MAX_SIZE = 20;
 
 function createRandomDataset(size: number): number[] {
   return Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
+}
+
+function createAscendingDataset(size: number): number[] {
+  const step = Math.max(1, Math.floor(80 / Math.max(size - 1, 1)));
+  return Array.from({ length: size }, (_, index) => 10 + index * step);
+}
+
+function createDescendingDataset(size: number): number[] {
+  return [...createAscendingDataset(size)].reverse();
+}
+
+function createNearlySortedDataset(size: number): number[] {
+  const values = createAscendingDataset(size);
+  const swapCount = Math.max(1, Math.floor(size / 5));
+
+  for (let index = 0; index < swapCount; index += 1) {
+    const leftIndex = Math.floor(Math.random() * (size - 1));
+    const rightIndex = Math.min(size - 1, leftIndex + 1 + Math.floor(Math.random() * 2));
+    [values[leftIndex], values[rightIndex]] = [values[rightIndex], values[leftIndex]];
+  }
+
+  return values;
 }
 
 function getStatusLabel(status: PlaybackStatus, t: ReturnType<typeof useI18n>['t']): string {
@@ -75,6 +97,26 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   return t('module.s01.highlight.default');
 }
 
+function buildBarOrderByFrame(steps: SelectionSortStep[]): number[][] {
+  if (steps.length === 0) {
+    return [];
+  }
+
+  const initialOrder = steps[0].arrayState.map((_, index) => index);
+  const order = [...initialOrder];
+
+  return steps.map((step) => {
+    if (step.action === 'swap' && step.indices.length === 2) {
+      const [leftIndex, rightIndex] = step.indices;
+      if (order[leftIndex] !== undefined && order[rightIndex] !== undefined) {
+        [order[leftIndex], order[rightIndex]] = [order[rightIndex], order[leftIndex]];
+      }
+    }
+
+    return [...order];
+  });
+}
+
 export function SelectionSortPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -88,11 +130,22 @@ export function SelectionSortPage() {
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
+  const initialValues = useMemo(() => steps[0]?.arrayState ?? [], [steps]);
+  const barIds = useMemo(() => initialValues.map((_, index) => index), [initialValues]);
+  const barOrdersByFrame = useMemo(() => buildBarOrderByFrame(steps), [steps]);
+  const currentBarOrder = useMemo(
+    () => barOrdersByFrame[currentStep] ?? barOrdersByFrame[0] ?? [],
+    [barOrdersByFrame, currentStep]
+  );
+  const isFinaleFrame = currentSnapshot?.action === 'completed';
 
-  const maxValue = useMemo(() => {
-    const values = currentSnapshot?.arrayState ?? inputData;
-    return Math.max(...values, 1);
-  }, [currentSnapshot?.arrayState, inputData]);
+  const barPositionMap = useMemo(() => {
+    const positions = new Map<number, number>();
+    currentBarOrder.forEach((barId, position) => positions.set(barId, position));
+    return positions;
+  }, [currentBarOrder]);
+
+  const maxValue = useMemo(() => Math.max(...initialValues, 1), [initialValues]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, SelectionSortStep['highlights'][number]['type']>();
@@ -100,13 +153,30 @@ export function SelectionSortPage() {
     return map;
   }, [currentSnapshot]);
 
+  const sortedIndexSet = useMemo(() => {
+    const sorted = new Set<number>();
+    for (let frameIndex = 0; frameIndex <= currentStep && frameIndex < steps.length; frameIndex += 1) {
+      const step = steps[frameIndex];
+      if (!step) {
+        continue;
+      }
+      if (step.action === 'sortedMark' && step.indices.length > 0) {
+        sorted.add(step.indices[0]);
+      }
+      if (step.action === 'completed') {
+        step.arrayState.forEach((_, index) => sorted.add(index));
+      }
+    }
+    return sorted;
+  }, [steps, currentStep]);
+
   useEffect(() => {
     setTotalFrames(steps.length);
     reset();
   }, [setTotalFrames, reset, steps.length]);
 
-  const regenerateData = () => {
-    setInputData(createRandomDataset(datasetSize));
+  const regenerateData = (generator: (size: number) => number[]) => {
+    setInputData(generator(datasetSize));
     reset();
   };
 
@@ -114,6 +184,8 @@ export function SelectionSortPage() {
     { key: 'module.s01.speed.slow', value: 1200 },
     { key: 'module.s01.speed.normal', value: 700 },
     { key: 'module.s01.speed.fast', value: 350 },
+    { key: 'module.s01.speed.faster', value: 175 },
+    { key: 'module.s01.speed.fastest', value: 88 },
   ] as const;
 
   return (
@@ -134,9 +206,20 @@ export function SelectionSortPage() {
           />
           <strong>{datasetSize}</strong>
         </label>
-        <button type="button" onClick={regenerateData}>
-          {t('module.s01.regenerate')}
-        </button>
+        <div className="speed-group">
+          <button type="button" onClick={() => regenerateData(createRandomDataset)}>
+            {t('module.s01.generate.random')}
+          </button>
+          <button type="button" onClick={() => regenerateData(createNearlySortedDataset)}>
+            {t('module.s01.generate.nearlySorted')}
+          </button>
+          <button type="button" onClick={() => regenerateData(createAscendingDataset)}>
+            {t('module.s01.generate.ascending')}
+          </button>
+          <button type="button" onClick={() => regenerateData(createDescendingDataset)}>
+            {t('module.s01.generate.descending')}
+          </button>
+        </div>
       </div>
 
       <div className="bubble-toolbar">
@@ -170,11 +253,20 @@ export function SelectionSortPage() {
         subtitle={t('module.canvas.sortingStage')}
         stageClassName="viz-canvas-stage-sorting"
       >
-        <div className="array-bars" aria-label="array-visualizer-s02">
-          {(currentSnapshot?.arrayState ?? []).map((value, index) => {
-            const highlight = highlightMap.get(index) ?? 'default';
+        <div className="array-bars bubble-array-bars" aria-label="array-visualizer-s02" style={{ '--bubble-count': Math.max(barIds.length, 1) } as CSSProperties}>
+          {barIds.map((barId) => {
+            const position = barPositionMap.get(barId) ?? barId;
+            const frameHighlight = highlightMap.get(position);
+            const highlight = frameHighlight ?? (sortedIndexSet.has(position) ? 'sorted' : 'default');
+            const value = initialValues[barId] ?? 0;
+            const barStyle = {
+              height: `${(value / maxValue) * 100}%`,
+              '--bubble-offset': position - barId,
+              '--bubble-z': highlight === 'swapping' ? 3 : highlight === 'comparing' ? 2 : 1,
+              '--piano-order': position,
+            } as CSSProperties;
             return (
-              <div key={`${index}-${value}`} className={`array-bar bar-${highlight}`} style={{ height: `${(value / maxValue) * 100}%` }}>
+              <div key={barId} className={`array-bar bubble-sort-bar bar-${highlight}${isFinaleFrame ? ' bar-finale' : ''}`} style={barStyle}>
                 <span>{value}</span>
               </div>
             );
