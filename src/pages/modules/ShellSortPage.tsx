@@ -9,7 +9,8 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 const DEFAULT_SIZE = 10;
 const MIN_SIZE = 5;
-const MAX_SIZE = 20;
+const MAX_SIZE = 100;
+const COMPACT_BAR_LABEL_THRESHOLD = 32;
 const SHELL_BASE_UNIFORM_COLOR = '#cfe1f3';
 
 function createRandomDataset(size: number): number[] {
@@ -156,6 +157,17 @@ function getBarHeightPercent(value: number, maxValue: number): number {
   return (value / maxValue) * 100;
 }
 
+function formatArrayPreview(values: Array<number | string>, maxVisible = 24): string {
+  if (values.length <= maxVisible) {
+    return values.join(', ');
+  }
+  const leftCount = Math.floor(maxVisible / 2);
+  const rightCount = maxVisible - leftCount;
+  const leftPart = values.slice(0, leftCount).join(', ');
+  const rightPart = values.slice(-rightCount).join(', ');
+  return `${leftPart}, ..., ${rightPart} (n=${values.length})`;
+}
+
 function getShellGroupColor(index: number, gap: number): string {
   const safeGap = gap > 0 ? gap : 1;
   const groupId = ((index % safeGap) + safeGap) % safeGap;
@@ -236,6 +248,9 @@ export function ShellSortPage() {
   const insertTargetIndex = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] : null;
   const arrayState = currentSnapshot?.arrayState ?? [];
   const barCount = arrayState.length;
+  const isCompactBarMode = barCount > COMPACT_BAR_LABEL_THRESHOLD;
+  const indexLabelStep =
+    barCount <= 24 ? 1 : barCount <= 40 ? 2 : barCount <= 70 ? 5 : 10;
   const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
   const showHeldBar = tempValue !== null && keyLifted && currentAction !== 'lift' && currentAction !== 'insert';
   const heldTargetOffset = currentAction === 'insert' && currentSnapshot.indices.length > 0 ? currentSnapshot.indices[0] + 1 : 0;
@@ -431,7 +446,7 @@ export function ShellSortPage() {
       </p>
 
       <p>
-        {t('module.s01.sample')}: [{inputData.join(', ')}]
+        {t('module.s01.sample')}: [{formatArrayPreview(inputData)}]
       </p>
       <div className="shell-status-lines">
         <p className="shell-status-line">{getStepDescription(currentSnapshot, t)}</p>
@@ -462,7 +477,10 @@ export function ShellSortPage() {
             } as CSSProperties
           }
         >
-          <div className="array-bars shell-array-bars" aria-label="array-visualizer-s04">
+          <div
+            className={`array-bars shell-array-bars${isCompactBarMode ? ' shell-array-bars-compact' : ''}`}
+            aria-label="array-visualizer-s04"
+          >
             {motionGhost ? (
               <div
                 ref={ghostRef}
@@ -517,17 +535,18 @@ export function ShellSortPage() {
                   }}
                   className={barClassName}
                   style={barStyle}
+                  aria-label={`index-${index}-value-${value}`}
                 >
-                  <span>{isHole ? t('module.s04.hole.label') : value}</span>
+                  {!isCompactBarMode ? <span>{isHole ? t('module.s04.hole.label') : value}</span> : null}
                 </div>
               );
             })}
           </div>
-          <div className="shell-index-row" aria-hidden="true">
+          <div className={`shell-index-row${isCompactBarMode ? ' shell-index-row-compact' : ''}`} aria-hidden="true">
             <span className="shell-index-spacer" />
             {arrayState.map((_, index) => (
               <span key={index} className="shell-index-cell">
-                {index}
+                {index % indexLabelStep === 0 ? index : ''}
               </span>
             ))}
           </div>
@@ -543,7 +562,7 @@ export function ShellSortPage() {
       </div>
 
       <p className="array-preview">
-        {t('module.s01.currentArray')}: [{previewArray.join(', ')}]
+        {t('module.s01.currentArray')}: [{formatArrayPreview(previewArray)}]
       </p>
       <p>
         {t('module.s01.highlight')}:{' '}
