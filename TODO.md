@@ -148,9 +148,10 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
   - Done: added `S-05` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`quickSort.test.ts`, `quickTimelineReplay.test.ts`) and local Playwright smoke artifact (`output/playwright/p7m1-s05-quick-sort-smoke.png`).
 
-- [ ] P7-M2 Add S-06 merge sort module
+- [x] P7-M2 Add S-06 merge sort module
   - DoD: split/merge stage visualization + timeline playback + deterministic tests + zh/en copy.
   - Acceptance: fixed input replay deterministic; `npm run check` passes.
+  - Done: added `S-06` step generator/timeline adapter/page/route/registry entry + zh/en i18n copy + deterministic tests (`mergeSort.test.ts`, `mergeTimelineReplay.test.ts`) and local Playwright smoke artifact (`output/playwright/p7m2-s06-merge-sort-smoke.png`).
 
 - [ ] P7-M3 Sorting-track consistency + acceptance refresh
   - DoD: align S-01~S-06 interaction semantics + Playwright acceptance artifacts/report refresh + docs closure sync.

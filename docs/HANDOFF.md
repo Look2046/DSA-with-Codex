@@ -2,6 +2,39 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-08 (P7-M2 S-06 merge-sort closure)
+
+### Today Done
+- Implemented `S-06 Merge Sort` module end-to-end:
+  - step generator (`mergeSort.ts`)
+  - timeline adapter (`mergeTimelineAdapter.ts`)
+  - module page (`MergeSortPage.tsx`)
+  - route registration (`/modules/merge-sort`) and registry mark as implemented
+- Added zh/en localized copy for merge-sort split/merge steps, pointer metadata, buffer labels, and pseudocode.
+- Added merge-sort visual styles for active range, left/right half hints, and temporary buffer row with write pointer.
+- Added deterministic tests:
+  - merge-sort step generation tests
+  - merge-sort timeline replay test (`seek/speed/resume`)
+- Passed full local quality gate (`npm run check`).
+- Captured local Playwright smoke evidence for `/modules -> S-06 -> play/pause/next/reset` at `output/playwright/p7m2-s06-merge-sort-smoke.png`.
+
+### Current State
+- Branch: `feat/p7-m2-merge-sort`
+- Working tree status: code + docs + acceptance artifact updates in progress (P7-M2 closure sync)
+- Last verified command: `npm run check` (pass, 2026-03-08)
+
+### Remaining Focus (Next Session)
+- Start P7-M3 sorting consistency/acceptance closure:
+  - align `S-01`~`S-06` interaction semantics
+  - refresh Playwright acceptance artifacts/report for all implemented modules
+  - sync P7 closure docs
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p7-m2-merge-sort
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-08 (P7-M1 S-05 quick-sort closure)
 
 ### Today Done

@@ -42,6 +42,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'S-06',
+    name: 'Merge Sort',
+    route: '/modules/merge-sort',
+    category: 'sort',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'SR-01',
     name: 'Linear Search',
     route: '/modules/linear-search',

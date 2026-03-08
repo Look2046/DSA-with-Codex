@@ -338,9 +338,33 @@ body {
 }
 
 .viz-canvas-stage-sorting {
-  min-height: 420px;
+  min-height: 560px;
   display: grid;
   overflow: hidden;
+}
+
+.merge-sort-canvas .viz-canvas-stage-sorting {
+  min-height: 760px;
+}
+
+.merge-sort-canvas .shell-stage-track {
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-content: stretch;
+  gap: 8px;
+  padding-bottom: 0;
+}
+
+.merge-sort-canvas .array-bars.shell-array-bars.merge-array-bars {
+  min-height: 0;
+  height: 100%;
+}
+
+.merge-sort-canvas .merge-buffer-wrap {
+  min-height: 0;
+  height: 100%;
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .viz-canvas-stage-linked {
@@ -582,10 +606,11 @@ body {
     var(--shell-total-count) * var(--shell-slot-width) + (var(--shell-total-count) - 1) * var(--shell-gap) + 2 * var(--shell-content-padding)
   );
   display: grid;
+  position: relative;
   align-content: start;
   justify-items: center;
-  gap: 6px;
-  padding-bottom: 6px;
+  gap: 10px;
+  padding-bottom: 10px;
   width: 100%;
   min-width: 0;
 }
@@ -813,6 +838,109 @@ body {
   font-size: 0.54rem;
 }
 
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-in-range {
+  box-shadow:
+    inset 0 0 0 1px rgba(79, 111, 145, 0.22),
+    0 0 0 1px rgba(79, 111, 145, 0.14);
+}
+
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-left {
+  border-left-color: #7fb0e3;
+  border-right-color: #7fb0e3;
+}
+
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-right {
+  border-left-color: #b99be8;
+  border-right-color: #b99be8;
+}
+
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-pointer-i::before,
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-pointer-j::before,
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-pointer-both::before {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #1a5b9b;
+}
+
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-pointer-i::before {
+  content: 'L';
+}
+
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-pointer-j::before {
+  content: 'R';
+}
+
+.shell-array-bars.merge-array-bars .array-bar.merge-bar-pointer-both::before {
+  content: 'L/R';
+}
+
+.merge-buffer-wrap {
+  width: var(--shell-track-width);
+  max-width: 100%;
+  margin-inline: auto;
+  display: grid;
+  gap: 0;
+}
+
+.merge-sort-canvas .array-bars.shell-array-bars.merge-buffer-bars {
+  min-height: 0;
+  height: 100%;
+}
+
+.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar {
+  border: 1px solid #d4dee9;
+  color: #4f6f91;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar.merge-buffer-bar-empty {
+  background: #f8fbff;
+  border-style: dashed;
+}
+
+.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar.merge-buffer-bar-in-range {
+  background: #eef5ff;
+  border-color: #bfd7f0;
+}
+
+.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar.merge-buffer-bar-written {
+  background: #63c87b;
+  border-color: #56b66d;
+  color: #103620;
+  border-style: solid;
+}
+
+.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar.merge-buffer-bar-pointer {
+  box-shadow: 0 0 0 2px rgba(107, 168, 233, 0.28);
+  position: relative;
+}
+
+.shell-array-bars.merge-buffer-bars .array-bar.merge-buffer-bar.merge-buffer-bar-pointer::before {
+  content: 'W';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  color: #2a6ba4;
+  font-weight: 700;
+}
+
+.merge-sort-canvas .array-bars.shell-array-bars.merge-buffer-bars.merge-buffer-bars-compact {
+  min-height: 120px;
+  height: 120px;
+}
+
+.shell-array-bars.merge-buffer-bars.merge-buffer-bars-compact .array-bar.merge-buffer-bar {
+  font-size: 0.54rem;
+}
+
 .shell-held-bar {
   width: 100%;
   min-height: 22px;
@@ -851,9 +979,9 @@ body {
 .shell-motion-ghost {
   position: absolute;
   left: var(--shell-ghost-start-left, 0px);
-  bottom: 0;
-  width: var(--shell-slot-width);
-  min-height: 22px;
+  top: var(--shell-ghost-start-top, 0px);
+  width: var(--shell-ghost-width, var(--shell-slot-width));
+  height: var(--shell-ghost-start-height, 22px);
   border-radius: 8px 8px 4px 4px;
   display: flex;
   align-items: flex-end;
@@ -863,7 +991,7 @@ body {
   color: #0b2947;
   pointer-events: none;
   z-index: 95;
-  transform: translateX(0);
+  transform: translate(0, 0);
   animation: shell-ghost-move var(--shell-motion-duration, 280ms) cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform;
 }
@@ -874,9 +1002,10 @@ body {
 }
 
 .shell-motion-ghost-shift {
-  background: #8fc9ff;
-  color: #0b2947;
-  box-shadow: 0 8px 14px rgba(31, 96, 163, 0.2);
+  background: var(--shell-ghost-bg, #8fc9ff);
+  border: 1px solid var(--shell-ghost-border, #77b8f2);
+  color: var(--shell-ghost-color, #0b2947);
+  box-shadow: var(--shell-ghost-shadow, 0 8px 14px rgba(31, 96, 163, 0.2));
 }
 
 .shell-motion-ghost-insert {
@@ -887,10 +1016,12 @@ body {
 
 @keyframes shell-ghost-move {
   from {
-    transform: translateX(0);
+    transform: translate(0, 0);
+    height: var(--shell-ghost-start-height, 22px);
   }
   to {
-    transform: translateX(var(--shell-ghost-delta-x, 0px));
+    transform: translate(var(--shell-ghost-delta-x, 0px), var(--shell-ghost-delta-y, 0px));
+    height: var(--shell-ghost-end-height, var(--shell-ghost-start-height, 22px));
   }
 }
 
@@ -983,6 +1114,18 @@ body {
 
 .legend-group {
   background: #e8f2fd;
+}
+
+.legend-merge-left {
+  background: #eaf3ff;
+}
+
+.legend-merge-right {
+  background: #f2ebff;
+}
+
+.legend-merge-buffer {
+  background: #e8f2ff;
 }
 
 .binary-search-stage-head {
@@ -1575,7 +1718,25 @@ body {
   .viz-canvas-stage-array,
   .viz-canvas-stage-sorting,
   .viz-canvas-stage-linked {
-    min-height: 320px;
+    min-height: 380px;
+  }
+
+  .merge-sort-canvas .viz-canvas-stage-sorting {
+    min-height: 600px;
+  }
+
+  .merge-sort-canvas .shell-stage-track {
+    gap: 6px;
+  }
+
+  .merge-sort-canvas .array-bars.shell-array-bars.merge-array-bars {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .merge-sort-canvas .array-bars.shell-array-bars.merge-buffer-bars {
+    min-height: 0;
+    height: 100%;
   }
 
   .array-bars {
