@@ -159,9 +159,22 @@ Track actionable tasks here. Keep tasks small and testable.
   - Done: refreshed `/modules` + all implemented-module Playwright artifacts (`output/playwright/p7m3-*.png`), generated `output/playwright/p7m3-acceptance-report.txt`, recorded detailed smoke evidence (`output/playwright/p7m3-runtime-smoke.txt`), and completed P7 closure docs sync.
 
 ## P8 (Planned)
-- [ ] P8 planning baseline
+- [x] P8 planning baseline
   - DoD: define P8 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done: added `docs/IMPLEMENTATION_PLAN_P8.md` and synced P8 next-priority state docs.
+
+- [ ] P8-M1 Tree onboarding + T-01 binary tree traversal
+  - DoD: tree category/registry wiring + `T-01` module (timeline/page/route/tests/i18n) landed.
+  - Acceptance: `npm run check` passes and `/modules -> T-01 -> play/pause/next/reset` smoke flow is stable.
+
+- [ ] P8-M2 T-02 BST module
+  - DoD: BST insert/find/delete timeline semantics + page/route/tests landed.
+  - Acceptance: deterministic fixed-input replay with explicit delete-case behavior and `npm run check` pass.
+
+- [ ] P8-M3 Tree-track consistency + acceptance refresh
+  - DoD: `T-01`/`T-02` consistency pass + full implemented-route Playwright refresh + docs closure sync.
+  - Acceptance: runtime stability confirmed across implemented routes and quality gate remains green.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

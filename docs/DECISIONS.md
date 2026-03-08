@@ -328,3 +328,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep older P6 acceptance artifacts; keep `W` marker and rely on explanatory text only.
 - Consequences: stronger milestone closure evidence and lower learner confusion in merge visualization; slight additional local acceptance execution time.
 - Owner: haoyu + codex
+
+## DEC-20260308-36
+- Date: 2026-03-08
+- Status: accepted
+- Context: After P7 closure, the project needed concrete next work items (not abstract methodology) and a controlled expansion path into remaining categories.
+- Decision: Define P8 as a tree-track kickoff with three executable milestones: `P8-M1` tree onboarding + `T-01 Binary Tree Traversal`, `P8-M2` `T-02 BST`, and `P8-M3` tree consistency + acceptance closure; record in `docs/IMPLEMENTATION_PLAN_P8.md`.
+- Alternatives considered: continue ad-hoc sorting polish only; jump directly into multiple tree/graph modules without milestone boundaries.
+- Consequences: immediate actionable backlog with clear DoD/acceptance boundaries; AVL/Heap/Trie/Graph remain deferred to later phases.
+- Owner: haoyu + codex
