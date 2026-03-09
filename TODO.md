@@ -181,9 +181,13 @@ Track actionable tasks here. Keep tasks small and testable.
     - `T-01` added traversal sequence panel and node value mode toggle (`number`/`letter`)
     - preorder guide-step timing refinement landed (arrival + D/L/R in one step)
     - dashed trace style was thinned, but arrowhead visibility regressed
+    - root-top supplemental route geometry + root-right terminal marker landed for canonical route polishing
+    - route-order overlay (`1..N`) added on guide segments for sequencing debug, but ordering does not yet match user-confirmed canonical order
+    - user requirement updated: avoid screenshots/image-analysis unless explicitly requested; `output/` image files were cleaned in working tree
   - Next (2026-03-10):
     - restore arrowhead clarity on trace path
     - continue dashed-path beautification toward hand-drawn style
+    - align route-order numbering with user-confirmed canonical preorder sequence and then formalize a generalizable numbering rule for arbitrary binary trees
     - evaluate if a lightweight hand-drawn animation library should be introduced for tree traversal path rendering
 
 ## Done

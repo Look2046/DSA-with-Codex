@@ -10,6 +10,15 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - added traversal output sequence panel (live update while stepping/playing)
   - added node-value display mode toggle (`number` / `letter`) and synchronized it across node labels + status line + output sequence
   - adjusted traversal trace style to thinner dashed stroke
+  - corrected root-top supplemental route geometry: root-entry arc now targets the intended left-route endpoint; terminal marker at root-right exit endpoint added
+  - added route-order label overlay (`1..N`) directly on guide segments for sequence debugging
+- User discussion record (correct route / correct sequence):
+  - current route-order labels are acknowledged as incorrect for the intended canonical preorder route
+  - agreement reached that single-tree sample ordering cannot reliably generalize without an explicit numbering rule
+  - next implementation should follow either (a) user-provided mapping for current tree, or (b) a formalized rule that can generalize to arbitrary binary trees
+- Workflow update requested by user:
+  - unless explicitly requested, do not take screenshots and do not perform image-based analysis
+  - cleaned all image files under `output/` in current working tree
 - Captured local UI artifact:
   - `output/playwright/p8m3-t01-traversal-sequence-letter.png`
 - Local quality gate verified:
@@ -18,7 +27,9 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 ### Current State
 - Branch: `feat/p8-m2-bst`
 - Working tree status: code + docs updates in progress, pending commit
-- Known issue to carry forward: latest dashed-trace styling degraded arrowhead visibility in `T-01` (needs visual fix)
+- Known issues to carry forward:
+  - latest dashed-trace styling degraded arrowhead visibility in `T-01` (needs visual fix)
+  - current route-order labels do not match user-confirmed canonical traversal order yet
 
 ### Remaining Focus (Next Session)
 - Continue `T-01` trace visual polish:

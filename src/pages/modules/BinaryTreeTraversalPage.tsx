@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
@@ -43,6 +43,13 @@ type TraversalTraceSegment = {
   roughPath: string;
   arrowPath: string | null;
   arrowIsCurrent: boolean;
+};
+
+type RouteOrderSegment = {
+  key: string;
+  d: string;
+  order: number;
+  pathId: string;
 };
 
 type NullEdgePath = {
@@ -540,47 +547,106 @@ function buildOffsetEdgeSegment(config: {
   };
 }
 
-function pickNullApproachSegment(
-  parentCenter: NodePoint,
-  nullCenter: NodePoint,
-  side: 'L' | 'R',
-  geometry: TraceGeometry,
-): { segment: { start: NodePoint; end: NodePoint } } {
-  const lane = getTraversalLaneForTreeMove(side, false);
-  const base = buildOffsetEdgeSegment({
-    from: parentCenter,
-    to: nullCenter,
-    fromRadius: geometry.nodeShellRadius,
-    toRadius: geometry.nullShellRadius,
-    lane,
-    edgeOffset: geometry.edgeOffset,
-    aspect: geometry.aspect,
-  });
-  return { segment: base };
-}
-
-function pickNullReturnSegment(
-  nullCenter: NodePoint,
-  parentCenter: NodePoint,
-  side: 'L' | 'R',
-  geometry: TraceGeometry,
-): { segment: { start: NodePoint; end: NodePoint } } {
-  const lane = getTraversalLaneForTreeMove(side, true);
-  const base = buildOffsetEdgeSegment({
-    from: nullCenter,
-    to: parentCenter,
-    fromRadius: geometry.nullShellRadius,
-    toRadius: geometry.nodeShellRadius,
-    lane,
-    edgeOffset: geometry.edgeOffset,
-    aspect: geometry.aspect,
-  });
-  return { segment: base };
-}
-
 function getRootTraceEntry(rootCenter: NodePoint, geometry: TraceGeometry): NodePoint {
-  const entryAngle = Math.PI * 1.18;
-  return pointOnMetricCircle(rootCenter, geometry.nodeShellRadius, entryAngle, geometry.aspect);
+  const entryAngle = Math.PI * 0.82;
+  return pointOnMetricCircle(rootCenter, geometry.guideNodeClearRadius, entryAngle, geometry.aspect);
+}
+
+function getRootTopEntryAnchor(rootCenter: NodePoint, geometry: TraceGeometry): NodePoint {
+  return pointOnMetricCircle(rootCenter, geometry.guideNodeClearRadius, -Math.PI / 2, geometry.aspect);
+}
+
+function getRootTopEntryStart(rootEntryAnchor: NodePoint): NodePoint {
+  return {
+    x: rootEntryAnchor.x,
+    y: clampPoint(rootEntryAnchor.y - 2.55, 0.35, 98),
+  };
+}
+
+function resolveRootRouteStartFromGuideEvents(
+  rootIndex: number,
+  eventIndex: number,
+  guideEvents: BinaryTreeGuideEvent[],
+  nodePositions: NodePoint[],
+  top: number,
+  yStep: number,
+  geometry: TraceGeometry,
+): NodePoint | null {
+  const rootCenter = getNodeCenter(nodePositions, rootIndex);
+  if (!rootCenter) {
+    return null;
+  }
+
+  const nextEvent = guideEvents[eventIndex + 1];
+  if (!nextEvent) {
+    return null;
+  }
+
+  if (nextEvent.type === 'move' && nextEvent.fromIndex === rootIndex) {
+    const childCenter = getNodeCenter(nodePositions, nextEvent.toIndex);
+    if (!childCenter) {
+      return null;
+    }
+    const moveSide = inferEdgeSide(nextEvent.fromIndex, nextEvent.toIndex);
+    const lane = getTraversalLaneForTreeMove(moveSide, nextEvent.side === 'UP');
+    const line = buildOffsetEdgeSegment({
+      from: rootCenter,
+      to: childCenter,
+      fromRadius: geometry.guideNodeClearRadius,
+      toRadius: geometry.guideNodeClearRadius,
+      lane,
+      edgeOffset: geometry.guideEdgeOffset,
+      aspect: geometry.aspect,
+    });
+    return line.start;
+  }
+
+  if (nextEvent.type === 'toNull' && nextEvent.fromIndex === rootIndex) {
+    const nullCenter = getNullPoint(rootIndex, nextEvent.side, top, yStep);
+    const lane = getTraversalLaneForTreeMove(nextEvent.side, false);
+    const line = buildOffsetEdgeSegment({
+      from: rootCenter,
+      to: nullCenter,
+      fromRadius: geometry.guideNodeClearRadius,
+      toRadius: geometry.guideNullClearRadius,
+      lane,
+      edgeOffset: geometry.guideEdgeOffset,
+      aspect: geometry.aspect,
+    });
+    return line.start;
+  }
+
+  return null;
+}
+
+function buildDirectedArcPath(
+  center: NodePoint,
+  radius: number,
+  fromPoint: NodePoint,
+  toPoint: NodePoint,
+  aspect: number,
+  preferredDirection: ArcDirection,
+  longArc = false,
+): ArcGuidePath | null {
+  const path = createTracePath(fromPoint, aspect);
+  appendTraceArc(path, {
+    center,
+    radius,
+    to: toPoint,
+    preferredDirection,
+    longArc,
+  });
+
+  if (path.commands.length <= 1) {
+    return null;
+  }
+
+  return {
+    d: path.commands.join(' '),
+    start: fromPoint,
+    end: toPoint,
+    direction: preferredDirection,
+  };
 }
 
 function buildTraceNodeArrowPath(from: NodePoint, to: NodePoint, geometry: TraceGeometry): string {
@@ -682,6 +748,61 @@ function buildLineLikeTraceSegment(config: {
   };
 }
 
+function createRawLineTraceSegment(config: {
+  key: string;
+  fromPoint: NodePoint;
+  toPoint: NodePoint;
+  isActive: boolean;
+  targetIndex: number | null;
+  geometry: TraceGeometry;
+}): RawTraversalTraceSegment {
+  return {
+    key: config.key,
+    d: `M ${formatPoint(config.fromPoint)} L ${formatPoint(config.toPoint)}`,
+    length: Math.max(metricDistance(config.fromPoint, config.toPoint, config.geometry.aspect), 1),
+    isActive: config.isActive,
+    fromPoint: config.fromPoint,
+    toPoint: config.toPoint,
+    targetIndex: config.targetIndex,
+  };
+}
+
+function createRawArcTraceSegment(config: {
+  key: string;
+  center: NodePoint;
+  radius: number;
+  fromPoint: NodePoint;
+  toPoint: NodePoint;
+  preferredDirection: ArcDirection;
+  longArc?: boolean;
+  isActive: boolean;
+  targetIndex: number | null;
+  geometry: TraceGeometry;
+}): RawTraversalTraceSegment | null {
+  const arcPath = buildDirectedArcPath(
+    config.center,
+    config.radius,
+    config.fromPoint,
+    config.toPoint,
+    config.geometry.aspect,
+    config.preferredDirection,
+    config.longArc ?? false,
+  );
+  if (!arcPath) {
+    return null;
+  }
+
+  return {
+    key: config.key,
+    d: arcPath.d,
+    length: Math.max(metricDistance(config.fromPoint, config.toPoint, config.geometry.aspect), 1),
+    isActive: config.isActive,
+    fromPoint: arcPath.start,
+    toPoint: arcPath.end,
+    targetIndex: config.targetIndex,
+  };
+}
+
 function getTraversalLaneForTreeMove(_side: 'L' | 'R', isUpMove: boolean): 'L' | 'R' {
   if (isUpMove) {
     return 'R';
@@ -713,7 +834,39 @@ function buildGuideRawTraceSegments(
       if (!root) {
         return;
       }
-      penPoint = getRootTraceEntry(root, geometry);
+      const rootEntryAnchor = getRootTopEntryAnchor(root, geometry);
+      const rootEntryStart = getRootTopEntryStart(rootEntryAnchor);
+      const rootEntry =
+        resolveRootRouteStartFromGuideEvents(event.toIndex, index, guideEvents, nodePositions, top, yStep, geometry) ??
+        getRootTraceEntry(root, geometry);
+
+      segments.push(
+        createRawLineTraceSegment({
+          key: `guide-root-entry-line-${index}`,
+          fromPoint: rootEntryStart,
+          toPoint: rootEntryAnchor,
+          isActive: false,
+          targetIndex: event.toIndex,
+          geometry,
+        }),
+      );
+
+      const rootArc = createRawArcTraceSegment({
+        key: `guide-root-entry-arc-${index}`,
+        center: root,
+        radius: geometry.guideNodeClearRadius,
+        fromPoint: rootEntryAnchor,
+        toPoint: rootEntry,
+        preferredDirection: 'ccw',
+        isActive: activeGuideEventIndex === index,
+        targetIndex: event.toIndex,
+        geometry,
+      });
+      if (rootArc) {
+        segments.push(rootArc);
+      }
+
+      penPoint = rootEntry;
       return;
     }
 
@@ -728,19 +881,20 @@ function buildGuideRawTraceSegments(
       const line = buildOffsetEdgeSegment({
         from: fromCenter,
         to: toCenter,
-        fromRadius: geometry.nodeShellRadius,
-        toRadius: geometry.nodeShellRadius,
+        fromRadius: geometry.guideNodeClearRadius,
+        toRadius: geometry.guideNodeClearRadius,
         lane,
-        edgeOffset: geometry.edgeOffset,
+        edgeOffset: geometry.guideEdgeOffset,
         aspect: geometry.aspect,
       });
+
       const segment = buildLineLikeTraceSegment({
         key: `guide-move-${index}`,
         isActive: activeGuideEventIndex === index,
         targetIndex: event.toIndex,
         penPoint,
         pivotCenter: fromCenter,
-        pivotRadius: geometry.nodeShellRadius,
+        pivotRadius: geometry.guideNodeClearRadius,
         lineStart: line.start,
         lineEnd: line.end,
         geometry,
@@ -757,16 +911,25 @@ function buildGuideRawTraceSegments(
         return;
       }
       const nullCenter = getNullPoint(event.fromIndex, event.side, top, yStep);
-      const approach = pickNullApproachSegment(parentCenter, nullCenter, event.side, geometry);
+      const lane = getTraversalLaneForTreeMove(event.side, false);
+      const approach = buildOffsetEdgeSegment({
+        from: parentCenter,
+        to: nullCenter,
+        fromRadius: geometry.guideNodeClearRadius,
+        toRadius: geometry.guideNullClearRadius,
+        lane,
+        edgeOffset: geometry.guideEdgeOffset,
+        aspect: geometry.aspect,
+      });
       const segment = buildLineLikeTraceSegment({
         key: `guide-null-enter-${index}`,
         isActive: activeGuideEventIndex === index,
         targetIndex: null,
         penPoint,
         pivotCenter: parentCenter,
-        pivotRadius: geometry.nodeShellRadius,
-        lineStart: approach.segment.start,
-        lineEnd: approach.segment.end,
+        pivotRadius: geometry.guideNodeClearRadius,
+        lineStart: approach.start,
+        lineEnd: approach.end,
         geometry,
         connectorDirection: event.side === 'L' ? 'ccw' : 'cw',
       });
@@ -780,29 +943,40 @@ function buildGuideRawTraceSegments(
       return;
     }
     const nullCenter = getNullPoint(event.toIndex, event.side, top, yStep);
-    const returnSegment = pickNullReturnSegment(nullCenter, parentCenter, event.side, geometry);
-    const pathStart = penPoint ?? returnSegment.segment.start;
+    const lane = getTraversalLaneForTreeMove(event.side, true);
+    const returnLine = buildOffsetEdgeSegment({
+      from: nullCenter,
+      to: parentCenter,
+      fromRadius: geometry.guideNullClearRadius,
+      toRadius: geometry.guideNodeClearRadius,
+      lane,
+      edgeOffset: geometry.guideEdgeOffset,
+      aspect: geometry.aspect,
+    });
+    const lineStart = returnLine.start;
+    const lineEnd = returnLine.end;
+    const pathStart = penPoint ?? lineStart;
     const path = createTracePath(pathStart, geometry.aspect);
 
-    if (metricDistance(pathStart, returnSegment.segment.start, geometry.aspect) > 0.03) {
+    if (metricDistance(pathStart, lineStart, geometry.aspect) > 0.03) {
       const nullSweep = resolveNullReturnArcSweep(
         pathStart,
-        returnSegment.segment.start,
+        lineStart,
         nullCenter,
         parentCenter,
         geometry.aspect,
       );
       appendTraceArc(path, {
         center: nullCenter,
-        radius: geometry.nullShellRadius,
-        to: returnSegment.segment.start,
+        radius: geometry.guideNullClearRadius,
+        to: lineStart,
         preferredDirection: nullSweep.preferredDirection,
         longArc: nullSweep.longArc,
       });
     }
 
-    appendTraceLine(path, returnSegment.segment.start);
-    appendTraceLine(path, returnSegment.segment.end);
+    appendTraceLine(path, lineStart);
+    appendTraceLine(path, lineEnd);
 
     segments.push({
       key: `guide-null-return-${index}`,
@@ -810,10 +984,10 @@ function buildGuideRawTraceSegments(
       length: Math.max(path.length, 1),
       isActive: activeGuideEventIndex === index,
       fromPoint: pathStart,
-      toPoint: returnSegment.segment.end,
+      toPoint: lineEnd,
       targetIndex: event.toIndex,
     });
-    penPoint = returnSegment.segment.end;
+    penPoint = lineEnd;
   });
 
   return segments;
@@ -896,14 +1070,25 @@ function buildTraceSegments(
       ? buildGuideRawTraceSegments(step.guideEvents, step.activeGuideEventIndex, nodePositions, top, yStep, geometry)
       : buildFallbackRawTraceSegments(step.visitedIndices, step.action === 'visit', nodePositions, geometry);
 
-  return rawSegments.map((segment) => ({
+  let headSegmentIndex = -1;
+  for (let index = rawSegments.length - 1; index >= 0; index -= 1) {
+    if (rawSegments[index]?.isActive) {
+      headSegmentIndex = index;
+      break;
+    }
+  }
+  if (headSegmentIndex < 0) {
+    headSegmentIndex = rawSegments.length - 1;
+  }
+
+  return rawSegments.map((segment, index) => ({
     key: segment.key,
     d: segment.d,
     length: segment.length,
     isActive: segment.isActive,
     roughPath: buildHandDrawnTracePath(segment.key, segment.d),
-    arrowPath: segment.targetIndex === null ? null : buildTraceNodeArrowPath(segment.fromPoint, segment.toPoint, geometry),
-    arrowIsCurrent: segment.targetIndex !== null && segment.targetIndex === step.currentIndex,
+    arrowPath: index === headSegmentIndex ? buildTraceNodeArrowPath(segment.fromPoint, segment.toPoint, geometry) : null,
+    arrowIsCurrent: index === headSegmentIndex,
   }));
 }
 
@@ -1317,6 +1502,57 @@ function buildParallelGuideSegments(
     }
   });
 
+  const rootCenter = getNodeCenter(nodePositions, 0);
+  if (rootCenter) {
+    const rootEntryAnchor = getRootTopEntryAnchor(rootCenter, geometry);
+    const rootEntryStart = getRootTopEntryStart(rootEntryAnchor);
+    const rootLeftBranch = leftBranchByNode.get(0);
+    const rootEntry = rootLeftBranch
+      ? pickGuideEndpointBySide(rootLeftBranch, 'left').point
+      : getRootTraceEntry(rootCenter, geometry);
+
+    segments.push({
+      key: 'root-entry-line',
+      d: `M ${formatPoint(rootEntryStart)} L ${formatPoint(rootEntryAnchor)}`,
+    });
+
+    const rootEntryArc = buildDirectedArcPath(
+      rootCenter,
+      geometry.guideNodeClearRadius,
+      rootEntryAnchor,
+      rootEntry,
+      geometry.aspect,
+      'ccw',
+      false,
+    );
+    if (rootEntryArc) {
+      segments.push({
+        key: 'root-entry-arc',
+        d: rootEntryArc.d,
+        directionMarkerPaths: [
+          buildEndpointMarkerPath(
+            {
+              point: rootEntryAnchor,
+              towardCenterDirection: getMetricDirection(rootEntryStart, rootEntryAnchor, geometry.aspect),
+            },
+            geometry,
+          ),
+        ],
+      });
+    }
+
+    const rootRightBranch = rightBranchByNode.get(0);
+    if (rootRightBranch) {
+      const rootExitEndpoint = pickGuideEndpointBySide(rootRightBranch, 'right');
+      segments.push({
+        key: 'root-exit-marker',
+        d: `M ${formatPoint(rootExitEndpoint.point)} L ${formatPoint(rootExitEndpoint.point)}`,
+        directionMarkerPaths: [buildEndpointMarkerPath(rootExitEndpoint, geometry)],
+      });
+    }
+
+  }
+
   return segments;
 }
 
@@ -1381,6 +1617,7 @@ export function BinaryTreeTraversalPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const routeOrderIdPrefix = useId().replace(/:/g, '');
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [mode, setMode] = useState<BinaryTreeTraversalMode>('preorder');
@@ -1436,6 +1673,39 @@ export function BinaryTreeTraversalPage() {
     () => buildParallelGuideSegments(edges, treeState.length, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
     [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState.length],
   );
+  const routeOrderSegments = useMemo<RouteOrderSegment[]>(() => {
+    if (mode !== 'preorder' || steps.length === 0 || nodePositions.length === 0) {
+      return [];
+    }
+
+    let guideStep: BinaryTreeTraversalStep | undefined;
+    for (let index = steps.length - 1; index >= 0; index -= 1) {
+      if ((steps[index]?.guideEvents.length ?? 0) > 0) {
+        guideStep = steps[index];
+        break;
+      }
+    }
+
+    if (!guideStep || guideStep.guideEvents.length === 0) {
+      return [];
+    }
+
+    const orderedRawSegments = buildGuideRawTraceSegments(
+      guideStep.guideEvents,
+      null,
+      nodePositions,
+      treeLayout.top,
+      treeLayout.yStep,
+      traceGeometry,
+    );
+
+    return orderedRawSegments.map((segment, index) => ({
+      key: `${segment.key}-order-${index}`,
+      d: segment.d,
+      order: index + 1,
+      pathId: `${routeOrderIdPrefix}-route-order-${index}`,
+    }));
+  }, [mode, nodePositions, routeOrderIdPrefix, steps, traceGeometry, treeLayout.top, treeLayout.yStep]);
 
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
@@ -1664,6 +1934,19 @@ export function BinaryTreeTraversalPage() {
                 {segment.directionMarkerPaths?.map((markerPath, markerIndex) => (
                   <path key={`${segment.key}-marker-${markerIndex}`} className="tree-shell-guide-direction" d={markerPath} />
                 ))}
+              </g>
+            ))}
+          </svg>
+
+          <svg className="tree-route-order-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {routeOrderSegments.map((segment) => (
+              <g key={segment.key}>
+                <path id={segment.pathId} className="tree-route-order-path-anchor" d={segment.d} />
+                <text className="tree-route-order-label">
+                  <textPath href={`#${segment.pathId}`} startOffset="50%" textAnchor="middle">
+                    {segment.order}
+                  </textPath>
+                </text>
               </g>
             ))}
           </svg>
