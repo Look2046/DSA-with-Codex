@@ -1203,6 +1203,16 @@ body {
   vector-effect: non-scaling-stroke;
 }
 
+.tree-shell-guide-direction {
+  fill: none;
+  stroke: #dc2626;
+  stroke-width: 0.72;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.96;
+  vector-effect: non-scaling-stroke;
+}
+
 .tree-trace-layer {
   position: absolute;
   inset: 0;

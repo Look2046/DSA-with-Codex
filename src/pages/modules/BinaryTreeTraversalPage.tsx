@@ -53,6 +53,19 @@ type NullEdgePath = {
 type ParallelGuideSegment = {
   key: string;
   d: string;
+  directionMarkerPaths?: string[];
+};
+
+type ArcGuidePath = {
+  d: string;
+  start: NodePoint;
+  end: NodePoint;
+  direction: ArcDirection;
+};
+
+type GuideBranchEndpoint = {
+  point: NodePoint;
+  towardCenterDirection: NodePoint;
 };
 
 type TraceGeometry = {
@@ -900,7 +913,7 @@ function buildCounterClockwiseNodeArc(
   firstPoint: NodePoint,
   secondPoint: NodePoint,
   aspect: number,
-): string | null {
+): ArcGuidePath | null {
   const firstAngle = getPointAngleAroundCenter(firstPoint, center, aspect);
   const secondAngle = getPointAngleAroundCenter(secondPoint, center, aspect);
   const firstToSecondCcw = normalizePositiveAngle(firstAngle - secondAngle);
@@ -917,23 +930,86 @@ function buildCounterClockwiseNodeArc(
     longArc: false,
   });
 
-  return path.commands.length > 1 ? path.commands.join(' ') : null;
+  if (path.commands.length <= 1) {
+    return null;
+  }
+
+  return {
+    d: path.commands.join(' '),
+    start,
+    end,
+    direction: 'ccw',
+  };
 }
 
 type NodeGuideBranchPoints = {
-  first: NodePoint;
-  second: NodePoint;
+  first: GuideBranchEndpoint;
+  second: GuideBranchEndpoint;
 };
 
-function pickGuideEndpointBySide(points: NodeGuideBranchPoints, side: 'left' | 'right' | 'down'): NodePoint {
+function pickGuideEndpointBySide(points: NodeGuideBranchPoints, side: 'left' | 'right' | 'down'): GuideBranchEndpoint {
   const candidates = [points.first, points.second];
   if (side === 'left') {
-    return candidates.sort((a, b) => (a.x === b.x ? b.y - a.y : a.x - b.x))[0];
+    return candidates.sort((a, b) => (a.point.x === b.point.x ? b.point.y - a.point.y : a.point.x - b.point.x))[0];
   }
   if (side === 'right') {
-    return candidates.sort((a, b) => (a.x === b.x ? b.y - a.y : b.x - a.x))[0];
+    return candidates.sort((a, b) => (a.point.x === b.point.x ? b.point.y - a.point.y : b.point.x - a.point.x))[0];
   }
-  return candidates.sort((a, b) => (a.y === b.y ? a.x - b.x : b.y - a.y))[0];
+  return candidates.sort((a, b) => (a.point.y === b.point.y ? a.point.x - b.point.x : b.point.y - a.point.y))[0];
+}
+
+function getMetricDirection(
+  from: NodePoint,
+  to: NodePoint,
+  aspect: number,
+): NodePoint {
+  const fromMetric = toMetricPoint(from, aspect);
+  const toMetric = toMetricPoint(to, aspect);
+  return normalizeDirection(toMetric.x - fromMetric.x, toMetric.y - fromMetric.y, 1, 0);
+}
+
+function buildGuideDirectionMarkerPath(
+  point: NodePoint,
+  lineDirection: NodePoint,
+  geometry: TraceGeometry,
+): string {
+  const markerLength = geometry.arrowSize * 0.64;
+  const markerSpread = geometry.arrowWing * 0.78;
+  const directionUnit = normalizeDirection(lineDirection.x, lineDirection.y, 1, 0);
+  const perpendicular = { x: -directionUnit.y, y: directionUnit.x };
+  const pointMetric = toMetricPoint(point, geometry.aspect);
+  const leftMetric = {
+    x: pointMetric.x - directionUnit.x * markerLength + perpendicular.x * markerSpread,
+    y: pointMetric.y - directionUnit.y * markerLength + perpendicular.y * markerSpread,
+  };
+  const rightMetric = {
+    x: pointMetric.x - directionUnit.x * markerLength - perpendicular.x * markerSpread,
+    y: pointMetric.y - directionUnit.y * markerLength - perpendicular.y * markerSpread,
+  };
+
+  return `M ${formatPoint(fromMetricPoint(leftMetric, geometry.aspect))} L ${formatPoint(point)} L ${formatPoint(fromMetricPoint(rightMetric, geometry.aspect))}`;
+}
+
+function pickArcStartEndpoint(
+  arc: ArcGuidePath,
+  endpoints: NodeGuideBranchPoints,
+  geometry: TraceGeometry,
+): GuideBranchEndpoint {
+  const firstDistance = metricDistance(arc.start, endpoints.first.point, geometry.aspect);
+  const secondDistance = metricDistance(arc.start, endpoints.second.point, geometry.aspect);
+  return firstDistance <= secondDistance ? endpoints.first : endpoints.second;
+}
+
+function buildArcStartMarkerPath(
+  arc: ArcGuidePath,
+  startEndpoint: GuideBranchEndpoint,
+  geometry: TraceGeometry,
+): string {
+  return buildGuideDirectionMarkerPath(arc.start, startEndpoint.towardCenterDirection, geometry);
+}
+
+function buildEndpointMarkerPath(endpoint: GuideBranchEndpoint, geometry: TraceGeometry): string {
+  return buildGuideDirectionMarkerPath(endpoint.point, endpoint.towardCenterDirection, geometry);
 }
 
 function buildLongConcaveNullArc(
@@ -943,7 +1019,7 @@ function buildLongConcaveNullArc(
   secondPoint: NodePoint,
   aspect: number,
   side: 'L' | 'R',
-): string | null {
+): ArcGuidePath | null {
   const endpoints: [NodePoint, NodePoint][] = [
     [firstPoint, secondPoint],
     [secondPoint, firstPoint],
@@ -1003,7 +1079,16 @@ function buildLongConcaveNullArc(
     longArc: true,
   });
 
-  return path.commands.length > 1 ? path.commands.join(' ') : null;
+  if (path.commands.length <= 1) {
+    return null;
+  }
+
+  return {
+    d: path.commands.join(' '),
+    start: best.start,
+    end: best.end,
+    direction: best.direction,
+  };
 }
 
 function buildParallelGuideSegments(
@@ -1055,28 +1140,37 @@ function buildParallelGuideSegments(
     });
     return { left, right };
   };
-  const toBranchPoints = (first: NodePoint, second: NodePoint): NodeGuideBranchPoints => ({ first, second });
+  const toBranchPoints = (first: GuideBranchEndpoint, second: GuideBranchEndpoint): NodeGuideBranchPoints => ({ first, second });
+  const toGuideEndpoint = (point: NodePoint, towardCenterDirection: NodePoint): GuideBranchEndpoint => ({
+    point,
+    towardCenterDirection,
+  });
   const registerChildBranch = (
     map: Map<number, NodeGuideBranchPoints>,
     nodeIndex: number,
-    first: NodePoint,
-    second: NodePoint,
+    first: GuideBranchEndpoint,
+    second: GuideBranchEndpoint,
   ) => {
     map.set(nodeIndex, toBranchPoints(first, second));
   };
-  const pushNodeArc = (key: string, center: NodePoint, firstPoint: NodePoint, secondPoint: NodePoint) => {
-    if (metricDistance(firstPoint, secondPoint, geometry.aspect) <= 0.02) {
+  const pushNodeArc = (key: string, center: NodePoint, firstEndpoint: GuideBranchEndpoint, secondEndpoint: GuideBranchEndpoint) => {
+    if (metricDistance(firstEndpoint.point, secondEndpoint.point, geometry.aspect) <= 0.02) {
       return;
     }
     const arc = buildCounterClockwiseNodeArc(
       center,
       geometry.guideNodeClearRadius,
-      firstPoint,
-      secondPoint,
+      firstEndpoint.point,
+      secondEndpoint.point,
       geometry.aspect,
     );
     if (arc) {
-      segments.push({ key, d: arc });
+      const startEndpoint = pickArcStartEndpoint(arc, toBranchPoints(firstEndpoint, secondEndpoint), geometry);
+      segments.push({
+        key,
+        d: arc.d,
+        directionMarkerPaths: [buildArcStartMarkerPath(arc, startEndpoint, geometry)],
+      });
     }
   };
 
@@ -1095,11 +1189,27 @@ function buildParallelGuideSegments(
       toRadius: geometry.guideNodeClearRadius,
     });
 
-    parentBranchByNode.set(edge.to, toBranchPoints(pair.left.end, pair.right.end));
+    parentBranchByNode.set(
+      edge.to,
+      toBranchPoints(
+        toGuideEndpoint(pair.left.end, getMetricDirection(pair.left.start, pair.left.end, geometry.aspect)),
+        toGuideEndpoint(pair.right.end, getMetricDirection(pair.right.start, pair.right.end, geometry.aspect)),
+      ),
+    );
     if (edge.to === getChildIndex(edge.from, 'L')) {
-      registerChildBranch(leftBranchByNode, edge.from, pair.left.start, pair.right.start);
+      registerChildBranch(
+        leftBranchByNode,
+        edge.from,
+        toGuideEndpoint(pair.left.start, getMetricDirection(pair.left.end, pair.left.start, geometry.aspect)),
+        toGuideEndpoint(pair.right.start, getMetricDirection(pair.right.end, pair.right.start, geometry.aspect)),
+      );
     } else {
-      registerChildBranch(rightBranchByNode, edge.from, pair.left.start, pair.right.start);
+      registerChildBranch(
+        rightBranchByNode,
+        edge.from,
+        toGuideEndpoint(pair.left.start, getMetricDirection(pair.left.end, pair.left.start, geometry.aspect)),
+        toGuideEndpoint(pair.right.start, getMetricDirection(pair.right.end, pair.right.start, geometry.aspect)),
+      );
     }
   });
 
@@ -1124,15 +1234,28 @@ function buildParallelGuideSegments(
         toRadius: geometry.guideNullClearRadius,
       });
       if (side === 'L') {
-        registerChildBranch(leftBranchByNode, parentIndex, pair.left.start, pair.right.start);
+        registerChildBranch(
+          leftBranchByNode,
+          parentIndex,
+          toGuideEndpoint(pair.left.start, getMetricDirection(pair.left.end, pair.left.start, geometry.aspect)),
+          toGuideEndpoint(pair.right.start, getMetricDirection(pair.right.end, pair.right.start, geometry.aspect)),
+        );
       } else {
-        registerChildBranch(rightBranchByNode, parentIndex, pair.left.start, pair.right.start);
+        registerChildBranch(
+          rightBranchByNode,
+          parentIndex,
+          toGuideEndpoint(pair.left.start, getMetricDirection(pair.left.end, pair.left.start, geometry.aspect)),
+          toGuideEndpoint(pair.right.start, getMetricDirection(pair.right.end, pair.right.start, geometry.aspect)),
+        );
       }
 
       nullBranchByKey.set(`${parentIndex}-${side}`, {
         center: nullPoint,
         side,
-        endpoints: toBranchPoints(pair.left.end, pair.right.end),
+        endpoints: toBranchPoints(
+          toGuideEndpoint(pair.left.end, getMetricDirection(pair.left.start, pair.left.end, geometry.aspect)),
+          toGuideEndpoint(pair.right.end, getMetricDirection(pair.right.start, pair.right.end, geometry.aspect)),
+        ),
       });
     });
   }
@@ -1179,15 +1302,17 @@ function buildParallelGuideSegments(
     const capArc = buildLongConcaveNullArc(
       branch.center,
       geometry.guideNullClearRadius,
-      branch.endpoints.first,
-      branch.endpoints.second,
+      branch.endpoints.first.point,
+      branch.endpoints.second.point,
       geometry.aspect,
       branch.side,
     );
     if (capArc) {
+      const leftEndpoint = pickGuideEndpointBySide(branch.endpoints, 'left');
       segments.push({
         key: `null-cap-${key}`,
-        d: capArc,
+        d: capArc.d,
+        directionMarkerPaths: [buildEndpointMarkerPath(leftEndpoint, geometry)],
       });
     }
   });
@@ -1534,7 +1659,12 @@ export function BinaryTreeTraversalPage() {
 
           <svg className="tree-shell-guide-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             {parallelGuideSegments.map((segment) => (
-              <path key={segment.key} className="tree-shell-guide" d={segment.d} />
+              <g key={segment.key}>
+                <path className="tree-shell-guide" d={segment.d} />
+                {segment.directionMarkerPaths?.map((markerPath, markerIndex) => (
+                  <path key={`${segment.key}-marker-${markerIndex}`} className="tree-shell-guide-direction" d={markerPath} />
+                ))}
+              </g>
             ))}
           </svg>
 
