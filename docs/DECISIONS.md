@@ -373,3 +373,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep full static route visible during playback; use a different front-cursor glyph; drop per-line endpoint arrows during animation.
 - Consequences: playback now aligns with traversal storytelling and preserves route semantics users already recognize from static guide styling.
 - Owner: haoyu + codex
+
+## DEC-20260310-41
+- Date: 2026-03-10
+- Status: accepted
+- Context: During progressive route playback, users needed explicit per-node entry-state semantics to map traversal flow to node-local directions.
+- Decision: Add node entry markers for real nodes with fixed semantics (`1` from up, `2` from left-down, `3` from right-down), and reveal each marker only when playback length reaches its mapped route position (`revealLength`).
+- Alternatives considered: show all markers statically from start; use one marker style without directional labels; tie marker visibility to wall-clock time instead of route progress.
+- Consequences: traversal direction is now readable at node level while preserving route-first storytelling; marker rendering remains deterministic under replay/seek based on route length.
+- Owner: haoyu + codex

@@ -13,6 +13,7 @@ This document captures the canonical preorder trace drawing rules used by the bi
 - Trace style:
   - dashed red stroke
   - arrowheads only on line-segment endpoints
+  - one moving front arrow while playback is in progress
 
 ## 2. Left/Right Definition
 
@@ -64,10 +65,34 @@ For a null node, it has one logical `up` edge only:
 - `arrowCount === lineSegmentCount`.
 - For empty input or root=`null`, no trace segments are produced.
 
-## 8. Reuse Guidance
+## 8. Playback Rendering Contract
+
+- Future segments must stay hidden until reached by playback.
+- In-progress segment shows partial visible length (`0..segmentLength`).
+- Completed segments keep dashed style and line-end arrows.
+- Moving front arrow must reuse the same arrow geometry as line-end arrows.
+- Playback starts from root top entry segment and ends at the canonical terminal return point.
+
+## 9. Node Entry Markers (`1/2/3`)
+
+- Marker meaning for real (data) nodes:
+  - `1`: entering node from the `up` edge (parent/upstream side)
+  - `2`: entering node from the `left-down` edge (after finishing left subtree)
+  - `3`: entering node from the `right-down` edge (after finishing right subtree)
+- Root also follows the same semantics:
+  - root-top entry is `1`
+  - return from left subtree into root is `2`
+  - return from right subtree into root is `3`
+- Markers are tied to route progress:
+  - each marker has a `revealLength` on the canonical path
+  - marker appears only when `traceDrawLength >= revealLength`
+  - do not pre-show all markers before playback reaches them
+
+## 10. Reuse Guidance
 
 When migrating this trace logic into other tree modules (for example `T-01` main traversal page):
 
 - Reuse the same geometry constants and absolute-left/right rule.
 - Keep data/null/root local rules unchanged.
 - Keep output as ordered segments so play/step can animate along one canonical route.
+- Keep entry-marker semantics (`1/2/3`) and reveal-by-progress behavior unchanged.

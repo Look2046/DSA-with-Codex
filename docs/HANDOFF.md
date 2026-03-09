@@ -2,6 +2,43 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-10 (P8-M3 trace playback + entry-marker semantics checkpoint)
+
+### Today Done
+- Finalized binary-tree-canvas route playback behavior on `feat/p8-m3-route-rules-spike`:
+  - route now renders progressively from root-top entry; future segments are hidden
+  - completed segments keep dashed style and line-end arrowheads
+  - moving front cursor now uses the same small-arrow geometry as line-end arrows
+- Added node entry-direction markers for real nodes:
+  - `1`: enter from up edge
+  - `2`: enter from left-down edge
+  - `3`: enter from right-down edge
+  - marker visibility is progress-driven (`revealLength`) and appears in drawing order
+- Verified locally:
+  - `npm run check` pass (2026-03-10)
+  - browser DOM checks confirm marker counts increase during playback and converge to full set at completion
+- Pushed implementation commits:
+  - `0712e4d` route-rules + progressive playback baseline
+  - `8289c51` entry-marker progressive reveal
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: clean after push (docs sync pending commit if updated further)
+- Remote: `origin/feat/p8-m3-route-rules-spike` up to date with latest commits
+
+### Remaining Focus (Next Session)
+- Integrate confirmed spike outcomes into the module mainline branch (`feat/p8-m2-bst`) via controlled cherry-pick/merge.
+- Continue `T-01` visual polish backlog:
+  - improve arrowhead clarity under dashed styling
+  - align route-order numbering with canonical preorder order
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m2-bst
+git -C /home/haoyu/data-structure-algorithm-visualizor cherry-pick 0712e4d 8289c51
+npm run check
+```
+
 ## 2026-03-09 (P8-M3 tree visual polish checkpoint)
 
 ### Today Done

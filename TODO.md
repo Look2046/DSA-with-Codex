@@ -188,6 +188,8 @@ Track actionable tasks here. Keep tasks small and testable.
     - reusable rule spec documented in `docs/modules/T-01-preorder-trace-rules.md`
     - binary-tree canvas trace rendering upgraded to progressive drawing from root-top entry segment to end, with a moving arrow following the current front
     - undrawn route segments are hidden; completed segments retain dashed style and per-line endpoint arrows during playback
+    - added node entry markers on data nodes (`1` from up, `2` from left-down, `3` from right-down)
+    - marker visibility is now tied to route progress (`revealLength`), so `1/2/3` appear in drawing order with the moving arrow
   - Next (2026-03-10):
     - restore arrowhead clarity on trace path
     - continue dashed-path beautification toward hand-drawn style

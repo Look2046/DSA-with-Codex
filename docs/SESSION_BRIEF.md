@@ -7,7 +7,7 @@ Use this file as the first thing to read in a new chat/session.
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p8-m3-route-rules-spike` (P8-M3 polish work in progress)
 - Current phase: P8-M3 in progress (tree consistency + acceptance closure)
-- Last local quality gate: `npm run check` (passed, 2026-03-09)
+- Last local quality gate: `npm run check` (passed, 2026-03-10)
 
 ## 2) What Is Already Done
 
@@ -57,6 +57,7 @@ Use this file as the first thing to read in a new chat/session.
   - preorder guide-step timing refined (arrival + D/L/R shown in one step)
   - binary-tree canvas route generation replaced: hardcoded sample-specific steps -> recursive rule-driven generator for arbitrary tree shapes (data/null/root rules)
   - binary-tree canvas route playback now draws progressively from root-top entry to end, with hidden future segments, dashed completed segments, line-end arrows, and a moving front arrow
+  - data-node entry markers landed on route (`1` from up, `2` from left-down, `3` from right-down) and now reveal progressively with route drawing order
   - reusable rule spec added: `docs/modules/T-01-preorder-trace-rules.md`
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
   - known carry-over issue: dashed traversal trace style currently has arrowhead visibility regression
