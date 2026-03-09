@@ -936,6 +936,76 @@ function pickGuideEndpointBySide(points: NodeGuideBranchPoints, side: 'left' | '
   return candidates.sort((a, b) => (a.y === b.y ? a.x - b.x : b.y - a.y))[0];
 }
 
+function buildLongConcaveNullArc(
+  center: NodePoint,
+  radius: number,
+  firstPoint: NodePoint,
+  secondPoint: NodePoint,
+  aspect: number,
+  side: 'L' | 'R',
+): string | null {
+  const endpoints: [NodePoint, NodePoint][] = [
+    [firstPoint, secondPoint],
+    [secondPoint, firstPoint],
+  ];
+  const directions: ArcDirection[] = ['cw', 'ccw'];
+  const targetDelta = Math.PI * 1.24;
+
+  let best:
+    | {
+        start: NodePoint;
+        end: NodePoint;
+        direction: ArcDirection;
+        score: number;
+      }
+    | null = null;
+
+  for (const [startPoint, endPoint] of endpoints) {
+    const startAngle = getPointAngleAroundCenter(startPoint, center, aspect);
+    const endAngle = getPointAngleAroundCenter(endPoint, center, aspect);
+
+    for (const direction of directions) {
+      const delta = resolveArcDelta(startAngle, endAngle, direction, true);
+      if (Math.abs(delta) <= Math.PI + 0.0001) {
+        continue;
+      }
+
+      const midAngle = startAngle + delta / 2;
+      const downConcave = Math.sin(midAngle) > 0;
+      const leftBias = Math.cos(midAngle) < 0;
+      const horizontalMatch = side === 'L' ? leftBias : !leftBias;
+      const score =
+        (downConcave ? 0 : 1000) +
+        (horizontalMatch ? 0 : 100) +
+        Math.abs(Math.abs(delta) - targetDelta);
+
+      if (!best || score < best.score) {
+        best = {
+          start: startPoint,
+          end: endPoint,
+          direction,
+          score,
+        };
+      }
+    }
+  }
+
+  if (!best) {
+    return null;
+  }
+
+  const path = createTracePath(best.start, aspect);
+  appendTraceArc(path, {
+    center,
+    radius,
+    to: best.end,
+    preferredDirection: best.direction,
+    longArc: true,
+  });
+
+  return path.commands.length > 1 ? path.commands.join(' ') : null;
+}
+
 function buildParallelGuideSegments(
   edges: Array<{ from: number; to: number }>,
   treeLength: number,
@@ -948,6 +1018,7 @@ function buildParallelGuideSegments(
   const parentBranchByNode = new Map<number, NodeGuideBranchPoints>();
   const leftBranchByNode = new Map<number, NodeGuideBranchPoints>();
   const rightBranchByNode = new Map<number, NodeGuideBranchPoints>();
+  const nullBranchByKey = new Map<string, { center: NodePoint; side: 'L' | 'R'; endpoints: NodeGuideBranchPoints }>();
   const pushParallelPair = (config: {
     keyBase: string;
     from: NodePoint;
@@ -1057,6 +1128,12 @@ function buildParallelGuideSegments(
       } else {
         registerChildBranch(rightBranchByNode, parentIndex, pair.left.start, pair.right.start);
       }
+
+      nullBranchByKey.set(`${parentIndex}-${side}`, {
+        center: nullPoint,
+        side,
+        endpoints: toBranchPoints(pair.left.end, pair.right.end),
+      });
     });
   }
 
@@ -1097,6 +1174,23 @@ function buildParallelGuideSegments(
       );
     }
   }
+
+  nullBranchByKey.forEach((branch, key) => {
+    const capArc = buildLongConcaveNullArc(
+      branch.center,
+      geometry.guideNullClearRadius,
+      branch.endpoints.first,
+      branch.endpoints.second,
+      geometry.aspect,
+      branch.side,
+    );
+    if (capArc) {
+      segments.push({
+        key: `null-cap-${key}`,
+        d: capArc,
+      });
+    }
+  });
 
   return segments;
 }
