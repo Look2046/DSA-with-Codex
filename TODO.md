@@ -184,6 +184,10 @@ Track actionable tasks here. Keep tasks small and testable.
     - root-top supplemental route geometry + root-right terminal marker landed for canonical route polishing
     - route-order overlay (`1..N`) added on guide segments for sequencing debug, but ordering does not yet match user-confirmed canonical order
     - user requirement updated: avoid screenshots/image-analysis unless explicitly requested; `output/` image files were cleaned in working tree
+    - binary-tree canvas playground trace generator refactored from hardcoded sample steps to recursive rule-driven algorithm (data node/null node/root entry), validated on multiple arbitrary trees
+    - reusable rule spec documented in `docs/modules/T-01-preorder-trace-rules.md`
+    - binary-tree canvas trace rendering upgraded to progressive drawing from root-top entry segment to end, with a moving arrow following the current front
+    - undrawn route segments are hidden; completed segments retain dashed style and per-line endpoint arrows during playback
   - Next (2026-03-10):
     - restore arrowhead clarity on trace path
     - continue dashed-path beautification toward hand-drawn style

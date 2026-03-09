@@ -355,3 +355,21 @@ Record architecture or workflow decisions here.
 - Alternatives considered: model BST with search-only first; defer delete-case explicit states; skip route discovery update until P8-M3.
 - Consequences: tree track now has two implemented modules with operation-level clarity and deterministic replay evidence, enabling P8-M3 to focus on consistency and full acceptance refresh.
 - Owner: haoyu + codex
+
+## DEC-20260309-39
+- Date: 2026-03-09
+- Status: accepted
+- Context: The preorder route drawing on binary-tree canvas was hardcoded to one specific sample shape (`trace-step1..step20`), so it could not reliably generalize to arbitrary binary trees.
+- Decision: Replace hardcoded route assembly with a recursive rule-driven trace generator based on three local rules (data node / null node / root entry), absolute canvas left-right lane selection, and ordered segment output.
+- Alternatives considered: keep expanding hardcoded sample-specific steps; rely on manual per-tree route corrections.
+- Consequences: route generation now scales to arbitrary level-order trees (including sparse/null-heavy cases), and the same rule set can be reused by other tree modules through a shared spec (`docs/modules/T-01-preorder-trace-rules.md`).
+- Owner: haoyu + codex
+
+## DEC-20260310-40
+- Date: 2026-03-10
+- Status: accepted
+- Context: After route generation became rule-driven, visualization still displayed full route statically, which did not match the intended traversal playback behavior.
+- Decision: Render route playback progressively from the root-top entry segment, hide future segments, keep completed segments in dashed style with line-end arrows, and use a moving front arrow that reuses the same small-arrow geometry.
+- Alternatives considered: keep full static route visible during playback; use a different front-cursor glyph; drop per-line endpoint arrows during animation.
+- Consequences: playback now aligns with traversal storytelling and preserves route semantics users already recognize from static guide styling.
+- Owner: haoyu + codex

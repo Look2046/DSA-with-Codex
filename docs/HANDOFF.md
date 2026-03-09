@@ -23,9 +23,21 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `output/playwright/p8m3-t01-traversal-sequence-letter.png`
 - Local quality gate verified:
   - `npm run check` (pass, 2026-03-09)
+- Route-rule generalization checkpoint (branch `feat/p8-m3-route-rules-spike`):
+  - replaced sample-specific hardcoded trace assembly (`trace-step1..step20`) in `BinaryTreeCanvasPlaygroundPage` with recursive rule-driven generation
+  - preserved existing visual contract: dashed trace + arrowheads only on line-segment endpoints
+  - validated in real browser (no screenshots) across multiple level-order trees (`null`, single-node, sparse-left, sparse-right, larger mixed tree):
+    - trace continuity breaks: `0`
+    - `arrowCount === lineCount` for all tested inputs
+  - documented reusable canonical rules for cross-module adoption:
+    - `docs/modules/T-01-preorder-trace-rules.md`
+- Trace playback rendering checkpoint:
+  - implemented progressive trace drawing from root-top entry to terminal point on `binary-tree-canvas` (no full-route pre-display)
+  - restored dashed-segment style and line-end arrowheads for completed segments during playback
+  - replaced front cursor glyph with the same small arrow geometry used by route line-end markers
 
 ### Current State
-- Branch: `feat/p8-m2-bst`
+- Branch: `feat/p8-m3-route-rules-spike`
 - Working tree status: code + docs updates in progress, pending commit
 - Known issues to carry forward:
   - latest dashed-trace styling degraded arrowhead visibility in `T-01` (needs visual fix)
