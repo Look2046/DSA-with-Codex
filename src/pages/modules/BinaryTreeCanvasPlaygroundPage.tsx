@@ -68,6 +68,22 @@ type TracePathSegment = {
   d: string;
 };
 
+type TraceEntryMarker = {
+  key: string;
+  nodeIndex: number;
+  point: Point;
+  label: '1' | '2' | '3';
+};
+
+type TraceBuildResult = {
+  paths: TracePathSegment[];
+  entryMarkers: TraceEntryMarker[];
+};
+
+type TraceEntryMarkerReveal = TraceEntryMarker & {
+  revealLength: number;
+};
+
 type TraceSegmentMetric = {
   length: number;
   start: number;
@@ -82,6 +98,7 @@ type TraceLineArrow = {
 
 const TRACE_DRAW_SPEED_UNITS_PER_SECOND = 120;
 const TRACE_CURSOR_SAMPLE_DISTANCE = 0.45;
+const TRACE_ENTRY_MARKER_MATCH_EPSILON = 0.08;
 
 type MutablePath = {
   commands: string[];
@@ -280,6 +297,18 @@ function parseSimpleLineSegment(path: string): { from: Point; to: Point } | null
   };
 }
 
+function parsePathEndpoints(path: string): { start: Point; end: Point } | null {
+  const startMatch = path.match(/^M\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/);
+  const endMatch = path.match(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)$/);
+  if (!startMatch || !endMatch) {
+    return null;
+  }
+  return {
+    start: { x: Number(startMatch[1]), y: Number(startMatch[2]) },
+    end: { x: Number(endMatch[1]), y: Number(endMatch[2]) },
+  };
+}
+
 function buildLineEndArrowPath(from: Point, to: Point, geometry: TraceGeometry): string {
   const unitY = geometry.nodeRadius / (TREE_NODE_DIAMETER_PX / 2);
   const arrowSize = 7 * unitY;
@@ -475,9 +504,12 @@ function buildRenderModel(values: Array<number | null>): RenderModel {
   };
 }
 
-function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): TracePathSegment[] {
+function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): TraceBuildResult {
   if (!model.nodePointByIndex.has(0)) {
-    return [];
+    return {
+      paths: [],
+      entryMarkers: [],
+    };
   }
 
   type EdgeLanePair = { left: { start: Point; end: Point }; right: { start: Point; end: Point } };
@@ -489,8 +521,20 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
   };
 
   const segments: TracePathSegment[] = [];
+  const entryMarkers: TraceEntryMarker[] = [];
   let segmentOrder = 1;
+  let markerOrder = 1;
   const nextKey = (kind: string) => `trace-${segmentOrder++}-${kind}`;
+  const nextMarkerKey = (label: '1' | '2' | '3', nodeIndex: number) => `trace-entry-${markerOrder++}-${label}-node-${nodeIndex}`;
+
+  const pushEntryMarker = (nodeIndex: number, label: '1' | '2' | '3', point: Point): void => {
+    entryMarkers.push({
+      key: nextMarkerKey(label, nodeIndex),
+      nodeIndex,
+      point,
+      label,
+    });
+  };
 
   const pushLine = (from: Point, to: Point, kind: string): void => {
     if (metricDistance(from, to, geometry.aspect) <= 0.003) {
@@ -548,6 +592,8 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
   }
 
   function traceDataNode(nodeIndex: number, nodeCenter: Point, incoming: EdgeLanePair): Point {
+    pushEntryMarker(nodeIndex, '1', incoming.left.end);
+
     const leftContext = buildChildTraceContext(nodeIndex, nodeCenter, 'L');
     pushArc(
       incoming.left.end,
@@ -559,6 +605,7 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
     pushLine(leftContext.lanes.left.start, leftContext.lanes.left.end, 'node-left-down-left-line');
 
     const leftReturnPoint = traceChild(leftContext);
+    pushEntryMarker(nodeIndex, '2', leftReturnPoint);
 
     const rightContext = buildChildTraceContext(nodeIndex, nodeCenter, 'R');
     pushArc(
@@ -571,6 +618,7 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
     pushLine(rightContext.lanes.left.start, rightContext.lanes.left.end, 'node-right-down-left-line');
 
     const rightReturnPoint = traceChild(rightContext);
+    pushEntryMarker(nodeIndex, '3', rightReturnPoint);
 
     pushArc(
       rightReturnPoint,
@@ -602,6 +650,7 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
   };
 
   pushLine(entryStart, entryEnd, 'root-up-line');
+  pushEntryMarker(0, '1', entryEnd);
 
   const rootLeftContext = buildChildTraceContext(0, rootCenter, 'L');
   pushArc(
@@ -614,6 +663,7 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
   pushLine(rootLeftContext.lanes.left.start, rootLeftContext.lanes.left.end, 'root-left-down-left-line');
 
   const rootLeftReturnPoint = traceChild(rootLeftContext);
+  pushEntryMarker(0, '2', rootLeftReturnPoint);
 
   const rootRightContext = buildChildTraceContext(0, rootCenter, 'R');
   pushArc(
@@ -625,9 +675,13 @@ function buildFirstStepTracePaths(model: RenderModel, geometry: TraceGeometry): 
   );
   pushLine(rootRightContext.lanes.left.start, rootRightContext.lanes.left.end, 'root-right-down-left-line');
 
-  traceChild(rootRightContext);
+  const rootRightReturnPoint = traceChild(rootRightContext);
+  pushEntryMarker(0, '3', rootRightReturnPoint);
 
-  return segments;
+  return {
+    paths: segments,
+    entryMarkers,
+  };
 }
 
 export function BinaryTreeCanvasPlaygroundPage() {
@@ -658,9 +712,25 @@ export function BinaryTreeCanvasPlaygroundPage() {
     return buildRenderModel(parseResult.values);
   }, [parseResult.error, parseResult.values]);
   const traceGeometry = useMemo(() => buildTraceGeometry(stageSize.width, stageSize.height), [stageSize.height, stageSize.width]);
-  const tracePaths = useMemo(
-    () => (parseResult.error ? [] : buildFirstStepTracePaths(model, traceGeometry)),
+  const traceBuild = useMemo(
+    () =>
+      parseResult.error
+        ? {
+          paths: [],
+          entryMarkers: [],
+        }
+        : buildFirstStepTracePaths(model, traceGeometry),
     [model, parseResult.error, traceGeometry],
+  );
+  const tracePaths = traceBuild.paths;
+  const traceEntryMarkers = traceBuild.entryMarkers;
+  const tracePathEndpoints = useMemo(
+    () =>
+      tracePaths.map((segment, index) => ({
+        index,
+        endpoints: parsePathEndpoints(segment.d),
+      })),
+    [tracePaths],
   );
   const traceVisibleLengths = useMemo(
     () =>
@@ -686,6 +756,49 @@ export function BinaryTreeCanvasPlaygroundPage() {
         })
         .filter((segment): segment is TraceLineArrow => segment !== null),
     [traceGeometry, tracePaths],
+  );
+  const traceEntryMarkersWithReveal = useMemo<TraceEntryMarkerReveal[]>(
+    () =>
+      traceEntryMarkers.map((marker, markerIndex) => {
+        let revealLength: number | null = null;
+
+        tracePathEndpoints.forEach((entry) => {
+          if (!entry.endpoints) {
+            return;
+          }
+          const metric = traceMetrics[entry.index];
+          if (!metric) {
+            return;
+          }
+          const endDistance = metricDistance(entry.endpoints.end, marker.point, traceGeometry.aspect);
+          if (endDistance <= TRACE_ENTRY_MARKER_MATCH_EPSILON) {
+            revealLength = revealLength === null ? metric.end : Math.min(revealLength, metric.end);
+          }
+        });
+
+        if (revealLength === null) {
+          tracePathEndpoints.forEach((entry) => {
+            if (!entry.endpoints) {
+              return;
+            }
+            const metric = traceMetrics[entry.index];
+            if (!metric) {
+              return;
+            }
+            const startDistance = metricDistance(entry.endpoints.start, marker.point, traceGeometry.aspect);
+            if (startDistance <= TRACE_ENTRY_MARKER_MATCH_EPSILON) {
+              revealLength = revealLength === null ? metric.start : Math.min(revealLength, metric.start);
+            }
+          });
+        }
+
+        const fallbackReveal = traceTotalLength > 0 ? ((markerIndex + 1) / (traceEntryMarkers.length + 1)) * traceTotalLength : 0;
+        return {
+          ...marker,
+          revealLength: revealLength ?? fallbackReveal,
+        };
+      }),
+    [traceEntryMarkers, traceGeometry.aspect, traceMetrics, tracePathEndpoints, traceTotalLength],
   );
 
   useEffect(() => {
@@ -923,6 +1036,20 @@ export function BinaryTreeCanvasPlaygroundPage() {
                 <span className="tree-null-value">null</span>
               </div>
             ))}
+          </div>
+
+          <div className="tree-canvas-entry-marker-layer" aria-hidden="true">
+            {traceEntryMarkersWithReveal.map((marker) => {
+              const visible = traceDrawLength >= marker.revealLength - 0.001;
+              if (!visible) {
+                return null;
+              }
+              return (
+                <span key={marker.key} className="tree-canvas-entry-marker" style={{ left: `${marker.point.x}%`, top: `${marker.point.y}%` }}>
+                  {marker.label}
+                </span>
+              );
+            })}
           </div>
 
           <div className="tree-node-layer" aria-hidden="true">

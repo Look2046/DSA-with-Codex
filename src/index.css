@@ -1244,6 +1244,29 @@ body {
   opacity: 0.96;
 }
 
+.tree-canvas-entry-marker-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.tree-canvas-entry-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(146, 28, 28, 0.85);
+  background: rgba(255, 246, 246, 0.95);
+  color: #991b1b;
+  font-size: 0.56rem;
+  font-weight: 700;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
 .bst-stage {
   background:
     radial-gradient(circle at 20% 12%, rgba(102, 162, 219, 0.12), transparent 36%),
