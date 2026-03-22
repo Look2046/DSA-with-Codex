@@ -121,7 +121,6 @@ const TRACE_GUIDE_NODE_CLEAR_PX = 10;
 const TRACE_ARROW_SIZE_PX = 8.5;
 const TRACE_ARROW_WING_PX = 4.4;
 const TRACE_ARROW_TIP_BACKOFF_PX = 1.3;
-const TRACE_NODE_TURN_BEND_ANGLE = 0.34;
 const TRACE_ENTRY_MARKER_MATCH_EPSILON = 0.08;
 const DEFAULT_PAGE_SPEED_MS = 1000;
 const TRACE_STEP_DRAW_MIN_MS = 750;
@@ -656,30 +655,6 @@ function buildLineLikeTraceSegment(config: {
     });
   } else if (config.penPoint && connectorDistance > 0.003) {
     appendTraceLine(path, config.lineStart);
-  } else if (config.penPoint) {
-    const startAngle = getPointAngleAroundCenter(config.penPoint, config.pivotCenter, config.geometry.aspect);
-    const bendSign = config.connectorDirection === 'cw' ? 1 : -1;
-    const bendPoint = pointOnMetricCircle(
-      config.pivotCenter,
-      config.pivotRadius,
-      startAngle + bendSign * TRACE_NODE_TURN_BEND_ANGLE,
-      config.geometry.aspect,
-    );
-
-    appendTraceArc(path, {
-      center: config.pivotCenter,
-      radius: config.pivotRadius,
-      to: bendPoint,
-      preferredDirection: config.connectorDirection,
-      longArc: false,
-    });
-    appendTraceArc(path, {
-      center: config.pivotCenter,
-      radius: config.pivotRadius,
-      to: config.lineStart,
-      preferredDirection: config.connectorDirection,
-      longArc: false,
-    });
   }
 
   appendTraceLine(path, config.lineStart);
