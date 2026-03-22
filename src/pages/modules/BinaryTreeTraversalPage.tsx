@@ -64,6 +64,11 @@ type MarkerOffset = {
   y: number;
 };
 
+type NodeFirstEntryReveal = {
+  nodeIndex: number;
+  revealLength: number;
+};
+
 type TraceSegmentMetric = {
   length: number;
   start: number;
@@ -1210,6 +1215,26 @@ function getTraceEntryMarkerOffset(marker: TraceEntryMarker): MarkerOffset {
   return { x: 18, y: 0 };
 }
 
+function buildNodeFirstEntryReveals(entryMarkers: TraceEntryMarkerReveal[]): NodeFirstEntryReveal[] {
+  const revealByNode = new Map<number, number>();
+
+  entryMarkers.forEach((marker) => {
+    if (marker.label !== '1') {
+      return;
+    }
+
+    const currentReveal = revealByNode.get(marker.nodeIndex);
+    if (currentReveal === undefined || marker.revealLength < currentReveal) {
+      revealByNode.set(marker.nodeIndex, marker.revealLength);
+    }
+  });
+
+  return [...revealByNode.entries()].map(([nodeIndex, revealLength]) => ({
+    nodeIndex,
+    revealLength,
+  }));
+}
+
 function buildCounterClockwiseNodeArc(
   center: NodePoint,
   radius: number,
@@ -1885,6 +1910,21 @@ export function BinaryTreeTraversalPage() {
     () => buildTraceEntryMarkersWithReveal(traceEntryMarkers, fullPreorderRawTraceSegments, traceGeometry.aspect),
     [fullPreorderRawTraceSegments, traceEntryMarkers, traceGeometry.aspect],
   );
+  const nodeFirstEntryReveals = useMemo(
+    () => buildNodeFirstEntryReveals(traceEntryMarkersWithReveal),
+    [traceEntryMarkersWithReveal],
+  );
+  const preorderEnteredNodeSet = useMemo(() => {
+    const entered = new Set<number>();
+
+    nodeFirstEntryReveals.forEach((entry) => {
+      if (traceVisibleLength >= entry.revealLength - 0.001) {
+        entered.add(entry.nodeIndex);
+      }
+    });
+
+    return entered;
+  }, [nodeFirstEntryReveals, traceVisibleLength]);
 
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
@@ -2237,10 +2277,11 @@ export function BinaryTreeTraversalPage() {
                 return null;
               }
               const markerOffset = getTraceEntryMarkerOffset(marker);
+              const isEnteredMarkerOne = marker.label === '1';
               return (
                 <span
                   key={marker.key}
-                  className="tree-trace-entry-marker"
+                  className={`tree-trace-entry-marker${isEnteredMarkerOne ? ' tree-trace-entry-marker-entered tree-trace-entry-marker-entered-pulse' : ''}`}
                   style={{
                     left: `${marker.point.x}%`,
                     top: `${marker.point.y}%`,
@@ -2261,7 +2302,11 @@ export function BinaryTreeTraversalPage() {
                   currentSnapshot.action === 'descendLeft' ||
                   currentSnapshot.action === 'descendRight' ||
                   currentSnapshot.action === 'visit');
-              const isVisited = visitedSet.has(index) || shouldMarkVisitedOnArrive;
+              const isPreorderEntered = mode === 'preorder' && preorderEnteredNodeSet.has(index);
+              const isVisited =
+                mode === 'preorder'
+                  ? isPreorderEntered
+                  : visitedSet.has(index) || shouldMarkVisitedOnArrive;
               const isCurrent =
                 currentSnapshot?.currentIndex === index &&
                 currentSnapshot.action !== 'traversalDone' &&

@@ -1273,6 +1273,22 @@ body {
   place-items: center;
 }
 
+.tree-trace-entry-marker-entered {
+  width: 18px;
+  height: 18px;
+  border-color: rgba(63, 150, 85, 0.95);
+  background: rgba(227, 249, 233, 0.98);
+  color: #24753a;
+  font-size: 0.68rem;
+  box-shadow:
+    0 0 0 2px rgba(102, 187, 123, 0.2),
+    0 6px 12px rgba(54, 128, 72, 0.2);
+}
+
+.tree-trace-entry-marker-entered-pulse {
+  animation: tree-trace-entry-marker-enter 720ms ease-out 1 both;
+}
+
 .bst-stage {
   background:
     radial-gradient(circle at 20% 12%, rgba(102, 162, 219, 0.12), transparent 36%),
@@ -1394,6 +1410,52 @@ body {
 
   to {
     stroke-dashoffset: -8;
+  }
+}
+
+@keyframes tree-trace-entry-marker-enter {
+  0% {
+    width: 14px;
+    height: 14px;
+    border-color: rgba(146, 28, 28, 0.85);
+    background: rgba(255, 246, 246, 0.95);
+    color: #991b1b;
+    font-size: 0.56rem;
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(146, 28, 28, 0.16);
+  }
+
+  35% {
+    opacity: 1;
+    box-shadow:
+      0 0 0 5px rgba(86, 182, 109, 0.16),
+      0 0 16px rgba(86, 182, 109, 0.2);
+  }
+
+  60% {
+    width: 19px;
+    height: 19px;
+    border-color: rgba(63, 150, 85, 0.98);
+    background: rgba(227, 249, 233, 1);
+    color: #24753a;
+    font-size: 0.72rem;
+    opacity: 1;
+    box-shadow:
+      0 0 0 4px rgba(102, 187, 123, 0.18),
+      0 8px 16px rgba(54, 128, 72, 0.18);
+  }
+
+  100% {
+    width: 18px;
+    height: 18px;
+    border-color: rgba(63, 150, 85, 0.95);
+    background: rgba(227, 249, 233, 0.98);
+    color: #24753a;
+    font-size: 0.68rem;
+    opacity: 1;
+    box-shadow:
+      0 0 0 2px rgba(102, 187, 123, 0.2),
+      0 6px 12px rgba(54, 128, 72, 0.2);
   }
 }
 
