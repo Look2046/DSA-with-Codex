@@ -1,6 +1,7 @@
 import type { AnimationStep, HighlightEntry } from '../../types/animation';
 
 export type BinaryTreeTraversalMode = 'preorder' | 'inorder' | 'postorder' | 'levelorder';
+export type BinaryTreeInputValue = number | null;
 
 export type BinaryTreeGuideMoveSide = 'L' | 'R' | 'UP';
 
@@ -16,7 +17,7 @@ export type BinaryTreeGuideNullHint = {
 };
 
 export type BinaryTreeTraversalStep = AnimationStep & {
-  treeState: number[];
+  treeState: BinaryTreeInputValue[];
   action:
     | 'initial'
     | 'guideStart'
@@ -42,7 +43,7 @@ export type BinaryTreeTraversalStep = AnimationStep & {
   guideNull: BinaryTreeGuideNullHint | null;
 };
 
-function cloneArray(values: number[]): number[] {
+function cloneArray<T>(values: T[]): T[] {
   return [...values];
 }
 
@@ -52,7 +53,7 @@ function cloneGuideEvents(events: BinaryTreeGuideEvent[]): BinaryTreeGuideEvent[
 
 type CreateTraversalStepConfig = {
   action: BinaryTreeTraversalStep['action'];
-  treeState: number[];
+  treeState: BinaryTreeInputValue[];
   mode: BinaryTreeTraversalMode;
   codeLines: number[];
   highlights: HighlightEntry[];
@@ -89,11 +90,23 @@ function createStep(config: CreateTraversalStepConfig): BinaryTreeTraversalStep 
   };
 }
 
-function collectPreorderIndices(length: number): number[] {
+function hasRealNode(tree: BinaryTreeInputValue[], index: number): boolean {
+  return index >= 0 && index < tree.length && tree[index] !== null;
+}
+
+function getNodeValue(tree: BinaryTreeInputValue[], index: number): number {
+  const value = tree[index];
+  if (value === null || value === undefined) {
+    throw new Error(`Missing tree node at index ${index}`);
+  }
+  return value;
+}
+
+function collectPreorderIndices(tree: BinaryTreeInputValue[]): number[] {
   const order: number[] = [];
 
   const traverse = (index: number) => {
-    if (index >= length) {
+    if (!hasRealNode(tree, index)) {
       return;
     }
     order.push(index);
@@ -105,11 +118,11 @@ function collectPreorderIndices(length: number): number[] {
   return order;
 }
 
-function collectInorderIndices(length: number): number[] {
+function collectInorderIndices(tree: BinaryTreeInputValue[]): number[] {
   const order: number[] = [];
 
   const traverse = (index: number) => {
-    if (index >= length) {
+    if (!hasRealNode(tree, index)) {
       return;
     }
     traverse(index * 2 + 1);
@@ -121,11 +134,11 @@ function collectInorderIndices(length: number): number[] {
   return order;
 }
 
-function collectPostorderIndices(length: number): number[] {
+function collectPostorderIndices(tree: BinaryTreeInputValue[]): number[] {
   const order: number[] = [];
 
   const traverse = (index: number) => {
-    if (index >= length) {
+    if (!hasRealNode(tree, index)) {
       return;
     }
     traverse(index * 2 + 1);
@@ -137,8 +150,8 @@ function collectPostorderIndices(length: number): number[] {
   return order;
 }
 
-function collectLevelorderIndices(length: number): number[] {
-  if (length === 0) {
+function collectLevelorderIndices(tree: BinaryTreeInputValue[]): number[] {
+  if (!hasRealNode(tree, 0)) {
     return [];
   }
 
@@ -147,7 +160,7 @@ function collectLevelorderIndices(length: number): number[] {
 
   while (queue.length > 0) {
     const current = queue.shift();
-    if (current === undefined || current >= length) {
+    if (current === undefined || !hasRealNode(tree, current)) {
       continue;
     }
 
@@ -156,10 +169,10 @@ function collectLevelorderIndices(length: number): number[] {
     const left = current * 2 + 1;
     const right = current * 2 + 2;
 
-    if (left < length) {
+    if (hasRealNode(tree, left)) {
       queue.push(left);
     }
-    if (right < length) {
+    if (hasRealNode(tree, right)) {
       queue.push(right);
     }
   }
@@ -167,17 +180,17 @@ function collectLevelorderIndices(length: number): number[] {
   return order;
 }
 
-function collectTraversalIndices(length: number, mode: BinaryTreeTraversalMode): number[] {
+function collectTraversalIndices(tree: BinaryTreeInputValue[], mode: BinaryTreeTraversalMode): number[] {
   if (mode === 'preorder') {
-    return collectPreorderIndices(length);
+    return collectPreorderIndices(tree);
   }
   if (mode === 'inorder') {
-    return collectInorderIndices(length);
+    return collectInorderIndices(tree);
   }
   if (mode === 'postorder') {
-    return collectPostorderIndices(length);
+    return collectPostorderIndices(tree);
   }
-  return collectLevelorderIndices(length);
+  return collectLevelorderIndices(tree);
 }
 
 function getVisitCodeLines(mode: BinaryTreeTraversalMode): number[] {
@@ -193,7 +206,7 @@ function getVisitCodeLines(mode: BinaryTreeTraversalMode): number[] {
   return [7];
 }
 
-function generateSimpleTraversalSteps(tree: number[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
+function generateSimpleTraversalSteps(tree: BinaryTreeInputValue[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
   const steps: BinaryTreeTraversalStep[] = [];
 
   steps.push(
@@ -210,7 +223,7 @@ function generateSimpleTraversalSteps(tree: number[], mode: BinaryTreeTraversalM
     }),
   );
 
-  if (tree.length === 0) {
+  if (!hasRealNode(tree, 0)) {
     steps.push(
       createStep({
         action: 'completed',
@@ -229,10 +242,10 @@ function generateSimpleTraversalSteps(tree: number[], mode: BinaryTreeTraversalM
 
   const visitedIndices: number[] = [];
   const outputOrder: number[] = [];
-  const traversalIndices = collectTraversalIndices(tree.length, mode);
+  const traversalIndices = collectTraversalIndices(tree, mode);
 
   traversalIndices.forEach((index) => {
-    const value = tree[index];
+    const value = getNodeValue(tree, index);
     const leftIndex = index * 2 + 1;
     const rightIndex = index * 2 + 2;
 
@@ -251,8 +264,8 @@ function generateSimpleTraversalSteps(tree: number[], mode: BinaryTreeTraversalM
         visitedIndices,
         outputOrder,
         guideRoleD: index,
-        guideRoleL: leftIndex < tree.length ? leftIndex : null,
-        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideRoleL: hasRealNode(tree, leftIndex) ? leftIndex : null,
+        guideRoleR: hasRealNode(tree, rightIndex) ? rightIndex : null,
       }),
     );
   });
@@ -289,7 +302,7 @@ function generateSimpleTraversalSteps(tree: number[], mode: BinaryTreeTraversalM
   return steps;
 }
 
-function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
+function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTraversalStep[] {
   const mode: BinaryTreeTraversalMode = 'preorder';
   const steps: BinaryTreeTraversalStep[] = [];
   const visitedIndices: number[] = [];
@@ -322,7 +335,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
     currentValue: null,
   });
 
-  if (tree.length === 0) {
+  if (!hasRealNode(tree, 0)) {
     pushStep({
       action: 'completed',
       codeLines: [9],
@@ -334,13 +347,15 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
   }
 
   const traverse = (index: number, parentIndex: number | null, entrySide: 'L' | 'R' | 'ROOT') => {
-    if (index >= tree.length) {
+    if (!hasRealNode(tree, index)) {
       return;
     }
 
-    const value = tree[index];
+    const value = getNodeValue(tree, index);
     const leftIndex = index * 2 + 1;
     const rightIndex = index * 2 + 2;
+    const hasLeftChild = hasRealNode(tree, leftIndex);
+    const hasRightChild = hasRealNode(tree, rightIndex);
 
     if (parentIndex === null) {
       const eventIndex = pushGuideEvent({ type: 'start', toIndex: index });
@@ -354,8 +369,8 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         currentValue: value,
         activeGuideEventIndex: eventIndex,
         guideRoleD: index,
-        guideRoleL: leftIndex < tree.length ? leftIndex : null,
-        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideRoleL: hasLeftChild ? leftIndex : null,
+        guideRoleR: hasRightChild ? rightIndex : null,
       });
     } else {
       const moveSide: BinaryTreeGuideMoveSide = entrySide === 'L' ? 'L' : 'R';
@@ -378,12 +393,12 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         currentValue: value,
         activeGuideEventIndex: eventIndex,
         guideRoleD: index,
-        guideRoleL: leftIndex < tree.length ? leftIndex : null,
-        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideRoleL: hasLeftChild ? leftIndex : null,
+        guideRoleR: hasRightChild ? rightIndex : null,
       });
     }
 
-    if (leftIndex < tree.length) {
+    if (hasLeftChild) {
       traverse(leftIndex, index, 'L');
       const eventIndex = pushGuideEvent({ type: 'move', fromIndex: leftIndex, toIndex: index, side: 'UP' });
       pushStep({
@@ -398,7 +413,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         activeGuideEventIndex: eventIndex,
         guideRoleD: index,
         guideRoleL: leftIndex,
-        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideRoleR: hasRightChild ? rightIndex : null,
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'L' });
@@ -411,7 +426,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         activeGuideEventIndex: toNullEventIndex,
         guideRoleD: index,
         guideRoleL: null,
-        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
       });
 
@@ -425,12 +440,12 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         activeGuideEventIndex: fromNullEventIndex,
         guideRoleD: index,
         guideRoleL: null,
-        guideRoleR: rightIndex < tree.length ? rightIndex : null,
+        guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
       });
     }
 
-    if (rightIndex < tree.length) {
+    if (hasRightChild) {
       traverse(rightIndex, index, 'R');
       const eventIndex = pushGuideEvent({ type: 'move', fromIndex: rightIndex, toIndex: index, side: 'UP' });
       pushStep({
@@ -444,7 +459,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         currentValue: value,
         activeGuideEventIndex: eventIndex,
         guideRoleD: index,
-        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: rightIndex,
       });
     } else {
@@ -457,7 +472,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         currentValue: value,
         activeGuideEventIndex: toNullEventIndex,
         guideRoleD: index,
-        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
       });
@@ -471,7 +486,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
         currentValue: value,
         activeGuideEventIndex: fromNullEventIndex,
         guideRoleD: index,
-        guideRoleL: leftIndex < tree.length ? leftIndex : null,
+        guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
       });
@@ -501,7 +516,7 @@ function generatePreorderGuideSteps(tree: number[]): BinaryTreeTraversalStep[] {
   return steps;
 }
 
-export function generateBinaryTreeTraversalSteps(input: number[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
+export function generateBinaryTreeTraversalSteps(input: BinaryTreeInputValue[], mode: BinaryTreeTraversalMode): BinaryTreeTraversalStep[] {
   const tree = cloneArray(input);
 
   if (mode === 'preorder') {

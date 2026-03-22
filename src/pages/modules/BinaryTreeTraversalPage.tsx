@@ -11,6 +11,7 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 import type {
   BinaryTreeGuideEvent,
   BinaryTreeGuideNullHint,
+  BinaryTreeInputValue,
   BinaryTreeTraversalMode,
   BinaryTreeTraversalStep,
 } from '../../modules/tree/binaryTreeTraversal';
@@ -25,6 +26,7 @@ type NodePoint = {
 };
 
 type ValueDisplayMode = 'number' | 'letter';
+type BinaryTreeShapeMode = 'random' | 'complete';
 
 type RawTraversalTraceSegment = {
   key: string;
@@ -139,7 +141,7 @@ const TRACE_STEP_DRAW_MIN_MS = 750;
 const TRACE_STEP_DRAW_MAX_MS = 1500;
 const SHOW_LEGACY_GUIDE_OVERLAY = false;
 
-function createRandomDataset(size: number): number[] {
+function createShuffledNodeValues(size: number): number[] {
   const poolSize = Math.max(99, size);
   const values = Array.from({ length: poolSize }, (_, index) => index + 1);
 
@@ -149,6 +151,79 @@ function createRandomDataset(size: number): number[] {
   }
 
   return values.slice(0, size);
+}
+
+function trimTrailingNulls(values: BinaryTreeInputValue[]): BinaryTreeInputValue[] {
+  let end = values.length;
+  while (end > 0 && values[end - 1] === null) {
+    end -= 1;
+  }
+  return values.slice(0, end);
+}
+
+function buildRandomBinaryTreeIndices(size: number): number[] {
+  if (size <= 0) {
+    return [];
+  }
+
+  const maxLevel = Math.max(1, Math.ceil(Math.log2(size + 1)));
+  const indices = new Set<number>([0]);
+  let slots = [1, 2];
+
+  while (indices.size < size && slots.length > 0) {
+    const eligibleSlots = slots.filter((index) => getNodeLevel(index) <= maxLevel);
+    const slotPool = eligibleSlots.length > 0 ? eligibleSlots : slots;
+    const slot = slotPool[Math.floor(Math.random() * slotPool.length)] ?? slots[0];
+    slots = slots.filter((index) => index !== slot);
+    indices.add(slot);
+
+    const left = slot * 2 + 1;
+    const right = slot * 2 + 2;
+    if (getNodeLevel(left) <= maxLevel) {
+      slots.push(left);
+    }
+    if (getNodeLevel(right) <= maxLevel) {
+      slots.push(right);
+    }
+  }
+
+  return [...indices].sort((left, right) => left - right);
+}
+
+function createCompleteBinaryTreeDataset(size: number): BinaryTreeInputValue[] {
+  return createShuffledNodeValues(size);
+}
+
+function createRandomBinaryTreeDataset(size: number): BinaryTreeInputValue[] {
+  const values = createShuffledNodeValues(size);
+  const indices = buildRandomBinaryTreeIndices(size);
+
+  if (indices.length === 0) {
+    return [];
+  }
+
+  const tree = Array<BinaryTreeInputValue>(indices[indices.length - 1] + 1).fill(null);
+  indices.forEach((index, valueIndex) => {
+    tree[index] = values[valueIndex] ?? null;
+  });
+  return trimTrailingNulls(tree);
+}
+
+function createBinaryTreeDataset(size: number, shapeMode: BinaryTreeShapeMode): BinaryTreeInputValue[] {
+  return shapeMode === 'random' ? createRandomBinaryTreeDataset(size) : createCompleteBinaryTreeDataset(size);
+}
+
+function hasTreeNode(tree: BinaryTreeInputValue[], index: number): boolean {
+  return index >= 0 && index < tree.length && tree[index] !== null;
+}
+
+function findLastTreeNodeIndex(tree: BinaryTreeInputValue[]): number {
+  for (let index = tree.length - 1; index >= 0; index -= 1) {
+    if (tree[index] !== null) {
+      return index;
+    }
+  }
+  return -1;
 }
 
 function getStatusLabel(status: PlaybackStatus, t: ReturnType<typeof useI18n>['t']): string {
@@ -232,14 +307,18 @@ function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t
   return t('module.s01.highlight.default');
 }
 
-function formatArrayPreview(values: number[], maxVisible = 24): string {
+function formatTreePreviewValue(value: BinaryTreeInputValue): string {
+  return value === null ? 'null' : String(value);
+}
+
+function formatArrayPreview(values: BinaryTreeInputValue[], maxVisible = 24): string {
   if (values.length <= maxVisible) {
-    return values.join(', ');
+    return values.map((value) => formatTreePreviewValue(value)).join(', ');
   }
   const leftCount = Math.floor(maxVisible / 2);
   const rightCount = maxVisible - leftCount;
-  const leftPart = values.slice(0, leftCount).join(', ');
-  const rightPart = values.slice(-rightCount).join(', ');
+  const leftPart = values.slice(0, leftCount).map((value) => formatTreePreviewValue(value)).join(', ');
+  const rightPart = values.slice(-rightCount).map((value) => formatTreePreviewValue(value)).join(', ');
   return `${leftPart}, ..., ${rightPart} (n=${values.length})`;
 }
 
@@ -1058,7 +1137,7 @@ function buildTraceMetrics(rawSegments: RawTraversalTraceSegment[]): TraceSegmen
 }
 
 function buildPreorderTraceEntryMarkers(
-  treeLength: number,
+  treeState: BinaryTreeInputValue[],
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
@@ -1092,7 +1171,7 @@ function buildPreorderTraceEntryMarkers(
 
   const buildChildTraceContext = (parentIndex: number, parentCenter: NodePoint, side: 'L' | 'R'): ChildTraceContext => {
     const childIndex = getChildIndex(parentIndex, side);
-    const childIsReal = childIndex < treeLength;
+    const childIsReal = hasTreeNode(treeState, childIndex);
     const childCenter = childIsReal
       ? getNodeCenter(nodePositions, childIndex) ?? getNullPoint(parentIndex, side, top, yStep)
       : getNullPoint(parentIndex, side, top, yStep);
@@ -1421,7 +1500,7 @@ function buildLongConcaveNullArc(
 
 function buildParallelGuideSegments(
   edges: Array<{ from: number; to: number }>,
-  treeLength: number,
+  treeState: BinaryTreeInputValue[],
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
@@ -1541,15 +1620,15 @@ function buildParallelGuideSegments(
     }
   });
 
-  for (let parentIndex = 0; parentIndex < treeLength; parentIndex += 1) {
+  for (let parentIndex = 0; parentIndex < treeState.length; parentIndex += 1) {
     const parentCenter = nodePositions[parentIndex];
-    if (!parentCenter) {
+    if (!parentCenter || !hasTreeNode(treeState, parentIndex)) {
       continue;
     }
 
     (['L', 'R'] as const).forEach((side) => {
       const childIndex = getChildIndex(parentIndex, side);
-      if (childIndex < treeLength) {
+      if (hasTreeNode(treeState, childIndex)) {
         return;
       }
 
@@ -1588,9 +1667,9 @@ function buildParallelGuideSegments(
     });
   }
 
-  for (let nodeIndex = 0; nodeIndex < treeLength; nodeIndex += 1) {
+  for (let nodeIndex = 0; nodeIndex < treeState.length; nodeIndex += 1) {
     const center = nodePositions[nodeIndex];
-    if (!center) {
+    if (!center || !hasTreeNode(treeState, nodeIndex)) {
       continue;
     }
 
@@ -1700,11 +1779,11 @@ function buildParallelGuideSegments(
 }
 
 
-function buildRoleLabelMap(step: BinaryTreeTraversalStep | undefined, treeLength: number): Map<number, string[]> {
+function buildRoleLabelMap(step: BinaryTreeTraversalStep | undefined, treeState: BinaryTreeInputValue[]): Map<number, string[]> {
   const map = new Map<number, string[]>();
 
   const addRole = (index: number | null, role: string) => {
-    if (index === null || index < 0 || index >= treeLength) {
+    if (index === null || !hasTreeNode(treeState, index)) {
       return;
     }
     const roles = map.get(index) ?? [];
@@ -1723,27 +1802,30 @@ function buildRoleLabelMap(step: BinaryTreeTraversalStep | undefined, treeLength
     const leftIndex = currentIndex * 2 + 1;
     const rightIndex = currentIndex * 2 + 2;
     addRole(currentIndex, 'D');
-    addRole(leftIndex < treeLength ? leftIndex : null, 'L');
-    addRole(rightIndex < treeLength ? rightIndex : null, 'R');
+    addRole(leftIndex, 'L');
+    addRole(rightIndex, 'R');
   }
 
   return map;
 }
 
-function buildNullHints(step: BinaryTreeTraversalStep | undefined, treeLength: number): BinaryTreeGuideNullHint[] {
+function buildNullHints(step: BinaryTreeTraversalStep | undefined, treeState: BinaryTreeInputValue[]): BinaryTreeGuideNullHint[] {
   if (!step || step.action === 'initial') {
     return [];
   }
 
   const hints: BinaryTreeGuideNullHint[] = [];
 
-  for (let parentIndex = 0; parentIndex < treeLength; parentIndex += 1) {
+  for (let parentIndex = 0; parentIndex < treeState.length; parentIndex += 1) {
+    if (!hasTreeNode(treeState, parentIndex)) {
+      continue;
+    }
     const left = parentIndex * 2 + 1;
     const right = parentIndex * 2 + 2;
-    if (left >= treeLength) {
+    if (!hasTreeNode(treeState, left)) {
       hints.push({ parentIndex, side: 'L' });
     }
-    if (right >= treeLength) {
+    if (!hasTreeNode(treeState, right)) {
       hints.push({ parentIndex, side: 'R' });
     }
   }
@@ -1763,9 +1845,10 @@ export function BinaryTreeTraversalPage() {
   const routeOrderIdPrefix = useId().replace(/:/g, '');
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
+  const [treeShapeMode, setTreeShapeMode] = useState<BinaryTreeShapeMode>('complete');
   const [mode, setMode] = useState<BinaryTreeTraversalMode>('preorder');
   const [valueDisplayMode, setValueDisplayMode] = useState<ValueDisplayMode>('number');
-  const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
+  const [inputData, setInputData] = useState<BinaryTreeInputValue[]>(() => createBinaryTreeDataset(DEFAULT_SIZE, 'complete'));
   const [stageSize, setStageSize] = useState({ width: DEFAULT_STAGE_WIDTH, height: DEFAULT_STAGE_HEIGHT });
   const [traceVisibleLength, setTraceVisibleLength] = useState(0);
 
@@ -1776,6 +1859,7 @@ export function BinaryTreeTraversalPage() {
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const treeState = currentSnapshot?.treeState ?? inputData;
+  const lastTreeNodeIndex = useMemo(() => findLastTreeNodeIndex(treeState), [treeState]);
   const preorderTraceSourceStep = useMemo(() => {
     if (mode !== 'preorder') {
       return undefined;
@@ -1795,11 +1879,11 @@ export function BinaryTreeTraversalPage() {
   const treeLayout = useMemo(() => {
     const top = TREE_STAGE_TOP;
     const bottom = TREE_STAGE_BOTTOM;
-    const maxNodeLevel = treeState.length > 0 ? getNodeLevel(treeState.length - 1) : 0;
+    const maxNodeLevel = lastTreeNodeIndex >= 0 ? getNodeLevel(lastTreeNodeIndex) : 0;
     const maxDisplayLevel = maxNodeLevel + 1;
     const yStep = (bottom - top) / Math.max(maxDisplayLevel, 1);
     return { top, yStep };
-  }, [treeState.length]);
+  }, [lastTreeNodeIndex]);
   const traceGeometry = useMemo(() => buildTraceGeometry(stageSize.width, stageSize.height), [stageSize.height, stageSize.width]);
 
   const nodePositions = useMemo(
@@ -1811,18 +1895,21 @@ export function BinaryTreeTraversalPage() {
     const allEdges: Array<{ from: number; to: number }> = [];
 
     for (let index = 0; index < treeState.length; index += 1) {
+      if (!hasTreeNode(treeState, index)) {
+        continue;
+      }
       const leftChild = index * 2 + 1;
       const rightChild = index * 2 + 2;
-      if (leftChild < treeState.length) {
+      if (hasTreeNode(treeState, leftChild)) {
         allEdges.push({ from: index, to: leftChild });
       }
-      if (rightChild < treeState.length) {
+      if (hasTreeNode(treeState, rightChild)) {
         allEdges.push({ from: index, to: rightChild });
       }
     }
 
     return allEdges;
-  }, [treeState.length]);
+  }, [treeState]);
 
   const currentRawTraceSegments = useMemo(
     () =>
@@ -1858,8 +1945,8 @@ export function BinaryTreeTraversalPage() {
     [currentRawTraceSegments, traceGeometry],
   );
   const parallelGuideSegments = useMemo(
-    () => buildParallelGuideSegments(edges, treeState.length, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
-    [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState.length],
+    () => buildParallelGuideSegments(edges, treeState, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
+    [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
   );
   const routeOrderSegments = useMemo<RouteOrderSegment[]>(() => {
     if (mode !== 'preorder' || !preorderTraceSourceStep || nodePositions.length === 0) {
@@ -1902,9 +1989,9 @@ export function BinaryTreeTraversalPage() {
   const traceEntryMarkers = useMemo(
     () =>
       mode === 'preorder'
-        ? buildPreorderTraceEntryMarkers(treeState.length, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
+        ? buildPreorderTraceEntryMarkers(treeState, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
         : [],
-    [mode, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState.length],
+    [mode, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
   );
   const traceEntryMarkersWithReveal = useMemo(
     () => buildTraceEntryMarkersWithReveal(traceEntryMarkers, fullPreorderRawTraceSegments, traceGeometry.aspect),
@@ -1928,9 +2015,11 @@ export function BinaryTreeTraversalPage() {
 
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
-  const roleLabelMap = useMemo(() => buildRoleLabelMap(currentSnapshot, treeState.length), [currentSnapshot, treeState.length]);
+  const roleLabelMap = useMemo(() => buildRoleLabelMap(currentSnapshot, treeState), [currentSnapshot, treeState]);
   const valueLabelMap = useMemo(() => {
-    const sortedUnique = Array.from(new Set(inputData)).sort((left, right) => left - right);
+    const sortedUnique = Array.from(
+      new Set(inputData.filter((value): value is number => value !== null)),
+    ).sort((left, right) => left - right);
     return new Map(sortedUnique.map((value, index) => [value, toAlphabetLabel(index)]));
   }, [inputData]);
 
@@ -1951,7 +2040,7 @@ export function BinaryTreeTraversalPage() {
       ),
     [currentSnapshot?.outputOrder, valueDisplayMode, valueLabelMap],
   );
-  const nullHints = useMemo(() => buildNullHints(currentSnapshot, treeState.length), [currentSnapshot, treeState.length]);
+  const nullHints = useMemo(() => buildNullHints(currentSnapshot, treeState), [currentSnapshot, treeState]);
   const nullEdges = useMemo(() => {
     const nextEdges: NullEdgePath[] = [];
 
@@ -2056,7 +2145,7 @@ export function BinaryTreeTraversalPage() {
   }, []);
 
   const regenerateData = () => {
-    setInputData(createRandomDataset(datasetSize));
+    setInputData(createBinaryTreeDataset(datasetSize, treeShapeMode));
     reset();
   };
 
@@ -2067,6 +2156,7 @@ export function BinaryTreeTraversalPage() {
   ] as const;
 
   const modeOptions: BinaryTreeTraversalMode[] = ['preorder', 'inorder', 'postorder', 'levelorder'];
+  const treeShapeOptions: BinaryTreeShapeMode[] = ['random', 'complete'];
 
   return (
     <section className="array-page tree-page">
@@ -2090,6 +2180,26 @@ export function BinaryTreeTraversalPage() {
           <button type="button" onClick={regenerateData}>
             {t('module.s01.regenerate')}
           </button>
+        </div>
+      </div>
+
+      <div className="bubble-toolbar">
+        <span>{t('module.t01.treeKind.label')}</span>
+        <div className="speed-group">
+          {treeShapeOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={treeShapeMode === option ? 'speed-active' : ''}
+              onClick={() => {
+                setTreeShapeMode(option);
+                setInputData(createBinaryTreeDataset(datasetSize, option));
+                reset();
+              }}
+            >
+              {t(`module.t01.treeKind.${option}`)}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -2161,7 +2271,7 @@ export function BinaryTreeTraversalPage() {
         </p>
         <p className="module-status-line">{t('module.t01.meta.output')}: [{outputSequence.join(', ')}]</p>
         <p className="module-status-line">
-          {t('module.t01.meta.structure')}: {t('module.t01.meta.structure.complete')}
+          {t('module.t01.meta.structure')}: {t(`module.t01.meta.structure.${treeShapeMode}`)}
         </p>
       </div>
 
@@ -2296,6 +2406,9 @@ export function BinaryTreeTraversalPage() {
 
           <div className="tree-node-layer" aria-hidden="true">
             {treeState.map((value, index) => {
+              if (value === null) {
+                return null;
+              }
               const shouldMarkVisitedOnArrive =
                 currentSnapshot?.currentIndex === index &&
                 (currentSnapshot.action === 'guideStart' ||

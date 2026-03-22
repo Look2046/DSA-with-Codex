@@ -5,6 +5,7 @@ import {
 } from './binaryTreeTraversal';
 
 const FIXED_TREE = [1, 2, 3, 4, 5, 6, 7];
+const SPARSE_TREE = [1, 2, 3, null, 5, null, 7];
 
 const EXPECTED_ORDER: Record<BinaryTreeTraversalMode, number[]> = {
   preorder: [1, 2, 4, 5, 3, 6, 7],
@@ -57,5 +58,17 @@ describe('generateBinaryTreeTraversalSteps', () => {
     expect(steps[0].action).toBe('initial');
     expect(steps[1].action).toBe('completed');
     expect(steps[1].outputOrder).toEqual([]);
+  });
+
+  it('supports sparse trees represented by level-order arrays with null gaps', () => {
+    const preorder = generateBinaryTreeTraversalSteps(SPARSE_TREE, 'preorder');
+    const inorder = generateBinaryTreeTraversalSteps(SPARSE_TREE, 'inorder');
+    const postorder = generateBinaryTreeTraversalSteps(SPARSE_TREE, 'postorder');
+    const levelorder = generateBinaryTreeTraversalSteps(SPARSE_TREE, 'levelorder');
+
+    expect(preorder.at(-1)?.outputOrder).toEqual([1, 2, 5, 3, 7]);
+    expect(inorder.at(-1)?.outputOrder).toEqual([2, 5, 1, 3, 7]);
+    expect(postorder.at(-1)?.outputOrder).toEqual([5, 2, 7, 3, 1]);
+    expect(levelorder.at(-1)?.outputOrder).toEqual([1, 2, 3, 5, 7]);
   });
 });

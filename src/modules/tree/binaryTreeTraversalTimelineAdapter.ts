@@ -1,6 +1,7 @@
 import type { TimelineFrame } from '../../engine/timeline/types';
 import {
   generateBinaryTreeTraversalSteps,
+  type BinaryTreeInputValue,
   type BinaryTreeTraversalMode,
   type BinaryTreeTraversalStep,
 } from './binaryTreeTraversal';
@@ -18,7 +19,7 @@ export function buildBinaryTreeTraversalTimelineFrames(
 }
 
 export function buildBinaryTreeTraversalTimelineFromInput(
-  inputData: number[],
+  inputData: BinaryTreeInputValue[],
   mode: BinaryTreeTraversalMode,
 ): BinaryTreeTraversalTimelineFrame[] {
   const steps = generateBinaryTreeTraversalSteps(inputData, mode);
