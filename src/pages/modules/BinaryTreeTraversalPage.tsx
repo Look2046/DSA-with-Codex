@@ -530,36 +530,38 @@ function resolveRootRouteStartFromGuideEvents(
     return null;
   }
 
-  const nextEvent = guideEvents[eventIndex + 1];
-  if (!nextEvent) {
-    return null;
-  }
-
-  if (nextEvent.type === 'move' && nextEvent.fromIndex === rootIndex) {
-    const childCenter = getNodeCenter(nodePositions, nextEvent.toIndex);
-    if (!childCenter) {
-      return null;
+  for (let nextIndex = eventIndex + 1; nextIndex < guideEvents.length; nextIndex += 1) {
+    const nextEvent = guideEvents[nextIndex];
+    if (!nextEvent) {
+      continue;
     }
-    const lanes = buildGuideAbsoluteLanePair({
-      from: rootCenter,
-      to: childCenter,
-      fromRadius: geometry.guideNodeClearRadius,
-      toRadius: geometry.guideNodeClearRadius,
-      geometry,
-    });
-    return lanes.left.start;
-  }
 
-  if (nextEvent.type === 'toNull' && nextEvent.fromIndex === rootIndex) {
-    const nullCenter = getNullPoint(rootIndex, nextEvent.side, top, yStep);
-    const lanes = buildGuideAbsoluteLanePair({
-      from: rootCenter,
-      to: nullCenter,
-      fromRadius: geometry.guideNodeClearRadius,
-      toRadius: geometry.guideNullClearRadius,
-      geometry,
-    });
-    return lanes.left.start;
+    if (nextEvent.type === 'move' && nextEvent.fromIndex === rootIndex) {
+      const childCenter = getNodeCenter(nodePositions, nextEvent.toIndex);
+      if (!childCenter) {
+        return null;
+      }
+      const lanes = buildGuideAbsoluteLanePair({
+        from: rootCenter,
+        to: childCenter,
+        fromRadius: geometry.guideNodeClearRadius,
+        toRadius: geometry.guideNodeClearRadius,
+        geometry,
+      });
+      return lanes.left.start;
+    }
+
+    if (nextEvent.type === 'toNull' && nextEvent.fromIndex === rootIndex) {
+      const nullCenter = getNullPoint(rootIndex, nextEvent.side, top, yStep);
+      const lanes = buildGuideAbsoluteLanePair({
+        from: rootCenter,
+        to: nullCenter,
+        fromRadius: geometry.guideNodeClearRadius,
+        toRadius: geometry.guideNullClearRadius,
+        geometry,
+      });
+      return lanes.left.start;
+    }
   }
 
   return null;
@@ -782,6 +784,7 @@ function buildGuideRawTraceSegments(
   top: number,
   yStep: number,
   geometry: TraceGeometry,
+  rootGuideEvents: BinaryTreeGuideEvent[] = guideEvents,
 ): RawTraversalTraceSegment[] {
   const segments: RawTraversalTraceSegment[] = [];
   let penPoint: NodePoint | null = null;
@@ -795,7 +798,7 @@ function buildGuideRawTraceSegments(
       const rootEntryAnchor = getRootTopEntryAnchor(root, geometry);
       const rootEntryStart = getRootTopEntryStart(rootEntryAnchor);
       const rootEntry =
-        resolveRootRouteStartFromGuideEvents(event.toIndex, index, guideEvents, nodePositions, top, yStep, geometry) ??
+        resolveRootRouteStartFromGuideEvents(event.toIndex, index, rootGuideEvents, nodePositions, top, yStep, geometry) ??
         getRootTraceEntry(root, geometry);
 
       segments.push(
@@ -1017,13 +1020,22 @@ function buildRawTraceSegments(
   top: number,
   yStep: number,
   geometry: TraceGeometry,
+  canonicalGuideEvents?: BinaryTreeGuideEvent[],
 ): RawTraversalTraceSegment[] {
   if (!step || nodePositions.length === 0) {
     return [];
   }
 
   return step.guideEvents.length > 0
-    ? buildGuideRawTraceSegments(step.guideEvents, step.activeGuideEventIndex, nodePositions, top, yStep, geometry)
+    ? buildGuideRawTraceSegments(
+      step.guideEvents,
+      step.activeGuideEventIndex,
+      nodePositions,
+      top,
+      yStep,
+      geometry,
+      canonicalGuideEvents ?? step.guideEvents,
+    )
     : buildFallbackRawTraceSegments(step.visitedIndices, step.action === 'visit', nodePositions, geometry);
 }
 
@@ -1736,6 +1748,21 @@ export function BinaryTreeTraversalPage() {
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const treeState = currentSnapshot?.treeState ?? inputData;
+  const preorderTraceSourceStep = useMemo(() => {
+    if (mode !== 'preorder') {
+      return undefined;
+    }
+
+    for (let index = steps.length - 1; index >= 0; index -= 1) {
+      const step = steps[index];
+      if (step && step.guideEvents.length > 0) {
+        return step;
+      }
+    }
+
+    return undefined;
+  }, [mode, steps]);
+  const canonicalPreorderGuideEvents = preorderTraceSourceStep?.guideEvents;
 
   const treeLayout = useMemo(() => {
     const top = 12;
@@ -1770,8 +1797,16 @@ export function BinaryTreeTraversalPage() {
   }, [treeState.length]);
 
   const currentRawTraceSegments = useMemo(
-    () => buildRawTraceSegments(currentSnapshot, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
-    [currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
+    () =>
+      buildRawTraceSegments(
+        currentSnapshot,
+        nodePositions,
+        treeLayout.top,
+        treeLayout.yStep,
+        traceGeometry,
+        canonicalPreorderGuideEvents,
+      ),
+    [canonicalPreorderGuideEvents, currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
   );
   const currentTraceMetrics = useMemo(() => buildTraceMetrics(currentRawTraceSegments), [currentRawTraceSegments]);
   const currentTraceTargetLength = currentTraceMetrics[currentTraceMetrics.length - 1]?.end ?? 0;
@@ -1799,29 +1834,18 @@ export function BinaryTreeTraversalPage() {
     [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState.length],
   );
   const routeOrderSegments = useMemo<RouteOrderSegment[]>(() => {
-    if (mode !== 'preorder' || steps.length === 0 || nodePositions.length === 0) {
-      return [];
-    }
-
-    let guideStep: BinaryTreeTraversalStep | undefined;
-    for (let index = steps.length - 1; index >= 0; index -= 1) {
-      if ((steps[index]?.guideEvents.length ?? 0) > 0) {
-        guideStep = steps[index];
-        break;
-      }
-    }
-
-    if (!guideStep || guideStep.guideEvents.length === 0) {
+    if (mode !== 'preorder' || !preorderTraceSourceStep || nodePositions.length === 0) {
       return [];
     }
 
     const orderedRawSegments = buildGuideRawTraceSegments(
-      guideStep.guideEvents,
+      preorderTraceSourceStep.guideEvents,
       null,
       nodePositions,
       treeLayout.top,
       treeLayout.yStep,
       traceGeometry,
+      preorderTraceSourceStep.guideEvents,
     );
 
     return orderedRawSegments
@@ -1832,25 +1856,18 @@ export function BinaryTreeTraversalPage() {
         order: index + 1,
         pathId: `${routeOrderIdPrefix}-route-order-${index}`,
       }));
-  }, [mode, nodePositions, routeOrderIdPrefix, steps, traceGeometry, treeLayout.top, treeLayout.yStep]);
-  const preorderTraceSourceStep = useMemo(() => {
-    if (mode !== 'preorder') {
-      return undefined;
-    }
-
-    for (let index = steps.length - 1; index >= 0; index -= 1) {
-      const step = steps[index];
-      if (step && step.guideEvents.length > 0) {
-        return step;
-      }
-    }
-
-    return undefined;
-  }, [mode, steps]);
+  }, [mode, nodePositions, preorderTraceSourceStep, routeOrderIdPrefix, traceGeometry, treeLayout.top, treeLayout.yStep]);
   const fullPreorderRawTraceSegments = useMemo(
     () =>
       preorderTraceSourceStep
-        ? buildRawTraceSegments(preorderTraceSourceStep, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
+        ? buildRawTraceSegments(
+          preorderTraceSourceStep,
+          nodePositions,
+          treeLayout.top,
+          treeLayout.yStep,
+          traceGeometry,
+          preorderTraceSourceStep.guideEvents,
+        )
         : [],
     [nodePositions, preorderTraceSourceStep, traceGeometry, treeLayout.top, treeLayout.yStep],
   );
