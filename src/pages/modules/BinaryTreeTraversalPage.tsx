@@ -66,7 +66,7 @@ type MarkerOffset = {
   y: number;
 };
 
-type NodeFirstEntryReveal = {
+type NodeVisitReveal = {
   nodeIndex: number;
   revealLength: number;
 };
@@ -1136,7 +1136,7 @@ function buildTraceMetrics(rawSegments: RawTraversalTraceSegment[]): TraceSegmen
   });
 }
 
-function buildPreorderTraceEntryMarkers(
+function buildCanonicalTraceEntryMarkers(
   treeState: BinaryTreeInputValue[],
   nodePositions: NodePoint[],
   top: number,
@@ -1226,6 +1226,22 @@ function buildPreorderTraceEntryMarkers(
   return entryMarkers;
 }
 
+function getGuideVisitMarkerLabel(mode: BinaryTreeTraversalMode): TraceEntryMarker['label'] | null {
+  if (mode === 'preorder') {
+    return '1';
+  }
+
+  if (mode === 'inorder') {
+    return '2';
+  }
+
+  if (mode === 'postorder') {
+    return '3';
+  }
+
+  return null;
+}
+
 function buildTraceEntryMarkersWithReveal(
   entryMarkers: TraceEntryMarker[],
   rawSegments: RawTraversalTraceSegment[],
@@ -1294,11 +1310,18 @@ function getTraceEntryMarkerOffset(marker: TraceEntryMarker): MarkerOffset {
   return { x: 18, y: 0 };
 }
 
-function buildNodeFirstEntryReveals(entryMarkers: TraceEntryMarkerReveal[]): NodeFirstEntryReveal[] {
+function buildNodeVisitReveals(
+  entryMarkers: TraceEntryMarkerReveal[],
+  visitLabel: TraceEntryMarker['label'] | null,
+): NodeVisitReveal[] {
+  if (visitLabel === null) {
+    return [];
+  }
+
   const revealByNode = new Map<number, number>();
 
   entryMarkers.forEach((marker) => {
-    if (marker.label !== '1') {
+    if (marker.label !== visitLabel) {
       return;
     }
 
@@ -1860,11 +1883,7 @@ export function BinaryTreeTraversalPage() {
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const treeState = currentSnapshot?.treeState ?? inputData;
   const lastTreeNodeIndex = useMemo(() => findLastTreeNodeIndex(treeState), [treeState]);
-  const preorderTraceSourceStep = useMemo(() => {
-    if (mode !== 'preorder') {
-      return undefined;
-    }
-
+  const guideTraceSourceStep = useMemo(() => {
     for (let index = steps.length - 1; index >= 0; index -= 1) {
       const step = steps[index];
       if (step && step.guideEvents.length > 0) {
@@ -1873,8 +1892,14 @@ export function BinaryTreeTraversalPage() {
     }
 
     return undefined;
-  }, [mode, steps]);
-  const canonicalPreorderGuideEvents = preorderTraceSourceStep?.guideEvents;
+  }, [steps]);
+  const canonicalGuideEvents = guideTraceSourceStep?.guideEvents;
+  const guideVisitMarkerLabel = useMemo(() => {
+    if (!guideTraceSourceStep) {
+      return null;
+    }
+    return getGuideVisitMarkerLabel(mode);
+  }, [guideTraceSourceStep, mode]);
 
   const treeLayout = useMemo(() => {
     const top = TREE_STAGE_TOP;
@@ -1919,9 +1944,9 @@ export function BinaryTreeTraversalPage() {
         treeLayout.top,
         treeLayout.yStep,
         traceGeometry,
-        canonicalPreorderGuideEvents,
+        canonicalGuideEvents,
       ),
-    [canonicalPreorderGuideEvents, currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
+    [canonicalGuideEvents, currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
   );
   const currentTraceMetrics = useMemo(() => buildTraceMetrics(currentRawTraceSegments), [currentRawTraceSegments]);
   const currentTraceTargetLength = currentTraceMetrics[currentTraceMetrics.length - 1]?.end ?? 0;
@@ -1949,18 +1974,18 @@ export function BinaryTreeTraversalPage() {
     [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
   );
   const routeOrderSegments = useMemo<RouteOrderSegment[]>(() => {
-    if (mode !== 'preorder' || !preorderTraceSourceStep || nodePositions.length === 0) {
+    if (mode !== 'preorder' || !guideTraceSourceStep || nodePositions.length === 0) {
       return [];
     }
 
     const orderedRawSegments = buildGuideRawTraceSegments(
-      preorderTraceSourceStep.guideEvents,
+      guideTraceSourceStep.guideEvents,
       null,
       nodePositions,
       treeLayout.top,
       treeLayout.yStep,
       traceGeometry,
-      preorderTraceSourceStep.guideEvents,
+      guideTraceSourceStep.guideEvents,
     );
 
     return orderedRawSegments
@@ -1971,47 +1996,47 @@ export function BinaryTreeTraversalPage() {
         order: index + 1,
         pathId: `${routeOrderIdPrefix}-route-order-${index}`,
       }));
-  }, [mode, nodePositions, preorderTraceSourceStep, routeOrderIdPrefix, traceGeometry, treeLayout.top, treeLayout.yStep]);
-  const fullPreorderRawTraceSegments = useMemo(
+  }, [guideTraceSourceStep, mode, nodePositions, routeOrderIdPrefix, traceGeometry, treeLayout.top, treeLayout.yStep]);
+  const fullGuideRawTraceSegments = useMemo(
     () =>
-      preorderTraceSourceStep
+      guideTraceSourceStep
         ? buildRawTraceSegments(
-          preorderTraceSourceStep,
+          guideTraceSourceStep,
           nodePositions,
           treeLayout.top,
           treeLayout.yStep,
           traceGeometry,
-          preorderTraceSourceStep.guideEvents,
+          guideTraceSourceStep.guideEvents,
         )
         : [],
-    [nodePositions, preorderTraceSourceStep, traceGeometry, treeLayout.top, treeLayout.yStep],
+    [guideTraceSourceStep, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
   );
   const traceEntryMarkers = useMemo(
     () =>
-      mode === 'preorder'
-        ? buildPreorderTraceEntryMarkers(treeState, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
+      guideTraceSourceStep
+        ? buildCanonicalTraceEntryMarkers(treeState, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
         : [],
-    [mode, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
+    [guideTraceSourceStep, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
   );
   const traceEntryMarkersWithReveal = useMemo(
-    () => buildTraceEntryMarkersWithReveal(traceEntryMarkers, fullPreorderRawTraceSegments, traceGeometry.aspect),
-    [fullPreorderRawTraceSegments, traceEntryMarkers, traceGeometry.aspect],
+    () => buildTraceEntryMarkersWithReveal(traceEntryMarkers, fullGuideRawTraceSegments, traceGeometry.aspect),
+    [fullGuideRawTraceSegments, traceEntryMarkers, traceGeometry.aspect],
   );
-  const nodeFirstEntryReveals = useMemo(
-    () => buildNodeFirstEntryReveals(traceEntryMarkersWithReveal),
-    [traceEntryMarkersWithReveal],
+  const guideNodeVisitReveals = useMemo(
+    () => buildNodeVisitReveals(traceEntryMarkersWithReveal, guideVisitMarkerLabel),
+    [guideVisitMarkerLabel, traceEntryMarkersWithReveal],
   );
-  const preorderEnteredNodeSet = useMemo(() => {
-    const entered = new Set<number>();
+  const guideVisitedNodeSet = useMemo(() => {
+    const visited = new Set<number>();
 
-    nodeFirstEntryReveals.forEach((entry) => {
+    guideNodeVisitReveals.forEach((entry) => {
       if (traceVisibleLength >= entry.revealLength - 0.001) {
-        entered.add(entry.nodeIndex);
+        visited.add(entry.nodeIndex);
       }
     });
 
-    return entered;
-  }, [nodeFirstEntryReveals, traceVisibleLength]);
+    return visited;
+  }, [guideNodeVisitReveals, traceVisibleLength]);
 
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
@@ -2033,12 +2058,25 @@ export function BinaryTreeTraversalPage() {
     return valueLabelMap.get(value) ?? String(value);
   };
 
+  const guideOutputOrder = useMemo(() => {
+    if (guideVisitMarkerLabel === null) {
+      return null;
+    }
+
+    return traceEntryMarkersWithReveal
+      .filter((marker) => marker.label === guideVisitMarkerLabel)
+      .sort((left, right) => left.revealLength - right.revealLength)
+      .filter((marker) => traceVisibleLength >= marker.revealLength - 0.001)
+      .map((marker) => treeState[marker.nodeIndex])
+      .filter((value): value is number => value !== null);
+  }, [guideVisitMarkerLabel, traceEntryMarkersWithReveal, traceVisibleLength, treeState]);
+
   const outputSequence = useMemo(
     () =>
-      (currentSnapshot?.outputOrder ?? []).map((value) =>
+      (guideOutputOrder ?? currentSnapshot?.outputOrder ?? []).map((value) =>
         valueDisplayMode === 'number' ? String(value) : (valueLabelMap.get(value) ?? String(value)),
       ),
-    [currentSnapshot?.outputOrder, valueDisplayMode, valueLabelMap],
+    [currentSnapshot?.outputOrder, guideOutputOrder, valueDisplayMode, valueLabelMap],
   );
   const nullHints = useMemo(() => buildNullHints(currentSnapshot, treeState), [currentSnapshot, treeState]);
   const nullEdges = useMemo(() => {
@@ -2387,11 +2425,11 @@ export function BinaryTreeTraversalPage() {
                 return null;
               }
               const markerOffset = getTraceEntryMarkerOffset(marker);
-              const isEnteredMarkerOne = marker.label === '1';
+              const isVisitMarker = guideVisitMarkerLabel !== null && marker.label === guideVisitMarkerLabel;
               return (
                 <span
                   key={marker.key}
-                  className={`tree-trace-entry-marker${isEnteredMarkerOne ? ' tree-trace-entry-marker-entered tree-trace-entry-marker-entered-pulse' : ''}`}
+                  className={`tree-trace-entry-marker${isVisitMarker ? ' tree-trace-entry-marker-entered tree-trace-entry-marker-entered-pulse' : ''}`}
                   style={{
                     left: `${marker.point.x}%`,
                     top: `${marker.point.y}%`,
@@ -2415,10 +2453,10 @@ export function BinaryTreeTraversalPage() {
                   currentSnapshot.action === 'descendLeft' ||
                   currentSnapshot.action === 'descendRight' ||
                   currentSnapshot.action === 'visit');
-              const isPreorderEntered = mode === 'preorder' && preorderEnteredNodeSet.has(index);
+              const isGuideVisited = guideTraceSourceStep ? guideVisitedNodeSet.has(index) : false;
               const isVisited =
-                mode === 'preorder'
-                  ? isPreorderEntered
+                guideTraceSourceStep
+                  ? isGuideVisited
                   : visitedSet.has(index) || shouldMarkVisitedOnArrive;
               const isCurrent =
                 currentSnapshot?.currentIndex === index &&
