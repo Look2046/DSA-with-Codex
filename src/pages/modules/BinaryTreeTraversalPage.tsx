@@ -1193,21 +1193,21 @@ function buildTraceEntryMarkersWithReveal(
 function getTraceEntryMarkerOffset(marker: TraceEntryMarker): MarkerOffset {
   if (marker.label === '1') {
     if (marker.nodeIndex === 0) {
-      return { x: -14, y: -14 };
+      return { x: -18, y: -18 };
     }
 
     if (marker.nodeIndex % 2 === 1) {
-      return { x: 0, y: -14 };
+      return { x: 0, y: -18 };
     }
 
-    return { x: -14, y: 12 };
+    return { x: -18, y: 16 };
   }
 
   if (marker.label === '2') {
-    return { x: 0, y: 12 };
+    return { x: 0, y: 16 };
   }
 
-  return { x: 14, y: 0 };
+  return { x: 18, y: 0 };
 }
 
 function buildCounterClockwiseNodeArc(
