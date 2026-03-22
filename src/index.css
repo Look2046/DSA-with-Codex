@@ -1915,9 +1915,18 @@ body {
   color: #5f7894;
 }
 
+.tree-levelorder-flow {
+  display: grid;
+  gap: 12px;
+}
+
 .tree-levelorder-current {
   display: grid;
   gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #dbeafb;
+  background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
 }
 
 .tree-levelorder-label {
@@ -1938,6 +1947,19 @@ body {
   font-weight: 700;
 }
 
+.tree-levelorder-current-state {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #53718f;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.tree-levelorder-current-value {
+  font-size: 0.96rem;
+}
+
 .tree-levelorder-node-index {
   color: #67839f;
   font-size: 0.78rem;
@@ -1949,10 +1971,69 @@ body {
   font-size: 0.84rem;
 }
 
+.tree-levelorder-summary {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #dbeafb;
+  background: rgba(255, 255, 255, 0.96);
+  color: #244261;
+}
+
+.tree-levelorder-summary-label {
+  font-size: 0.76rem;
+  color: #5f7894;
+}
+
+.tree-levelorder-summary-flow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #56718b;
+  font-size: 0.76rem;
+}
+
+.tree-levelorder-queue-section {
+  display: grid;
+  gap: 10px;
+}
+
+.tree-levelorder-queue-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tree-levelorder-queue-count {
+  color: #61809e;
+  font-size: 0.78rem;
+}
+
+.tree-levelorder-queue-lane {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.tree-levelorder-queue-end {
+  color: #56718b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .tree-levelorder-queue-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
 }
 
 .tree-levelorder-queue-chip {
@@ -1964,6 +2045,7 @@ body {
   border: 1px solid #dbeafb;
   background: #f8fbff;
   color: #244261;
+  flex: 0 0 auto;
 }
 
 .tree-levelorder-queue-chip-front {
@@ -1973,6 +2055,12 @@ body {
 
 .tree-levelorder-queue-chip-rear {
   box-shadow: inset 0 0 0 1px rgba(86, 182, 109, 0.2);
+}
+
+.tree-levelorder-queue-chip-new {
+  border-color: #8bc09a;
+  background: #eefaf2;
+  box-shadow: 0 6px 14px rgba(62, 131, 81, 0.08);
 }
 
 .tree-levelorder-queue-value {
@@ -1991,6 +2079,11 @@ body {
   color: #446887;
   font-size: 0.68rem;
   font-weight: 700;
+}
+
+.tree-levelorder-queue-badge-new {
+  background: #dff3e5;
+  color: #2f7a43;
 }
 
 .tree-recursion-resize-handle {

@@ -13,12 +13,15 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - level-order mode can now open the floating algorithm window correctly
   - window content switches to queue-state playback + queue-specific pseudocode for level-order mode
   - stepping the timeline now updates both the current dequeued node and the remaining queue inside the floating window
+  - queue presentation is now split into current dequeued node / action summary / single-row waiting queue, so the active node no longer blends into the remaining queue chips
+  - newly enqueued child nodes are now highlighted directly inside the waiting queue lane
 - Verified locally:
   - `./scripts/check-doc-links.sh` pass (2026-03-23)
   - `eslint` pass via direct node entry (2026-03-23)
   - `tsc -b` pass via direct node entry (2026-03-23)
   - Playwright browser check confirms level-order mode shows `0` `.tree-null-node` elements and `0` null-legend items
   - Playwright browser check confirms the algorithm window opens in level-order mode and the queue panel updates after one `Next` step (`89#0` current, queue becomes `90#1`, `61#2`)
+  - Playwright browser check confirms the waiting queue stays single-row (`flex-wrap: nowrap`) and newly enqueued nodes receive the `New` badge after stepping
 
 ### Current State
 - Branch: `feat/p8-m3-route-rules-spike`

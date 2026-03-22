@@ -2702,6 +2702,58 @@ export function BinaryTreeTraversalPage() {
         : [],
     [currentSnapshot?.queueState, isLevelorderMode, treeState],
   );
+  const levelorderEnqueuedEntries = useMemo(() => {
+    if (!isLevelorderMode || currentSnapshot?.action !== 'visit' || currentSnapshot.currentIndex === null) {
+      return [];
+    }
+
+    const currentIndex = currentSnapshot.currentIndex;
+    const childIndices = [currentIndex * 2 + 1, currentIndex * 2 + 2].filter((index) => hasTreeNode(treeState, index));
+    return childIndices.map((nodeIndex) => ({
+      nodeIndex,
+      value: treeState[nodeIndex],
+    }));
+  }, [currentSnapshot, isLevelorderMode, treeState]);
+  const levelorderQueueSummary = useMemo(() => {
+    if (!isLevelorderMode) {
+      return null;
+    }
+
+    if (!currentSnapshot || currentSnapshot.action === 'initial') {
+      return {
+        dequeue: null,
+        enqueue: [] as typeof levelorderEnqueuedEntries,
+      };
+    }
+
+    if (currentSnapshot.action !== 'visit' || currentSnapshot.currentIndex === null) {
+      return {
+        dequeue: null,
+        enqueue: [] as typeof levelorderEnqueuedEntries,
+      };
+    }
+
+    return {
+      dequeue: {
+        nodeIndex: currentSnapshot.currentIndex,
+        value: currentSnapshot.currentValue,
+      },
+      enqueue: levelorderEnqueuedEntries,
+    };
+  }, [currentSnapshot, isLevelorderMode, levelorderEnqueuedEntries]);
+  const levelorderActionText = useMemo(() => {
+    if (!isLevelorderMode || !levelorderQueueSummary?.dequeue) {
+      return t('module.t01.levelorder.summary.idle');
+    }
+
+    const currentLabel = formatDisplayValue(levelorderQueueSummary.dequeue.value);
+    if (levelorderQueueSummary.enqueue.length === 0) {
+      return `${t('module.t01.levelorder.summary.dequeuePrefix')} ${currentLabel} · ${t('module.t01.levelorder.summary.noEnqueue')}`;
+    }
+
+    const enqueueLabels = levelorderQueueSummary.enqueue.map((entry) => formatDisplayValue(entry.value)).join(', ');
+    return `${t('module.t01.levelorder.summary.dequeuePrefix')} ${currentLabel} · ${t('module.t01.levelorder.summary.enqueuePrefix')} ${enqueueLabels}`;
+  }, [formatDisplayValue, isLevelorderMode, levelorderQueueSummary, t]);
   const algorithmWindowBody = useMemo(
     () => (isLevelorderMode ? t('module.t01.window.body.levelorder') : t('module.t01.window.body.recursion')),
     [isLevelorderMode, t],
@@ -3441,45 +3493,74 @@ export function BinaryTreeTraversalPage() {
                       <span className="tree-recursion-card-note">{t('module.t01.levelorder.queue.subtitle')}</span>
                     </div>
 
-                    <div className="tree-levelorder-current">
-                      <span className="tree-levelorder-label">{t('module.t01.levelorder.queue.current')}</span>
-                      {currentSnapshot?.currentValue !== null && currentSnapshot?.currentValue !== undefined ? (
-                        <span className="tree-levelorder-current-chip">
-                          {formatDisplayValue(currentSnapshot.currentValue)}
-                          {currentSnapshot.currentIndex !== null ? (
-                            <span className="tree-levelorder-node-index">#{currentSnapshot.currentIndex}</span>
-                          ) : null}
-                        </span>
-                      ) : (
-                        <span className="tree-levelorder-empty">{t('module.t01.levelorder.queue.currentEmpty')}</span>
-                      )}
+                    <div className="tree-levelorder-flow">
+                      <div className="tree-levelorder-current">
+                        <span className="tree-levelorder-label">{t('module.t01.levelorder.queue.current')}</span>
+                        {currentSnapshot?.currentValue !== null && currentSnapshot?.currentValue !== undefined ? (
+                          <span className="tree-levelorder-current-chip">
+                            <span className="tree-levelorder-current-state">{t('module.t01.levelorder.queue.dequeued')}</span>
+                            <span className="tree-levelorder-current-value">{formatDisplayValue(currentSnapshot.currentValue)}</span>
+                            {currentSnapshot.currentIndex !== null ? (
+                              <span className="tree-levelorder-node-index">#{currentSnapshot.currentIndex}</span>
+                            ) : null}
+                          </span>
+                        ) : (
+                          <span className="tree-levelorder-empty">{t('module.t01.levelorder.queue.currentEmpty')}</span>
+                        )}
+                      </div>
+
+                      <div className="tree-levelorder-summary" role="note">
+                        <span className="tree-levelorder-summary-label">{t('module.t01.levelorder.summary.title')}</span>
+                        <strong>{levelorderActionText}</strong>
+                        <div className="tree-levelorder-summary-flow" aria-hidden="true">
+                          <span>{t('module.t01.levelorder.summary.stepDequeue')}</span>
+                          <span>→</span>
+                          <span>{t('module.t01.levelorder.summary.stepVisit')}</span>
+                          <span>→</span>
+                          <span>{t('module.t01.levelorder.summary.stepEnqueue')}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    {levelorderQueueEntries.length === 0 ? (
-                      <p className="tree-recursion-stack-empty">{t('module.t01.levelorder.queue.empty')}</p>
-                    ) : (
-                      <div className="tree-levelorder-queue-list">
-                        {levelorderQueueEntries.map((entry, index) => {
-                          const isFront = index === 0;
-                          const isRear = index === levelorderQueueEntries.length - 1;
-                          return (
-                            <span
-                              key={`${entry.nodeIndex}-${index}`}
-                              className={`tree-levelorder-queue-chip${isFront ? ' tree-levelorder-queue-chip-front' : ''}${isRear ? ' tree-levelorder-queue-chip-rear' : ''}`}
-                            >
-                              <span className="tree-levelorder-queue-value">{formatDisplayValue(entry.value)}</span>
-                              <span className="tree-levelorder-queue-index">#{entry.nodeIndex}</span>
-                              {isFront ? (
-                                <span className="tree-levelorder-queue-badge">{t('module.t01.levelorder.queue.front')}</span>
-                              ) : null}
-                              {isRear ? (
-                                <span className="tree-levelorder-queue-badge">{t('module.t01.levelorder.queue.rear')}</span>
-                              ) : null}
-                            </span>
-                          );
-                        })}
+                    <div className="tree-levelorder-queue-section">
+                      <div className="tree-levelorder-queue-head">
+                        <span className="tree-levelorder-label">{t('module.t01.levelorder.queue.waiting')}</span>
+                        <span className="tree-levelorder-queue-count">
+                          {t('module.t01.levelorder.queue.count')}: {levelorderQueueEntries.length}
+                        </span>
                       </div>
-                    )}
+
+                      {levelorderQueueEntries.length === 0 ? (
+                        <p className="tree-recursion-stack-empty">{t('module.t01.levelorder.queue.empty')}</p>
+                      ) : (
+                        <div className="tree-levelorder-queue-lane">
+                          <span className="tree-levelorder-queue-end">{t('module.t01.levelorder.queue.front')}</span>
+                          <div className="tree-levelorder-queue-list" role="list" aria-label={t('module.t01.levelorder.queue.waiting')}>
+                            {levelorderQueueEntries.map((entry, index) => {
+                              const isFront = index === 0;
+                              const isRear = index === levelorderQueueEntries.length - 1;
+                              const isNewlyEnqueued = levelorderEnqueuedEntries.some((item) => item.nodeIndex === entry.nodeIndex);
+                              return (
+                                <span
+                                  key={`${entry.nodeIndex}-${index}`}
+                                  className={`tree-levelorder-queue-chip${isFront ? ' tree-levelorder-queue-chip-front' : ''}${isRear ? ' tree-levelorder-queue-chip-rear' : ''}${isNewlyEnqueued ? ' tree-levelorder-queue-chip-new' : ''}`}
+                                  role="listitem"
+                                >
+                                  <span className="tree-levelorder-queue-value">{formatDisplayValue(entry.value)}</span>
+                                  <span className="tree-levelorder-queue-index">#{entry.nodeIndex}</span>
+                                  {isNewlyEnqueued ? (
+                                    <span className="tree-levelorder-queue-badge tree-levelorder-queue-badge-new">
+                                      {t('module.t01.levelorder.queue.new')}
+                                    </span>
+                                  ) : null}
+                                </span>
+                              );
+                            })}
+                          </div>
+                          <span className="tree-levelorder-queue-end">{t('module.t01.levelorder.queue.rear')}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="tree-recursion-card">

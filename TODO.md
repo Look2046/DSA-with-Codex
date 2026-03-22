@@ -210,6 +210,8 @@ Track actionable tasks here. Keep tasks small and testable.
     - level-order mode now uses a real-node-only threading trace and exposes a working floating algorithm window
     - the floating algorithm window now shows queue-state playback + queue-specific pseudocode for level-order mode
     - browser-side Playwright verification confirms the level-order queue panel opens and updates after stepping
+    - level-order queue popup now separates current dequeue / action summary / waiting queue, and the waiting queue stays on a single horizontal lane
+    - newly enqueued level-order children are now highlighted directly inside the waiting queue lane for the current step
   - Next (2026-03-22):
     - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless requested)
     - continue dashed-path beautification only if native SVG styling still falls short
