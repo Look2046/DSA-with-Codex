@@ -1653,6 +1653,43 @@ body {
   color: #246a38;
 }
 
+.tree-stage-recursion-shell {
+  display: grid;
+  gap: 12px;
+}
+
+.tree-stage-recursion-main,
+.tree-stage-recursion-side {
+  min-width: 0;
+}
+
+.tree-stage-recursion-main {
+  display: grid;
+  gap: 12px;
+}
+
+.tree-stage-recursion-shell-open {
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.95fr);
+  align-items: start;
+}
+
+.tree-stage-recursion-side {
+  display: grid;
+}
+
+.tree-stage-recursion-side .tree-recursion-panel {
+  height: 100%;
+}
+
+.tree-stage-recursion-side .tree-recursion-grid {
+  grid-template-columns: 1fr;
+}
+
+.tree-stage-recursion-side .tree-recursion-points {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
 .tree-recursion-panel {
   display: grid;
   gap: 12px;
@@ -2411,6 +2448,12 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+@media (max-width: 1180px) {
+  .tree-stage-recursion-shell-open {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {

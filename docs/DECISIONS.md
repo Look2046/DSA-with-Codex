@@ -382,3 +382,31 @@ Record architecture or workflow decisions here.
 - Alternatives considered: show all markers statically from start; use one marker style without directional labels; tie marker visibility to wall-clock time instead of route progress.
 - Consequences: traversal direction is now readable at node level while preserving route-first storytelling; marker rendering remains deterministic under replay/seek based on route length.
 - Owner: haoyu + codex
+
+## DEC-20260322-42
+- Date: 2026-03-22
+- Status: accepted
+- Context: In `T-01`, active trace arrowheads and route-order labels were derived from whole composite paths (arc + line), which made dashed-trace arrows harder to read and caused numbering to attach to mixed path fragments rather than the terminal travel runs users follow.
+- Decision: Store dedicated straight-run arrow anchors (`arrowFromPoint` / `arrowToPoint`) on raw trace segments, render active arrowheads from those terminal line directions, and restrict route-order labels to arrow-capable straight travel segments only.
+- Alternatives considered: keep deriving arrow direction and numbering from whole-path endpoints; attempt a CSS-only visibility fix without changing trace semantics; remove route-order overlay entirely.
+- Consequences: arrowheads now align with the final movement direction learners see, and route-order labels better reflect canonical preorder travel runs; final browser-side acceptance verification is still required before closing `P8-M3`.
+- Owner: haoyu + codex
+
+## DEC-20260322-43
+- Date: 2026-03-22
+- Status: accepted
+- Context: The binary-tree canvas playground already followed the documented canonical preorder route rules, but the formal `T-01` page still rebuilt guide traces from `guideEvents` with non-canonical lane selection and a dynamic null-return sweep.
+- Decision: Extract shared preorder trace geometry helpers and make the formal `T-01` guide trace builder follow the same canonical absolute-left/right data/null/root rules as the playground, including fixed CCW null returns.
+- Alternatives considered: keep the playground and formal page on separate trace builders; only patch null returns while leaving event-driven lane selection intact.
+- Consequences: playground and formal `T-01` now share the same reusable preorder route contract, reducing future drift and making browser verification focus on one canonical rule set.
+- Owner: haoyu + codex
+
+
+## DEC-20260322-44
+- Date: 2026-03-22
+- Status: accepted
+- Context: `T-01` recursive view still showed generic DFS pseudocode with `if preorder / inorder / postorder` branches, and the panel sat well below the traversal canvas, forcing learners to scroll between animation and recursion explanation.
+- Decision: Switch the recursive pseudocode to traversal-mode-specific code lines for preorder / inorder / postorder, and place the recursion panel beside the traversal canvas on wide viewports while stacking it responsively on narrower screens.
+- Alternatives considered: keep one generic DFS pseudocode block with conditional visit lines; leave the recursion panel below the canvas; fork separate page layouts per traversal mode.
+- Consequences: learners now see the exact recursive control flow for the active mode, and can compare animation with recursion state in a single desktop viewport without extra scrolling; level-order remains excluded from the recursion view.
+- Owner: haoyu + codex

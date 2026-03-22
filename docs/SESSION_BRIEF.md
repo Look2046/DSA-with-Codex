@@ -7,7 +7,7 @@ Use this file as the first thing to read in a new chat/session.
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p8-m3-route-rules-spike` (P8-M3 polish work in progress)
 - Current phase: P8-M3 in progress (tree consistency + acceptance closure)
-- Last local quality gate: `npm run check` (passed, 2026-03-10)
+- Last local quality gate: `npm run check` (passed, 2026-03-22)
 
 ## 2) What Is Already Done
 
@@ -59,8 +59,13 @@ Use this file as the first thing to read in a new chat/session.
   - binary-tree canvas route playback now draws progressively from root-top entry to end, with hidden future segments, dashed completed segments, line-end arrows, and a moving front arrow
   - data-node entry markers landed on route (`1` from up, `2` from left-down, `3` from right-down) and now reveal progressively with route drawing order
   - reusable rule spec added: `docs/modules/T-01-preorder-trace-rules.md`
+  - `T-01` active trace arrowheads now anchor to terminal straight travel segments instead of whole composite paths, improving dashed-trace readability
+  - `T-01` route-order overlay now numbers arrow-capable straight travel segments instead of mixed arc/path fragments
+  - `T-01` recursive view now switches to mode-specific preorder/inorder/postorder pseudocode instead of generic conditional branches
+  - `T-01` recursive panel now docks beside the traversal canvas on wider screens (and stacks responsively on narrower screens) so both remain readable in one viewport
+- `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
-  - known carry-over issue: dashed traversal trace style currently has arrowhead visibility regression
+  - browser-side Playwright verification confirms the stage/recursion shell stays same-row and fully visible at `1280x720`
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
@@ -89,8 +94,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 3) Next Priority
 
 - Continue P8-M3 (tree consistency + acceptance refresh):
-  - fix `T-01` traversal trace arrowhead visibility and continue dashed style beautification
-  - optionally evaluate a lightweight hand-drawn path library if native SVG styling cannot reach target quality
+  - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless explicitly requested)
+  - continue dashed style beautification only if native SVG styling still falls short
   - align `T-01`/`T-02` controls, legend semantics, and status layout
   - refresh Playwright acceptance artifacts for `/modules` + all implemented routes
   - sync closure docs (`SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`)

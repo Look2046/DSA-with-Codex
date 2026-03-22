@@ -190,11 +190,20 @@ Track actionable tasks here. Keep tasks small and testable.
     - undrawn route segments are hidden; completed segments retain dashed style and per-line endpoint arrows during playback
     - added node entry markers on data nodes (`1` from up, `2` from left-down, `3` from right-down)
     - marker visibility is now tied to route progress (`revealLength`), so `1/2/3` appear in drawing order with the moving arrow
-  - Next (2026-03-10):
-    - restore arrowhead clarity on trace path
-    - continue dashed-path beautification toward hand-drawn style
-    - align route-order numbering with user-confirmed canonical preorder sequence and then formalize a generalizable numbering rule for arbitrary binary trees
-    - evaluate if a lightweight hand-drawn animation library should be introduced for tree traversal path rendering
+  - Progress (2026-03-22):
+    - `T-01` active trace arrowheads now follow terminal straight travel segments instead of composite path endpoints
+    - route-order overlay now numbers arrow-capable straight travel segments instead of mixed arc/path fragments
+    - added white halo strokes on traversal/page canvas arrows to improve visibility over dashed traces
+    - extracted shared preorder trace helper and aligned formal `T-01` route generation with the playground's canonical absolute-left/right data/null/root rules
+    - recursive pseudocode now switches to mode-specific preorder / inorder / postorder lines instead of generic conditional branches
+    - recursion panel now docks beside the traversal canvas on wider screens and stacks responsively on narrower screens for same-screen teaching
+    - Playwright browser check confirms the stage/recursion shell stays same-row and fully visible at `1280x720`
+    - local quality gate re-verified: `npm run check` (pass, 2026-03-22)
+  - Next (2026-03-22):
+    - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless requested)
+    - continue dashed-path beautification only if native SVG styling still falls short
+    - align `T-01`/`T-02` controls, legend semantics, and status layout
+    - refresh full implemented-route acceptance artifacts/report and then sync closure docs
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

@@ -2,6 +2,42 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-22 (P8-M3 T-01 arrow-anchor + route-order checkpoint)
+
+### Today Done
+- Refined `T-01 Binary Tree Traversal` trace rendering on `feat/p8-m3-route-rules-spike`:
+  - active trace arrowheads now follow terminal straight travel segments instead of composite path endpoints
+  - route-order overlay now labels arrow-capable straight travel segments instead of mixed arc/path fragments
+  - added white halo strokes to traversal/page canvas arrows so arrowheads stay readable over dashed paths
+- Updated `T-01` recursive teaching panel:
+  - recursive pseudocode now switches to mode-specific preorder / inorder / postorder lines, with no generic `if preorder/inorder/postorder` branches
+  - recursion panel now sits beside the traversal canvas on wider viewports and stacks responsively on narrower ones, keeping recursion and animation in the same reading area
+- Verified locally:
+  - `npm run check` pass (2026-03-22)
+  - Playwright browser check confirms `.tree-stage-recursion-main` and `.tree-stage-recursion-side` stay same-row and fully visible at `1280x720`
+  - live recursion code list in browser now reads `traverse(node) / visit(node) / traverse(node.left) / traverse(node.right)` for preorder mode
+- Migrated canonical preorder route rules from playground into formal `T-01` page:
+  - extracted shared helper `src/modules/tree/preorderTraceRules.ts`
+  - formal preorder trace builder now uses absolute left/right lanes and fixed data/null/root local rules
+  - null return path is fixed to canonical CCW turn + right-lane return instead of dynamic sweep selection
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: code/docs updates in progress; legacy script mode changes still present in working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest work not committed yet
+
+### Remaining Focus (Next Session)
+- Visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless explicitly requested).
+- Continue `P8-M3` consistency/acceptance closure:
+  - align `T-01` / `T-02` controls, legend semantics, and status layout
+  - refresh `/modules` + implemented-route acceptance artifacts/report
+  - sync closure docs after acceptance refresh
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m3-route-rules-spike
+npm run dev -- --host 127.0.0.1 --port 5173
+```
 ## 2026-03-10 (P8-M3 trace playback + entry-marker semantics checkpoint)
 
 ### Today Done
