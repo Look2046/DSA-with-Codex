@@ -59,6 +59,11 @@ type TraceEntryMarkerReveal = TraceEntryMarker & {
   revealLength: number;
 };
 
+type MarkerOffset = {
+  x: number;
+  y: number;
+};
+
 type TraceSegmentMetric = {
   length: number;
   start: number;
@@ -1182,6 +1187,26 @@ function buildTraceEntryMarkersWithReveal(
   });
 }
 
+function getTraceEntryMarkerOffset(marker: TraceEntryMarker): MarkerOffset {
+  if (marker.label === '1') {
+    if (marker.nodeIndex === 0) {
+      return { x: -10, y: -10 };
+    }
+
+    if (marker.nodeIndex % 2 === 1) {
+      return { x: 0, y: -10 };
+    }
+
+    return { x: -10, y: 8 };
+  }
+
+  if (marker.label === '2') {
+    return { x: 0, y: 8 };
+  }
+
+  return { x: 10, y: 0 };
+}
+
 function buildCounterClockwiseNodeArc(
   center: NodePoint,
   radius: number,
@@ -2208,11 +2233,16 @@ export function BinaryTreeTraversalPage() {
               if (!visible) {
                 return null;
               }
+              const markerOffset = getTraceEntryMarkerOffset(marker);
               return (
                 <span
                   key={marker.key}
                   className="tree-trace-entry-marker"
-                  style={{ left: `${marker.point.x}%`, top: `${marker.point.y}%` }}
+                  style={{
+                    left: `${marker.point.x}%`,
+                    top: `${marker.point.y}%`,
+                    transform: `translate(-50%, -50%) translate(${markerOffset.x}px, ${markerOffset.y}px)`,
+                  }}
                 >
                   {marker.label}
                 </span>
