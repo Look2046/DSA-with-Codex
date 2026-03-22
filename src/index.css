@@ -1653,6 +1653,190 @@ body {
   color: #246a38;
 }
 
+.tree-recursion-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #d7e8f8;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at top right, rgba(104, 169, 231, 0.12), transparent 28%),
+    #f8fbff;
+}
+
+.tree-recursion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tree-recursion-header h3 {
+  margin: 0 0 4px;
+}
+
+.tree-recursion-header p {
+  margin: 0;
+  color: #5c7187;
+}
+
+.tree-recursion-status-block {
+  min-width: 220px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dbeafb;
+}
+
+.tree-recursion-status-label {
+  font-size: 0.76rem;
+  color: #5f7894;
+}
+
+.tree-recursion-visit-now {
+  color: #2f7a43;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.tree-recursion-points {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tree-recursion-point {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #d6e5f5;
+  background: rgba(255, 255, 255, 0.92);
+  color: #425b73;
+  font-size: 0.82rem;
+}
+
+.tree-recursion-point strong {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #edf4fb;
+  color: #0b4f90;
+  font-size: 0.78rem;
+}
+
+.tree-recursion-point-current {
+  border-color: #7aaee1;
+  background: #eaf4ff;
+}
+
+.tree-recursion-point-visit {
+  box-shadow: inset 0 0 0 1px rgba(86, 182, 109, 0.35);
+}
+
+.tree-recursion-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: 12px;
+}
+
+.tree-recursion-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dbeafb;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.tree-recursion-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #244261;
+  font-weight: 700;
+}
+
+.tree-recursion-card-note {
+  color: #61809e;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.tree-recursion-code-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #41566e;
+}
+
+.tree-recursion-code-list li {
+  padding: 2px 0;
+}
+
+.tree-recursion-code-list .code-active {
+  color: #0b4f90;
+  font-weight: 700;
+}
+
+.tree-recursion-stack-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.tree-recursion-stack-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddeaf7;
+  background: #f8fbff;
+}
+
+.tree-recursion-stack-item-current {
+  border-color: #8bc09a;
+  background: #eefaf2;
+  box-shadow: 0 6px 14px rgba(62, 131, 81, 0.1);
+}
+
+.tree-recursion-stack-depth {
+  color: #5f7894;
+  font-size: 0.76rem;
+}
+
+.tree-recursion-stack-call {
+  color: #244261;
+  font-weight: 700;
+}
+
+.tree-recursion-stack-index {
+  margin-left: 8px;
+  color: #64809d;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.tree-recursion-stack-current {
+  color: #2f7a43;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tree-recursion-stack-empty {
+  margin: 0;
+  color: #5f7894;
+}
+
 .bst-input-form {
   grid-template-columns: minmax(160px, 220px) auto;
 }
@@ -2304,5 +2488,14 @@ body {
   .tree-sequence-chip {
     min-width: 28px;
     padding: 5px 9px;
+  }
+
+  .tree-recursion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tree-recursion-point {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

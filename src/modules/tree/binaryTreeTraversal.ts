@@ -16,6 +16,8 @@ export type BinaryTreeGuideNullHint = {
   side: 'L' | 'R';
 };
 
+export type BinaryTreeRecursionCheckpoint = '1' | '2' | '3';
+
 export type BinaryTreeTraversalStep = AnimationStep & {
   treeState: BinaryTreeInputValue[];
   action:
@@ -41,6 +43,9 @@ export type BinaryTreeTraversalStep = AnimationStep & {
   guideRoleL: number | null;
   guideRoleR: number | null;
   guideNull: BinaryTreeGuideNullHint | null;
+  recursionStack: number[];
+  recursionCheckpoint: BinaryTreeRecursionCheckpoint | null;
+  recursionNullSide: 'L' | 'R' | null;
 };
 
 function cloneArray<T>(values: T[]): T[] {
@@ -67,6 +72,9 @@ type CreateTraversalStepConfig = {
   guideRoleL?: number | null;
   guideRoleR?: number | null;
   guideNull?: BinaryTreeGuideNullHint | null;
+  recursionStack?: number[];
+  recursionCheckpoint?: BinaryTreeRecursionCheckpoint | null;
+  recursionNullSide?: 'L' | 'R' | null;
 };
 
 function createStep(config: CreateTraversalStepConfig): BinaryTreeTraversalStep {
@@ -87,6 +95,9 @@ function createStep(config: CreateTraversalStepConfig): BinaryTreeTraversalStep 
     guideRoleL: config.guideRoleL ?? null,
     guideRoleR: config.guideRoleR ?? null,
     guideNull: config.guideNull ? { ...config.guideNull } : null,
+    recursionStack: cloneArray(config.recursionStack ?? []),
+    recursionCheckpoint: config.recursionCheckpoint ?? null,
+    recursionNullSide: config.recursionNullSide ?? null,
   };
 }
 
@@ -308,6 +319,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
   const visitedIndices: number[] = [];
   const outputOrder: number[] = [];
   const guideEvents: BinaryTreeGuideEvent[] = [];
+  const recursionStack: number[] = [];
 
   const pushStep = (config: Omit<CreateTraversalStepConfig, 'treeState' | 'mode' | 'visitedIndices' | 'outputOrder'>) => {
     steps.push(
@@ -318,6 +330,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         visitedIndices,
         outputOrder,
         guideEvents,
+        recursionStack,
       }),
     );
   };
@@ -356,6 +369,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
     const rightIndex = index * 2 + 2;
     const hasLeftChild = hasRealNode(tree, leftIndex);
     const hasRightChild = hasRealNode(tree, rightIndex);
+    recursionStack.push(index);
 
     if (parentIndex === null) {
       const eventIndex = pushGuideEvent({ type: 'start', toIndex: index });
@@ -371,6 +385,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '1',
       });
     } else {
       const moveSide: BinaryTreeGuideMoveSide = entrySide === 'L' ? 'L' : 'R';
@@ -395,6 +410,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '1',
       });
     }
 
@@ -414,6 +430,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleD: index,
         guideRoleL: leftIndex,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '2',
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'L' });
@@ -428,6 +445,8 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleL: null,
         guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
+        recursionCheckpoint: '1',
+        recursionNullSide: 'L',
       });
 
       const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'L' });
@@ -442,6 +461,8 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleL: null,
         guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
+        recursionCheckpoint: '2',
+        recursionNullSide: 'L',
       });
     }
 
@@ -461,6 +482,7 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: rightIndex,
+        recursionCheckpoint: '3',
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'R' });
@@ -475,6 +497,8 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
+        recursionCheckpoint: '2',
+        recursionNullSide: 'R',
       });
 
       const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'R' });
@@ -489,8 +513,12 @@ function generatePreorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTra
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
+        recursionCheckpoint: '3',
+        recursionNullSide: 'R',
       });
     }
+
+    recursionStack.pop();
   };
 
   traverse(0, null, 'ROOT');
@@ -522,6 +550,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
   const visitedIndices: number[] = [];
   const outputOrder: number[] = [];
   const guideEvents: BinaryTreeGuideEvent[] = [];
+  const recursionStack: number[] = [];
 
   const pushStep = (config: Omit<CreateTraversalStepConfig, 'treeState' | 'mode' | 'visitedIndices' | 'outputOrder'>) => {
     steps.push(
@@ -532,6 +561,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         visitedIndices,
         outputOrder,
         guideEvents,
+        recursionStack,
       }),
     );
   };
@@ -570,6 +600,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
     const rightIndex = index * 2 + 2;
     const hasLeftChild = hasRealNode(tree, leftIndex);
     const hasRightChild = hasRealNode(tree, rightIndex);
+    recursionStack.push(index);
 
     if (parentIndex === null) {
       const eventIndex = pushGuideEvent({ type: 'start', toIndex: index });
@@ -583,6 +614,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '1',
       });
     } else {
       const moveSide: BinaryTreeGuideMoveSide = entrySide === 'L' ? 'L' : 'R';
@@ -605,6 +637,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '1',
       });
     }
 
@@ -626,6 +659,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleD: index,
         guideRoleL: leftIndex,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '2',
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'L' });
@@ -640,6 +674,8 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleL: null,
         guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
+        recursionCheckpoint: '1',
+        recursionNullSide: 'L',
       });
 
       const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'L' });
@@ -656,6 +692,8 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleL: null,
         guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
+        recursionCheckpoint: '2',
+        recursionNullSide: 'L',
       });
     }
 
@@ -675,6 +713,7 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: rightIndex,
+        recursionCheckpoint: '3',
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'R' });
@@ -689,6 +728,8 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
+        recursionCheckpoint: '2',
+        recursionNullSide: 'R',
       });
 
       const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'R' });
@@ -703,8 +744,12 @@ function generateInorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTrav
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
+        recursionCheckpoint: '3',
+        recursionNullSide: 'R',
       });
     }
+
+    recursionStack.pop();
   };
 
   traverse(0, null, 'ROOT');
@@ -736,6 +781,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
   const visitedIndices: number[] = [];
   const outputOrder: number[] = [];
   const guideEvents: BinaryTreeGuideEvent[] = [];
+  const recursionStack: number[] = [];
 
   const pushStep = (config: Omit<CreateTraversalStepConfig, 'treeState' | 'mode' | 'visitedIndices' | 'outputOrder'>) => {
     steps.push(
@@ -746,6 +792,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         visitedIndices,
         outputOrder,
         guideEvents,
+        recursionStack,
       }),
     );
   };
@@ -784,6 +831,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
     const rightIndex = index * 2 + 2;
     const hasLeftChild = hasRealNode(tree, leftIndex);
     const hasRightChild = hasRealNode(tree, rightIndex);
+    recursionStack.push(index);
 
     if (parentIndex === null) {
       const eventIndex = pushGuideEvent({ type: 'start', toIndex: index });
@@ -797,6 +845,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '1',
       });
     } else {
       const moveSide: BinaryTreeGuideMoveSide = entrySide === 'L' ? 'L' : 'R';
@@ -819,6 +868,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '1',
       });
     }
 
@@ -838,6 +888,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleD: index,
         guideRoleL: leftIndex,
         guideRoleR: hasRightChild ? rightIndex : null,
+        recursionCheckpoint: '2',
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'L' });
@@ -852,6 +903,8 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleL: null,
         guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
+        recursionCheckpoint: '1',
+        recursionNullSide: 'L',
       });
 
       const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'L' });
@@ -866,6 +919,8 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleL: null,
         guideRoleR: hasRightChild ? rightIndex : null,
         guideNull: { parentIndex: index, side: 'L' },
+        recursionCheckpoint: '2',
+        recursionNullSide: 'L',
       });
     }
 
@@ -887,6 +942,7 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleD: index,
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: rightIndex,
+        recursionCheckpoint: '3',
       });
     } else {
       const toNullEventIndex = pushGuideEvent({ type: 'toNull', fromIndex: index, side: 'R' });
@@ -901,6 +957,8 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
+        recursionCheckpoint: '2',
+        recursionNullSide: 'R',
       });
 
       const fromNullEventIndex = pushGuideEvent({ type: 'fromNull', toIndex: index, side: 'R' });
@@ -917,8 +975,12 @@ function generatePostorderGuideSteps(tree: BinaryTreeInputValue[]): BinaryTreeTr
         guideRoleL: hasLeftChild ? leftIndex : null,
         guideRoleR: null,
         guideNull: { parentIndex: index, side: 'R' },
+        recursionCheckpoint: '3',
+        recursionNullSide: 'R',
       });
     }
+
+    recursionStack.pop();
   };
 
   traverse(0, null, 'ROOT');

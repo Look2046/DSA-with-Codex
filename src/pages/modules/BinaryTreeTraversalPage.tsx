@@ -254,6 +254,154 @@ function getModeLabel(mode: BinaryTreeTraversalMode, t: ReturnType<typeof useI18
   return t('module.t01.mode.levelorder');
 }
 
+type RecursiveCodeLine = {
+  line: number;
+  text: string;
+};
+
+function buildRecursiveCodeLines(t: ReturnType<typeof useI18n>['t']): RecursiveCodeLine[] {
+  return [
+    { line: 1, text: t('module.t01.recursion.code.line1') },
+    { line: 2, text: t('module.t01.recursion.code.line2') },
+    { line: 3, text: t('module.t01.recursion.code.line3') },
+    { line: 4, text: t('module.t01.recursion.code.line4') },
+    { line: 5, text: t('module.t01.recursion.code.line5') },
+    { line: 6, text: t('module.t01.recursion.code.line6') },
+    { line: 7, text: t('module.t01.recursion.code.line7') },
+    { line: 8, text: t('module.t01.recursion.code.line8') },
+    { line: 9, text: t('module.t01.recursion.code.line9') },
+    { line: 10, text: t('module.t01.recursion.code.line10') },
+    { line: 11, text: t('module.t01.recursion.code.line11') },
+  ];
+}
+
+function getBacktrackSourceSide(step: BinaryTreeTraversalStep | undefined): 'L' | 'R' | null {
+  if (!step) {
+    return null;
+  }
+
+  if (step.action === 'backtrackFromNull') {
+    return step.guideNull?.side ?? step.recursionNullSide;
+  }
+
+  if (step.action !== 'backtrack' || step.activeGuideEventIndex === null) {
+    return null;
+  }
+
+  const event = step.guideEvents[step.activeGuideEventIndex];
+  if (!event || event.type !== 'move' || event.side !== 'UP') {
+    return null;
+  }
+
+  return event.fromIndex === getChildIndex(event.toIndex, 'L') ? 'L' : 'R';
+}
+
+function getRecursiveCodeActiveLines(
+  step: BinaryTreeTraversalStep | undefined,
+  mode: BinaryTreeTraversalMode,
+): number[] {
+  if (!step) {
+    return [];
+  }
+
+  if (step.action === 'guideStart' || step.action === 'descendLeft' || step.action === 'descendRight') {
+    return mode === 'preorder' ? [3, 4] : [3];
+  }
+
+  if (step.action === 'nullLeft') {
+    return [5, 2];
+  }
+
+  if (step.action === 'nullRight') {
+    return [8, 2];
+  }
+
+  if (step.action === 'visit') {
+    if (mode === 'inorder') {
+      return [6, 7];
+    }
+
+    if (mode === 'postorder') {
+      return [9, 10];
+    }
+
+    return [3, 4];
+  }
+
+  if (step.action === 'backtrack' || step.action === 'backtrackFromNull') {
+    const side = getBacktrackSourceSide(step);
+    if (side === 'L') {
+      return [6];
+    }
+    if (side === 'R') {
+      return [9];
+    }
+  }
+
+  return [];
+}
+
+function getRecursionCheckpointText(
+  checkpoint: TraceEntryMarker['label'] | null,
+  t: ReturnType<typeof useI18n>['t'],
+): string | null {
+  if (checkpoint === '1') {
+    return t('module.t01.recursion.point1');
+  }
+
+  if (checkpoint === '2') {
+    return t('module.t01.recursion.point2');
+  }
+
+  if (checkpoint === '3') {
+    return t('module.t01.recursion.point3');
+  }
+
+  return null;
+}
+
+function getRecursionStatusText(
+  step: BinaryTreeTraversalStep | undefined,
+  t: ReturnType<typeof useI18n>['t'],
+): string {
+  if (!step || step.action === 'initial') {
+    return t('module.t01.recursion.status.idle');
+  }
+
+  if (step.action === 'nullLeft') {
+    return t('module.t01.recursion.status.nullLeft');
+  }
+
+  if (step.action === 'nullRight') {
+    return t('module.t01.recursion.status.nullRight');
+  }
+
+  if (step.action === 'traversalDone' || step.action === 'completed') {
+    return t('module.t01.recursion.status.complete');
+  }
+
+  return getRecursionCheckpointText(step.recursionCheckpoint, t) ?? t('module.t01.recursion.status.idle');
+}
+
+function isRecursionVisitStep(
+  step: BinaryTreeTraversalStep | undefined,
+  mode: BinaryTreeTraversalMode,
+): boolean {
+  if (!step) {
+    return false;
+  }
+
+  if (mode === 'preorder') {
+    return step.action === 'guideStart' || step.action === 'descendLeft' || step.action === 'descendRight';
+  }
+
+  if (mode === 'inorder' || mode === 'postorder') {
+    return step.action === 'visit';
+  }
+
+  return false;
+}
+
 function getStepDescription(
   step: BinaryTreeTraversalStep | undefined,
   t: ReturnType<typeof useI18n>['t'],
@@ -1871,6 +2019,7 @@ export function BinaryTreeTraversalPage() {
   const [treeShapeMode, setTreeShapeMode] = useState<BinaryTreeShapeMode>('complete');
   const [mode, setMode] = useState<BinaryTreeTraversalMode>('preorder');
   const [valueDisplayMode, setValueDisplayMode] = useState<ValueDisplayMode>('number');
+  const [showRecursionView, setShowRecursionView] = useState(false);
   const [inputData, setInputData] = useState<BinaryTreeInputValue[]>(() => createBinaryTreeDataset(DEFAULT_SIZE, 'complete'));
   const [stageSize, setStageSize] = useState({ width: DEFAULT_STAGE_WIDTH, height: DEFAULT_STAGE_HEIGHT });
   const [traceVisibleLength, setTraceVisibleLength] = useState(0);
@@ -2041,6 +2190,13 @@ export function BinaryTreeTraversalPage() {
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
   const roleLabelMap = useMemo(() => buildRoleLabelMap(currentSnapshot, treeState), [currentSnapshot, treeState]);
+  const supportsRecursionView = mode !== 'levelorder';
+  const isRecursionViewOpen = supportsRecursionView && showRecursionView;
+  const recursiveCodeLines = useMemo(() => buildRecursiveCodeLines(t), [t]);
+  const recursiveCodeActiveLines = useMemo(
+    () => (supportsRecursionView ? getRecursiveCodeActiveLines(currentSnapshot, mode) : []),
+    [currentSnapshot, mode, supportsRecursionView],
+  );
   const valueLabelMap = useMemo(() => {
     const sortedUnique = Array.from(
       new Set(inputData.filter((value): value is number => value !== null)),
@@ -2077,6 +2233,25 @@ export function BinaryTreeTraversalPage() {
         valueDisplayMode === 'number' ? String(value) : (valueLabelMap.get(value) ?? String(value)),
       ),
     [currentSnapshot?.outputOrder, guideOutputOrder, valueDisplayMode, valueLabelMap],
+  );
+  const recursionStatusText = useMemo(
+    () => (supportsRecursionView ? getRecursionStatusText(currentSnapshot, t) : ''),
+    [currentSnapshot, supportsRecursionView, t],
+  );
+  const recursionVisitPointText = useMemo(
+    () => getRecursionCheckpointText(guideVisitMarkerLabel, t),
+    [guideVisitMarkerLabel, t],
+  );
+  const recursionStackEntries = useMemo(
+    () =>
+      supportsRecursionView
+        ? (currentSnapshot?.recursionStack ?? []).map((nodeIndex, depth) => ({
+          nodeIndex,
+          depth,
+          value: treeState[nodeIndex],
+        }))
+        : [],
+    [currentSnapshot?.recursionStack, supportsRecursionView, treeState],
   );
   const nullHints = useMemo(() => buildNullHints(currentSnapshot, treeState), [currentSnapshot, treeState]);
   const nullEdges = useMemo(() => {
@@ -2251,6 +2426,9 @@ export function BinaryTreeTraversalPage() {
               className={mode === option ? 'speed-active' : ''}
               onClick={() => {
                 setMode(option);
+                if (option === 'levelorder') {
+                  setShowRecursionView(false);
+                }
                 reset();
               }}
             >
@@ -2552,7 +2730,96 @@ export function BinaryTreeTraversalPage() {
         <button type="button" onClick={reset} disabled={steps.length === 0}>
           {t('playback.reset')}
         </button>
+        <button type="button" onClick={() => setShowRecursionView((value) => !value)} disabled={!supportsRecursionView}>
+          {isRecursionViewOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
+        </button>
       </div>
+
+      {isRecursionViewOpen ? (
+        <div className="tree-recursion-panel" aria-live="polite">
+          <div className="tree-recursion-header">
+            <div>
+              <h3>{t('module.t01.recursion.title')}</h3>
+              <p>{t('module.t01.recursion.body')}</p>
+            </div>
+            <div className="tree-recursion-status-block">
+              <span className="tree-recursion-status-label">{t('module.t01.recursion.status.label')}</span>
+              <strong>{recursionStatusText}</strong>
+              {isRecursionVisitStep(currentSnapshot, mode) &&
+              currentSnapshot?.recursionCheckpoint !== null &&
+              currentSnapshot?.recursionCheckpoint === guideVisitMarkerLabel ? (
+                <span className="tree-recursion-visit-now">{t('module.t01.recursion.status.visitNow')}</span>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="tree-recursion-points" aria-hidden="true">
+            {(['1', '2', '3'] as const).map((checkpoint) => {
+              const pointText = getRecursionCheckpointText(checkpoint, t) ?? checkpoint;
+              const isCurrent = currentSnapshot?.recursionCheckpoint === checkpoint;
+              const isVisitPoint = guideVisitMarkerLabel === checkpoint;
+              return (
+                <span
+                  key={checkpoint}
+                  className={`tree-recursion-point${isCurrent ? ' tree-recursion-point-current' : ''}${isVisitPoint ? ' tree-recursion-point-visit' : ''}`}
+                >
+                  <strong>{checkpoint}</strong>
+                  <span>{pointText}</span>
+                </span>
+              );
+            })}
+          </div>
+
+          <div className="tree-recursion-grid">
+            <div className="tree-recursion-card">
+              <div className="tree-recursion-card-head">
+                <span>{t('module.t01.recursion.code.title')}</span>
+                {recursionVisitPointText ? <span className="tree-recursion-card-note">{recursionVisitPointText}</span> : null}
+              </div>
+              <ol className="tree-recursion-code-list">
+                {recursiveCodeLines.map((item) => (
+                  <li key={item.line} className={recursiveCodeActiveLines.includes(item.line) ? 'code-active' : ''}>
+                    {item.text}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="tree-recursion-card">
+              <div className="tree-recursion-card-head">
+                <span>{t('module.t01.recursion.stack.title')}</span>
+                <span className="tree-recursion-card-note">{t('module.t01.recursion.stack.subtitle')}</span>
+              </div>
+              {recursionStackEntries.length === 0 ? (
+                <p className="tree-recursion-stack-empty">{t('module.t01.recursion.stack.empty')}</p>
+              ) : (
+                <ol className="tree-recursion-stack-list">
+                  {recursionStackEntries.map((entry, index) => {
+                    const isCurrentFrame = index === recursionStackEntries.length - 1;
+                    return (
+                      <li
+                        key={`${entry.nodeIndex}-${entry.depth}`}
+                        className={`tree-recursion-stack-item${isCurrentFrame ? ' tree-recursion-stack-item-current' : ''}`}
+                      >
+                        <span className="tree-recursion-stack-depth">
+                          {t('module.t01.recursion.stack.depth')} {entry.depth}
+                        </span>
+                        <span className="tree-recursion-stack-call">
+                          traverse({formatDisplayValue(entry.value)})
+                          <span className="tree-recursion-stack-index">#{entry.nodeIndex}</span>
+                        </span>
+                        {isCurrentFrame ? (
+                          <span className="tree-recursion-stack-current">{t('module.t01.recursion.stack.current')}</span>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="pseudocode-block">
         <h3>{t('module.s01.pseudocode')}</h3>

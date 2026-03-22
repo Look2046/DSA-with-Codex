@@ -51,6 +51,23 @@ describe('generateBinaryTreeTraversalSteps', () => {
     expect(steps.some((step) => step.guideEvents.length > 0)).toBe(true);
   });
 
+  it('tracks recursion stack checkpoints for preorder/inorder/postorder', () => {
+    const preorder = generateBinaryTreeTraversalSteps(FIXED_TREE, 'preorder');
+    const inorder = generateBinaryTreeTraversalSteps(FIXED_TREE, 'inorder');
+    const postorder = generateBinaryTreeTraversalSteps(FIXED_TREE, 'postorder');
+
+    const preorderEnter = preorder.find((step) => step.action === 'guideStart');
+    const inorderVisit = inorder.find((step) => step.action === 'visit');
+    const postorderVisit = postorder.find((step) => step.action === 'visit');
+
+    expect(preorderEnter?.recursionStack).toEqual([0]);
+    expect(preorderEnter?.recursionCheckpoint).toBe('1');
+    expect(inorderVisit?.recursionStack).toEqual([0, 1, 3]);
+    expect(inorderVisit?.recursionCheckpoint).toBe('2');
+    expect(postorderVisit?.recursionStack).toEqual([0, 1, 3]);
+    expect(postorderVisit?.recursionCheckpoint).toBe('3');
+  });
+
   it('inorder includes guide actions and visits nodes on the second encounter', () => {
     const steps = generateBinaryTreeTraversalSteps(FIXED_TREE, 'inorder');
     const firstVisit = steps.find((step) => step.action === 'visit');
