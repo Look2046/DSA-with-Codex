@@ -80,6 +80,35 @@ describe('generateBinaryTreeTraversalSteps', () => {
     expect(inorder.at(-1)?.guideEvents).toEqual(preorder.at(-1)?.guideEvents);
   });
 
+  it('postorder includes guide actions and visits nodes on the third encounter', () => {
+    const steps = generateBinaryTreeTraversalSteps(FIXED_TREE, 'postorder');
+    const firstVisit = steps.find((step) => step.action === 'visit');
+
+    expect(steps.some((step) => step.action === 'guideStart')).toBe(true);
+    expect(steps.some((step) => step.action === 'descendLeft')).toBe(true);
+    expect(steps.some((step) => step.action === 'descendRight')).toBe(true);
+    expect(steps.some((step) => step.action === 'nullLeft')).toBe(true);
+    expect(steps.some((step) => step.action === 'nullRight')).toBe(true);
+    expect(steps.some((step) => step.action === 'backtrack')).toBe(true);
+    expect(steps.some((step) => step.action === 'backtrackFromNull')).toBe(true);
+    expect(steps.some((step) => step.guideEvents.length > 0)).toBe(true);
+    expect(firstVisit?.currentIndex).toBe(3);
+    expect(firstVisit?.outputOrder).toEqual([4]);
+
+    const firstVisitEvent =
+      firstVisit?.activeGuideEventIndex === null || firstVisit?.activeGuideEventIndex === undefined
+        ? null
+        : firstVisit.guideEvents[firstVisit.activeGuideEventIndex];
+    expect(firstVisitEvent).toEqual({ type: 'fromNull', toIndex: 3, side: 'R' });
+  });
+
+  it('postorder reuses the same canonical guide route as preorder', () => {
+    const preorder = generateBinaryTreeTraversalSteps(FIXED_TREE, 'preorder');
+    const postorder = generateBinaryTreeTraversalSteps(FIXED_TREE, 'postorder');
+
+    expect(postorder.at(-1)?.guideEvents).toEqual(preorder.at(-1)?.guideEvents);
+  });
+
   it('handles empty input with initial and completed steps', () => {
     const steps = generateBinaryTreeTraversalSteps([], 'inorder');
 
