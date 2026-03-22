@@ -2,6 +2,42 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-23 (P8-M3 T-01 level-order algorithm window + queue view)
+
+### Today Done
+- Fixed `T-01` level-order mode on `feat/p8-m3-route-rules-spike`:
+  - null-child nodes/edges and the null legend are now hidden in level-order mode
+  - level-order trace now threads only through real nodes in BFS order instead of reusing the recursion-oriented null-aware route presentation
+  - the floating panel is now positioned as a generic algorithm window rather than recursion-only wording
+- Added level-order teaching content to the floating window:
+  - level-order mode can now open the floating algorithm window correctly
+  - window content switches to queue-state playback + queue-specific pseudocode for level-order mode
+  - stepping the timeline now updates both the current dequeued node and the remaining queue inside the floating window
+- Verified locally:
+  - `./scripts/check-doc-links.sh` pass (2026-03-23)
+  - `eslint` pass via direct node entry (2026-03-23)
+  - `tsc -b` pass via direct node entry (2026-03-23)
+  - Playwright browser check confirms level-order mode shows `0` `.tree-null-node` elements and `0` null-legend items
+  - Playwright browser check confirms the algorithm window opens in level-order mode and the queue panel updates after one `Next` step (`89#0` current, queue becomes `90#1`, `61#2`)
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: level-order code/docs updates in progress; legacy script mode changes still present in working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest level-order work not committed yet
+
+### Remaining Focus (Next Session)
+- Continue `P8-M3` consistency/acceptance closure:
+  - get user feedback on the new level-order threading trace aesthetics
+  - align `T-01` / `T-02` controls, legend semantics, and status layout
+  - refresh `/modules` + implemented-route acceptance artifacts/report
+  - sync closure docs after acceptance refresh
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m3-route-rules-spike
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-23 (P8-M3 T-01 floating recursion panel)
 
 ### Today Done

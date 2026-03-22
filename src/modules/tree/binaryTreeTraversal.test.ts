@@ -38,6 +38,15 @@ describe('generateBinaryTreeTraversalSteps', () => {
     expect(steps.some((step) => step.action === 'traversalDone')).toBe(true);
   });
 
+  it('tracks queue state during level-order traversal', () => {
+    const steps = generateBinaryTreeTraversalSteps(SPARSE_TREE, 'levelorder');
+    const visitSteps = steps.filter((step) => step.action === 'visit');
+
+    expect(steps[0]?.queueState).toEqual([0]);
+    expect(visitSteps.map((step) => step.currentIndex)).toEqual([0, 1, 2, 4, 6]);
+    expect(visitSteps.map((step) => step.queueState)).toEqual([[1, 2], [2, 4], [4, 6], [6], []]);
+  });
+
   it('preorder includes guide actions for descend/null/backtrack flow', () => {
     const steps = generateBinaryTreeTraversalSteps(FIXED_TREE, 'preorder');
 

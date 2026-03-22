@@ -46,6 +46,7 @@ export type BinaryTreeTraversalStep = AnimationStep & {
   recursionStack: number[];
   recursionCheckpoint: BinaryTreeRecursionCheckpoint | null;
   recursionNullSide: 'L' | 'R' | null;
+  queueState: number[];
 };
 
 function cloneArray<T>(values: T[]): T[] {
@@ -75,6 +76,7 @@ type CreateTraversalStepConfig = {
   recursionStack?: number[];
   recursionCheckpoint?: BinaryTreeRecursionCheckpoint | null;
   recursionNullSide?: 'L' | 'R' | null;
+  queueState?: number[];
 };
 
 function createStep(config: CreateTraversalStepConfig): BinaryTreeTraversalStep {
@@ -98,6 +100,7 @@ function createStep(config: CreateTraversalStepConfig): BinaryTreeTraversalStep 
     recursionStack: cloneArray(config.recursionStack ?? []),
     recursionCheckpoint: config.recursionCheckpoint ?? null,
     recursionNullSide: config.recursionNullSide ?? null,
+    queueState: cloneArray(config.queueState ?? []),
   };
 }
 
@@ -309,6 +312,106 @@ function generateSimpleTraversalSteps(tree: BinaryTreeInputValue[], mode: Binary
       outputOrder,
     }),
   );
+
+  return steps;
+}
+
+function generateLevelorderSteps(tree: BinaryTreeInputValue[]): BinaryTreeTraversalStep[] {
+  const mode: BinaryTreeTraversalMode = 'levelorder';
+  const steps: BinaryTreeTraversalStep[] = [];
+  const visitedIndices: number[] = [];
+  const outputOrder: number[] = [];
+  const queueState: number[] = hasRealNode(tree, 0) ? [0] : [];
+
+  const pushStep = (
+    config: Omit<CreateTraversalStepConfig, 'treeState' | 'mode' | 'visitedIndices' | 'outputOrder'>,
+  ) => {
+    steps.push(
+      createStep({
+        ...config,
+        treeState: tree,
+        mode,
+        visitedIndices,
+        outputOrder,
+        queueState,
+      }),
+    );
+  };
+
+  pushStep({
+    action: 'initial',
+    codeLines: hasRealNode(tree, 0) ? [1, 2, 3] : [1],
+    highlights: [],
+    currentIndex: null,
+    currentValue: null,
+  });
+
+  if (!hasRealNode(tree, 0)) {
+    pushStep({
+      action: 'completed',
+      codeLines: [9],
+      highlights: [],
+      currentIndex: null,
+      currentValue: null,
+    });
+    return steps;
+  }
+
+  while (queueState.length > 0) {
+    const currentIndex = queueState.shift();
+    if (currentIndex === undefined || !hasRealNode(tree, currentIndex)) {
+      continue;
+    }
+
+    const currentValue = getNodeValue(tree, currentIndex);
+    const leftIndex = currentIndex * 2 + 1;
+    const rightIndex = currentIndex * 2 + 2;
+    const hasLeftChild = hasRealNode(tree, leftIndex);
+    const hasRightChild = hasRealNode(tree, rightIndex);
+    const codeLines = [3, 4, 5];
+
+    if (hasLeftChild) {
+      queueState.push(leftIndex);
+      codeLines.push(6);
+    }
+
+    if (hasRightChild) {
+      queueState.push(rightIndex);
+      codeLines.push(7);
+    }
+
+    visitedIndices.push(currentIndex);
+    outputOrder.push(currentValue);
+
+    pushStep({
+      action: 'visit',
+      codeLines,
+      highlights: [{ index: currentIndex, type: 'visiting' }],
+      currentIndex,
+      currentValue,
+      guideRoleD: null,
+      guideRoleL: null,
+      guideRoleR: null,
+    });
+  }
+
+  const doneHighlights = visitedIndices.map((index) => ({ index, type: 'matched' as const }));
+
+  pushStep({
+    action: 'traversalDone',
+    codeLines: [8],
+    highlights: doneHighlights,
+    currentIndex: null,
+    currentValue: null,
+  });
+
+  pushStep({
+    action: 'completed',
+    codeLines: [9],
+    highlights: doneHighlights,
+    currentIndex: null,
+    currentValue: null,
+  });
 
   return steps;
 }
@@ -1019,6 +1122,10 @@ export function generateBinaryTreeTraversalSteps(input: BinaryTreeInputValue[], 
 
   if (mode === 'postorder') {
     return generatePostorderGuideSteps(tree);
+  }
+
+  if (mode === 'levelorder') {
+    return generateLevelorderSteps(tree);
   }
 
   return generateSimpleTraversalSteps(tree, mode);

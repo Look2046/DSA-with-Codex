@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useCurrentModule } from '../../hooks/useCurrentModule';
@@ -400,6 +400,8 @@ type RecursiveCodeSpec = {
   returnLine: number;
 };
 
+type AlgorithmCodeVariant = RecursiveCodeVariant | 'levelorder';
+
 const RECURSIVE_CODE_LINE_KEYS = {
   preorder: [
     'module.t01.recursion.code.preorder.line1',
@@ -427,6 +429,25 @@ const RECURSIVE_CODE_LINE_KEYS = {
   ],
 } as const;
 
+const LEVELORDER_CODE_LINE_KEYS = [
+  'module.t01.levelorder.code.line1',
+  'module.t01.levelorder.code.line2',
+  'module.t01.levelorder.code.line3',
+  'module.t01.levelorder.code.line4',
+  'module.t01.levelorder.code.line5',
+  'module.t01.levelorder.code.line6',
+  'module.t01.levelorder.code.line7',
+  'module.t01.levelorder.code.line8',
+] as const;
+
+function getAlgorithmCodeVariant(mode: BinaryTreeTraversalMode): AlgorithmCodeVariant {
+  if (mode === 'levelorder') {
+    return 'levelorder';
+  }
+
+  return getRecursiveCodeVariant(mode);
+}
+
 function getRecursiveCodeVariant(mode: BinaryTreeTraversalMode): RecursiveCodeVariant {
   if (mode === 'inorder' || mode === 'postorder') {
     return mode;
@@ -445,6 +466,22 @@ function buildRecursiveCodeLines(
     line: index + 1,
     text: t(key),
   }));
+}
+
+function buildAlgorithmCodeLines(
+  mode: BinaryTreeTraversalMode,
+  t: ReturnType<typeof useI18n>['t'],
+): RecursiveCodeLine[] {
+  const variant = getAlgorithmCodeVariant(mode);
+
+  if (variant === 'levelorder') {
+    return LEVELORDER_CODE_LINE_KEYS.map((key, index) => ({
+      line: index + 1,
+      text: t(key),
+    }));
+  }
+
+  return buildRecursiveCodeLines(mode, t);
 }
 
 function getRecursiveCodeSpec(mode: BinaryTreeTraversalMode): RecursiveCodeSpec {
@@ -546,6 +583,46 @@ function getRecursiveCodeActiveLines(
   return [];
 }
 
+function getLevelorderCodeActiveLines(step: BinaryTreeTraversalStep | undefined, treeState: BinaryTreeInputValue[]): number[] {
+  if (!step) {
+    return [];
+  }
+
+  if (step.action === 'initial') {
+    return step.queueState.length > 0 ? [1, 2, 3] : [1];
+  }
+
+  if (step.action === 'visit' && step.currentIndex !== null) {
+    const currentIndex = step.currentIndex;
+    const codeLines = [3, 4, 5];
+    if (hasTreeNode(treeState, currentIndex * 2 + 1)) {
+      codeLines.push(6);
+    }
+    if (hasTreeNode(treeState, currentIndex * 2 + 2)) {
+      codeLines.push(7);
+    }
+    return codeLines;
+  }
+
+  if (step.action === 'traversalDone' || step.action === 'completed') {
+    return [8];
+  }
+
+  return [];
+}
+
+function getAlgorithmCodeActiveLines(
+  step: BinaryTreeTraversalStep | undefined,
+  mode: BinaryTreeTraversalMode,
+  treeState: BinaryTreeInputValue[],
+): number[] {
+  if (mode === 'levelorder') {
+    return getLevelorderCodeActiveLines(step, treeState);
+  }
+
+  return getRecursiveCodeActiveLines(step, mode);
+}
+
 function getRecursionCheckpointText(
   checkpoint: TraceEntryMarker['label'] | null,
   t: ReturnType<typeof useI18n>['t'],
@@ -586,6 +663,40 @@ function getRecursionStatusText(
   }
 
   return getRecursionCheckpointText(step.recursionCheckpoint, t) ?? t('module.t01.recursion.status.idle');
+}
+
+function getLevelorderStatusText(
+  step: BinaryTreeTraversalStep | undefined,
+  t: ReturnType<typeof useI18n>['t'],
+  formatValue: (value: number | null | undefined) => string,
+): string {
+  if (!step || step.action === 'initial') {
+    return step?.queueState.length ? t('module.t01.levelorder.status.ready') : t('module.t01.levelorder.status.idle');
+  }
+
+  if (step.action === 'visit') {
+    const currentLabel = formatValue(step.currentValue);
+    return `${t('module.t01.levelorder.status.processing')} ${currentLabel} · ${t('module.t01.levelorder.status.queueSize')} ${step.queueState.length}`;
+  }
+
+  if (step.action === 'traversalDone' || step.action === 'completed') {
+    return t('module.t01.levelorder.status.complete');
+  }
+
+  return t('module.t01.levelorder.status.ready');
+}
+
+function getAlgorithmStatusText(
+  step: BinaryTreeTraversalStep | undefined,
+  mode: BinaryTreeTraversalMode,
+  t: ReturnType<typeof useI18n>['t'],
+  formatValue: (value: number | null | undefined) => string,
+): string {
+  if (mode === 'levelorder') {
+    return getLevelorderStatusText(step, t, formatValue);
+  }
+
+  return getRecursionStatusText(step, t);
 }
 
 function isRecursionVisitStep(
@@ -1373,6 +1484,101 @@ function buildGuideRawTraceSegments(
   return segments;
 }
 
+function buildNodeShellLineSegment(
+  fromCenter: NodePoint,
+  toCenter: NodePoint,
+  geometry: TraceGeometry,
+): { start: NodePoint; end: NodePoint } {
+  const fromMetric = toMetricPoint(fromCenter, geometry.aspect);
+  const toMetric = toMetricPoint(toCenter, geometry.aspect);
+  const direction = normalizeDirection(toMetric.x - fromMetric.x, toMetric.y - fromMetric.y, 0, 1);
+
+  const startMetric = {
+    x: fromMetric.x + direction.x * geometry.nodeShellRadius,
+    y: fromMetric.y + direction.y * geometry.nodeShellRadius,
+  };
+  const endMetric = {
+    x: toMetric.x - direction.x * geometry.nodeShellRadius,
+    y: toMetric.y - direction.y * geometry.nodeShellRadius,
+  };
+
+  return {
+    start: fromMetricPoint(startMetric, geometry.aspect),
+    end: fromMetricPoint(endMetric, geometry.aspect),
+  };
+}
+
+function pickShortArcDirection(center: NodePoint, fromPoint: NodePoint, toPoint: NodePoint, aspect: number): ArcDirection {
+  const fromAngle = getPointAngleAroundCenter(fromPoint, center, aspect);
+  const toAngle = getPointAngleAroundCenter(toPoint, center, aspect);
+  const ccwDelta = normalizePositiveAngle(fromAngle - toAngle);
+  const cwDelta = normalizePositiveAngle(toAngle - fromAngle);
+  return ccwDelta <= cwDelta ? 'ccw' : 'cw';
+}
+
+function buildLevelorderRawTraceSegments(
+  step: BinaryTreeTraversalStep,
+  nodePositions: NodePoint[],
+  geometry: TraceGeometry,
+): RawTraversalTraceSegment[] {
+  const visitedIndices = step.visitedIndices.filter((index) => hasTreeNode(step.treeState, index));
+  if (visitedIndices.length === 0) {
+    return [];
+  }
+
+  const firstCenter = getNodeCenter(nodePositions, visitedIndices[0]);
+  if (!firstCenter) {
+    return [];
+  }
+
+  const segments: RawTraversalTraceSegment[] = [];
+  const rootEntryAnchor = getRootTopEntryAnchor(firstCenter, geometry);
+  const rootEntryStart = getRootTopEntryStart(rootEntryAnchor, geometry);
+  segments.push(
+    createRawLineTraceSegment({
+      key: 'levelorder-entry',
+      fromPoint: rootEntryStart,
+      toPoint: rootEntryAnchor,
+      isActive: step.action === 'visit' && visitedIndices.length === 1,
+      targetIndex: visitedIndices[0],
+      geometry,
+    }),
+  );
+
+  let penPoint = rootEntryAnchor;
+
+  for (let index = 1; index < visitedIndices.length; index += 1) {
+    const fromIndex = visitedIndices[index - 1];
+    const toIndex = visitedIndices[index];
+    const fromCenter = getNodeCenter(nodePositions, fromIndex);
+    const toCenter = getNodeCenter(nodePositions, toIndex);
+
+    if (!fromCenter || !toCenter) {
+      continue;
+    }
+
+    const line = buildNodeShellLineSegment(fromCenter, toCenter, geometry);
+    const connectorDirection = pickShortArcDirection(fromCenter, penPoint, line.start, geometry.aspect);
+
+    const segment = buildLineLikeTraceSegment({
+      key: `levelorder-${fromIndex}-${toIndex}-${index}`,
+      isActive: step.action === 'visit' && index === visitedIndices.length - 1,
+      targetIndex: toIndex,
+      penPoint,
+      pivotCenter: fromCenter,
+      pivotRadius: geometry.nodeShellRadius,
+      lineStart: line.start,
+      lineEnd: line.end,
+      geometry,
+      connectorDirection,
+    });
+    segments.push(segment);
+    penPoint = segment.toPoint;
+  }
+
+  return segments;
+}
+
 function buildFallbackRawTraceSegments(
   visitedIndices: number[],
   active: boolean,
@@ -1444,6 +1650,10 @@ function buildRawTraceSegments(
 ): RawTraversalTraceSegment[] {
   if (!step || nodePositions.length === 0) {
     return [];
+  }
+
+  if (step.mode === 'levelorder') {
+    return buildLevelorderRawTraceSegments(step, nodePositions, geometry);
   }
 
   return step.guideEvents.length > 0
@@ -2158,6 +2368,10 @@ function buildParallelGuideSegments(
 function buildRoleLabelMap(step: BinaryTreeTraversalStep | undefined, treeState: BinaryTreeInputValue[]): Map<number, string[]> {
   const map = new Map<number, string[]>();
 
+  if (step?.mode === 'levelorder') {
+    return map;
+  }
+
   const addRole = (index: number | null, role: string) => {
     if (index === null || !hasTreeNode(treeState, index)) {
       return;
@@ -2186,7 +2400,7 @@ function buildRoleLabelMap(step: BinaryTreeTraversalStep | undefined, treeState:
 }
 
 function buildNullHints(step: BinaryTreeTraversalStep | undefined, treeState: BinaryTreeInputValue[]): BinaryTreeGuideNullHint[] {
-  if (!step || step.action === 'initial') {
+  if (!step || step.action === 'initial' || step.mode === 'levelorder') {
     return [];
   }
 
@@ -2401,12 +2615,13 @@ export function BinaryTreeTraversalPage() {
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
   const roleLabelMap = useMemo(() => buildRoleLabelMap(currentSnapshot, treeState), [currentSnapshot, treeState]);
-  const supportsRecursionView = mode !== 'levelorder';
-  const isRecursionViewOpen = supportsRecursionView && showRecursionView;
-  const recursiveCodeLines = useMemo(() => buildRecursiveCodeLines(mode, t), [mode, t]);
-  const recursiveCodeActiveLines = useMemo(
-    () => (supportsRecursionView ? getRecursiveCodeActiveLines(currentSnapshot, mode) : []),
-    [currentSnapshot, mode, supportsRecursionView],
+  const isLevelorderMode = mode === 'levelorder';
+  const supportsAlgorithmWindow = true;
+  const isAlgorithmWindowOpen = supportsAlgorithmWindow && showRecursionView;
+  const algorithmCodeLines = useMemo(() => buildAlgorithmCodeLines(mode, t), [mode, t]);
+  const algorithmCodeActiveLines = useMemo(
+    () => getAlgorithmCodeActiveLines(currentSnapshot, mode, treeState),
+    [currentSnapshot, mode, treeState],
   );
   const valueLabelMap = useMemo(() => {
     const sortedUnique = Array.from(
@@ -2415,15 +2630,18 @@ export function BinaryTreeTraversalPage() {
     return new Map(sortedUnique.map((value, index) => [value, toAlphabetLabel(index)]));
   }, [inputData]);
 
-  const formatDisplayValue = (value: number | null | undefined): string => {
-    if (value === null || value === undefined) {
-      return '-';
-    }
-    if (valueDisplayMode === 'number') {
-      return String(value);
-    }
-    return valueLabelMap.get(value) ?? String(value);
-  };
+  const formatDisplayValue = useCallback(
+    (value: number | null | undefined): string => {
+      if (value === null || value === undefined) {
+        return '-';
+      }
+      if (valueDisplayMode === 'number') {
+        return String(value);
+      }
+      return valueLabelMap.get(value) ?? String(value);
+    },
+    [valueDisplayMode, valueLabelMap],
+  );
 
   const guideOutputOrder = useMemo(() => {
     if (guideVisitMarkerLabel === null) {
@@ -2445,31 +2663,52 @@ export function BinaryTreeTraversalPage() {
       ),
     [currentSnapshot?.outputOrder, guideOutputOrder, valueDisplayMode, valueLabelMap],
   );
-  const recursionStatusText = useMemo(
-    () => (supportsRecursionView ? getRecursionStatusText(currentSnapshot, t) : ''),
-    [currentSnapshot, supportsRecursionView, t],
+  const algorithmStatusText = useMemo(
+    () => getAlgorithmStatusText(currentSnapshot, mode, t, formatDisplayValue),
+    [currentSnapshot, formatDisplayValue, mode, t],
   );
   const recursionVisitPointText = useMemo(
     () => getRecursionCheckpointText(guideVisitMarkerLabel, t),
     [guideVisitMarkerLabel, t],
   );
-  const recursionCodeNote = useMemo(() => {
+  const algorithmCodeNote = (() => {
     const notes = [`${t('module.t01.meta.mode')}: ${modeLabel}`];
-    if (recursionVisitPointText) {
+    if (!isLevelorderMode && recursionVisitPointText) {
       notes.push(recursionVisitPointText);
     }
+    if (isLevelorderMode && currentSnapshot?.queueState) {
+      notes.push(`${t('module.t01.levelorder.queue.count')}: ${currentSnapshot.queueState.length}`);
+    }
     return notes.join(' · ');
-  }, [modeLabel, recursionVisitPointText, t]);
+  })();
   const recursionStackEntries = useMemo(
     () =>
-      supportsRecursionView
+      !isLevelorderMode
         ? (currentSnapshot?.recursionStack ?? []).map((nodeIndex, depth) => ({
           nodeIndex,
           depth,
           value: treeState[nodeIndex],
         }))
         : [],
-    [currentSnapshot?.recursionStack, supportsRecursionView, treeState],
+    [currentSnapshot?.recursionStack, isLevelorderMode, treeState],
+  );
+  const levelorderQueueEntries = useMemo(
+    () =>
+      isLevelorderMode
+        ? (currentSnapshot?.queueState ?? []).map((nodeIndex) => ({
+          nodeIndex,
+          value: treeState[nodeIndex],
+        }))
+        : [],
+    [currentSnapshot?.queueState, isLevelorderMode, treeState],
+  );
+  const algorithmWindowBody = useMemo(
+    () => (isLevelorderMode ? t('module.t01.window.body.levelorder') : t('module.t01.window.body.recursion')),
+    [isLevelorderMode, t],
+  );
+  const algorithmCodeTitle = useMemo(
+    () => (isLevelorderMode ? t('module.t01.levelorder.code.title') : t('module.t01.recursion.code.title')),
+    [isLevelorderMode, t],
   );
   const nullHints = useMemo(() => buildNullHints(currentSnapshot, treeState), [currentSnapshot, treeState]);
   const nullEdges = useMemo(() => {
@@ -2664,11 +2903,11 @@ export function BinaryTreeTraversalPage() {
   };
 
   const toggleRecursionView = () => {
-    if (!supportsRecursionView) {
+    if (!supportsAlgorithmWindow) {
       return;
     }
 
-    if (isRecursionViewOpen) {
+    if (isAlgorithmWindowOpen) {
       setRecursionPanelInteraction(null);
       setShowRecursionView(false);
       return;
@@ -2788,10 +3027,6 @@ export function BinaryTreeTraversalPage() {
               className={mode === option ? 'speed-active' : ''}
               onClick={() => {
                 setMode(option);
-                if (option === 'levelorder') {
-                  setRecursionPanelInteraction(null);
-                  setShowRecursionView(false);
-                }
                 reset();
               }}
             >
@@ -2933,31 +3168,35 @@ export function BinaryTreeTraversalPage() {
             })}
           </svg>
 
-          <svg className="tree-null-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            {nullEdges.map((edge) => (
-              <path key={edge.key} className="tree-null-edge" d={edge.d} />
-            ))}
-          </svg>
+          {!isLevelorderMode ? (
+            <>
+              <svg className="tree-null-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                {nullEdges.map((edge) => (
+                  <path key={edge.key} className="tree-null-edge" d={edge.d} />
+                ))}
+              </svg>
 
-          <div className="tree-null-layer" aria-hidden="true">
-            {nullHints.map((hint) => {
-              const point = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep);
+              <div className="tree-null-layer" aria-hidden="true">
+                {nullHints.map((hint) => {
+                  const point = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep);
 
-              const isActiveNull =
-                currentSnapshot?.guideNull?.parentIndex === hint.parentIndex && currentSnapshot?.guideNull?.side === hint.side;
+                  const isActiveNull =
+                    currentSnapshot?.guideNull?.parentIndex === hint.parentIndex && currentSnapshot?.guideNull?.side === hint.side;
 
-              return (
-                <div
-                  key={`${hint.parentIndex}-${hint.side}`}
-                  className={`tree-null-node${isActiveNull ? ' tree-null-active' : ''}`}
-                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                >
-                  <span className="tree-null-value">null</span>
-                  <span className="tree-null-side">{hint.side}</span>
-                </div>
-              );
-            })}
-          </div>
+                  return (
+                    <div
+                      key={`${hint.parentIndex}-${hint.side}`}
+                      className={`tree-null-node${isActiveNull ? ' tree-null-active' : ''}`}
+                      style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                    >
+                      <span className="tree-null-value">null</span>
+                      <span className="tree-null-side">{hint.side}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
 
           <div className="tree-trace-entry-marker-layer" aria-hidden="true">
             {traceEntryMarkersWithReveal.map((marker) => {
@@ -2995,15 +3234,19 @@ export function BinaryTreeTraversalPage() {
                   currentSnapshot.action === 'descendRight' ||
                   currentSnapshot.action === 'visit');
               const isGuideVisited = guideTraceSourceStep ? guideVisitedNodeSet.has(index) : false;
+              const isLevelorderCurrent =
+                isLevelorderMode &&
+                currentSnapshot?.currentIndex === index &&
+                currentSnapshot.action === 'visit';
               const isVisited =
                 guideTraceSourceStep
                   ? isGuideVisited
-                  : visitedSet.has(index) || shouldMarkVisitedOnArrive;
+                  : visitedSet.has(index) || (!isLevelorderCurrent && shouldMarkVisitedOnArrive);
               const isCurrent =
                 currentSnapshot?.currentIndex === index &&
                 currentSnapshot.action !== 'traversalDone' &&
                 currentSnapshot.action !== 'completed' &&
-                !isVisited;
+                (!isVisited || isLevelorderCurrent);
               const stateClass = isCurrent ? ' bar-visiting' : isVisited ? ' bar-matched' : '';
               const markerRoles = roleLabelMap.get(index) ?? [];
 
@@ -3068,7 +3311,7 @@ export function BinaryTreeTraversalPage() {
         <span className="legend-item legend-visiting">{t('module.t01.legend.visiting')}</span>
         <span className="legend-item legend-matched">{t('module.t01.legend.visited')}</span>
         <span className="legend-item legend-moving">{t('module.t01.legend.path')}</span>
-        <span className="legend-item legend-default">{t('module.t01.legend.null')}</span>
+        {!isLevelorderMode ? <span className="legend-item legend-default">{t('module.t01.legend.null')}</span> : null}
       </div>
 
       <p>
@@ -3093,12 +3336,12 @@ export function BinaryTreeTraversalPage() {
         <button type="button" onClick={reset} disabled={steps.length === 0}>
           {t('playback.reset')}
         </button>
-        <button type="button" onClick={toggleRecursionView} disabled={!supportsRecursionView}>
-          {isRecursionViewOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
+        <button type="button" onClick={toggleRecursionView} disabled={!supportsAlgorithmWindow}>
+          {isAlgorithmWindowOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
         </button>
       </div>
 
-      {isRecursionViewOpen ? (
+      {isAlgorithmWindowOpen ? (
         <div className="tree-recursion-floating-shell" aria-live="polite">
           <aside
             className={`tree-recursion-panel tree-recursion-panel-floating${
@@ -3114,7 +3357,7 @@ export function BinaryTreeTraversalPage() {
             <div className="tree-recursion-header tree-recursion-window-bar" onPointerDown={startRecursionPanelDrag}>
               <div className="tree-recursion-window-title-group">
                 <h3>{t('module.t01.recursion.title')}</h3>
-                <p>{t('module.t01.recursion.body')}</p>
+                <p>{algorithmWindowBody}</p>
               </div>
               <div className="tree-recursion-window-controls">
                 <button
@@ -3148,78 +3391,130 @@ export function BinaryTreeTraversalPage() {
 
               <div className="tree-recursion-status-block">
                 <span className="tree-recursion-status-label">{t('module.t01.recursion.status.label')}</span>
-                <strong>{recursionStatusText}</strong>
-                {isRecursionVisitStep(currentSnapshot, mode) &&
+                <strong>{algorithmStatusText}</strong>
+                {!isLevelorderMode &&
+                isRecursionVisitStep(currentSnapshot, mode) &&
                 currentSnapshot?.recursionCheckpoint !== null &&
                 currentSnapshot?.recursionCheckpoint === guideVisitMarkerLabel ? (
                   <span className="tree-recursion-visit-now">{t('module.t01.recursion.status.visitNow')}</span>
                 ) : null}
               </div>
 
-              <div className="tree-recursion-points" aria-hidden="true">
-                {(['1', '2', '3'] as const).map((checkpoint) => {
-                  const pointText = getRecursionCheckpointText(checkpoint, t) ?? checkpoint;
-                  const isCurrent = currentSnapshot?.recursionCheckpoint === checkpoint;
-                  const isVisitPoint = guideVisitMarkerLabel === checkpoint;
-                  return (
-                    <span
-                      key={checkpoint}
-                      className={`tree-recursion-point${isCurrent ? ' tree-recursion-point-current' : ''}${isVisitPoint ? ' tree-recursion-point-visit' : ''}`}
-                    >
-                      <strong>{checkpoint}</strong>
-                      <span>{pointText}</span>
-                    </span>
-                  );
-                })}
-              </div>
+              {!isLevelorderMode ? (
+                <div className="tree-recursion-points" aria-hidden="true">
+                  {(['1', '2', '3'] as const).map((checkpoint) => {
+                    const pointText = getRecursionCheckpointText(checkpoint, t) ?? checkpoint;
+                    const isCurrent = currentSnapshot?.recursionCheckpoint === checkpoint;
+                    const isVisitPoint = guideVisitMarkerLabel === checkpoint;
+                    return (
+                      <span
+                        key={checkpoint}
+                        className={`tree-recursion-point${isCurrent ? ' tree-recursion-point-current' : ''}${isVisitPoint ? ' tree-recursion-point-visit' : ''}`}
+                      >
+                        <strong>{checkpoint}</strong>
+                        <span>{pointText}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              ) : null}
 
               <div className="tree-recursion-grid">
                 <div className="tree-recursion-card">
                   <div className="tree-recursion-card-head">
-                    <span>{t('module.t01.recursion.code.title')}</span>
-                    <span className="tree-recursion-card-note">{recursionCodeNote}</span>
+                    <span>{algorithmCodeTitle}</span>
+                    <span className="tree-recursion-card-note">{algorithmCodeNote}</span>
                   </div>
                   <ol className="tree-recursion-code-list">
-                    {recursiveCodeLines.map((item) => (
-                      <li key={item.line} className={recursiveCodeActiveLines.includes(item.line) ? 'code-active' : ''}>
+                    {algorithmCodeLines.map((item) => (
+                      <li key={item.line} className={algorithmCodeActiveLines.includes(item.line) ? 'code-active' : ''}>
                         {item.text}
                       </li>
                     ))}
                   </ol>
                 </div>
 
-                <div className="tree-recursion-card">
-                  <div className="tree-recursion-card-head">
-                    <span>{t('module.t01.recursion.stack.title')}</span>
-                    <span className="tree-recursion-card-note">{t('module.t01.recursion.stack.subtitle')}</span>
+                {isLevelorderMode ? (
+                  <div className="tree-recursion-card">
+                    <div className="tree-recursion-card-head">
+                      <span>{t('module.t01.levelorder.queue.title')}</span>
+                      <span className="tree-recursion-card-note">{t('module.t01.levelorder.queue.subtitle')}</span>
+                    </div>
+
+                    <div className="tree-levelorder-current">
+                      <span className="tree-levelorder-label">{t('module.t01.levelorder.queue.current')}</span>
+                      {currentSnapshot?.currentValue !== null && currentSnapshot?.currentValue !== undefined ? (
+                        <span className="tree-levelorder-current-chip">
+                          {formatDisplayValue(currentSnapshot.currentValue)}
+                          {currentSnapshot.currentIndex !== null ? (
+                            <span className="tree-levelorder-node-index">#{currentSnapshot.currentIndex}</span>
+                          ) : null}
+                        </span>
+                      ) : (
+                        <span className="tree-levelorder-empty">{t('module.t01.levelorder.queue.currentEmpty')}</span>
+                      )}
+                    </div>
+
+                    {levelorderQueueEntries.length === 0 ? (
+                      <p className="tree-recursion-stack-empty">{t('module.t01.levelorder.queue.empty')}</p>
+                    ) : (
+                      <div className="tree-levelorder-queue-list">
+                        {levelorderQueueEntries.map((entry, index) => {
+                          const isFront = index === 0;
+                          const isRear = index === levelorderQueueEntries.length - 1;
+                          return (
+                            <span
+                              key={`${entry.nodeIndex}-${index}`}
+                              className={`tree-levelorder-queue-chip${isFront ? ' tree-levelorder-queue-chip-front' : ''}${isRear ? ' tree-levelorder-queue-chip-rear' : ''}`}
+                            >
+                              <span className="tree-levelorder-queue-value">{formatDisplayValue(entry.value)}</span>
+                              <span className="tree-levelorder-queue-index">#{entry.nodeIndex}</span>
+                              {isFront ? (
+                                <span className="tree-levelorder-queue-badge">{t('module.t01.levelorder.queue.front')}</span>
+                              ) : null}
+                              {isRear ? (
+                                <span className="tree-levelorder-queue-badge">{t('module.t01.levelorder.queue.rear')}</span>
+                              ) : null}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                  {recursionStackEntries.length === 0 ? (
-                    <p className="tree-recursion-stack-empty">{t('module.t01.recursion.stack.empty')}</p>
-                  ) : (
-                    <ol className="tree-recursion-stack-list">
-                      {recursionStackEntries.map((entry, index) => {
-                        const isCurrentFrame = index === recursionStackEntries.length - 1;
-                        return (
-                          <li
-                            key={`${entry.nodeIndex}-${entry.depth}`}
-                            className={`tree-recursion-stack-item${isCurrentFrame ? ' tree-recursion-stack-item-current' : ''}`}
-                          >
-                            <span className="tree-recursion-stack-depth">
-                              {t('module.t01.recursion.stack.depth')} {entry.depth}
-                            </span>
-                            <span className="tree-recursion-stack-call">
-                              traverse({formatDisplayValue(entry.value)})
-                              <span className="tree-recursion-stack-index">#{entry.nodeIndex}</span>
-                            </span>
-                            {isCurrentFrame ? (
-                              <span className="tree-recursion-stack-current">{t('module.t01.recursion.stack.current')}</span>
-                            ) : null}
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  )}
-                </div>
+                ) : (
+                  <div className="tree-recursion-card">
+                    <div className="tree-recursion-card-head">
+                      <span>{t('module.t01.recursion.stack.title')}</span>
+                      <span className="tree-recursion-card-note">{t('module.t01.recursion.stack.subtitle')}</span>
+                    </div>
+                    {recursionStackEntries.length === 0 ? (
+                      <p className="tree-recursion-stack-empty">{t('module.t01.recursion.stack.empty')}</p>
+                    ) : (
+                      <ol className="tree-recursion-stack-list">
+                        {recursionStackEntries.map((entry, index) => {
+                          const isCurrentFrame = index === recursionStackEntries.length - 1;
+                          return (
+                            <li
+                              key={`${entry.nodeIndex}-${entry.depth}`}
+                              className={`tree-recursion-stack-item${isCurrentFrame ? ' tree-recursion-stack-item-current' : ''}`}
+                            >
+                              <span className="tree-recursion-stack-depth">
+                                {t('module.t01.recursion.stack.depth')} {entry.depth}
+                              </span>
+                              <span className="tree-recursion-stack-call">
+                                traverse({formatDisplayValue(entry.value)})
+                                <span className="tree-recursion-stack-index">#{entry.nodeIndex}</span>
+                              </span>
+                              {isCurrentFrame ? (
+                                <span className="tree-recursion-stack-current">{t('module.t01.recursion.stack.current')}</span>
+                              ) : null}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

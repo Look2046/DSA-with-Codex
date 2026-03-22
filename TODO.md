@@ -206,6 +206,10 @@ Track actionable tasks here. Keep tasks small and testable.
     - added an in-panel tip recommending single-step playback when comparing recursion state with the traversal animation
     - Playwright browser check confirms traversal canvas width stays `1146px` before/after opening the panel at `1280x720`
     - Playwright browser check confirms drag + resize behavior (`440x560 -> 510x585`) on the floating recursion window
+    - level-order mode now hides null-child visuals and null legend entries in the main stage
+    - level-order mode now uses a real-node-only threading trace and exposes a working floating algorithm window
+    - the floating algorithm window now shows queue-state playback + queue-specific pseudocode for level-order mode
+    - browser-side Playwright verification confirms the level-order queue panel opens and updates after stepping
   - Next (2026-03-22):
     - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless requested)
     - continue dashed-path beautification only if native SVG styling still falls short

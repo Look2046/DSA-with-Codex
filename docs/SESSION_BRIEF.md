@@ -64,9 +64,13 @@ Use this file as the first thing to read in a new chat/session.
   - `T-01` recursive view now switches to mode-specific preorder/inorder/postorder pseudocode instead of generic conditional branches
   - `T-01` recursive panel now opens as a draggable, resizable floating window so the traversal canvas keeps full width
   - `T-01` floating recursion panel now includes an in-panel tip recommending single-step playback for clearer recursion/animation comparison
+  - `T-01` floating panel wording is now promoted to a generic algorithm window instead of recursion-only wording
+  - `T-01` level-order mode now hides null children in the main stage and uses a level-by-level threading trace that only connects real nodes
+  - `T-01` level-order algorithm window now opens correctly and shows queue-state playback plus queue-specific pseudocode
 - `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
   - browser-side Playwright verification confirms the traversal canvas keeps its width when the floating recursion window opens, and the window can be dragged/resized at `1280x720`
+  - browser-side Playwright verification confirms level-order mode shows `0` null nodes / null-legend entries, the algorithm window opens, and the queue panel updates after stepping
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
@@ -98,6 +102,7 @@ Use this file as the first thing to read in a new chat/session.
   - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless explicitly requested)
   - continue dashed style beautification only if native SVG styling still falls short
   - align `T-01`/`T-02` controls, legend semantics, and status layout
+  - decide whether the new level-order threading trace needs another pass for route aesthetics after user review
   - refresh Playwright acceptance artifacts for `/modules` + all implemented routes
   - sync closure docs (`SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`)
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).

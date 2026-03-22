@@ -419,3 +419,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep iterating on a fixed two-column layout; move recursion content into a bottom dock; hide content behind multiple tabs inside the page flow.
 - Consequences: `T-01` now preserves animation space while still supporting direct recursion comparison, and the panel interaction can evolve independently with future snap presets or persistence tweaks if needed.
 - Owner: haoyu + codex
+
+## DEC-20260323-46
+- Date: 2026-03-23
+- Status: accepted
+- Context: After the floating panel landed, `T-01` level-order mode still inherited recursion-only wording/availability rules, continued to show null-child visuals in the main stage, and did not explain BFS queue behavior inside the floating panel.
+- Decision: Promote the floating panel to a generic algorithm window, keep it available in level-order mode, hide null-child visuals for level-order rendering, and show a queue-state card plus queue-specific pseudocode while the main trace threads only through real nodes level by level.
+- Alternatives considered: keep the panel disabled for level-order; reuse recursion wording for all modes; leave null placeholders visible while only changing the floating panel content.
+- Consequences: level-order mode now teaches BFS with the right mental model (queue + real-node visit order), while preorder/inorder/postorder continue to use the same floating window shell for recursion checkpoints and call-stack comparison.
+- Owner: haoyu + codex
