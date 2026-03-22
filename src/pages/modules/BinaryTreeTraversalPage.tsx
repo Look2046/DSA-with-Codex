@@ -19,6 +19,13 @@ import type {
 const DEFAULT_SIZE = 7;
 const MIN_SIZE = 3;
 const MAX_SIZE = 15;
+const RECURSION_PANEL_STORAGE_KEY = 't01-recursion-panel-layout-v2';
+const RECURSION_PANEL_MARGIN = 16;
+const RECURSION_PANEL_MIN_WIDTH = 320;
+const RECURSION_PANEL_MIN_HEIGHT = 280;
+const RECURSION_PANEL_MAX_WIDTH = 560;
+const RECURSION_PANEL_MAX_HEIGHT = 760;
+const RECURSION_PANEL_DEFAULT_Y = 88;
 
 type NodePoint = {
   x: number;
@@ -27,6 +34,36 @@ type NodePoint = {
 
 type ValueDisplayMode = 'number' | 'letter';
 type BinaryTreeShapeMode = 'random' | 'complete';
+
+type FloatingPanelRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type ViewportSize = {
+  width: number;
+  height: number;
+};
+
+type RecursionPanelInteraction =
+  | {
+      kind: 'drag';
+      pointerId: number;
+      offsetX: number;
+      offsetY: number;
+    }
+  | {
+      kind: 'resize';
+      pointerId: number;
+      startX: number;
+      startY: number;
+      startWidth: number;
+      startHeight: number;
+      startPanelX: number;
+      startPanelY: number;
+    };
 
 type RawTraversalTraceSegment = {
   key: string;
@@ -258,6 +295,101 @@ type RecursiveCodeLine = {
   line: number;
   text: string;
 };
+
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getViewportSize(): ViewportSize {
+  if (typeof window === 'undefined') {
+    return { width: 1280, height: 720 };
+  }
+
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+}
+
+function clampRecursionPanelRect(rect: FloatingPanelRect, viewport: ViewportSize): FloatingPanelRect {
+  const maxWidth = Math.max(
+    RECURSION_PANEL_MIN_WIDTH,
+    Math.min(RECURSION_PANEL_MAX_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2),
+  );
+  const width = clampNumber(rect.width, RECURSION_PANEL_MIN_WIDTH, maxWidth);
+  const maxHeight = Math.max(
+    RECURSION_PANEL_MIN_HEIGHT,
+    Math.min(RECURSION_PANEL_MAX_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2),
+  );
+  const height = clampNumber(rect.height, RECURSION_PANEL_MIN_HEIGHT, maxHeight);
+  const maxX = Math.max(RECURSION_PANEL_MARGIN, viewport.width - width - RECURSION_PANEL_MARGIN);
+  const maxY = Math.max(RECURSION_PANEL_MARGIN, viewport.height - height - RECURSION_PANEL_MARGIN);
+
+  return {
+    x: clampNumber(rect.x, RECURSION_PANEL_MARGIN, maxX),
+    y: clampNumber(rect.y, RECURSION_PANEL_MARGIN, maxY),
+    width,
+    height,
+  };
+}
+
+function getDefaultRecursionPanelRect(viewport: ViewportSize): FloatingPanelRect {
+  const maxWidth = Math.max(
+    RECURSION_PANEL_MIN_WIDTH,
+    Math.min(RECURSION_PANEL_MAX_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2),
+  );
+  const maxHeight = Math.max(
+    RECURSION_PANEL_MIN_HEIGHT,
+    Math.min(RECURSION_PANEL_MAX_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2),
+  );
+  const width = Math.min(440, maxWidth);
+  const height = Math.min(560, maxHeight);
+
+  return clampRecursionPanelRect(
+    {
+      x: viewport.width - width - RECURSION_PANEL_MARGIN,
+      y: RECURSION_PANEL_DEFAULT_Y,
+      width,
+      height,
+    },
+    viewport,
+  );
+}
+
+function readStoredRecursionPanelRect(viewport: ViewportSize): FloatingPanelRect | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(RECURSION_PANEL_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<FloatingPanelRect>;
+    if (
+      typeof parsed.x !== 'number' ||
+      typeof parsed.y !== 'number' ||
+      typeof parsed.width !== 'number' ||
+      typeof parsed.height !== 'number'
+    ) {
+      return null;
+    }
+
+    return clampRecursionPanelRect(
+      {
+        x: parsed.x,
+        y: parsed.y,
+        width: parsed.width,
+        height: parsed.height,
+      },
+      viewport,
+    );
+  } catch {
+    return null;
+  }
+}
 
 type RecursiveCodeVariant = 'preorder' | 'inorder' | 'postorder';
 
@@ -2087,12 +2219,18 @@ export function BinaryTreeTraversalPage() {
   const currentModule = useCurrentModule();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const routeOrderIdPrefix = useId().replace(/:/g, '');
+  const initialViewport = useMemo(() => getViewportSize(), []);
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [treeShapeMode, setTreeShapeMode] = useState<BinaryTreeShapeMode>('complete');
   const [mode, setMode] = useState<BinaryTreeTraversalMode>('preorder');
   const [valueDisplayMode, setValueDisplayMode] = useState<ValueDisplayMode>('number');
   const [showRecursionView, setShowRecursionView] = useState(false);
+  const [viewportSize, setViewportSize] = useState<ViewportSize>(initialViewport);
+  const [recursionPanelRect, setRecursionPanelRect] = useState<FloatingPanelRect>(
+    () => readStoredRecursionPanelRect(initialViewport) ?? getDefaultRecursionPanelRect(initialViewport),
+  );
+  const [recursionPanelInteraction, setRecursionPanelInteraction] = useState<RecursionPanelInteraction | null>(null);
   const [inputData, setInputData] = useState<BinaryTreeInputValue[]>(() => createBinaryTreeDataset(DEFAULT_SIZE, 'complete'));
   const [stageSize, setStageSize] = useState({ width: DEFAULT_STAGE_WIDTH, height: DEFAULT_STAGE_HEIGHT });
   const [traceVisibleLength, setTraceVisibleLength] = useState(0);
@@ -2364,6 +2502,89 @@ export function BinaryTreeTraversalPage() {
   }, [setSpeed]);
 
   useEffect(() => {
+    const handleViewportResize = () => {
+      const nextViewport = getViewportSize();
+      setViewportSize(nextViewport);
+      setRecursionPanelRect((previous) => clampRecursionPanelRect(previous, nextViewport));
+    };
+
+    handleViewportResize();
+    window.addEventListener('resize', handleViewportResize);
+    return () => window.removeEventListener('resize', handleViewportResize);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(RECURSION_PANEL_STORAGE_KEY, JSON.stringify(recursionPanelRect));
+  }, [recursionPanelRect]);
+
+  useEffect(() => {
+    if (!recursionPanelInteraction) {
+      return;
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      setRecursionPanelRect((previous) => {
+        if (recursionPanelInteraction.kind === 'drag') {
+          return clampRecursionPanelRect(
+            {
+              ...previous,
+              x: event.clientX - recursionPanelInteraction.offsetX,
+              y: event.clientY - recursionPanelInteraction.offsetY,
+            },
+            viewportSize,
+          );
+        }
+
+        const nextWidth = recursionPanelInteraction.startWidth + (event.clientX - recursionPanelInteraction.startX);
+        const nextHeight = recursionPanelInteraction.startHeight + (event.clientY - recursionPanelInteraction.startY);
+        return clampRecursionPanelRect(
+          {
+            x: recursionPanelInteraction.startPanelX,
+            y: recursionPanelInteraction.startPanelY,
+            width: nextWidth,
+            height: nextHeight,
+          },
+          viewportSize,
+        );
+      });
+    };
+
+    const handlePointerEnd = (event: PointerEvent) => {
+      if (event.pointerId === recursionPanelInteraction.pointerId) {
+        setRecursionPanelInteraction(null);
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerEnd);
+      window.removeEventListener('pointercancel', handlePointerEnd);
+    };
+  }, [recursionPanelInteraction, viewportSize]);
+
+  useEffect(() => {
+    if (!recursionPanelInteraction) {
+      return;
+    }
+
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+    document.body.style.cursor = recursionPanelInteraction.kind === 'drag' ? 'grabbing' : 'nwse-resize';
+    document.body.style.userSelect = 'none';
+    return () => {
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [recursionPanelInteraction]);
+
+  useEffect(() => {
     let rafId = 0;
     let startTime: number | null = null;
     const durationMs = Math.max(
@@ -2442,6 +2663,67 @@ export function BinaryTreeTraversalPage() {
     reset();
   };
 
+  const toggleRecursionView = () => {
+    if (!supportsRecursionView) {
+      return;
+    }
+
+    if (isRecursionViewOpen) {
+      setRecursionPanelInteraction(null);
+      setShowRecursionView(false);
+      return;
+    }
+
+    const currentViewport = getViewportSize();
+    setViewportSize(currentViewport);
+    setRecursionPanelRect((previous) => clampRecursionPanelRect(previous, currentViewport));
+    setShowRecursionView(true);
+  };
+
+  const resetRecursionPanel = () => {
+    const currentViewport = getViewportSize();
+    setViewportSize(currentViewport);
+    setRecursionPanelRect(getDefaultRecursionPanelRect(currentViewport));
+  };
+
+  const startRecursionPanelDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    if (target.closest('button')) {
+      return;
+    }
+
+    event.preventDefault();
+    setRecursionPanelInteraction({
+      kind: 'drag',
+      pointerId: event.pointerId,
+      offsetX: event.clientX - recursionPanelRect.x,
+      offsetY: event.clientY - recursionPanelRect.y,
+    });
+  };
+
+  const startRecursionPanelResize = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    setRecursionPanelInteraction({
+      kind: 'resize',
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startWidth: recursionPanelRect.width,
+      startHeight: recursionPanelRect.height,
+      startPanelX: recursionPanelRect.x,
+      startPanelY: recursionPanelRect.y,
+    });
+  };
+
   const speedOptions = [
     { key: 'module.s01.speed.slow', value: 1800 },
     { key: 'module.s01.speed.normal', value: 1000 },
@@ -2507,6 +2789,7 @@ export function BinaryTreeTraversalPage() {
               onClick={() => {
                 setMode(option);
                 if (option === 'levelorder') {
+                  setRecursionPanelInteraction(null);
                   setShowRecursionView(false);
                 }
                 reset();
@@ -2575,267 +2858,302 @@ export function BinaryTreeTraversalPage() {
         {t('module.s01.sample')}: [{formatArrayPreview(inputData)}]
       </p>
 
-      <div className={`tree-stage-recursion-shell${isRecursionViewOpen ? ' tree-stage-recursion-shell-open' : ''}`}>
-        <div className="tree-stage-recursion-main">
-          <VisualizationCanvas title={t('module.t01.title')} subtitle={t('module.t01.stage')} stageClassName="viz-canvas-stage-tree">
-            <div ref={stageRef} className="tree-stage" aria-label="binary-tree-stage">
-              <svg className="tree-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                {edges.map((edge) => {
-                  const from = nodePositions[edge.from];
-                  const to = nodePositions[edge.to];
-                  return (
-                    <line
-                      key={`${edge.from}-${edge.to}`}
-                      className="tree-edge"
-                      x1={from?.x ?? 0}
-                      y1={from?.y ?? 0}
-                      x2={to?.x ?? 0}
-                      y2={to?.y ?? 0}
-                    />
-                  );
-                })}
-              </svg>
+      <VisualizationCanvas title={t('module.t01.title')} subtitle={t('module.t01.stage')} stageClassName="viz-canvas-stage-tree">
+        <div ref={stageRef} className="tree-stage" aria-label="binary-tree-stage">
+          <svg className="tree-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {edges.map((edge) => {
+              const from = nodePositions[edge.from];
+              const to = nodePositions[edge.to];
+              return (
+                <line
+                  key={`${edge.from}-${edge.to}`}
+                  className="tree-edge"
+                  x1={from?.x ?? 0}
+                  y1={from?.y ?? 0}
+                  x2={to?.x ?? 0}
+                  y2={to?.y ?? 0}
+                />
+              );
+            })}
+          </svg>
 
-              {SHOW_LEGACY_GUIDE_OVERLAY ? (
-                <svg className="tree-shell-guide-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                  {parallelGuideSegments.map((segment) => (
-                    <g key={segment.key}>
-                      <path className="tree-shell-guide" d={segment.d} />
-                      {segment.directionMarkerPaths?.map((markerPath, markerIndex) => (
-                        <path key={`${segment.key}-marker-${markerIndex}`} className="tree-shell-guide-direction" d={markerPath} />
-                      ))}
-                    </g>
+          {SHOW_LEGACY_GUIDE_OVERLAY ? (
+            <svg className="tree-shell-guide-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {parallelGuideSegments.map((segment) => (
+                <g key={segment.key}>
+                  <path className="tree-shell-guide" d={segment.d} />
+                  {segment.directionMarkerPaths?.map((markerPath, markerIndex) => (
+                    <path key={`${segment.key}-marker-${markerIndex}`} className="tree-shell-guide-direction" d={markerPath} />
                   ))}
-                </svg>
-              ) : null}
+                </g>
+              ))}
+            </svg>
+          ) : null}
 
-              {SHOW_LEGACY_GUIDE_OVERLAY ? (
-                <svg className="tree-route-order-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                  {routeOrderSegments.map((segment) => (
-                    <g key={segment.key}>
-                      <path id={segment.pathId} className="tree-route-order-path-anchor" d={segment.d} />
-                      <text className="tree-route-order-label">
-                        <textPath href={`#${segment.pathId}`} startOffset="50%" textAnchor="middle">
-                          {segment.order}
-                        </textPath>
-                      </text>
-                    </g>
-                  ))}
-                </svg>
-              ) : null}
+          {SHOW_LEGACY_GUIDE_OVERLAY ? (
+            <svg className="tree-route-order-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {routeOrderSegments.map((segment) => (
+                <g key={segment.key}>
+                  <path id={segment.pathId} className="tree-route-order-path-anchor" d={segment.d} />
+                  <text className="tree-route-order-label">
+                    <textPath href={`#${segment.pathId}`} startOffset="50%" textAnchor="middle">
+                      {segment.order}
+                    </textPath>
+                  </text>
+                </g>
+              ))}
+            </svg>
+          ) : null}
 
-              <svg className="tree-trace-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                {traceSegments.map((segment, index) => {
-                  const segmentKey = segment.isActive ? `${segment.key}-${currentStep}` : segment.key;
-                  const segmentLength = currentTraceMetrics[index]?.length ?? segment.length;
-                  const visibleLength = currentTraceVisibleLengths[index] ?? 0;
-                  const hiddenLength = Math.max(segmentLength - visibleLength, 0) + 0.01;
-                  const isPending = segmentLength <= 0.001 || visibleLength <= 0.001;
-                  const isCompleted = visibleLength >= segmentLength - 0.001;
-                  return (
-                    <path
-                      key={segmentKey}
-                      className={`tree-trace${segment.isActive ? ' tree-trace-active' : ''}`}
-                      d={segment.roughPath}
-                      style={
-                        isPending
-                          ? { opacity: 0 }
-                          : isCompleted
-                            ? undefined
-                            : {
-                              strokeDasharray: `${visibleLength.toFixed(3)} ${hiddenLength.toFixed(3)}`,
-                              strokeDashoffset: 0,
-                            }
-                      }
-                    />
-                  );
-                })}
-              </svg>
-
-              <svg className="tree-null-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                {nullEdges.map((edge) => (
-                  <path key={edge.key} className="tree-null-edge" d={edge.d} />
-                ))}
-              </svg>
-
-              <div className="tree-null-layer" aria-hidden="true">
-                {nullHints.map((hint) => {
-                  const point = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep);
-
-                  const isActiveNull =
-                    currentSnapshot?.guideNull?.parentIndex === hint.parentIndex &&
-                    currentSnapshot?.guideNull?.side === hint.side;
-
-                  return (
-                    <div
-                      key={`${hint.parentIndex}-${hint.side}`}
-                      className={`tree-null-node${isActiveNull ? ' tree-null-active' : ''}`}
-                      style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                    >
-                      <span className="tree-null-value">null</span>
-                      <span className="tree-null-side">{hint.side}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="tree-trace-entry-marker-layer" aria-hidden="true">
-                {traceEntryMarkersWithReveal.map((marker) => {
-                  const visible = traceVisibleLength >= marker.revealLength - 0.001;
-                  if (!visible) {
-                    return null;
+          <svg className="tree-trace-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {traceSegments.map((segment, index) => {
+              const segmentKey = segment.isActive ? `${segment.key}-${currentStep}` : segment.key;
+              const segmentLength = currentTraceMetrics[index]?.length ?? segment.length;
+              const visibleLength = currentTraceVisibleLengths[index] ?? 0;
+              const hiddenLength = Math.max(segmentLength - visibleLength, 0) + 0.01;
+              const isPending = segmentLength <= 0.001 || visibleLength <= 0.001;
+              const isCompleted = visibleLength >= segmentLength - 0.001;
+              return (
+                <path
+                  key={segmentKey}
+                  className={`tree-trace${segment.isActive ? ' tree-trace-active' : ''}`}
+                  d={segment.roughPath}
+                  style={
+                    isPending
+                      ? { opacity: 0 }
+                      : isCompleted
+                        ? undefined
+                        : {
+                          strokeDasharray: `${visibleLength.toFixed(3)} ${hiddenLength.toFixed(3)}`,
+                          strokeDashoffset: 0,
+                        }
                   }
-                  const markerOffset = getTraceEntryMarkerOffset(marker);
-                  const isVisitMarker = guideVisitMarkerLabel !== null && marker.label === guideVisitMarkerLabel;
-                  return (
-                    <span
-                      key={marker.key}
-                      className={`tree-trace-entry-marker${isVisitMarker ? ' tree-trace-entry-marker-entered tree-trace-entry-marker-entered-pulse' : ''}`}
-                      style={{
-                        left: `${marker.point.x}%`,
-                        top: `${marker.point.y}%`,
-                        transform: `translate(-50%, -50%) translate(${markerOffset.x}px, ${markerOffset.y}px)`,
-                      }}
-                    >
-                      {marker.label}
-                    </span>
-                  );
-                })}
-              </div>
+                />
+              );
+            })}
+          </svg>
 
-              <div className="tree-node-layer" aria-hidden="true">
-                {treeState.map((value, index) => {
-                  if (value === null) {
-                    return null;
-                  }
-                  const shouldMarkVisitedOnArrive =
-                    currentSnapshot?.currentIndex === index &&
-                    (currentSnapshot.action === 'guideStart' ||
-                      currentSnapshot.action === 'descendLeft' ||
-                      currentSnapshot.action === 'descendRight' ||
-                      currentSnapshot.action === 'visit');
-                  const isGuideVisited = guideTraceSourceStep ? guideVisitedNodeSet.has(index) : false;
-                  const isVisited =
-                    guideTraceSourceStep
-                      ? isGuideVisited
-                      : visitedSet.has(index) || shouldMarkVisitedOnArrive;
-                  const isCurrent =
-                    currentSnapshot?.currentIndex === index &&
-                    currentSnapshot.action !== 'traversalDone' &&
-                    currentSnapshot.action !== 'completed' &&
-                    !isVisited;
-                  const stateClass = isCurrent ? ' bar-visiting' : isVisited ? ' bar-matched' : '';
-                  const markerRoles = roleLabelMap.get(index) ?? [];
+          <svg className="tree-null-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {nullEdges.map((edge) => (
+              <path key={edge.key} className="tree-null-edge" d={edge.d} />
+            ))}
+          </svg>
 
-                  return (
-                    <div
-                      key={`${index}-${value}`}
-                      className={`tree-node${stateClass}`}
-                      style={{ left: `${nodePositions[index]?.x ?? 0}%`, top: `${nodePositions[index]?.y ?? 0}%` }}
-                    >
-                      {markerRoles.length > 0 ? <span className="tree-node-tag">{markerRoles.join('/')}</span> : null}
-                      <span className="tree-node-value">{formatDisplayValue(value)}</span>
-                      <span className="tree-node-index">#{index}</span>
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="tree-null-layer" aria-hidden="true">
+            {nullHints.map((hint) => {
+              const point = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep);
 
-              <svg className="tree-trace-arrow-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                {traceSegments.map((segment, index) => {
-                  if (!segment.arrowPath) {
-                    return null;
-                  }
+              const isActiveNull =
+                currentSnapshot?.guideNull?.parentIndex === hint.parentIndex && currentSnapshot?.guideNull?.side === hint.side;
 
-                  const segmentLength = currentTraceMetrics[index]?.length ?? segment.length;
-                  const visibleLength = currentTraceVisibleLengths[index] ?? 0;
-                  if (visibleLength < segmentLength - 0.001) {
-                    return null;
-                  }
-
-                  const arrowKey = segment.isActive ? `${segment.key}-arrow-${currentStep}` : `${segment.key}-arrow`;
-                  return (
-                    <path
-                      key={arrowKey}
-                      className={`tree-trace-node-arrow${segment.arrowIsCurrent ? ' tree-trace-node-arrow-current' : ''}`}
-                      d={segment.arrowPath}
-                    />
-                  );
-                })}
-              </svg>
-            </div>
-          </VisualizationCanvas>
-
-          <div className="tree-sequence-block" aria-live="polite">
-            <span className="tree-sequence-label">{t('module.t01.meta.output')}</span>
-            <div className="tree-sequence-list">
-              {outputSequence.length === 0 ? (
-                <span className="tree-sequence-empty">{t('module.t01.sequence.empty')}</span>
-              ) : (
-                outputSequence.map((value, index) => (
-                  <span
-                    key={`${value}-${index}`}
-                    className={`tree-sequence-chip${index === outputSequence.length - 1 ? ' tree-sequence-chip-active' : ''}`}
-                  >
-                    {value}
-                  </span>
-                ))
-              )}
-            </div>
+              return (
+                <div
+                  key={`${hint.parentIndex}-${hint.side}`}
+                  className={`tree-null-node${isActiveNull ? ' tree-null-active' : ''}`}
+                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                >
+                  <span className="tree-null-value">null</span>
+                  <span className="tree-null-side">{hint.side}</span>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="legend-row">
-            <span className="legend-item legend-visiting">{t('module.t01.legend.visiting')}</span>
-            <span className="legend-item legend-matched">{t('module.t01.legend.visited')}</span>
-            <span className="legend-item legend-moving">{t('module.t01.legend.path')}</span>
-            <span className="legend-item legend-default">{t('module.t01.legend.null')}</span>
+          <div className="tree-trace-entry-marker-layer" aria-hidden="true">
+            {traceEntryMarkersWithReveal.map((marker) => {
+              const visible = traceVisibleLength >= marker.revealLength - 0.001;
+              if (!visible) {
+                return null;
+              }
+              const markerOffset = getTraceEntryMarkerOffset(marker);
+              const isVisitMarker = guideVisitMarkerLabel !== null && marker.label === guideVisitMarkerLabel;
+              return (
+                <span
+                  key={marker.key}
+                  className={`tree-trace-entry-marker${isVisitMarker ? ' tree-trace-entry-marker-entered tree-trace-entry-marker-entered-pulse' : ''}`}
+                  style={{
+                    left: `${marker.point.x}%`,
+                    top: `${marker.point.y}%`,
+                    transform: `translate(-50%, -50%) translate(${markerOffset.x}px, ${markerOffset.y}px)`,
+                  }}
+                >
+                  {marker.label}
+                </span>
+              );
+            })}
           </div>
 
-          <p>
-            {t('module.s01.highlight')}:{' '}
-            {(currentSnapshot?.highlights ?? []).map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`).join(' | ') ||
-              t('module.s01.none')}
-          </p>
+          <div className="tree-node-layer" aria-hidden="true">
+            {treeState.map((value, index) => {
+              if (value === null) {
+                return null;
+              }
+              const shouldMarkVisitedOnArrive =
+                currentSnapshot?.currentIndex === index &&
+                (currentSnapshot.action === 'guideStart' ||
+                  currentSnapshot.action === 'descendLeft' ||
+                  currentSnapshot.action === 'descendRight' ||
+                  currentSnapshot.action === 'visit');
+              const isGuideVisited = guideTraceSourceStep ? guideVisitedNodeSet.has(index) : false;
+              const isVisited =
+                guideTraceSourceStep
+                  ? isGuideVisited
+                  : visitedSet.has(index) || shouldMarkVisitedOnArrive;
+              const isCurrent =
+                currentSnapshot?.currentIndex === index &&
+                currentSnapshot.action !== 'traversalDone' &&
+                currentSnapshot.action !== 'completed' &&
+                !isVisited;
+              const stateClass = isCurrent ? ' bar-visiting' : isVisited ? ' bar-matched' : '';
+              const markerRoles = roleLabelMap.get(index) ?? [];
 
-          <div className="playback-actions">
-            <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
-              {t('playback.play')}
-            </button>
-            <button type="button" onClick={pause} disabled={status !== 'playing'}>
-              {t('playback.pause')}
-            </button>
-            <button type="button" onClick={prev} disabled={steps.length === 0}>
-              {t('playback.prev')}
-            </button>
-            <button type="button" onClick={next} disabled={steps.length === 0}>
-              {t('playback.next')}
-            </button>
-            <button type="button" onClick={reset} disabled={steps.length === 0}>
-              {t('playback.reset')}
-            </button>
-            <button type="button" onClick={() => setShowRecursionView((value) => !value)} disabled={!supportsRecursionView}>
-              {isRecursionViewOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
-            </button>
+              return (
+                <div
+                  key={`${index}-${value}`}
+                  className={`tree-node${stateClass}`}
+                  style={{ left: `${nodePositions[index]?.x ?? 0}%`, top: `${nodePositions[index]?.y ?? 0}%` }}
+                >
+                  {markerRoles.length > 0 ? <span className="tree-node-tag">{markerRoles.join('/')}</span> : null}
+                  <span className="tree-node-value">{formatDisplayValue(value)}</span>
+                  <span className="tree-node-index">#{index}</span>
+                </div>
+              );
+            })}
           </div>
+
+          <svg className="tree-trace-arrow-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {traceSegments.map((segment, index) => {
+              if (!segment.arrowPath) {
+                return null;
+              }
+
+              const segmentLength = currentTraceMetrics[index]?.length ?? segment.length;
+              const visibleLength = currentTraceVisibleLengths[index] ?? 0;
+              if (visibleLength < segmentLength - 0.001) {
+                return null;
+              }
+
+              const arrowKey = segment.isActive ? `${segment.key}-arrow-${currentStep}` : `${segment.key}-arrow`;
+              return (
+                <path
+                  key={arrowKey}
+                  className={`tree-trace-node-arrow${segment.arrowIsCurrent ? ' tree-trace-node-arrow-current' : ''}`}
+                  d={segment.arrowPath}
+                />
+              );
+            })}
+          </svg>
         </div>
+      </VisualizationCanvas>
 
-        {isRecursionViewOpen ? (
-          <aside className="tree-stage-recursion-side">
-            <div className="tree-recursion-panel" aria-live="polite">
-              <div className="tree-recursion-header">
-                <div>
-                  <h3>{t('module.t01.recursion.title')}</h3>
-                  <p>{t('module.t01.recursion.body')}</p>
-                </div>
-                <div className="tree-recursion-status-block">
-                  <span className="tree-recursion-status-label">{t('module.t01.recursion.status.label')}</span>
-                  <strong>{recursionStatusText}</strong>
-                  {isRecursionVisitStep(currentSnapshot, mode) &&
-                  currentSnapshot?.recursionCheckpoint !== null &&
-                  currentSnapshot?.recursionCheckpoint === guideVisitMarkerLabel ? (
-                    <span className="tree-recursion-visit-now">{t('module.t01.recursion.status.visitNow')}</span>
-                  ) : null}
-                </div>
+      <div className="tree-sequence-block" aria-live="polite">
+        <span className="tree-sequence-label">{t('module.t01.meta.output')}</span>
+        <div className="tree-sequence-list">
+          {outputSequence.length === 0 ? (
+            <span className="tree-sequence-empty">{t('module.t01.sequence.empty')}</span>
+          ) : (
+            outputSequence.map((value, index) => (
+              <span
+                key={`${value}-${index}`}
+                className={`tree-sequence-chip${index === outputSequence.length - 1 ? ' tree-sequence-chip-active' : ''}`}
+              >
+                {value}
+              </span>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="legend-row">
+        <span className="legend-item legend-visiting">{t('module.t01.legend.visiting')}</span>
+        <span className="legend-item legend-matched">{t('module.t01.legend.visited')}</span>
+        <span className="legend-item legend-moving">{t('module.t01.legend.path')}</span>
+        <span className="legend-item legend-default">{t('module.t01.legend.null')}</span>
+      </div>
+
+      <p>
+        {t('module.s01.highlight')}:{' '}
+        {(currentSnapshot?.highlights ?? []).map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`).join(' | ') ||
+          t('module.s01.none')}
+      </p>
+
+      <div className="playback-actions">
+        <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
+          {t('playback.play')}
+        </button>
+        <button type="button" onClick={pause} disabled={status !== 'playing'}>
+          {t('playback.pause')}
+        </button>
+        <button type="button" onClick={prev} disabled={steps.length === 0}>
+          {t('playback.prev')}
+        </button>
+        <button type="button" onClick={next} disabled={steps.length === 0}>
+          {t('playback.next')}
+        </button>
+        <button type="button" onClick={reset} disabled={steps.length === 0}>
+          {t('playback.reset')}
+        </button>
+        <button type="button" onClick={toggleRecursionView} disabled={!supportsRecursionView}>
+          {isRecursionViewOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
+        </button>
+      </div>
+
+      {isRecursionViewOpen ? (
+        <div className="tree-recursion-floating-shell" aria-live="polite">
+          <aside
+            className={`tree-recursion-panel tree-recursion-panel-floating${
+              recursionPanelInteraction?.kind === 'drag' ? ' tree-recursion-panel-dragging' : ''
+            }`}
+            style={{
+              left: recursionPanelRect.x,
+              top: recursionPanelRect.y,
+              width: recursionPanelRect.width,
+              height: recursionPanelRect.height,
+            }}
+          >
+            <div className="tree-recursion-header tree-recursion-window-bar" onPointerDown={startRecursionPanelDrag}>
+              <div className="tree-recursion-window-title-group">
+                <h3>{t('module.t01.recursion.title')}</h3>
+                <p>{t('module.t01.recursion.body')}</p>
+              </div>
+              <div className="tree-recursion-window-controls">
+                <button
+                  type="button"
+                  className="tree-recursion-window-btn"
+                  onClick={resetRecursionPanel}
+                  aria-label={t('module.t01.recursion.window.reset')}
+                  title={t('module.t01.recursion.window.reset')}
+                >
+                  ↺
+                </button>
+                <button
+                  type="button"
+                  className="tree-recursion-window-btn"
+                  onClick={() => {
+                    setRecursionPanelInteraction(null);
+                    setShowRecursionView(false);
+                  }}
+                  aria-label={t('module.t01.recursion.toggle.hide')}
+                  title={t('module.t01.recursion.toggle.hide')}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="tree-recursion-window-content">
+              <div className="tree-recursion-tip" role="note">
+                {t('module.t01.recursion.tip')}
+              </div>
+
+              <div className="tree-recursion-status-block">
+                <span className="tree-recursion-status-label">{t('module.t01.recursion.status.label')}</span>
+                <strong>{recursionStatusText}</strong>
+                {isRecursionVisitStep(currentSnapshot, mode) &&
+                currentSnapshot?.recursionCheckpoint !== null &&
+                currentSnapshot?.recursionCheckpoint === guideVisitMarkerLabel ? (
+                  <span className="tree-recursion-visit-now">{t('module.t01.recursion.status.visitNow')}</span>
+                ) : null}
               </div>
 
               <div className="tree-recursion-points" aria-hidden="true">
@@ -2904,9 +3222,17 @@ export function BinaryTreeTraversalPage() {
                 </div>
               </div>
             </div>
+
+            <button
+              type="button"
+              className="tree-recursion-resize-handle"
+              onPointerDown={startRecursionPanelResize}
+              aria-label={t('module.t01.recursion.window.resize')}
+              title={t('module.t01.recursion.window.resize')}
+            />
           </aside>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       <div className="pseudocode-block">
         <h3>{t('module.s01.pseudocode')}</h3>

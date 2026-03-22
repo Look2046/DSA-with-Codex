@@ -7,7 +7,7 @@ Use this file as the first thing to read in a new chat/session.
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p8-m3-route-rules-spike` (P8-M3 polish work in progress)
 - Current phase: P8-M3 in progress (tree consistency + acceptance closure)
-- Last local quality gate: `npm run check` (passed, 2026-03-22)
+- Last local quality gate: `npm run check` (passed, 2026-03-23)
 
 ## 2) What Is Already Done
 
@@ -62,10 +62,11 @@ Use this file as the first thing to read in a new chat/session.
   - `T-01` active trace arrowheads now anchor to terminal straight travel segments instead of whole composite paths, improving dashed-trace readability
   - `T-01` route-order overlay now numbers arrow-capable straight travel segments instead of mixed arc/path fragments
   - `T-01` recursive view now switches to mode-specific preorder/inorder/postorder pseudocode instead of generic conditional branches
-  - `T-01` recursive panel now docks beside the traversal canvas on wider screens (and stacks responsively on narrower screens) so both remain readable in one viewport
+  - `T-01` recursive panel now opens as a draggable, resizable floating window so the traversal canvas keeps full width
+  - `T-01` floating recursion panel now includes an in-panel tip recommending single-step playback for clearer recursion/animation comparison
 - `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
-  - browser-side Playwright verification confirms the stage/recursion shell stays same-row and fully visible at `1280x720`
+  - browser-side Playwright verification confirms the traversal canvas keeps its width when the floating recursion window opens, and the window can be dragged/resized at `1280x720`
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`

@@ -410,3 +410,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep one generic DFS pseudocode block with conditional visit lines; leave the recursion panel below the canvas; fork separate page layouts per traversal mode.
 - Consequences: learners now see the exact recursive control flow for the active mode, and can compare animation with recursion state in a single desktop viewport without extra scrolling; level-order remains excluded from the recursion view.
 - Owner: haoyu + codex
+
+## DEC-20260323-45
+- Date: 2026-03-23
+- Status: accepted
+- Context: The side-by-side recursion layout still made both the traversal canvas and recursion panel feel cramped, and the recursion column height remained unstable compared with the animation area.
+- Decision: Replace the docked recursion column with a draggable, resizable floating recursion panel that keeps the traversal canvas full width and lets learners place the recursion explanation where it helps most.
+- Alternatives considered: keep iterating on a fixed two-column layout; move recursion content into a bottom dock; hide content behind multiple tabs inside the page flow.
+- Consequences: `T-01` now preserves animation space while still supporting direct recursion comparison, and the panel interaction can evolve independently with future snap presets or persistence tweaks if needed.
+- Owner: haoyu + codex

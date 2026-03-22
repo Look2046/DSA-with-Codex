@@ -199,6 +199,13 @@ Track actionable tasks here. Keep tasks small and testable.
     - recursion panel now docks beside the traversal canvas on wider screens and stacks responsively on narrower screens for same-screen teaching
     - Playwright browser check confirms the stage/recursion shell stays same-row and fully visible at `1280x720`
     - local quality gate re-verified: `npm run check` (pass, 2026-03-22)
+  - Progress (2026-03-23):
+    - replaced the docked recursion panel with a draggable, resizable floating recursion window
+    - recursion panel keeps its own scroll area and no longer squeezes the traversal canvas width
+    - recursion window wording was updated from inline "view" semantics to open/hide window semantics
+    - added an in-panel tip recommending single-step playback when comparing recursion state with the traversal animation
+    - Playwright browser check confirms traversal canvas width stays `1146px` before/after opening the panel at `1280x720`
+    - Playwright browser check confirms drag + resize behavior (`440x560 -> 510x585`) on the floating recursion window
   - Next (2026-03-22):
     - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless requested)
     - continue dashed-path beautification only if native SVG styling still falls short

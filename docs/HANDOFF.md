@@ -2,6 +2,41 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-23 (P8-M3 T-01 floating recursion panel)
+
+### Today Done
+- Replaced the docked `T-01` recursion layout with a floating recursion panel on `feat/p8-m3-route-rules-spike`:
+  - recursion panel no longer shrinks the traversal canvas
+  - panel is draggable by the header bar and resizable from the bottom-right corner
+  - panel layout is internally scrollable and remembers its last window position/size via local storage
+- Updated `T-01` recursion copy to match the floating-window interaction:
+  - toggle text now uses open/hide recursion panel wording
+  - recursion title now reads as a panel/window instead of an inline side-by-side view
+  - added an in-panel tip recommending single-step playback for easier recursion/animation comparison
+- Verified locally:
+  - `npm run check` pass (2026-03-23)
+  - Playwright browser check confirms the traversal canvas width stays `1146px` before/after opening the panel at `1280x720`
+  - Playwright browser check confirms the recursion panel can be dragged and resized (`440x560 -> 510x585` during the verification flow)
+  - Playwright browser check confirms the new recursion tip is visible inside the floating panel
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: new floating-panel code/docs updates in progress; legacy script mode changes still present in working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest floating-panel work not committed yet
+
+### Remaining Focus (Next Session)
+- Continue `P8-M3` consistency/acceptance closure:
+  - align `T-01` / `T-02` controls, legend semantics, and status layout
+  - refresh `/modules` + implemented-route acceptance artifacts/report
+  - sync closure docs after acceptance refresh
+- Optionally add panel snap presets only if real usage shows the free-form floating window still needs guidance.
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m3-route-rules-spike
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-22 (P8-M3 T-01 arrow-anchor + route-order checkpoint)
 
 ### Today Done
