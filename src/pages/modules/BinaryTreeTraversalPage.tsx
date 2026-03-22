@@ -117,6 +117,8 @@ type TraceGeometry = {
 
 const DEFAULT_STAGE_WIDTH = 1200;
 const DEFAULT_STAGE_HEIGHT = 460;
+const TREE_STAGE_TOP = 16;
+const TREE_STAGE_BOTTOM = 92;
 const TREE_NODE_DIAMETER_PX = 62;
 const TREE_NULL_DIAMETER_PX = 24;
 const TRACE_SHELL_GAP_PX = 4.5;
@@ -496,10 +498,11 @@ function getRootTopEntryAnchor(rootCenter: NodePoint, geometry: TraceGeometry): 
   return pointOnMetricCircle(rootCenter, geometry.guideNodeClearRadius, -Math.PI / 2, geometry.aspect);
 }
 
-function getRootTopEntryStart(rootEntryAnchor: NodePoint): NodePoint {
+function getRootTopEntryStart(rootEntryAnchor: NodePoint, geometry: TraceGeometry): NodePoint {
+  const pxToUnitY = geometry.nodeRadius / (TREE_NODE_DIAMETER_PX / 2);
   return {
     x: rootEntryAnchor.x,
-    y: clampPoint(rootEntryAnchor.y - 2.55, 0.35, 98),
+    y: clampPoint(rootEntryAnchor.y - 30 * pxToUnitY, 0.35, 98),
   };
 }
 
@@ -776,7 +779,7 @@ function buildGuideRawTraceSegments(
         return;
       }
       const rootEntryAnchor = getRootTopEntryAnchor(root, geometry);
-      const rootEntryStart = getRootTopEntryStart(rootEntryAnchor);
+      const rootEntryStart = getRootTopEntryStart(rootEntryAnchor, geometry);
       const rootEntry =
         resolveRootRouteStartFromGuideEvents(event.toIndex, index, rootGuideEvents, nodePositions, top, yStep, geometry) ??
         getRootTraceEntry(root, geometry);
@@ -1190,21 +1193,21 @@ function buildTraceEntryMarkersWithReveal(
 function getTraceEntryMarkerOffset(marker: TraceEntryMarker): MarkerOffset {
   if (marker.label === '1') {
     if (marker.nodeIndex === 0) {
-      return { x: -10, y: -10 };
+      return { x: -14, y: -14 };
     }
 
     if (marker.nodeIndex % 2 === 1) {
-      return { x: 0, y: -10 };
+      return { x: 0, y: -14 };
     }
 
-    return { x: -10, y: 8 };
+    return { x: -14, y: 12 };
   }
 
   if (marker.label === '2') {
-    return { x: 0, y: 8 };
+    return { x: 0, y: 12 };
   }
 
-  return { x: 10, y: 0 };
+  return { x: 14, y: 0 };
 }
 
 function buildCounterClockwiseNodeArc(
@@ -1620,7 +1623,7 @@ function buildParallelGuideSegments(
   const rootCenter = getNodeCenter(nodePositions, 0);
   if (rootCenter) {
     const rootEntryAnchor = getRootTopEntryAnchor(rootCenter, geometry);
-    const rootEntryStart = getRootTopEntryStart(rootEntryAnchor);
+    const rootEntryStart = getRootTopEntryStart(rootEntryAnchor, geometry);
     const rootLeftBranch = leftBranchByNode.get(0);
     const rootEntry = rootLeftBranch
       ? pickGuideEndpointBySide(rootLeftBranch, 'left').point
@@ -1765,8 +1768,8 @@ export function BinaryTreeTraversalPage() {
   const canonicalPreorderGuideEvents = preorderTraceSourceStep?.guideEvents;
 
   const treeLayout = useMemo(() => {
-    const top = 12;
-    const bottom = 92;
+    const top = TREE_STAGE_TOP;
+    const bottom = TREE_STAGE_BOTTOM;
     const maxNodeLevel = treeState.length > 0 ? getNodeLevel(treeState.length - 1) : 0;
     const maxDisplayLevel = maxNodeLevel + 1;
     const yStep = (bottom - top) / Math.max(maxDisplayLevel, 1);
