@@ -6,6 +6,7 @@ import { useI18n } from '../../i18n/useI18n';
 import {
   buildBinaryTreeTraversalTimelineFromInput,
 } from '../../modules/tree/binaryTreeTraversalTimelineAdapter';
+import { buildOffsetEdgeSegment, pickAbsoluteSidePair } from '../../modules/tree/preorderTraceRules';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 import type {
   BinaryTreeGuideEvent,
@@ -32,6 +33,8 @@ type RawTraversalTraceSegment = {
   isActive: boolean;
   fromPoint: NodePoint;
   toPoint: NodePoint;
+  arrowFromPoint: NodePoint | null;
+  arrowToPoint: NodePoint | null;
   targetIndex: number | null;
 };
 
@@ -43,6 +46,23 @@ type TraversalTraceSegment = {
   roughPath: string;
   arrowPath: string | null;
   arrowIsCurrent: boolean;
+};
+
+type TraceEntryMarker = {
+  key: string;
+  nodeIndex: number;
+  point: NodePoint;
+  label: '1' | '2' | '3';
+};
+
+type TraceEntryMarkerReveal = TraceEntryMarker & {
+  revealLength: number;
+};
+
+type TraceSegmentMetric = {
+  length: number;
+  start: number;
+  end: number;
 };
 
 type RouteOrderSegment = {
@@ -102,6 +122,11 @@ const TRACE_ARROW_SIZE_PX = 8.5;
 const TRACE_ARROW_WING_PX = 4.4;
 const TRACE_ARROW_TIP_BACKOFF_PX = 1.3;
 const TRACE_NODE_TURN_BEND_ANGLE = 0.34;
+const TRACE_ENTRY_MARKER_MATCH_EPSILON = 0.08;
+const DEFAULT_PAGE_SPEED_MS = 1000;
+const TRACE_STEP_DRAW_MIN_MS = 750;
+const TRACE_STEP_DRAW_MAX_MS = 1500;
+const SHOW_LEGACY_GUIDE_OVERLAY = false;
 
 function createRandomDataset(size: number): number[] {
   const poolSize = Math.max(99, size);
@@ -352,60 +377,6 @@ function getPointAngleAroundCenter(point: NodePoint, center: NodePoint, aspect: 
   return Math.atan2(pointMetric.y - centerMetric.y, pointMetric.x - centerMetric.x);
 }
 
-function isAngleOnSweep(startAngle: number, delta: number, angle: number): boolean {
-  if (delta >= 0) {
-    const relative = normalizePositiveAngle(angle - startAngle);
-    return relative <= delta + 0.0001;
-  }
-
-  const relative = normalizePositiveAngle(startAngle - angle);
-  return relative <= Math.abs(delta) + 0.0001;
-}
-
-function resolveNullReturnArcSweep(
-  from: NodePoint,
-  to: NodePoint,
-  nullCenter: NodePoint,
-  parentCenter: NodePoint,
-  aspect: number,
-): { preferredDirection: ArcDirection; longArc: boolean } {
-  const centerMetric = toMetricPoint(nullCenter, aspect);
-  const fromMetric = toMetricPoint(from, aspect);
-  const toMetric = toMetricPoint(to, aspect);
-  const parentMetric = toMetricPoint(parentCenter, aspect);
-  const startAngle = Math.atan2(fromMetric.y - centerMetric.y, fromMetric.x - centerMetric.x);
-  const endAngle = Math.atan2(toMetric.y - centerMetric.y, toMetric.x - centerMetric.x);
-  const parentAngle = Math.atan2(parentMetric.y - centerMetric.y, parentMetric.x - centerMetric.x);
-  const outerAngle = normalizePositiveAngle(parentAngle + Math.PI);
-  const targetDelta = Math.PI * 1.24;
-
-  const candidates: Array<{ preferredDirection: ArcDirection; longArc: boolean }> = [
-    { preferredDirection: 'cw', longArc: true },
-    { preferredDirection: 'ccw', longArc: true },
-    { preferredDirection: 'cw', longArc: false },
-    { preferredDirection: 'ccw', longArc: false },
-  ];
-
-  let best = candidates[0];
-  let bestScore = Number.POSITIVE_INFINITY;
-
-  candidates.forEach((candidate) => {
-    const delta = resolveArcDelta(startAngle, endAngle, candidate.preferredDirection, candidate.longArc);
-    if (candidate.longArc && Math.abs(delta) < Math.PI * 1.02) {
-      return;
-    }
-
-    const passesOuter = isAngleOnSweep(startAngle, delta, outerAngle);
-    const score = (passesOuter ? 0 : 1000) + Math.abs(Math.abs(delta) - targetDelta);
-    if (score < bestScore) {
-      bestScore = score;
-      best = candidate;
-    }
-  });
-
-  return best;
-}
-
 type MutableTracePath = {
   commands: string[];
   cursor: NodePoint;
@@ -512,41 +483,6 @@ function buildTraceGeometry(stageWidth: number, stageHeight: number): TraceGeome
   };
 }
 
-function buildOffsetEdgeSegment(config: {
-  from: NodePoint;
-  to: NodePoint;
-  fromRadius: number;
-  toRadius: number;
-  lane: 'L' | 'R';
-  edgeOffset: number;
-  aspect: number;
-}): { start: NodePoint; end: NodePoint } {
-  const fromMetric = toMetricPoint(config.from, config.aspect);
-  const toMetric = toMetricPoint(config.to, config.aspect);
-  const direction = normalizeDirection(toMetric.x - fromMetric.x, toMetric.y - fromMetric.y, 0, 1);
-  // Screen-space left normal: y grows downward, so use (dy, -dx) instead of (-dy, dx).
-  const normal = { x: direction.y, y: -direction.x };
-  const laneSign = config.lane === 'L' ? 1 : -1;
-  const offsetCap = Math.max(Math.min(config.fromRadius, config.toRadius) - 0.08, 0.08);
-  const offset = Math.min(config.edgeOffset, offsetCap);
-  const fromAlong = Math.sqrt(Math.max(config.fromRadius ** 2 - offset ** 2, 0.03));
-  const toAlong = Math.sqrt(Math.max(config.toRadius ** 2 - offset ** 2, 0.03));
-
-  const startMetric = {
-    x: fromMetric.x + direction.x * fromAlong + normal.x * offset * laneSign,
-    y: fromMetric.y + direction.y * fromAlong + normal.y * offset * laneSign,
-  };
-  const endMetric = {
-    x: toMetric.x - direction.x * toAlong + normal.x * offset * laneSign,
-    y: toMetric.y - direction.y * toAlong + normal.y * offset * laneSign,
-  };
-
-  return {
-    start: fromMetricPoint(startMetric, config.aspect),
-    end: fromMetricPoint(endMetric, config.aspect),
-  };
-}
-
 function getRootTraceEntry(rootCenter: NodePoint, geometry: TraceGeometry): NodePoint {
   const entryAngle = Math.PI * 0.82;
   return pointOnMetricCircle(rootCenter, geometry.guideNodeClearRadius, entryAngle, geometry.aspect);
@@ -561,6 +497,23 @@ function getRootTopEntryStart(rootEntryAnchor: NodePoint): NodePoint {
     x: rootEntryAnchor.x,
     y: clampPoint(rootEntryAnchor.y - 2.55, 0.35, 98),
   };
+}
+
+function buildGuideAbsoluteLanePair(config: {
+  from: NodePoint;
+  to: NodePoint;
+  fromRadius: number;
+  toRadius: number;
+  geometry: TraceGeometry;
+}) {
+  return pickAbsoluteSidePair({
+    from: config.from,
+    to: config.to,
+    fromRadius: config.fromRadius,
+    toRadius: config.toRadius,
+    edgeOffset: config.geometry.guideEdgeOffset,
+    aspect: config.geometry.aspect,
+  });
 }
 
 function resolveRootRouteStartFromGuideEvents(
@@ -587,33 +540,26 @@ function resolveRootRouteStartFromGuideEvents(
     if (!childCenter) {
       return null;
     }
-    const moveSide = inferEdgeSide(nextEvent.fromIndex, nextEvent.toIndex);
-    const lane = getTraversalLaneForTreeMove(moveSide, nextEvent.side === 'UP');
-    const line = buildOffsetEdgeSegment({
+    const lanes = buildGuideAbsoluteLanePair({
       from: rootCenter,
       to: childCenter,
       fromRadius: geometry.guideNodeClearRadius,
       toRadius: geometry.guideNodeClearRadius,
-      lane,
-      edgeOffset: geometry.guideEdgeOffset,
-      aspect: geometry.aspect,
+      geometry,
     });
-    return line.start;
+    return lanes.left.start;
   }
 
   if (nextEvent.type === 'toNull' && nextEvent.fromIndex === rootIndex) {
     const nullCenter = getNullPoint(rootIndex, nextEvent.side, top, yStep);
-    const lane = getTraversalLaneForTreeMove(nextEvent.side, false);
-    const line = buildOffsetEdgeSegment({
+    const lanes = buildGuideAbsoluteLanePair({
       from: rootCenter,
       to: nullCenter,
       fromRadius: geometry.guideNodeClearRadius,
       toRadius: geometry.guideNullClearRadius,
-      lane,
-      edgeOffset: geometry.guideEdgeOffset,
-      aspect: geometry.aspect,
+      geometry,
     });
-    return line.start;
+    return lanes.left.start;
   }
 
   return null;
@@ -744,6 +690,8 @@ function buildLineLikeTraceSegment(config: {
     isActive: config.isActive,
     fromPoint: pathStart,
     toPoint: config.lineEnd,
+    arrowFromPoint: config.lineStart,
+    arrowToPoint: config.lineEnd,
     targetIndex: config.targetIndex,
   };
 }
@@ -763,6 +711,8 @@ function createRawLineTraceSegment(config: {
     isActive: config.isActive,
     fromPoint: config.fromPoint,
     toPoint: config.toPoint,
+    arrowFromPoint: config.fromPoint,
+    arrowToPoint: config.toPoint,
     targetIndex: config.targetIndex,
   };
 }
@@ -799,8 +749,16 @@ function createRawArcTraceSegment(config: {
     isActive: config.isActive,
     fromPoint: arcPath.start,
     toPoint: arcPath.end,
+    arrowFromPoint: null,
+    arrowToPoint: null,
     targetIndex: config.targetIndex,
   };
+}
+
+function hasTraceArrowAnchor(
+  segment: RawTraversalTraceSegment,
+): segment is RawTraversalTraceSegment & { arrowFromPoint: NodePoint; arrowToPoint: NodePoint } {
+  return segment.arrowFromPoint !== null && segment.arrowToPoint !== null;
 }
 
 function getTraversalLaneForTreeMove(_side: 'L' | 'R', isUpMove: boolean): 'L' | 'R' {
@@ -871,34 +829,59 @@ function buildGuideRawTraceSegments(
     }
 
     if (event.type === 'move') {
-      const fromCenter = getNodeCenter(nodePositions, event.fromIndex);
-      const toCenter = getNodeCenter(nodePositions, event.toIndex);
-      if (!fromCenter || !toCenter) {
+      if (event.side === 'UP') {
+        const childCenter = getNodeCenter(nodePositions, event.fromIndex);
+        const parentCenter = getNodeCenter(nodePositions, event.toIndex);
+        if (!childCenter || !parentCenter) {
+          return;
+        }
+        const lanes = buildGuideAbsoluteLanePair({
+          from: parentCenter,
+          to: childCenter,
+          fromRadius: geometry.guideNodeClearRadius,
+          toRadius: geometry.guideNodeClearRadius,
+          geometry,
+        });
+        const segment = buildLineLikeTraceSegment({
+          key: `guide-move-${index}`,
+          isActive: activeGuideEventIndex === index,
+          targetIndex: event.toIndex,
+          penPoint,
+          pivotCenter: childCenter,
+          pivotRadius: geometry.guideNodeClearRadius,
+          lineStart: lanes.right.end,
+          lineEnd: lanes.right.start,
+          geometry,
+          connectorDirection: 'ccw',
+        });
+        segments.push(segment);
+        penPoint = segment.toPoint;
         return;
       }
-      const moveSide = inferEdgeSide(event.fromIndex, event.toIndex);
-      const lane = getTraversalLaneForTreeMove(moveSide, event.side === 'UP');
-      const line = buildOffsetEdgeSegment({
-        from: fromCenter,
-        to: toCenter,
+
+      const parentCenter = getNodeCenter(nodePositions, event.fromIndex);
+      const childCenter = getNodeCenter(nodePositions, event.toIndex);
+      if (!parentCenter || !childCenter) {
+        return;
+      }
+      const lanes = buildGuideAbsoluteLanePair({
+        from: parentCenter,
+        to: childCenter,
         fromRadius: geometry.guideNodeClearRadius,
         toRadius: geometry.guideNodeClearRadius,
-        lane,
-        edgeOffset: geometry.guideEdgeOffset,
-        aspect: geometry.aspect,
+        geometry,
       });
-
       const segment = buildLineLikeTraceSegment({
         key: `guide-move-${index}`,
         isActive: activeGuideEventIndex === index,
         targetIndex: event.toIndex,
         penPoint,
-        pivotCenter: fromCenter,
+        pivotCenter: parentCenter,
         pivotRadius: geometry.guideNodeClearRadius,
-        lineStart: line.start,
-        lineEnd: line.end,
+        lineStart: lanes.left.start,
+        lineEnd: lanes.left.end,
         geometry,
-        connectorDirection: event.side === 'UP' ? 'cw' : 'ccw',
+        connectorDirection: 'ccw',
       });
       segments.push(segment);
       penPoint = segment.toPoint;
@@ -911,15 +894,12 @@ function buildGuideRawTraceSegments(
         return;
       }
       const nullCenter = getNullPoint(event.fromIndex, event.side, top, yStep);
-      const lane = getTraversalLaneForTreeMove(event.side, false);
-      const approach = buildOffsetEdgeSegment({
+      const lanes = buildGuideAbsoluteLanePair({
         from: parentCenter,
         to: nullCenter,
         fromRadius: geometry.guideNodeClearRadius,
         toRadius: geometry.guideNullClearRadius,
-        lane,
-        edgeOffset: geometry.guideEdgeOffset,
-        aspect: geometry.aspect,
+        geometry,
       });
       const segment = buildLineLikeTraceSegment({
         key: `guide-null-enter-${index}`,
@@ -928,10 +908,10 @@ function buildGuideRawTraceSegments(
         penPoint,
         pivotCenter: parentCenter,
         pivotRadius: geometry.guideNodeClearRadius,
-        lineStart: approach.start,
-        lineEnd: approach.end,
+        lineStart: lanes.left.start,
+        lineEnd: lanes.left.end,
         geometry,
-        connectorDirection: event.side === 'L' ? 'ccw' : 'cw',
+        connectorDirection: 'ccw',
       });
       segments.push(segment);
       penPoint = segment.toPoint;
@@ -943,51 +923,28 @@ function buildGuideRawTraceSegments(
       return;
     }
     const nullCenter = getNullPoint(event.toIndex, event.side, top, yStep);
-    const lane = getTraversalLaneForTreeMove(event.side, true);
-    const returnLine = buildOffsetEdgeSegment({
-      from: nullCenter,
-      to: parentCenter,
-      fromRadius: geometry.guideNullClearRadius,
-      toRadius: geometry.guideNodeClearRadius,
-      lane,
-      edgeOffset: geometry.guideEdgeOffset,
-      aspect: geometry.aspect,
+    const lanes = buildGuideAbsoluteLanePair({
+      from: parentCenter,
+      to: nullCenter,
+      fromRadius: geometry.guideNodeClearRadius,
+      toRadius: geometry.guideNullClearRadius,
+      geometry,
     });
-    const lineStart = returnLine.start;
-    const lineEnd = returnLine.end;
-    const pathStart = penPoint ?? lineStart;
-    const path = createTracePath(pathStart, geometry.aspect);
-
-    if (metricDistance(pathStart, lineStart, geometry.aspect) > 0.03) {
-      const nullSweep = resolveNullReturnArcSweep(
-        pathStart,
-        lineStart,
-        nullCenter,
-        parentCenter,
-        geometry.aspect,
-      );
-      appendTraceArc(path, {
-        center: nullCenter,
-        radius: geometry.guideNullClearRadius,
-        to: lineStart,
-        preferredDirection: nullSweep.preferredDirection,
-        longArc: nullSweep.longArc,
-      });
-    }
-
-    appendTraceLine(path, lineStart);
-    appendTraceLine(path, lineEnd);
-
-    segments.push({
+    const segment = buildLineLikeTraceSegment({
       key: `guide-null-return-${index}`,
-      d: path.commands.join(' '),
-      length: Math.max(path.length, 1),
       isActive: activeGuideEventIndex === index,
-      fromPoint: pathStart,
-      toPoint: lineEnd,
       targetIndex: event.toIndex,
+      penPoint,
+      pivotCenter: nullCenter,
+      pivotRadius: geometry.guideNullClearRadius,
+      lineStart: lanes.right.end,
+      lineEnd: lanes.right.start,
+      geometry,
+      connectorDirection: 'ccw',
+      connectorLongArc: true,
     });
-    penPoint = lineEnd;
+    segments.push(segment);
+    penPoint = segment.toPoint;
   });
 
   return segments;
@@ -1054,42 +1011,188 @@ function buildFallbackRawTraceSegments(
   return segments;
 }
 
-function buildTraceSegments(
+function buildRawTraceSegments(
   step: BinaryTreeTraversalStep | undefined,
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
   geometry: TraceGeometry,
-): TraversalTraceSegment[] {
+): RawTraversalTraceSegment[] {
   if (!step || nodePositions.length === 0) {
     return [];
   }
 
-  const rawSegments =
-    step.guideEvents.length > 0
-      ? buildGuideRawTraceSegments(step.guideEvents, step.activeGuideEventIndex, nodePositions, top, yStep, geometry)
-      : buildFallbackRawTraceSegments(step.visitedIndices, step.action === 'visit', nodePositions, geometry);
+  return step.guideEvents.length > 0
+    ? buildGuideRawTraceSegments(step.guideEvents, step.activeGuideEventIndex, nodePositions, top, yStep, geometry)
+    : buildFallbackRawTraceSegments(step.visitedIndices, step.action === 'visit', nodePositions, geometry);
+}
 
-  let headSegmentIndex = -1;
-  for (let index = rawSegments.length - 1; index >= 0; index -= 1) {
-    if (rawSegments[index]?.isActive) {
-      headSegmentIndex = index;
-      break;
-    }
-  }
-  if (headSegmentIndex < 0) {
-    headSegmentIndex = rawSegments.length - 1;
+function buildTraceSegments(rawSegments: RawTraversalTraceSegment[], geometry: TraceGeometry): TraversalTraceSegment[] {
+  if (rawSegments.length === 0) {
+    return [];
   }
 
-  return rawSegments.map((segment, index) => ({
+  return rawSegments.map((segment) => ({
     key: segment.key,
     d: segment.d,
     length: segment.length,
     isActive: segment.isActive,
     roughPath: buildHandDrawnTracePath(segment.key, segment.d),
-    arrowPath: index === headSegmentIndex ? buildTraceNodeArrowPath(segment.fromPoint, segment.toPoint, geometry) : null,
-    arrowIsCurrent: index === headSegmentIndex,
+    arrowPath: hasTraceArrowAnchor(segment) ? buildTraceNodeArrowPath(segment.arrowFromPoint, segment.arrowToPoint, geometry) : null,
+    arrowIsCurrent: segment.isActive,
   }));
+}
+
+function buildTraceMetrics(rawSegments: RawTraversalTraceSegment[]): TraceSegmentMetric[] {
+  let cursor = 0;
+
+  return rawSegments.map((segment) => {
+    const start = cursor;
+    cursor += segment.length;
+    return {
+      length: segment.length,
+      start,
+      end: cursor,
+    };
+  });
+}
+
+function buildPreorderTraceEntryMarkers(
+  treeLength: number,
+  nodePositions: NodePoint[],
+  top: number,
+  yStep: number,
+  geometry: TraceGeometry,
+): TraceEntryMarker[] {
+  const rootCenter = getNodeCenter(nodePositions, 0);
+  if (!rootCenter) {
+    return [];
+  }
+
+  type EdgeLanePair = { left: { start: NodePoint; end: NodePoint }; right: { start: NodePoint; end: NodePoint } };
+  type ChildTraceContext = {
+    childIndex: number;
+    childCenter: NodePoint;
+    childIsReal: boolean;
+    lanes: EdgeLanePair;
+  };
+
+  const entryMarkers: TraceEntryMarker[] = [];
+  let markerOrder = 1;
+  const nextMarkerKey = (label: '1' | '2' | '3', nodeIndex: number) => `trace-entry-${markerOrder++}-${label}-node-${nodeIndex}`;
+
+  const pushEntryMarker = (nodeIndex: number, label: '1' | '2' | '3', point: NodePoint): void => {
+    entryMarkers.push({
+      key: nextMarkerKey(label, nodeIndex),
+      nodeIndex,
+      point,
+      label,
+    });
+  };
+
+  const buildChildTraceContext = (parentIndex: number, parentCenter: NodePoint, side: 'L' | 'R'): ChildTraceContext => {
+    const childIndex = getChildIndex(parentIndex, side);
+    const childIsReal = childIndex < treeLength;
+    const childCenter = childIsReal
+      ? getNodeCenter(nodePositions, childIndex) ?? getNullPoint(parentIndex, side, top, yStep)
+      : getNullPoint(parentIndex, side, top, yStep);
+    const childRadius = childIsReal ? geometry.guideNodeClearRadius : geometry.guideNullClearRadius;
+
+    return {
+      childIndex,
+      childCenter,
+      childIsReal,
+      lanes: buildGuideAbsoluteLanePair({
+        from: parentCenter,
+        to: childCenter,
+        fromRadius: geometry.guideNodeClearRadius,
+        toRadius: childRadius,
+        geometry,
+      }),
+    };
+  };
+
+  function traceChild(context: ChildTraceContext): NodePoint {
+    if (context.childIsReal) {
+      return traceDataNode(context.childIndex, context.childCenter, context.lanes);
+    }
+    return context.lanes.right.start;
+  }
+
+  function traceDataNode(nodeIndex: number, nodeCenter: NodePoint, incoming: EdgeLanePair): NodePoint {
+    pushEntryMarker(nodeIndex, '1', incoming.left.end);
+
+    const leftContext = buildChildTraceContext(nodeIndex, nodeCenter, 'L');
+    const leftReturnPoint = traceChild(leftContext);
+    pushEntryMarker(nodeIndex, '2', leftReturnPoint);
+
+    const rightContext = buildChildTraceContext(nodeIndex, nodeCenter, 'R');
+    const rightReturnPoint = traceChild(rightContext);
+    pushEntryMarker(nodeIndex, '3', rightReturnPoint);
+
+    return incoming.right.start;
+  }
+
+  const rootEntryAnchor = getRootTopEntryAnchor(rootCenter, geometry);
+  pushEntryMarker(0, '1', rootEntryAnchor);
+
+  const rootLeftContext = buildChildTraceContext(0, rootCenter, 'L');
+  const rootLeftReturnPoint = traceChild(rootLeftContext);
+  pushEntryMarker(0, '2', rootLeftReturnPoint);
+
+  const rootRightContext = buildChildTraceContext(0, rootCenter, 'R');
+  const rootRightReturnPoint = traceChild(rootRightContext);
+  pushEntryMarker(0, '3', rootRightReturnPoint);
+
+  return entryMarkers;
+}
+
+function buildTraceEntryMarkersWithReveal(
+  entryMarkers: TraceEntryMarker[],
+  rawSegments: RawTraversalTraceSegment[],
+  aspect: number,
+): TraceEntryMarkerReveal[] {
+  if (entryMarkers.length === 0 || rawSegments.length === 0) {
+    return [];
+  }
+
+  let totalLength = 0;
+  const metrics = rawSegments.map((segment) => {
+    const start = totalLength;
+    totalLength += segment.length;
+    return {
+      start,
+      end: totalLength,
+      fromPoint: segment.fromPoint,
+      toPoint: segment.toPoint,
+    };
+  });
+
+  return entryMarkers.map((marker, markerIndex) => {
+    let revealLength: number | null = null;
+
+    metrics.forEach((metric) => {
+      const endDistance = metricDistance(metric.toPoint, marker.point, aspect);
+      if (endDistance <= TRACE_ENTRY_MARKER_MATCH_EPSILON) {
+        revealLength = revealLength === null ? metric.end : Math.min(revealLength, metric.end);
+      }
+    });
+
+    if (revealLength === null) {
+      metrics.forEach((metric) => {
+        const startDistance = metricDistance(metric.fromPoint, marker.point, aspect);
+        if (startDistance <= TRACE_ENTRY_MARKER_MATCH_EPSILON) {
+          revealLength = revealLength === null ? metric.start : Math.min(revealLength, metric.start);
+        }
+      });
+    }
+
+    const fallbackReveal = totalLength > 0 ? ((markerIndex + 1) / (entryMarkers.length + 1)) * totalLength : 0;
+    return {
+      ...marker,
+      revealLength: revealLength ?? fallbackReveal,
+    };
+  });
 }
 
 function buildCounterClockwiseNodeArc(
@@ -1624,6 +1727,7 @@ export function BinaryTreeTraversalPage() {
   const [valueDisplayMode, setValueDisplayMode] = useState<ValueDisplayMode>('number');
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
   const [stageSize, setStageSize] = useState({ width: DEFAULT_STAGE_WIDTH, height: DEFAULT_STAGE_HEIGHT });
+  const [traceVisibleLength, setTraceVisibleLength] = useState(0);
 
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
 
@@ -1665,9 +1769,30 @@ export function BinaryTreeTraversalPage() {
     return allEdges;
   }, [treeState.length]);
 
-  const traceSegments = useMemo(
-    () => buildTraceSegments(currentSnapshot, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
+  const currentRawTraceSegments = useMemo(
+    () => buildRawTraceSegments(currentSnapshot, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
     [currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
+  );
+  const currentTraceMetrics = useMemo(() => buildTraceMetrics(currentRawTraceSegments), [currentRawTraceSegments]);
+  const currentTraceTargetLength = currentTraceMetrics[currentTraceMetrics.length - 1]?.end ?? 0;
+  const currentTraceActiveStartLength = useMemo(() => {
+    const activeIndex = currentRawTraceSegments.findIndex((segment) => segment.isActive);
+    if (activeIndex < 0) {
+      return currentTraceTargetLength;
+    }
+    return currentTraceMetrics[activeIndex]?.start ?? currentTraceTargetLength;
+  }, [currentRawTraceSegments, currentTraceMetrics, currentTraceTargetLength]);
+  const currentTraceVisibleLengths = useMemo(
+    () =>
+      currentTraceMetrics.map((metric) => {
+        const visible = traceVisibleLength - metric.start;
+        return Math.max(0, Math.min(metric.length, visible));
+      }),
+    [currentTraceMetrics, traceVisibleLength],
+  );
+  const traceSegments = useMemo(
+    () => buildTraceSegments(currentRawTraceSegments, traceGeometry),
+    [currentRawTraceSegments, traceGeometry],
   );
   const parallelGuideSegments = useMemo(
     () => buildParallelGuideSegments(edges, treeState.length, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
@@ -1699,13 +1824,47 @@ export function BinaryTreeTraversalPage() {
       traceGeometry,
     );
 
-    return orderedRawSegments.map((segment, index) => ({
-      key: `${segment.key}-order-${index}`,
-      d: segment.d,
-      order: index + 1,
-      pathId: `${routeOrderIdPrefix}-route-order-${index}`,
-    }));
+    return orderedRawSegments
+      .filter(hasTraceArrowAnchor)
+      .map((segment, index) => ({
+        key: `${segment.key}-order-${index}`,
+        d: `M ${formatPoint(segment.arrowFromPoint)} L ${formatPoint(segment.arrowToPoint)}`,
+        order: index + 1,
+        pathId: `${routeOrderIdPrefix}-route-order-${index}`,
+      }));
   }, [mode, nodePositions, routeOrderIdPrefix, steps, traceGeometry, treeLayout.top, treeLayout.yStep]);
+  const preorderTraceSourceStep = useMemo(() => {
+    if (mode !== 'preorder') {
+      return undefined;
+    }
+
+    for (let index = steps.length - 1; index >= 0; index -= 1) {
+      const step = steps[index];
+      if (step && step.guideEvents.length > 0) {
+        return step;
+      }
+    }
+
+    return undefined;
+  }, [mode, steps]);
+  const fullPreorderRawTraceSegments = useMemo(
+    () =>
+      preorderTraceSourceStep
+        ? buildRawTraceSegments(preorderTraceSourceStep, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
+        : [],
+    [nodePositions, preorderTraceSourceStep, traceGeometry, treeLayout.top, treeLayout.yStep],
+  );
+  const traceEntryMarkers = useMemo(
+    () =>
+      mode === 'preorder'
+        ? buildPreorderTraceEntryMarkers(treeState.length, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
+        : [],
+    [mode, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState.length],
+  );
+  const traceEntryMarkersWithReveal = useMemo(
+    () => buildTraceEntryMarkersWithReveal(traceEntryMarkers, fullPreorderRawTraceSegments, traceGeometry.aspect),
+    [fullPreorderRawTraceSegments, traceEntryMarkers, traceGeometry.aspect],
+  );
 
   const visitedSet = useMemo(() => new Set(currentSnapshot?.visitedIndices ?? []), [currentSnapshot?.visitedIndices]);
   const modeLabel = getModeLabel(mode, t);
@@ -1759,6 +1918,48 @@ export function BinaryTreeTraversalPage() {
   }, [setTotalFrames, reset, steps.length]);
 
   useEffect(() => {
+    setSpeed(DEFAULT_PAGE_SPEED_MS);
+  }, [setSpeed]);
+
+  useEffect(() => {
+    let rafId = 0;
+    let startTime: number | null = null;
+    const durationMs = Math.max(
+      TRACE_STEP_DRAW_MIN_MS,
+      Math.min(TRACE_STEP_DRAW_MAX_MS, speedMs * 0.92),
+    );
+    const hasAnimatedTail = currentTraceTargetLength - currentTraceActiveStartLength > 0.001;
+    const initialLength = hasAnimatedTail ? currentTraceActiveStartLength : currentTraceTargetLength;
+
+    const tick = (timestamp: number) => {
+      if (startTime === null) {
+        startTime = timestamp;
+      }
+
+      const progress = Math.min(1, (timestamp - startTime) / durationMs);
+      const nextLength =
+        currentTraceActiveStartLength + (currentTraceTargetLength - currentTraceActiveStartLength) * progress;
+      setTraceVisibleLength(nextLength);
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    rafId = requestAnimationFrame((timestamp) => {
+      setTraceVisibleLength(initialLength);
+
+      if (currentTraceTargetLength <= 0 || !hasAnimatedTail) {
+        return;
+      }
+
+      startTime = timestamp;
+      rafId = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [currentStep, currentTraceActiveStartLength, currentTraceTargetLength, speedMs]);
+
+  useEffect(() => {
     const stageElement = stageRef.current;
     if (!stageElement) {
       return;
@@ -1800,9 +2001,9 @@ export function BinaryTreeTraversalPage() {
   };
 
   const speedOptions = [
-    { key: 'module.s01.speed.slow', value: 1200 },
-    { key: 'module.s01.speed.normal', value: 700 },
-    { key: 'module.s01.speed.fast', value: 350 },
+    { key: 'module.s01.speed.slow', value: 1800 },
+    { key: 'module.s01.speed.normal', value: 1000 },
+    { key: 'module.s01.speed.fast', value: 600 },
   ] as const;
 
   const modeOptions: BinaryTreeTraversalMode[] = ['preorder', 'inorder', 'postorder', 'levelorder'];
@@ -1927,38 +2128,57 @@ export function BinaryTreeTraversalPage() {
             })}
           </svg>
 
-          <svg className="tree-shell-guide-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            {parallelGuideSegments.map((segment) => (
-              <g key={segment.key}>
-                <path className="tree-shell-guide" d={segment.d} />
-                {segment.directionMarkerPaths?.map((markerPath, markerIndex) => (
-                  <path key={`${segment.key}-marker-${markerIndex}`} className="tree-shell-guide-direction" d={markerPath} />
-                ))}
-              </g>
-            ))}
-          </svg>
+          {SHOW_LEGACY_GUIDE_OVERLAY ? (
+            <svg className="tree-shell-guide-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {parallelGuideSegments.map((segment) => (
+                <g key={segment.key}>
+                  <path className="tree-shell-guide" d={segment.d} />
+                  {segment.directionMarkerPaths?.map((markerPath, markerIndex) => (
+                    <path key={`${segment.key}-marker-${markerIndex}`} className="tree-shell-guide-direction" d={markerPath} />
+                  ))}
+                </g>
+              ))}
+            </svg>
+          ) : null}
 
-          <svg className="tree-route-order-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            {routeOrderSegments.map((segment) => (
-              <g key={segment.key}>
-                <path id={segment.pathId} className="tree-route-order-path-anchor" d={segment.d} />
-                <text className="tree-route-order-label">
-                  <textPath href={`#${segment.pathId}`} startOffset="50%" textAnchor="middle">
-                    {segment.order}
-                  </textPath>
-                </text>
-              </g>
-            ))}
-          </svg>
+          {SHOW_LEGACY_GUIDE_OVERLAY ? (
+            <svg className="tree-route-order-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {routeOrderSegments.map((segment) => (
+                <g key={segment.key}>
+                  <path id={segment.pathId} className="tree-route-order-path-anchor" d={segment.d} />
+                  <text className="tree-route-order-label">
+                    <textPath href={`#${segment.pathId}`} startOffset="50%" textAnchor="middle">
+                      {segment.order}
+                    </textPath>
+                  </text>
+                </g>
+              ))}
+            </svg>
+          ) : null}
 
           <svg className="tree-trace-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            {traceSegments.map((segment) => {
+            {traceSegments.map((segment, index) => {
               const segmentKey = segment.isActive ? `${segment.key}-${currentStep}` : segment.key;
+              const segmentLength = currentTraceMetrics[index]?.length ?? segment.length;
+              const visibleLength = currentTraceVisibleLengths[index] ?? 0;
+              const hiddenLength = Math.max(segmentLength - visibleLength, 0) + 0.01;
+              const isPending = segmentLength <= 0.001 || visibleLength <= 0.001;
+              const isCompleted = visibleLength >= segmentLength - 0.001;
               return (
                 <path
                   key={segmentKey}
                   className={`tree-trace${segment.isActive ? ' tree-trace-active' : ''}`}
                   d={segment.roughPath}
+                  style={
+                    isPending
+                      ? { opacity: 0 }
+                      : isCompleted
+                        ? undefined
+                        : {
+                          strokeDasharray: `${visibleLength.toFixed(3)} ${hiddenLength.toFixed(3)}`,
+                          strokeDashoffset: 0,
+                        }
+                  }
                 />
               );
             })}
@@ -1986,6 +2206,24 @@ export function BinaryTreeTraversalPage() {
                   <span className="tree-null-value">null</span>
                   <span className="tree-null-side">{hint.side}</span>
                 </div>
+              );
+            })}
+          </div>
+
+          <div className="tree-trace-entry-marker-layer" aria-hidden="true">
+            {traceEntryMarkersWithReveal.map((marker) => {
+              const visible = traceVisibleLength >= marker.revealLength - 0.001;
+              if (!visible) {
+                return null;
+              }
+              return (
+                <span
+                  key={marker.key}
+                  className="tree-trace-entry-marker"
+                  style={{ left: `${marker.point.x}%`, top: `${marker.point.y}%` }}
+                >
+                  {marker.label}
+                </span>
               );
             })}
           </div>
@@ -2022,8 +2260,14 @@ export function BinaryTreeTraversalPage() {
           </div>
 
           <svg className="tree-trace-arrow-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            {traceSegments.map((segment) => {
+            {traceSegments.map((segment, index) => {
               if (!segment.arrowPath) {
+                return null;
+              }
+
+              const segmentLength = currentTraceMetrics[index]?.length ?? segment.length;
+              const visibleLength = currentTraceVisibleLengths[index] ?? 0;
+              if (visibleLength < segmentLength - 0.001) {
                 return null;
               }
 

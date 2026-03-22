@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VisualizationCanvas } from '../../components/VisualizationCanvas';
+import { pickAbsoluteSidePair } from '../../modules/tree/preorderTraceRules';
 
 type Point = {
   x: number;
@@ -196,73 +197,6 @@ function appendPathArc(
   const sweepFlag = delta > 0 ? 1 : 0;
   path.commands.push(`A ${radiusX.toFixed(2)} ${radius.toFixed(2)} 0 ${largeArcFlag} ${sweepFlag} ${formatPoint(target)}`);
   path.cursor = target;
-}
-
-function buildOffsetEdgeSegment(config: {
-  from: Point;
-  to: Point;
-  fromRadius: number;
-  toRadius: number;
-  lane: 'L' | 'R';
-  edgeOffset: number;
-  aspect: number;
-}): { start: Point; end: Point } {
-  const fromMetric = toMetricPoint(config.from, config.aspect);
-  const toMetric = toMetricPoint(config.to, config.aspect);
-  const direction = normalizeDirection(toMetric.x - fromMetric.x, toMetric.y - fromMetric.y, 0, 1);
-  const normal = { x: direction.y, y: -direction.x };
-  const laneSign = config.lane === 'L' ? 1 : -1;
-  const offsetCap = Math.max(Math.min(config.fromRadius, config.toRadius) - 0.08, 0.08);
-  const offset = Math.min(config.edgeOffset, offsetCap);
-  const fromAlong = Math.sqrt(Math.max(config.fromRadius ** 2 - offset ** 2, 0.03));
-  const toAlong = Math.sqrt(Math.max(config.toRadius ** 2 - offset ** 2, 0.03));
-
-  const startMetric = {
-    x: fromMetric.x + direction.x * fromAlong + normal.x * offset * laneSign,
-    y: fromMetric.y + direction.y * fromAlong + normal.y * offset * laneSign,
-  };
-  const endMetric = {
-    x: toMetric.x - direction.x * toAlong + normal.x * offset * laneSign,
-    y: toMetric.y - direction.y * toAlong + normal.y * offset * laneSign,
-  };
-
-  return {
-    start: fromMetricPoint(startMetric, config.aspect),
-    end: fromMetricPoint(endMetric, config.aspect),
-  };
-}
-
-function pickAbsoluteSidePair(config: {
-  from: Point;
-  to: Point;
-  fromRadius: number;
-  toRadius: number;
-  edgeOffset: number;
-  aspect: number;
-}): { left: { start: Point; end: Point }; right: { start: Point; end: Point } } {
-  const laneLeft = buildOffsetEdgeSegment({
-    from: config.from,
-    to: config.to,
-    fromRadius: config.fromRadius,
-    toRadius: config.toRadius,
-    lane: 'L',
-    edgeOffset: config.edgeOffset,
-    aspect: config.aspect,
-  });
-  const laneRight = buildOffsetEdgeSegment({
-    from: config.from,
-    to: config.to,
-    fromRadius: config.fromRadius,
-    toRadius: config.toRadius,
-    lane: 'R',
-    edgeOffset: config.edgeOffset,
-    aspect: config.aspect,
-  });
-  const laneLeftX = (laneLeft.start.x + laneLeft.end.x) / 2;
-  const laneRightX = (laneRight.start.x + laneRight.end.x) / 2;
-  return laneLeftX <= laneRightX
-    ? { left: laneLeft, right: laneRight }
-    : { left: laneRight, right: laneLeft };
 }
 
 function buildTraceGeometry(stageWidth: number, stageHeight: number): TraceGeometry {

@@ -1240,18 +1240,24 @@ body {
 
 .tree-canvas-trace-arrow {
   fill: #b91c1c;
-  stroke: none;
+  stroke: rgba(255, 252, 252, 0.96);
+  stroke-width: 0.45;
+  stroke-linejoin: round;
   opacity: 0.96;
+  paint-order: stroke fill;
+  vector-effect: non-scaling-stroke;
 }
 
-.tree-canvas-entry-marker-layer {
+.tree-canvas-entry-marker-layer,
+.tree-trace-entry-marker-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 6;
 }
 
-.tree-canvas-entry-marker {
+.tree-canvas-entry-marker,
+.tree-trace-entry-marker {
   position: absolute;
   transform: translate(-50%, -50%);
   width: 14px;
@@ -1378,7 +1384,7 @@ body {
   stroke: #c73939;
   stroke-width: 1.9;
   opacity: 0.98;
-  animation: tree-trace-flow 1.4s linear infinite;
+  animation: tree-trace-flow 2.2s linear infinite;
 }
 
 @keyframes tree-trace-flow {
@@ -1393,8 +1399,12 @@ body {
 
 .tree-trace-node-arrow {
   fill: #c73939;
-  stroke: none;
+  stroke: rgba(255, 251, 251, 0.98);
+  stroke-width: 0.72;
+  stroke-linejoin: round;
   opacity: 0.98;
+  paint-order: stroke fill;
+  vector-effect: non-scaling-stroke;
 }
 
 .tree-trace-node-arrow-current {
