@@ -42,7 +42,9 @@ describe('generateBinaryTreeTraversalSteps', () => {
     const steps = generateBinaryTreeTraversalSteps(SPARSE_TREE, 'levelorder');
     const visitSteps = steps.filter((step) => step.action === 'visit');
 
-    expect(steps[0]?.queueState).toEqual([0]);
+    expect(steps[0]?.queueState).toEqual([]);
+    expect(steps[1]?.action).toBe('enqueueRoot');
+    expect(steps[1]?.queueState).toEqual([0]);
     expect(visitSteps.map((step) => step.currentIndex)).toEqual([0, 1, 2, 4, 6]);
     expect(visitSteps.map((step) => step.queueState)).toEqual([[1, 2], [2, 4], [4, 6], [6], []]);
   });

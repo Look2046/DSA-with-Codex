@@ -1681,6 +1681,74 @@ body {
   max-height: calc(100vh - 32px);
 }
 
+.tree-recursion-resize-zone,
+.tree-recursion-resize-handle {
+  position: absolute;
+  z-index: 2;
+  touch-action: none;
+}
+
+.tree-recursion-resize-zone {
+  display: block;
+  background: transparent;
+}
+
+.tree-recursion-resize-zone-top {
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.tree-recursion-resize-zone-right {
+  top: 14px;
+  right: 0;
+  bottom: 14px;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+.tree-recursion-resize-zone-bottom {
+  left: 14px;
+  right: 14px;
+  bottom: 0;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.tree-recursion-resize-zone-left {
+  top: 14px;
+  left: 0;
+  bottom: 14px;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+.tree-recursion-resize-zone-top-left {
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+}
+
+.tree-recursion-resize-zone-top-right {
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nesw-resize;
+}
+
+.tree-recursion-resize-zone-bottom-left {
+  bottom: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nesw-resize;
+}
+
 .tree-recursion-panel-dragging {
   box-shadow: 0 24px 46px rgba(15, 45, 84, 0.24);
 }
@@ -1822,6 +1890,10 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   align-items: start;
+}
+
+.tree-recursion-grid-levelorder {
+  grid-template-columns: 1fr;
 }
 
 .tree-recursion-card {
@@ -2087,7 +2159,6 @@ body {
 }
 
 .tree-recursion-resize-handle {
-  position: absolute;
   right: 8px;
   bottom: 8px;
   width: 20px;
@@ -2097,6 +2168,11 @@ body {
   background: transparent;
   cursor: nwse-resize;
   border-radius: 6px;
+}
+
+.tree-recursion-resize-handle:focus-visible {
+  outline: 2px solid #5d86b9;
+  outline-offset: 1px;
 }
 
 .tree-recursion-resize-handle::before,

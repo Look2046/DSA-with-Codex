@@ -15,6 +15,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - stepping the timeline now updates both the current dequeued node and the remaining queue inside the floating window
   - queue presentation is now split into current dequeued node / action summary / single-row waiting queue, so the active node no longer blends into the remaining queue chips
   - newly enqueued child nodes are now highlighted directly inside the waiting queue lane
+  - level-order mode now stacks the pseudocode card above the queue card so the waiting queue can use the full popup width
+  - level-order reset/initial state now keeps the queue empty until the root-enqueue step actually begins
+- Expanded floating-window resize affordances:
+  - the algorithm window now supports dragging from edges and corners, not just the bottom-right grip
+  - top/left resizing keeps the opposite edge visually anchored instead of drifting the full popup
 - Verified locally:
   - `./scripts/check-doc-links.sh` pass (2026-03-23)
   - `eslint` pass via direct node entry (2026-03-23)
@@ -22,6 +27,10 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - Playwright browser check confirms level-order mode shows `0` `.tree-null-node` elements and `0` null-legend items
   - Playwright browser check confirms the algorithm window opens in level-order mode and the queue panel updates after one `Next` step (`89#0` current, queue becomes `90#1`, `61#2`)
   - Playwright browser check confirms the waiting queue stays single-row (`flex-wrap: nowrap`) and newly enqueued nodes receive the `New` badge after stepping
+  - Playwright browser check confirms reset/initial level-order state now shows `0` waiting-queue chips, plus pending-root copy instead of a completed-traversal message
+  - Playwright browser check confirms the first `Next` step only enqueues the root node (`#0`) before any dequeue/visit step runs
+  - Playwright browser check confirms the floating algorithm window can now resize from the left edge, top edge, and bottom-left corner while keeping the opposite edge anchored as expected
+  - Attempted `npm run check` / direct `vitest` re-run from Windows Node, but the mixed WSL/Windows dependency tree is still missing `@rollup/rollup-win32-x64-msvc`; `eslint` re-run also remains flaky on mapped-drive reads, so the new follow-up validation relies on `tsc` + doc-link check + browser interaction instead
 
 ### Current State
 - Branch: `feat/p8-m3-route-rules-spike`

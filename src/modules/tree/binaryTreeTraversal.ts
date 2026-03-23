@@ -22,6 +22,7 @@ export type BinaryTreeTraversalStep = AnimationStep & {
   treeState: BinaryTreeInputValue[];
   action:
     | 'initial'
+    | 'enqueueRoot'
     | 'guideStart'
     | 'visit'
     | 'descendLeft'
@@ -321,7 +322,8 @@ function generateLevelorderSteps(tree: BinaryTreeInputValue[]): BinaryTreeTraver
   const steps: BinaryTreeTraversalStep[] = [];
   const visitedIndices: number[] = [];
   const outputOrder: number[] = [];
-  const queueState: number[] = hasRealNode(tree, 0) ? [0] : [];
+  const hasRoot = hasRealNode(tree, 0);
+  const queueState: number[] = [];
 
   const pushStep = (
     config: Omit<CreateTraversalStepConfig, 'treeState' | 'mode' | 'visitedIndices' | 'outputOrder'>,
@@ -340,13 +342,13 @@ function generateLevelorderSteps(tree: BinaryTreeInputValue[]): BinaryTreeTraver
 
   pushStep({
     action: 'initial',
-    codeLines: hasRealNode(tree, 0) ? [1, 2, 3] : [1],
+    codeLines: [1],
     highlights: [],
     currentIndex: null,
     currentValue: null,
   });
 
-  if (!hasRealNode(tree, 0)) {
+  if (!hasRoot) {
     pushStep({
       action: 'completed',
       codeLines: [9],
@@ -356,6 +358,15 @@ function generateLevelorderSteps(tree: BinaryTreeInputValue[]): BinaryTreeTraver
     });
     return steps;
   }
+
+  queueState.push(0);
+  pushStep({
+    action: 'enqueueRoot',
+    codeLines: [2, 3],
+    highlights: [],
+    currentIndex: null,
+    currentValue: null,
+  });
 
   while (queueState.length > 0) {
     const currentIndex = queueState.shift();

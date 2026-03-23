@@ -47,6 +47,8 @@ type ViewportSize = {
   height: number;
 };
 
+type RecursionPanelResizeDirection = 'n' | 'e' | 's' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
 type RecursionPanelInteraction =
   | {
       kind: 'drag';
@@ -63,7 +65,21 @@ type RecursionPanelInteraction =
       startHeight: number;
       startPanelX: number;
       startPanelY: number;
+      direction: RecursionPanelResizeDirection;
     };
+
+const RECURSION_PANEL_RESIZE_ZONES: Array<{
+  direction: Exclude<RecursionPanelResizeDirection, 'se'>;
+  className: string;
+}> = [
+  { direction: 'n', className: 'tree-recursion-resize-zone-top' },
+  { direction: 'e', className: 'tree-recursion-resize-zone-right' },
+  { direction: 's', className: 'tree-recursion-resize-zone-bottom' },
+  { direction: 'w', className: 'tree-recursion-resize-zone-left' },
+  { direction: 'nw', className: 'tree-recursion-resize-zone-top-left' },
+  { direction: 'ne', className: 'tree-recursion-resize-zone-top-right' },
+  { direction: 'sw', className: 'tree-recursion-resize-zone-bottom-left' },
+];
 
 type RawTraversalTraceSegment = {
   key: string;
@@ -333,6 +349,83 @@ function clampRecursionPanelRect(rect: FloatingPanelRect, viewport: ViewportSize
   };
 }
 
+function getRecursionPanelResizeCursor(direction: RecursionPanelResizeDirection): string {
+  if (direction === 'n' || direction === 's') {
+    return 'ns-resize';
+  }
+
+  if (direction === 'e' || direction === 'w') {
+    return 'ew-resize';
+  }
+
+  if (direction === 'ne' || direction === 'sw') {
+    return 'nesw-resize';
+  }
+
+  return 'nwse-resize';
+}
+
+function resolveRecursionPanelResizeRect(
+  interaction: Extract<RecursionPanelInteraction, { kind: 'resize' }>,
+  pointerX: number,
+  pointerY: number,
+  viewport: ViewportSize,
+): FloatingPanelRect {
+  const maxWidth = Math.max(
+    RECURSION_PANEL_MIN_WIDTH,
+    Math.min(RECURSION_PANEL_MAX_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2),
+  );
+  const maxHeight = Math.max(
+    RECURSION_PANEL_MIN_HEIGHT,
+    Math.min(RECURSION_PANEL_MAX_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2),
+  );
+  const startRight = interaction.startPanelX + interaction.startWidth;
+  const startBottom = interaction.startPanelY + interaction.startHeight;
+  const deltaX = pointerX - interaction.startX;
+  const deltaY = pointerY - interaction.startY;
+
+  let x = interaction.startPanelX;
+  let y = interaction.startPanelY;
+  let width = interaction.startWidth;
+  let height = interaction.startHeight;
+
+  if (interaction.direction.includes('e')) {
+    const availableWidth = viewport.width - interaction.startPanelX - RECURSION_PANEL_MARGIN;
+    width = clampNumber(interaction.startWidth + deltaX, RECURSION_PANEL_MIN_WIDTH, Math.min(maxWidth, availableWidth));
+  } else if (interaction.direction.includes('w')) {
+    const availableWidth = startRight - RECURSION_PANEL_MARGIN;
+    width = clampNumber(interaction.startWidth - deltaX, RECURSION_PANEL_MIN_WIDTH, Math.min(maxWidth, availableWidth));
+    x = startRight - width;
+  }
+
+  if (interaction.direction.includes('s')) {
+    const availableHeight = viewport.height - interaction.startPanelY - RECURSION_PANEL_MARGIN;
+    height = clampNumber(
+      interaction.startHeight + deltaY,
+      RECURSION_PANEL_MIN_HEIGHT,
+      Math.min(maxHeight, availableHeight),
+    );
+  } else if (interaction.direction.includes('n')) {
+    const availableHeight = startBottom - RECURSION_PANEL_MARGIN;
+    height = clampNumber(
+      interaction.startHeight - deltaY,
+      RECURSION_PANEL_MIN_HEIGHT,
+      Math.min(maxHeight, availableHeight),
+    );
+    y = startBottom - height;
+  }
+
+  return clampRecursionPanelRect(
+    {
+      x,
+      y,
+      width,
+      height,
+    },
+    viewport,
+  );
+}
+
 function getDefaultRecursionPanelRect(viewport: ViewportSize): FloatingPanelRect {
   const maxWidth = Math.max(
     RECURSION_PANEL_MIN_WIDTH,
@@ -589,7 +682,11 @@ function getLevelorderCodeActiveLines(step: BinaryTreeTraversalStep | undefined,
   }
 
   if (step.action === 'initial') {
-    return step.queueState.length > 0 ? [1, 2, 3] : [1];
+    return [1];
+  }
+
+  if (step.action === 'enqueueRoot') {
+    return [2, 3];
   }
 
   if (step.action === 'visit' && step.currentIndex !== null) {
@@ -670,8 +767,18 @@ function getLevelorderStatusText(
   t: ReturnType<typeof useI18n>['t'],
   formatValue: (value: number | null | undefined) => string,
 ): string {
-  if (!step || step.action === 'initial') {
-    return step?.queueState.length ? t('module.t01.levelorder.status.ready') : t('module.t01.levelorder.status.idle');
+  if (!step) {
+    return t('module.t01.levelorder.status.idle');
+  }
+
+  if (step.action === 'initial') {
+    return hasTreeNode(step.treeState, 0)
+      ? t('module.t01.levelorder.status.pendingRoot')
+      : t('module.t01.levelorder.status.idle');
+  }
+
+  if (step.action === 'enqueueRoot') {
+    return t('module.t01.levelorder.status.ready');
   }
 
   if (step.action === 'visit') {
@@ -732,6 +839,9 @@ function getStepDescription(
   }
   if (step.action === 'guideStart') {
     return t('module.t01.step.guideStart');
+  }
+  if (step.action === 'enqueueRoot') {
+    return t('module.t01.step.enqueueRoot');
   }
   if (step.action === 'visit') {
     return `${t('module.t01.step.visit')} ${step.currentIndex} (${formatValue(step.currentValue)})`;
@@ -2741,8 +2851,35 @@ export function BinaryTreeTraversalPage() {
       enqueue: levelorderEnqueuedEntries,
     };
   }, [currentSnapshot, isLevelorderMode, levelorderEnqueuedEntries]);
+  const levelorderQueueEmptyText = useMemo(() => {
+    if (!isLevelorderMode) {
+      return null;
+    }
+
+    if (currentSnapshot?.action === 'initial' && hasTreeNode(treeState, 0)) {
+      return t('module.t01.levelorder.queue.pendingRoot');
+    }
+
+    return t('module.t01.levelorder.queue.empty');
+  }, [currentSnapshot, isLevelorderMode, t, treeState]);
   const levelorderActionText = useMemo(() => {
-    if (!isLevelorderMode || !levelorderQueueSummary?.dequeue) {
+    if (!isLevelorderMode) {
+      return t('module.t01.levelorder.summary.idle');
+    }
+
+    if (currentSnapshot?.action === 'initial') {
+      return hasTreeNode(treeState, 0)
+        ? t('module.t01.levelorder.summary.pendingRoot')
+        : t('module.t01.levelorder.summary.idle');
+    }
+
+    if (currentSnapshot?.action === 'enqueueRoot') {
+      const rootIndex = currentSnapshot.queueState[0];
+      const rootLabel = rootIndex === undefined ? '-' : formatDisplayValue(treeState[rootIndex]);
+      return `${t('module.t01.levelorder.summary.enqueueRootPrefix')} ${rootLabel}`;
+    }
+
+    if (!levelorderQueueSummary?.dequeue) {
       return t('module.t01.levelorder.summary.idle');
     }
 
@@ -2753,7 +2890,7 @@ export function BinaryTreeTraversalPage() {
 
     const enqueueLabels = levelorderQueueSummary.enqueue.map((entry) => formatDisplayValue(entry.value)).join(', ');
     return `${t('module.t01.levelorder.summary.dequeuePrefix')} ${currentLabel} · ${t('module.t01.levelorder.summary.enqueuePrefix')} ${enqueueLabels}`;
-  }, [formatDisplayValue, isLevelorderMode, levelorderQueueSummary, t]);
+  }, [currentSnapshot, formatDisplayValue, isLevelorderMode, levelorderQueueSummary, t, treeState]);
   const algorithmWindowBody = useMemo(
     () => (isLevelorderMode ? t('module.t01.window.body.levelorder') : t('module.t01.window.body.recursion')),
     [isLevelorderMode, t],
@@ -2830,15 +2967,10 @@ export function BinaryTreeTraversalPage() {
           );
         }
 
-        const nextWidth = recursionPanelInteraction.startWidth + (event.clientX - recursionPanelInteraction.startX);
-        const nextHeight = recursionPanelInteraction.startHeight + (event.clientY - recursionPanelInteraction.startY);
-        return clampRecursionPanelRect(
-          {
-            x: recursionPanelInteraction.startPanelX,
-            y: recursionPanelInteraction.startPanelY,
-            width: nextWidth,
-            height: nextHeight,
-          },
+        return resolveRecursionPanelResizeRect(
+          recursionPanelInteraction,
+          event.clientX,
+          event.clientY,
           viewportSize,
         );
       });
@@ -2867,7 +2999,10 @@ export function BinaryTreeTraversalPage() {
 
     const previousCursor = document.body.style.cursor;
     const previousUserSelect = document.body.style.userSelect;
-    document.body.style.cursor = recursionPanelInteraction.kind === 'drag' ? 'grabbing' : 'nwse-resize';
+    document.body.style.cursor =
+      recursionPanelInteraction.kind === 'drag'
+        ? 'grabbing'
+        : getRecursionPanelResizeCursor(recursionPanelInteraction.direction);
     document.body.style.userSelect = 'none';
     return () => {
       document.body.style.cursor = previousCursor;
@@ -2996,24 +3131,26 @@ export function BinaryTreeTraversalPage() {
     });
   };
 
-  const startRecursionPanelResize = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (event.button !== 0) {
-      return;
-    }
+  const startRecursionPanelResize =
+    (direction: RecursionPanelResizeDirection) => (event: React.PointerEvent<HTMLElement>) => {
+      if (event.button !== 0) {
+        return;
+      }
 
-    event.preventDefault();
-    event.stopPropagation();
-    setRecursionPanelInteraction({
-      kind: 'resize',
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      startWidth: recursionPanelRect.width,
-      startHeight: recursionPanelRect.height,
-      startPanelX: recursionPanelRect.x,
-      startPanelY: recursionPanelRect.y,
-    });
-  };
+      event.preventDefault();
+      event.stopPropagation();
+      setRecursionPanelInteraction({
+        kind: 'resize',
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startWidth: recursionPanelRect.width,
+        startHeight: recursionPanelRect.height,
+        startPanelX: recursionPanelRect.x,
+        startPanelY: recursionPanelRect.y,
+        direction,
+      });
+    };
 
   const speedOptions = [
     { key: 'module.s01.speed.slow', value: 1800 },
@@ -3471,7 +3608,7 @@ export function BinaryTreeTraversalPage() {
                 </div>
               ) : null}
 
-              <div className="tree-recursion-grid">
+              <div className={`tree-recursion-grid${isLevelorderMode ? ' tree-recursion-grid-levelorder' : ''}`}>
                 <div className="tree-recursion-card">
                   <div className="tree-recursion-card-head">
                     <span>{algorithmCodeTitle}</span>
@@ -3531,7 +3668,7 @@ export function BinaryTreeTraversalPage() {
                       </div>
 
                       {levelorderQueueEntries.length === 0 ? (
-                        <p className="tree-recursion-stack-empty">{t('module.t01.levelorder.queue.empty')}</p>
+                        <p className="tree-recursion-stack-empty">{levelorderQueueEmptyText}</p>
                       ) : (
                         <div className="tree-levelorder-queue-lane">
                           <span className="tree-levelorder-queue-end">{t('module.t01.levelorder.queue.front')}</span>
@@ -3599,10 +3736,18 @@ export function BinaryTreeTraversalPage() {
               </div>
             </div>
 
+            {RECURSION_PANEL_RESIZE_ZONES.map((zone) => (
+              <span
+                key={zone.direction}
+                className={`tree-recursion-resize-zone ${zone.className}`}
+                onPointerDown={startRecursionPanelResize(zone.direction)}
+                aria-hidden="true"
+              />
+            ))}
             <button
               type="button"
               className="tree-recursion-resize-handle"
-              onPointerDown={startRecursionPanelResize}
+              onPointerDown={startRecursionPanelResize('se')}
               aria-label={t('module.t01.recursion.window.resize')}
               title={t('module.t01.recursion.window.resize')}
             />
