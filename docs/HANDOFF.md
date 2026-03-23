@@ -2,6 +2,28 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-23 (P8-M3 T-01 level-order root arc clearance tweak)
+
+### Today Done
+- Refined the early `T-01` level-order threading geometry around the root node:
+  - the root-to-direct-child transition now uses a larger outer root pivot radius instead of hugging the root shell
+  - the root-to-left-child route now follows the outer upper-left offset lane, so it no longer visually overlaps the tree edge
+  - sparse-tree root-to-right-child transitions reuse the same outer-lane strategy on the right side for consistency
+
+### Verified locally
+- `node node_modules/typescript/lib/tsc.js -b` pass (2026-03-23)
+- `node node_modules/eslint/bin/eslint.js src/pages/modules/BinaryTreeTraversalPage.tsx` pass (2026-03-23)
+- `./scripts/check-doc-links.sh` pass (2026-03-23)
+- script-level regression confirms the root-to-left segment now resolves to:
+  - arc end / line start `46.28, 19.86` (moved further left/up from the old shell-hugging point)
+  - line end `35.15, 31.88` (lifted away from the root-left tree edge)
+- `npm run check` remains blocked by the same Windows UNC wrapper issue (`C:\\Windows\\package.json`)
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: latest level-order root-arc tweak is local-only; legacy script mode changes still remain in the working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest fix not pushed yet
+
 ## 2026-03-23 (P8-M3 T-01 level-order child-enqueue stage highlight)
 
 ### Today Done

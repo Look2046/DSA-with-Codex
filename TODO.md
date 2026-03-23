@@ -216,6 +216,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - floating algorithm window no longer stops at the old hardcoded `560x760` ceiling and can now grow to the viewport-safe limit
     - level-order `enqueueRoot` now shows the root-entry trace immediately and marks the just-enqueued root on the main stage
     - level-order visit steps now also highlight newly enqueued child nodes on the main stage with a queue-matched pulse and `New` badge
+    - level-order root-to-left-child route now uses a larger outer root arc and upper-left offset line, avoiding root遮挡和树边重叠
     - targeted helper-level regression confirms the resize math and root-entry trace behavior without waiting for the blocked browser environment
   - Next (2026-03-23):
     - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless requested)

@@ -1610,6 +1610,39 @@ function buildNodeShellLineSegment(
   };
 }
 
+function buildLevelorderTransitionLineSegment(
+  fromIndex: number,
+  toIndex: number,
+  fromCenter: NodePoint,
+  toCenter: NodePoint,
+  geometry: TraceGeometry,
+): { start: NodePoint; end: NodePoint; pivotRadius: number } {
+  const isRootDirectChild = fromIndex === 0 && (toIndex === getChildIndex(0, 'L') || toIndex === getChildIndex(0, 'R'));
+  if (!isRootDirectChild) {
+    return {
+      ...buildNodeShellLineSegment(fromCenter, toCenter, geometry),
+      pivotRadius: geometry.nodeShellRadius,
+    };
+  }
+
+  const absoluteLanes = pickAbsoluteSidePair({
+    from: fromCenter,
+    to: toCenter,
+    fromRadius: geometry.guideNodeClearRadius + geometry.edgeOffset * 1.2,
+    toRadius: geometry.nodeShellRadius,
+    edgeOffset: geometry.guideEdgeOffset * 1.25,
+    aspect: geometry.aspect,
+  });
+  const side = inferEdgeSide(fromIndex, toIndex);
+  const offsetLine = side === 'L' ? absoluteLanes.left : absoluteLanes.right;
+
+  return {
+    start: offsetLine.start,
+    end: offsetLine.end,
+    pivotRadius: geometry.guideNodeClearRadius + geometry.edgeOffset * 1.2,
+  };
+}
+
 function pickShortArcDirection(center: NodePoint, fromPoint: NodePoint, toPoint: NodePoint, aspect: number): ArcDirection {
   const fromAngle = getPointAngleAroundCenter(fromPoint, center, aspect);
   const toAngle = getPointAngleAroundCenter(toPoint, center, aspect);
@@ -1669,7 +1702,7 @@ function buildLevelorderRawTraceSegments(
       continue;
     }
 
-    const line = buildNodeShellLineSegment(fromCenter, toCenter, geometry);
+    const line = buildLevelorderTransitionLineSegment(fromIndex, toIndex, fromCenter, toCenter, geometry);
     const connectorDirection = pickShortArcDirection(fromCenter, penPoint, line.start, geometry.aspect);
 
     const segment = buildLineLikeTraceSegment({
@@ -1678,7 +1711,7 @@ function buildLevelorderRawTraceSegments(
       targetIndex: toIndex,
       penPoint,
       pivotCenter: fromCenter,
-      pivotRadius: geometry.nodeShellRadius,
+      pivotRadius: line.pivotRadius,
       lineStart: line.start,
       lineEnd: line.end,
       geometry,
