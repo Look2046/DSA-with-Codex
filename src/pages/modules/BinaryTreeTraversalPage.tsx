@@ -2540,6 +2540,23 @@ function buildNullHints(step: BinaryTreeTraversalStep | undefined, treeState: Bi
   return [...dedup.values()];
 }
 
+function getLevelorderNewQueueNodeIndices(step: BinaryTreeTraversalStep | undefined): number[] {
+  if (!step || step.mode !== 'levelorder') {
+    return [];
+  }
+
+  if (step.action === 'enqueueRoot') {
+    const rootIndex = step.queueState.find((index) => hasTreeNode(step.treeState, index));
+    return rootIndex === undefined ? [] : [rootIndex];
+  }
+
+  if (step.action !== 'visit' || step.currentIndex === null) {
+    return [];
+  }
+
+  return [step.currentIndex * 2 + 1, step.currentIndex * 2 + 2].filter((index) => hasTreeNode(step.treeState, index));
+}
+
 export function BinaryTreeTraversalPage() {
   const { t } = useI18n();
   const currentModule = useCurrentModule();
@@ -2815,17 +2832,19 @@ export function BinaryTreeTraversalPage() {
     [currentSnapshot?.queueState, isLevelorderMode, treeState],
   );
   const levelorderEnqueuedEntries = useMemo(() => {
-    if (!isLevelorderMode || currentSnapshot?.action !== 'visit' || currentSnapshot.currentIndex === null) {
+    if (!isLevelorderMode) {
       return [];
     }
 
-    const currentIndex = currentSnapshot.currentIndex;
-    const childIndices = [currentIndex * 2 + 1, currentIndex * 2 + 2].filter((index) => hasTreeNode(treeState, index));
-    return childIndices.map((nodeIndex) => ({
+    return getLevelorderNewQueueNodeIndices(currentSnapshot).map((nodeIndex) => ({
       nodeIndex,
       value: treeState[nodeIndex],
     }));
   }, [currentSnapshot, isLevelorderMode, treeState]);
+  const levelorderEnqueuedNodeSet = useMemo(
+    () => new Set(levelorderEnqueuedEntries.map((entry) => entry.nodeIndex)),
+    [levelorderEnqueuedEntries],
+  );
   const levelorderQueueSummary = useMemo(() => {
     if (!isLevelorderMode) {
       return null;
@@ -3431,10 +3450,14 @@ export function BinaryTreeTraversalPage() {
                 isLevelorderMode &&
                 currentSnapshot?.currentIndex === index &&
                 currentSnapshot.action === 'visit';
-              const isLevelorderNewlyEnqueued =
+              const isLevelorderRootQueued =
                 isLevelorderMode &&
                 currentSnapshot?.action === 'enqueueRoot' &&
-                currentSnapshot.queueState.includes(index);
+                levelorderEnqueuedNodeSet.has(index);
+              const isLevelorderChildQueued =
+                isLevelorderMode &&
+                currentSnapshot?.action === 'visit' &&
+                levelorderEnqueuedNodeSet.has(index);
               const isVisited =
                 guideTraceSourceStep
                   ? isGuideVisited
@@ -3446,7 +3469,9 @@ export function BinaryTreeTraversalPage() {
                 (!isVisited || isLevelorderCurrent);
               const stateClass = isCurrent
                 ? ' bar-visiting'
-                : isLevelorderNewlyEnqueued
+                : isLevelorderChildQueued
+                  ? ' bar-queue-new'
+                  : isLevelorderRootQueued
                   ? ' bar-new-node'
                   : isVisited
                     ? ' bar-matched'
@@ -3460,6 +3485,9 @@ export function BinaryTreeTraversalPage() {
                   style={{ left: `${nodePositions[index]?.x ?? 0}%`, top: `${nodePositions[index]?.y ?? 0}%` }}
                 >
                   {markerRoles.length > 0 ? <span className="tree-node-tag">{markerRoles.join('/')}</span> : null}
+                  {isLevelorderChildQueued ? (
+                    <span className="tree-node-badge tree-node-badge-queue-new">{t('module.t01.levelorder.queue.new')}</span>
+                  ) : null}
                   <span className="tree-node-value">{formatDisplayValue(value)}</span>
                   <span className="tree-node-index">#{index}</span>
                 </div>

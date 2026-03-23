@@ -2,6 +2,29 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-23 (P8-M3 T-01 level-order child-enqueue stage highlight)
+
+### Today Done
+- Refined the `T-01` level-order visit-step teaching feedback:
+  - extracted a shared helper for “nodes newly enqueued in this step” so queue chips and main-stage highlights now derive from the same source
+  - when visiting a node enqueues child nodes, those children now receive a stage-side green queue-style pulse instead of blending into the untouched tree
+  - newly enqueued child nodes now show a small `New` badge on the main stage, matching the queue window semantics more directly
+
+### Verified locally
+- `node node_modules/typescript/lib/tsc.js -b` pass (2026-03-23)
+- `node node_modules/eslint/bin/eslint.js src/pages/modules/BinaryTreeTraversalPage.tsx src/index.css` pass for the TSX file; CSS remains ignored by the current ESLint config (warning only)
+- script-level regression confirms the shared helper reports:
+  - `enqueueRoot -> [0]`
+  - first root visit -> `[1, 2]`
+  - next left-subtree visit -> `[3, 4]`
+  - leaf visit -> `[]`
+- `npm run check` remains blocked by the same Windows UNC wrapper issue (`C:\\Windows\\package.json`)
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: latest child-enqueue highlight is local-only; legacy script mode changes still remain in the working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest fix not pushed yet
+
 ## 2026-03-23 (P8-M3 T-01 floating algorithm window max-size unlock)
 
 ### Today Done
