@@ -7,6 +7,7 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 ### Today Done
 - Refined the early `T-01` level-order threading geometry around the root node:
   - the root-to-direct-child transition now uses a larger outer root pivot radius instead of hugging the root shell
+  - the top entry line now ends on that same outer pivot radius, so the follow-up root connector truly renders as a visible arc instead of seeming to continue as a hidden straight segment
   - the root-to-left-child route now follows the outer upper-left offset lane, so it no longer visually overlaps the tree edge
   - sparse-tree root-to-right-child transitions reuse the same outer-lane strategy on the right side for consistency
 

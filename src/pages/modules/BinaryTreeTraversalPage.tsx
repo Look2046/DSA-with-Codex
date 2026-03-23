@@ -1144,8 +1144,16 @@ function getRootTraceEntry(rootCenter: NodePoint, geometry: TraceGeometry): Node
   return pointOnMetricCircle(rootCenter, geometry.guideNodeClearRadius, entryAngle, geometry.aspect);
 }
 
+function getLevelorderRootPivotRadius(geometry: TraceGeometry): number {
+  return geometry.guideNodeClearRadius + geometry.edgeOffset * 1.2;
+}
+
 function getRootTopEntryAnchor(rootCenter: NodePoint, geometry: TraceGeometry): NodePoint {
   return pointOnMetricCircle(rootCenter, geometry.guideNodeClearRadius, -Math.PI / 2, geometry.aspect);
+}
+
+function getLevelorderRootTopEntryAnchor(rootCenter: NodePoint, geometry: TraceGeometry): NodePoint {
+  return pointOnMetricCircle(rootCenter, getLevelorderRootPivotRadius(geometry), -Math.PI / 2, geometry.aspect);
 }
 
 function getRootTopEntryStart(rootEntryAnchor: NodePoint, geometry: TraceGeometry): NodePoint {
@@ -1625,10 +1633,11 @@ function buildLevelorderTransitionLineSegment(
     };
   }
 
+  const rootPivotRadius = getLevelorderRootPivotRadius(geometry);
   const absoluteLanes = pickAbsoluteSidePair({
     from: fromCenter,
     to: toCenter,
-    fromRadius: geometry.guideNodeClearRadius + geometry.edgeOffset * 1.2,
+    fromRadius: rootPivotRadius,
     toRadius: geometry.nodeShellRadius,
     edgeOffset: geometry.guideEdgeOffset * 1.25,
     aspect: geometry.aspect,
@@ -1639,7 +1648,7 @@ function buildLevelorderTransitionLineSegment(
   return {
     start: offsetLine.start,
     end: offsetLine.end,
-    pivotRadius: geometry.guideNodeClearRadius + geometry.edgeOffset * 1.2,
+    pivotRadius: rootPivotRadius,
   };
 }
 
@@ -1673,7 +1682,10 @@ function buildLevelorderRawTraceSegments(
   }
 
   const segments: RawTraversalTraceSegment[] = [];
-  const rootEntryAnchor = getRootTopEntryAnchor(firstCenter, geometry);
+  const hasRootTransition = visitedIndices.length > 1;
+  const rootEntryAnchor = hasRootTransition
+    ? getLevelorderRootTopEntryAnchor(firstCenter, geometry)
+    : getRootTopEntryAnchor(firstCenter, geometry);
   const rootEntryStart = getRootTopEntryStart(rootEntryAnchor, geometry);
   segments.push(
     createRawLineTraceSegment({

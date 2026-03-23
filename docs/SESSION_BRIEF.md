@@ -72,7 +72,7 @@ Use this file as the first thing to read in a new chat/session.
   - `T-01` floating algorithm window no longer stops at a hardcoded `560x760`; it can now grow up to the viewport-safe bounds
   - `T-01` level-order root-enqueue step now immediately animates the root-entry trace and marks the just-enqueued root on the main stage instead of lagging until visit
   - `T-01` level-order visit steps now also mark newly enqueued child nodes on the main stage with a queue-matched pulse/badge so they visually echo the queue-side `New` chips
-  - `T-01` level-order root-to-left-child route now uses a wider outer root arc plus an upper-left offset line, so the second segment no longer hides behind the root or overlaps the tree edge
+  - `T-01` level-order root-to-left-child route now uses a wider outer root arc plus an upper-left offset line, and the top entry line now lands on that same outer arc radius so the root-side connector no longer masquerades as a straight line behind the node
 - `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
   - browser-side Playwright verification confirms the traversal canvas keeps its width when the floating recursion window opens, and the window can be dragged/resized at `1280x720`
