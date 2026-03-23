@@ -23,8 +23,6 @@ const RECURSION_PANEL_STORAGE_KEY = 't01-recursion-panel-layout-v2';
 const RECURSION_PANEL_MARGIN = 16;
 const RECURSION_PANEL_MIN_WIDTH = 320;
 const RECURSION_PANEL_MIN_HEIGHT = 280;
-const RECURSION_PANEL_MAX_WIDTH = 560;
-const RECURSION_PANEL_MAX_HEIGHT = 760;
 const RECURSION_PANEL_DEFAULT_Y = 88;
 
 type NodePoint = {
@@ -316,6 +314,14 @@ function clampNumber(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+function getRecursionPanelMaxWidth(viewport: ViewportSize): number {
+  return Math.max(RECURSION_PANEL_MIN_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2);
+}
+
+function getRecursionPanelMaxHeight(viewport: ViewportSize): number {
+  return Math.max(RECURSION_PANEL_MIN_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2);
+}
+
 function getViewportSize(): ViewportSize {
   if (typeof window === 'undefined') {
     return { width: 1280, height: 720 };
@@ -328,15 +334,9 @@ function getViewportSize(): ViewportSize {
 }
 
 function clampRecursionPanelRect(rect: FloatingPanelRect, viewport: ViewportSize): FloatingPanelRect {
-  const maxWidth = Math.max(
-    RECURSION_PANEL_MIN_WIDTH,
-    Math.min(RECURSION_PANEL_MAX_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2),
-  );
+  const maxWidth = getRecursionPanelMaxWidth(viewport);
   const width = clampNumber(rect.width, RECURSION_PANEL_MIN_WIDTH, maxWidth);
-  const maxHeight = Math.max(
-    RECURSION_PANEL_MIN_HEIGHT,
-    Math.min(RECURSION_PANEL_MAX_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2),
-  );
+  const maxHeight = getRecursionPanelMaxHeight(viewport);
   const height = clampNumber(rect.height, RECURSION_PANEL_MIN_HEIGHT, maxHeight);
   const maxX = Math.max(RECURSION_PANEL_MARGIN, viewport.width - width - RECURSION_PANEL_MARGIN);
   const maxY = Math.max(RECURSION_PANEL_MARGIN, viewport.height - height - RECURSION_PANEL_MARGIN);
@@ -371,14 +371,8 @@ function resolveRecursionPanelResizeRect(
   pointerY: number,
   viewport: ViewportSize,
 ): FloatingPanelRect {
-  const maxWidth = Math.max(
-    RECURSION_PANEL_MIN_WIDTH,
-    Math.min(RECURSION_PANEL_MAX_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2),
-  );
-  const maxHeight = Math.max(
-    RECURSION_PANEL_MIN_HEIGHT,
-    Math.min(RECURSION_PANEL_MAX_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2),
-  );
+  const maxWidth = getRecursionPanelMaxWidth(viewport);
+  const maxHeight = getRecursionPanelMaxHeight(viewport);
   const startRight = interaction.startPanelX + interaction.startWidth;
   const startBottom = interaction.startPanelY + interaction.startHeight;
   const deltaX = pointerX - interaction.startX;
@@ -431,14 +425,8 @@ function resolveRecursionPanelResizeRect(
 }
 
 function getDefaultRecursionPanelRect(viewport: ViewportSize): FloatingPanelRect {
-  const maxWidth = Math.max(
-    RECURSION_PANEL_MIN_WIDTH,
-    Math.min(RECURSION_PANEL_MAX_WIDTH, viewport.width - RECURSION_PANEL_MARGIN * 2),
-  );
-  const maxHeight = Math.max(
-    RECURSION_PANEL_MIN_HEIGHT,
-    Math.min(RECURSION_PANEL_MAX_HEIGHT, viewport.height - RECURSION_PANEL_MARGIN * 2),
-  );
+  const maxWidth = getRecursionPanelMaxWidth(viewport);
+  const maxHeight = getRecursionPanelMaxHeight(viewport);
   const width = Math.min(440, maxWidth);
   const height = Math.min(560, maxHeight);
 

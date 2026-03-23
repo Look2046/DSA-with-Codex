@@ -2,6 +2,23 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-23 (P8-M3 T-01 floating algorithm window max-size unlock)
+
+### Today Done
+- Removed the remaining hardcoded max-size clamp on the `T-01` floating algorithm window:
+  - popup width/height are no longer capped at `560x760`
+  - resize now only stops at the viewport-safe margin bounds, so the user can enlarge the panel close to full-screen if needed
+
+### Verified locally
+- `node node_modules/typescript/lib/tsc.js -b` pass (2026-03-23)
+- script-level regression confirms an aggressive south-east resize now reaches `1248x688` at `1280x720`, anchored to `x=16`, `y=16`
+- `npm run check` remains blocked by the same Windows UNC wrapper issue (`C:\\Windows\\package.json`)
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: latest max-size unlock is local-only; legacy script mode changes still remain in the working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest fix not pushed yet
+
 ## 2026-03-23 (P8-M3 T-01 algorithm window edge-resize + enqueue sync)
 
 ### Today Done

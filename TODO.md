@@ -213,6 +213,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - level-order queue popup now separates current dequeue / action summary / waiting queue, and the waiting queue stays on a single horizontal lane
     - newly enqueued level-order children are now highlighted directly inside the waiting queue lane for the current step
     - floating algorithm window edge/corner resizing now still expands when the popup starts贴近右/下视口边界
+    - floating algorithm window no longer stops at the old hardcoded `560x760` ceiling and can now grow to the viewport-safe limit
     - level-order `enqueueRoot` now shows the root-entry trace immediately and marks the just-enqueued root on the main stage
     - targeted helper-level regression confirms the resize math and root-entry trace behavior without waiting for the blocked browser environment
   - Next (2026-03-23):

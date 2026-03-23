@@ -69,6 +69,7 @@ Use this file as the first thing to read in a new chat/session.
   - `T-01` level-order algorithm window now opens correctly and shows queue-state playback plus queue-specific pseudocode
   - `T-01` level-order algorithm window now separates current dequeue / action summary / waiting queue, and keeps the waiting queue on one horizontal lane with new-enqueue highlighting
   - `T-01` floating algorithm window now keeps edge/corner resizing effective even when the popup starts flush against the viewport boundary
+  - `T-01` floating algorithm window no longer stops at a hardcoded `560x760`; it can now grow up to the viewport-safe bounds
   - `T-01` level-order root-enqueue step now immediately animates the root-entry trace and marks the just-enqueued root on the main stage instead of lagging until visit
 - `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
