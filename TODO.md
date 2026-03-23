@@ -212,7 +212,10 @@ Track actionable tasks here. Keep tasks small and testable.
     - browser-side Playwright verification confirms the level-order queue panel opens and updates after stepping
     - level-order queue popup now separates current dequeue / action summary / waiting queue, and the waiting queue stays on a single horizontal lane
     - newly enqueued level-order children are now highlighted directly inside the waiting queue lane for the current step
-  - Next (2026-03-22):
+    - floating algorithm window edge/corner resizing now still expands when the popup starts贴近右/下视口边界
+    - level-order `enqueueRoot` now shows the root-entry trace immediately and marks the just-enqueued root on the main stage
+    - targeted helper-level regression confirms the resize math and root-entry trace behavior without waiting for the blocked browser environment
+  - Next (2026-03-23):
     - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless requested)
     - continue dashed-path beautification only if native SVG styling still falls short
     - align `T-01`/`T-02` controls, legend semantics, and status layout

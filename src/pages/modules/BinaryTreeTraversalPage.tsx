@@ -388,10 +388,15 @@ function resolveRecursionPanelResizeRect(
   let y = interaction.startPanelY;
   let width = interaction.startWidth;
   let height = interaction.startHeight;
+  const viewportRight = viewport.width - RECURSION_PANEL_MARGIN;
+  const viewportBottom = viewport.height - RECURSION_PANEL_MARGIN;
 
   if (interaction.direction.includes('e')) {
-    const availableWidth = viewport.width - interaction.startPanelX - RECURSION_PANEL_MARGIN;
-    width = clampNumber(interaction.startWidth + deltaX, RECURSION_PANEL_MIN_WIDTH, Math.min(maxWidth, availableWidth));
+    width = clampNumber(interaction.startWidth + deltaX, RECURSION_PANEL_MIN_WIDTH, maxWidth);
+    const overflowRight = x + width - viewportRight;
+    if (overflowRight > 0) {
+      x = clampNumber(x - overflowRight, RECURSION_PANEL_MARGIN, viewportRight - width);
+    }
   } else if (interaction.direction.includes('w')) {
     const availableWidth = startRight - RECURSION_PANEL_MARGIN;
     width = clampNumber(interaction.startWidth - deltaX, RECURSION_PANEL_MIN_WIDTH, Math.min(maxWidth, availableWidth));
@@ -399,12 +404,11 @@ function resolveRecursionPanelResizeRect(
   }
 
   if (interaction.direction.includes('s')) {
-    const availableHeight = viewport.height - interaction.startPanelY - RECURSION_PANEL_MARGIN;
-    height = clampNumber(
-      interaction.startHeight + deltaY,
-      RECURSION_PANEL_MIN_HEIGHT,
-      Math.min(maxHeight, availableHeight),
-    );
+    height = clampNumber(interaction.startHeight + deltaY, RECURSION_PANEL_MIN_HEIGHT, maxHeight);
+    const overflowBottom = y + height - viewportBottom;
+    if (overflowBottom > 0) {
+      y = clampNumber(y - overflowBottom, RECURSION_PANEL_MARGIN, viewportBottom - height);
+    }
   } else if (interaction.direction.includes('n')) {
     const availableHeight = startBottom - RECURSION_PANEL_MARGIN;
     height = clampNumber(
@@ -440,7 +444,7 @@ function getDefaultRecursionPanelRect(viewport: ViewportSize): FloatingPanelRect
 
   return clampRecursionPanelRect(
     {
-      x: viewport.width - width - RECURSION_PANEL_MARGIN,
+      x: viewport.width - width - RECURSION_PANEL_MARGIN - 48,
       y: RECURSION_PANEL_DEFAULT_Y,
       width,
       height,
@@ -1632,11 +1636,17 @@ function buildLevelorderRawTraceSegments(
   geometry: TraceGeometry,
 ): RawTraversalTraceSegment[] {
   const visitedIndices = step.visitedIndices.filter((index) => hasTreeNode(step.treeState, index));
-  if (visitedIndices.length === 0) {
+  const enqueuedRootIndex =
+    step.action === 'enqueueRoot'
+      ? (step.queueState.find((index) => hasTreeNode(step.treeState, index)) ?? null)
+      : null;
+  const rootIndex = enqueuedRootIndex ?? visitedIndices[0] ?? null;
+
+  if (rootIndex === null) {
     return [];
   }
 
-  const firstCenter = getNodeCenter(nodePositions, visitedIndices[0]);
+  const firstCenter = getNodeCenter(nodePositions, rootIndex);
   if (!firstCenter) {
     return [];
   }
@@ -1649,11 +1659,15 @@ function buildLevelorderRawTraceSegments(
       key: 'levelorder-entry',
       fromPoint: rootEntryStart,
       toPoint: rootEntryAnchor,
-      isActive: step.action === 'visit' && visitedIndices.length === 1,
-      targetIndex: visitedIndices[0],
+      isActive: step.action === 'enqueueRoot' || (step.action === 'visit' && visitedIndices.length === 1),
+      targetIndex: rootIndex,
       geometry,
     }),
   );
+
+  if (visitedIndices.length === 0) {
+    return segments;
+  }
 
   let penPoint = rootEntryAnchor;
 
@@ -3123,6 +3137,7 @@ export function BinaryTreeTraversalPage() {
     }
 
     event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
     setRecursionPanelInteraction({
       kind: 'drag',
       pointerId: event.pointerId,
@@ -3139,6 +3154,7 @@ export function BinaryTreeTraversalPage() {
 
       event.preventDefault();
       event.stopPropagation();
+      event.currentTarget.setPointerCapture?.(event.pointerId);
       setRecursionPanelInteraction({
         kind: 'resize',
         pointerId: event.pointerId,
@@ -3427,6 +3443,10 @@ export function BinaryTreeTraversalPage() {
                 isLevelorderMode &&
                 currentSnapshot?.currentIndex === index &&
                 currentSnapshot.action === 'visit';
+              const isLevelorderNewlyEnqueued =
+                isLevelorderMode &&
+                currentSnapshot?.action === 'enqueueRoot' &&
+                currentSnapshot.queueState.includes(index);
               const isVisited =
                 guideTraceSourceStep
                   ? isGuideVisited
@@ -3436,7 +3456,13 @@ export function BinaryTreeTraversalPage() {
                 currentSnapshot.action !== 'traversalDone' &&
                 currentSnapshot.action !== 'completed' &&
                 (!isVisited || isLevelorderCurrent);
-              const stateClass = isCurrent ? ' bar-visiting' : isVisited ? ' bar-matched' : '';
+              const stateClass = isCurrent
+                ? ' bar-visiting'
+                : isLevelorderNewlyEnqueued
+                  ? ' bar-new-node'
+                  : isVisited
+                    ? ' bar-matched'
+                    : '';
               const markerRoles = roleLabelMap.get(index) ?? [];
 
               return (

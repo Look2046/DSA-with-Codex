@@ -2,6 +2,44 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-23 (P8-M3 T-01 algorithm window edge-resize + enqueue sync)
+
+### Today Done
+- Fixed the remaining `T-01` level-order/floating-window regressions on `feat/p8-m3-route-rules-spike`:
+  - edge/corner resizing now still enlarges the floating algorithm window when it begins flush against the right/bottom viewport boundary
+  - default popup placement leaves a small right-side breathing room after reset, reducing the “cursor changes but size does not move” confusion
+  - resize hit zones and the bottom-right handle are slightly larger for more reliable mouse interaction
+  - level-order `enqueueRoot` now renders the root-entry trace immediately instead of waiting until the first dequeue/visit step
+  - the just-enqueued root now receives the stage-side `bar-new-node` emphasis during the enqueue step, so queue updates and main-stage feedback stay in sync
+
+### Verified locally
+- `node node_modules/typescript/lib/tsc.js -b` pass (2026-03-23)
+- `node node_modules/eslint/bin/eslint.js src/pages/modules/BinaryTreeTraversalPage.tsx src/index.css` pass for the TSX file; CSS remains ignored by the current ESLint config (warning only)
+- `npm run check` attempted again, but the Windows `npm` wrapper still falls back to `C:\\Windows` under the UNC workspace and errors before entering the repo (`ENOENT: C:\\Windows\\package.json`)
+- script-level regression check (TypeScript transpile hook + direct helper invocation) confirms:
+  - east-edge resize grows `440 -> 540` while shifting `x: 824 -> 724` when the popup starts贴右边界
+  - south-east resize grows `440x560 -> 520x640` while shifting inward to stay in-viewport
+  - level-order `enqueueRoot` now emits one active `levelorder-entry` trace segment targeting root `#0` before the first visit step
+- Attempted browser-side validation again, but local Vite startup is still blocked in this Windows/UNC environment by missing optional Rollup native packages (`@rollup/rollup-win32-x64-msvc`); WSL also lacks a local `node` runtime, so this round relies on `tsc` + targeted script regression instead of live Playwright
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: latest resize + enqueue-sync fixes landed locally; legacy script mode changes still remain in the working tree
+- Remote: `origin/feat/p8-m3-route-rules-spike` unchanged; latest fix not pushed yet
+
+### Remaining Focus (Next Session)
+- Continue `P8-M3` consistency/acceptance closure:
+  - re-run browser-side Playwright acceptance once the local Vite/Rollup environment is runnable again
+  - align `T-01` / `T-02` controls, legend semantics, and status layout
+  - refresh `/modules` + implemented-route acceptance artifacts/report
+  - sync closure docs after acceptance refresh
+
+### First Step Next Session
+```bash
+git -C /home/haoyu/data-structure-algorithm-visualizor switch feat/p8-m3-route-rules-spike
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
 ## 2026-03-23 (P8-M3 T-01 level-order algorithm window + queue view)
 
 ### Today Done

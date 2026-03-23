@@ -68,10 +68,13 @@ Use this file as the first thing to read in a new chat/session.
   - `T-01` level-order mode now hides null children in the main stage and uses a level-by-level threading trace that only connects real nodes
   - `T-01` level-order algorithm window now opens correctly and shows queue-state playback plus queue-specific pseudocode
   - `T-01` level-order algorithm window now separates current dequeue / action summary / waiting queue, and keeps the waiting queue on one horizontal lane with new-enqueue highlighting
+  - `T-01` floating algorithm window now keeps edge/corner resizing effective even when the popup starts flush against the viewport boundary
+  - `T-01` level-order root-enqueue step now immediately animates the root-entry trace and marks the just-enqueued root on the main stage instead of lagging until visit
 - `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
   - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
   - browser-side Playwright verification confirms the traversal canvas keeps its width when the floating recursion window opens, and the window can be dragged/resized at `1280x720`
   - browser-side Playwright verification confirms level-order mode shows `0` null nodes / null-legend entries, the algorithm window opens, and the queue panel updates after stepping
+  - script-level validation confirms right/bottom-edge resize now expands by shifting the popup inward when needed, and `enqueueRoot` now emits an active root-entry trace segment before the first dequeue/visit step
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
