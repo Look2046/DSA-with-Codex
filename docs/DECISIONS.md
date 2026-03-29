@@ -428,3 +428,21 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep the panel disabled for level-order; reuse recursion wording for all modes; leave null placeholders visible while only changing the floating panel content.
 - Consequences: level-order mode now teaches BFS with the right mental model (queue + real-node visit order), while preorder/inorder/postorder continue to use the same floating window shell for recursion checkpoints and call-stack comparison.
 - Owner: haoyu + codex
+
+## DEC-20260328-47
+- Date: 2026-03-28
+- Status: accepted
+- Context: This repository lives under WSL (`/home/haoyu/...`) but was often executed from Windows PowerShell via the `\\wsl$\\...` UNC path. That mixed runtime path caused recurring failures: Windows `cmd/npm` falling back to `C:\\Windows`, shell scripts prompting for an app association, and broken package resolution for `playwright` under the UNC-mounted `node_modules`.
+- Decision: Standardize frontend/runtime commands for this repo on WSL-native Node/npm/Playwright, loaded through `nvm`; update `/home/haoyu/.profile` so login shells resolve the WSL-native toolchain by default, and avoid using Windows `node/npm` directly against the `\\wsl$\\...` workspace.
+- Alternatives considered: keep using Windows Node against the UNC workspace; duplicate the repo into a Windows path just for package/runtime commands.
+- Consequences: local quality gates and Playwright rendering are now reproducible from WSL, but future command examples and automation should prefer `wsl bash -lc 'cd /home/haoyu/data-structure-algorithm-visualizor && ...'` or a native WSL terminal.
+- Owner: haoyu + codex
+
+## DEC-20260329-48
+- Date: 2026-03-29
+- Status: accepted
+- Context: An older Windows-side copy appears to exist from a prior migration attempt, but the current WSL repo has become the validated implementation path, and the user is satisfied with the active WSL progress.
+- Decision: Keep the WSL repository as the only active source of truth, do not merge the older Windows copy by default, and do not migrate the active repo to Windows at this time.
+- Alternatives considered: merge the Windows copy back into the active branch; move the active repo to a native Windows path to avoid UNC/toolchain friction.
+- Consequences: work stays on the already-validated WSL-native toolchain and avoids reopening mixed-environment drift; if the Windows copy ever needs to be consulted, treat it as read-only comparison material rather than a live branch to merge blindly.
+- Owner: haoyu + codex

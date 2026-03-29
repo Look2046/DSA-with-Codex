@@ -7,7 +7,7 @@ Use this file as the first thing to read in a new chat/session.
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p8-m3-route-rules-spike` (P8-M3 polish work in progress)
 - Current phase: P8-M3 in progress (tree consistency + acceptance closure)
-- Last local quality gate: `npm run check` (passed, 2026-03-23)
+- Last local quality gate: `npm run check` (passed, 2026-03-29)
 
 ## 2) What Is Already Done
 
@@ -53,6 +53,8 @@ Use this file as the first thing to read in a new chat/session.
   - marked `T-02` as implemented in module registry
   - captured local Playwright smoke artifacts (`output/playwright/p8m2-modules-tree-filter.png`, `output/playwright/p8m2-t02-bst-smoke.png`)
 - P8-M3 tree-track polish (in progress):
+  - `T-01` production route now uses the new single-stage shell (edge drawer + stage-first animation area + floating algorithm window)
+  - `T-01` wide complete-tree spacing was rebalanced so large datasets keep distinct outer null hints and avoid near-vertical outer leaf-to-null edges
   - `T-01` added traversal output sequence panel and node value display toggle (`number`/`letter`)
   - preorder guide-step timing refined (arrival + D/L/R shown in one step)
   - binary-tree canvas route generation replaced: hardcoded sample-specific steps -> recursive rule-driven generator for arbitrary tree shapes (data/null/root rules)
@@ -106,6 +108,7 @@ Use this file as the first thing to read in a new chat/session.
 ## 3) Next Priority
 
 - Continue P8-M3 (tree consistency + acceptance refresh):
+  - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
   - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless explicitly requested)
   - continue dashed style beautification only if native SVG styling still falls short
   - align `T-01`/`T-02` controls, legend semantics, and status layout

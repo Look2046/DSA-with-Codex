@@ -98,6 +98,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - replaced the old fixed `56 +/- 54` x formula with a stage-width-aware horizontal inset so node/null positions distribute across the full stage without saturating the left/right clamps
   - threaded the same adaptive x inset through node placement, null placement, guide traces, null-edge hints, and entry-marker geometry so the main tree and overlay layers stay aligned
   - re-verified in Playwright on a 15-node complete tree that all 16 null hints render separately and the outermost child-to-null edges keep visible horizontal spread instead of turning vertical
+- Committed the validated wide-tree spacing fix as `a0717f5 fix: rebalance t01 wide-tree spacing`.
+- Confirmed workflow direction after user review:
+  - the older Windows-side copy is no longer part of the active implementation path
+  - keep the WSL repo as the only working source of truth
+  - do not migrate the active repo to Windows; keep using WSL-native `node/npm/playwright`
 - Captured refreshed browser artifact after the refinement pass:
   - `output/playwright/t01-round12-live-v2-default.png`
   - `output/playwright/t01-round12-live-v3-default.png`
@@ -128,6 +133,8 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - the panel height stays fixed while the playback advances
 - Recursive tree layouts now reserve room for null-child hints, so leaf-expansion steps stay inside the stage.
 - Wide complete-tree layouts now keep the outermost null children distinct and visible, and the leaf-to-null edges no longer collapse into near-vertical lines at the stage boundaries.
+- Latest validated code checkpoint is commit `a0717f5` on branch `feat/p8-m3-route-rules-spike`.
+- WSL is the active runtime path; treat any older Windows-side copy as out-of-band history unless a future session explicitly needs read-only comparison.
 - The first browser artifact shows the intended priority shift is working, but this is still a spike-quality pass:
   - control tab affordance likely needs another refinement pass
   - the in-stage meta / legend density may need one more spacing pass after more user review
@@ -140,6 +147,7 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - refine the collapsed/expanded affordance of the left control drawer
   - refine the right context sheet density and decide whether one tab should stay visible by default
   - align `T-02` to the same stage-first shell after `T-01` stabilizes
+- If a later session resumes the unfinished trace bug thread, revisit the preorder outer-leaf red-arc direction mismatch separately from the now-committed wide-tree spacing fix.
 
 ## 2026-03-28 (T-01 module workspace handoff before Codex restart)
 
