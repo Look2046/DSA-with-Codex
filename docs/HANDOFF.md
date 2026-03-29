@@ -77,6 +77,17 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - replaced the old dynamic code-note summary with a much shorter visit-timing note such as `在首次进入节点时访问。`
   - collapsed each recursion stack item so `深度 N` and `traverse(...)` now sit on the same row
   - re-verified in Playwright that the trimmed window still opens correctly and the stack row now renders as a single flex row once frames exist
+- Applied a step-sheet stability pass after user feedback:
+  - wrapped the `步骤` context content into a dedicated bottom-aligned copy block
+  - moved the full text stack to the lower part of the panel so headline line-wrap changes no longer jitter the top of the sheet
+  - fixed the step sheet to a stable viewport-relative height instead of letting it resize on every step
+  - enabled internal scrolling on the copy block so future copy growth stays inside the panel rather than changing the shell geometry
+  - re-verified in Playwright across multiple playback steps that the sheet top and height now stay constant
+- Applied a step-sheet top-anchor pass after user feedback:
+  - promoted the `步骤` label out of the variable copy block so it stays pinned to the top edge
+  - split the sheet into three stable regions: top label, middle changing copy, bottom metadata
+  - kept the panel height fixed while centering the changing explanation text inside the middle region
+  - re-verified in Playwright across multiple playback steps that the sheet top, label position, middle copy area, and bottom metadata position all stay constant
 - Captured refreshed browser artifact after the refinement pass:
   - `output/playwright/t01-round12-live-v2-default.png`
   - `output/playwright/t01-round12-live-v3-default.png`
@@ -99,6 +110,10 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - header subtitle / tip / status block / checkpoint pills are all removed
   - the code panel keeps only a concise visit-timing note
   - recursion stack entries now use a denser single-row layout
+- The `步骤` panel is now stable across step changes:
+  - the `步骤` label is pinned at the top
+  - changing explanation copy lives in a dedicated middle area
+  - the panel height stays fixed while the playback advances
 - The first browser artifact shows the intended priority shift is working, but this is still a spike-quality pass:
   - control tab affordance likely needs another refinement pass
   - the in-stage meta / legend density may need one more spacing pass after more user review

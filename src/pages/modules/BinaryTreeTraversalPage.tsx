@@ -3353,30 +3353,30 @@ export function BinaryTreeTraversalPage() {
           </div>
 
           {showContextSheet ? (
-            <aside className="tree-workspace-context-sheet">
-              <>
-                <strong>{t('playback.step')}</strong>
+            <aside className="tree-workspace-context-sheet tree-workspace-context-sheet-step">
+              <strong className="tree-workspace-step-label">{t('playback.step')}</strong>
+              <div className="tree-workspace-step-copy">
                 <h3>{stepSummaryText}</h3>
                 <p>{algorithmStatusText}</p>
-                <dl className="tree-workspace-kv">
-                  <div>
-                    <dt>{t('module.t01.meta.mode')}</dt>
-                    <dd>{modeLabel}</dd>
-                  </div>
-                  <div>
-                    <dt>{t('module.t01.meta.currentNode')}</dt>
-                    <dd>{currentSnapshot?.currentIndex ?? '-'}</dd>
-                  </div>
-                  <div>
-                    <dt>{t('module.t01.meta.currentValue')}</dt>
-                    <dd>{formatDisplayValue(currentSnapshot?.currentValue)}</dd>
-                  </div>
-                  <div>
-                    <dt>{t('module.t01.meta.structure')}</dt>
-                    <dd>{t(`module.t01.meta.structure.${treeShapeMode}`)}</dd>
-                  </div>
-                </dl>
-              </>
+              </div>
+              <dl className="tree-workspace-kv">
+                <div>
+                  <dt>{t('module.t01.meta.mode')}</dt>
+                  <dd>{modeLabel}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t01.meta.currentNode')}</dt>
+                  <dd>{currentSnapshot?.currentIndex ?? '-'}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t01.meta.currentValue')}</dt>
+                  <dd>{formatDisplayValue(currentSnapshot?.currentValue)}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t01.meta.structure')}</dt>
+                  <dd>{t(`module.t01.meta.structure.${treeShapeMode}`)}</dd>
+                </div>
+              </dl>
             </aside>
           ) : null}
         </div>

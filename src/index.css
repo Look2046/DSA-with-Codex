@@ -1402,6 +1402,26 @@ body {
   gap: 12px;
 }
 
+.tree-workspace-context-sheet-step {
+  height: clamp(320px, 44svh, 372px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
+}
+
+.tree-workspace-step-label {
+  align-self: start;
+}
+
+.tree-workspace-step-copy {
+  min-height: 0;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  overflow: auto;
+  padding-right: 2px;
+}
+
 .tree-workspace-context-sheet h3 {
   margin: 0;
   color: #18395b;
