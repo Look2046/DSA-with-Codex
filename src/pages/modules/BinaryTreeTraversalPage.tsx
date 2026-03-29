@@ -174,7 +174,7 @@ type TraceGeometry = {
 const DEFAULT_STAGE_WIDTH = 1200;
 const DEFAULT_STAGE_HEIGHT = 460;
 const TREE_STAGE_TOP = 16;
-const TREE_STAGE_BOTTOM = 88;
+const TREE_STAGE_BOTTOM = 84;
 const TREE_NODE_DIAMETER_PX = 62;
 const TREE_NULL_DIAMETER_PX = 24;
 const TRACE_SHELL_GAP_PX = 4.5;
@@ -882,13 +882,24 @@ function getNodeLevel(index: number): number {
   return Math.floor(Math.log2(index + 1));
 }
 
-function getTreePointByIndex(index: number, top: number, yStep: number): NodePoint {
+function getTreeHorizontalInset(stageWidth: number, maxDisplayLevel: number): number {
+  const safeStageWidth = Math.max(stageWidth, 1);
+  const unitX = 100 / safeStageWidth;
+  const baseInset = clampNumber(Math.max((TREE_NODE_DIAMETER_PX / 2 + 12) * unitX, (TREE_NULL_DIAMETER_PX / 2 + 12) * unitX), 3.5, 6.5);
+  const deepestSlotCount = 2 ** Math.max(maxDisplayLevel, 1);
+  const minDeepestGapPercent = ((TREE_NULL_DIAMETER_PX + 18) * deepestSlotCount * unitX) / 2;
+  const maxInsetForDeepestGap = Math.max((100 - minDeepestGapPercent) / 2, 0.8);
+  return clampNumber(Math.min(baseInset, maxInsetForDeepestGap), 0.8, 6.5);
+}
+
+function getTreePointByIndex(index: number, top: number, yStep: number, xInset: number): NodePoint {
   const level = getNodeLevel(index);
   const firstIndexOfLevel = 2 ** level - 1;
   const positionInLevel = index - firstIndexOfLevel;
   const nodesInLevel = 2 ** level;
   const ratio = (positionInLevel + 0.5) / nodesInLevel;
-  const x = clampPoint(56 + (ratio - 0.5) * 108, 12, 96);
+  const usableWidth = Math.max(100 - xInset * 2, 1);
+  const x = clampPoint(xInset + ratio * usableWidth, 1.5, 98.5);
   const y = clampPoint(top + level * yStep, 2, 98);
   return { x, y };
 }
@@ -901,9 +912,9 @@ function getNodeCenter(nodePositions: NodePoint[], nodeIndex: number): NodePoint
   return { ...node };
 }
 
-function getNullPoint(parentIndex: number, side: 'L' | 'R', top: number, yStep: number): NodePoint {
+function getNullPoint(parentIndex: number, side: 'L' | 'R', top: number, yStep: number, xInset: number): NodePoint {
   const childIndex = getChildIndex(parentIndex, side);
-  return getTreePointByIndex(childIndex, top, yStep);
+  return getTreePointByIndex(childIndex, top, yStep, xInset);
 }
 
 function normalizeDirection(dx: number, dy: number, fallbackX: number, fallbackY: number): NodePoint {
@@ -1158,6 +1169,7 @@ function resolveRootRouteStartFromGuideEvents(
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
+  xInset: number,
   geometry: TraceGeometry,
 ): NodePoint | null {
   const rootCenter = getNodeCenter(nodePositions, rootIndex);
@@ -1187,7 +1199,7 @@ function resolveRootRouteStartFromGuideEvents(
     }
 
     if (nextEvent.type === 'toNull' && nextEvent.fromIndex === rootIndex) {
-      const nullCenter = getNullPoint(rootIndex, nextEvent.side, top, yStep);
+      const nullCenter = getNullPoint(rootIndex, nextEvent.side, top, yStep, xInset);
       const lanes = buildGuideAbsoluteLanePair({
         from: rootCenter,
         to: nullCenter,
@@ -1394,6 +1406,7 @@ function buildGuideRawTraceSegments(
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
+  xInset: number,
   geometry: TraceGeometry,
   rootGuideEvents: BinaryTreeGuideEvent[] = guideEvents,
 ): RawTraversalTraceSegment[] {
@@ -1409,7 +1422,7 @@ function buildGuideRawTraceSegments(
       const rootEntryAnchor = getRootTopEntryAnchor(root, geometry);
       const rootEntryStart = getRootTopEntryStart(rootEntryAnchor, geometry);
       const rootEntry =
-        resolveRootRouteStartFromGuideEvents(event.toIndex, index, rootGuideEvents, nodePositions, top, yStep, geometry) ??
+        resolveRootRouteStartFromGuideEvents(event.toIndex, index, rootGuideEvents, nodePositions, top, yStep, xInset, geometry) ??
         getRootTraceEntry(root, geometry);
 
       segments.push(
@@ -1507,7 +1520,7 @@ function buildGuideRawTraceSegments(
       if (!parentCenter) {
         return;
       }
-      const nullCenter = getNullPoint(event.fromIndex, event.side, top, yStep);
+      const nullCenter = getNullPoint(event.fromIndex, event.side, top, yStep, xInset);
       const lanes = buildGuideAbsoluteLanePair({
         from: parentCenter,
         to: nullCenter,
@@ -1536,7 +1549,7 @@ function buildGuideRawTraceSegments(
     if (!parentCenter) {
       return;
     }
-    const nullCenter = getNullPoint(event.toIndex, event.side, top, yStep);
+    const nullCenter = getNullPoint(event.toIndex, event.side, top, yStep, xInset);
     const lanes = buildGuideAbsoluteLanePair({
       from: parentCenter,
       to: nullCenter,
@@ -1772,6 +1785,7 @@ function buildRawTraceSegments(
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
+  xInset: number,
   geometry: TraceGeometry,
   canonicalGuideEvents?: BinaryTreeGuideEvent[],
 ): RawTraversalTraceSegment[] {
@@ -1790,6 +1804,7 @@ function buildRawTraceSegments(
       nodePositions,
       top,
       yStep,
+      xInset,
       geometry,
       canonicalGuideEvents ?? step.guideEvents,
     )
@@ -1831,6 +1846,7 @@ function buildCanonicalTraceEntryMarkers(
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
+  xInset: number,
   geometry: TraceGeometry,
 ): TraceEntryMarker[] {
   const rootCenter = getNodeCenter(nodePositions, 0);
@@ -1863,8 +1879,8 @@ function buildCanonicalTraceEntryMarkers(
     const childIndex = getChildIndex(parentIndex, side);
     const childIsReal = hasTreeNode(treeState, childIndex);
     const childCenter = childIsReal
-      ? getNodeCenter(nodePositions, childIndex) ?? getNullPoint(parentIndex, side, top, yStep)
-      : getNullPoint(parentIndex, side, top, yStep);
+      ? getNodeCenter(nodePositions, childIndex) ?? getNullPoint(parentIndex, side, top, yStep, xInset)
+      : getNullPoint(parentIndex, side, top, yStep, xInset);
     const childRadius = childIsReal ? geometry.guideNodeClearRadius : geometry.guideNullClearRadius;
 
     return {
@@ -2217,6 +2233,7 @@ function buildParallelGuideSegments(
   nodePositions: NodePoint[],
   top: number,
   yStep: number,
+  xInset: number,
   geometry: TraceGeometry,
 ): ParallelGuideSegment[] {
   const segments: ParallelGuideSegment[] = [];
@@ -2345,7 +2362,7 @@ function buildParallelGuideSegments(
         return;
       }
 
-      const nullPoint = getNullPoint(parentIndex, side, top, yStep);
+      const nullPoint = getNullPoint(parentIndex, side, top, yStep, xInset);
       const pair = pushParallelPair({
         keyBase: `null-${parentIndex}-${side}`,
         from: parentCenter,
@@ -2624,15 +2641,17 @@ export function BinaryTreeTraversalPage() {
     const top = TREE_STAGE_TOP;
     const bottom = TREE_STAGE_BOTTOM;
     const maxNodeLevel = lastTreeNodeIndex >= 0 ? getNodeLevel(lastTreeNodeIndex) : 0;
-    const maxDisplayLevel = Math.max(maxNodeLevel, 1);
+    const reserveNullLevel = mode === 'levelorder' ? 0 : 1;
+    const maxDisplayLevel = Math.max(maxNodeLevel + reserveNullLevel, 1);
     const yStep = (bottom - top) / maxDisplayLevel;
-    return { top, yStep };
-  }, [lastTreeNodeIndex]);
+    const xInset = getTreeHorizontalInset(stageSize.width, maxDisplayLevel);
+    return { top, yStep, xInset };
+  }, [lastTreeNodeIndex, mode, stageSize.width]);
   const traceGeometry = useMemo(() => buildTraceGeometry(stageSize.width, stageSize.height), [stageSize.height, stageSize.width]);
 
   const nodePositions = useMemo(
-    () => treeState.map((_, index) => getTreePointByIndex(index, treeLayout.top, treeLayout.yStep)),
-    [treeLayout.top, treeLayout.yStep, treeState],
+    () => treeState.map((_, index) => getTreePointByIndex(index, treeLayout.top, treeLayout.yStep, treeLayout.xInset)),
+    [treeLayout.top, treeLayout.xInset, treeLayout.yStep, treeState],
   );
 
   const edges = useMemo(() => {
@@ -2662,10 +2681,11 @@ export function BinaryTreeTraversalPage() {
         nodePositions,
         treeLayout.top,
         treeLayout.yStep,
+        treeLayout.xInset,
         traceGeometry,
         canonicalGuideEvents,
       ),
-    [canonicalGuideEvents, currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
+    [canonicalGuideEvents, currentSnapshot, nodePositions, traceGeometry, treeLayout.top, treeLayout.xInset, treeLayout.yStep],
   );
   const currentTraceMetrics = useMemo(() => buildTraceMetrics(currentRawTraceSegments), [currentRawTraceSegments]);
   const currentTraceTargetLength = currentTraceMetrics[currentTraceMetrics.length - 1]?.end ?? 0;
@@ -2689,8 +2709,8 @@ export function BinaryTreeTraversalPage() {
     [currentRawTraceSegments, traceGeometry],
   );
   const parallelGuideSegments = useMemo(
-    () => buildParallelGuideSegments(edges, treeState, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry),
-    [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
+    () => buildParallelGuideSegments(edges, treeState, nodePositions, treeLayout.top, treeLayout.yStep, treeLayout.xInset, traceGeometry),
+    [edges, nodePositions, traceGeometry, treeLayout.top, treeLayout.xInset, treeLayout.yStep, treeState],
   );
   const routeOrderSegments = useMemo<RouteOrderSegment[]>(() => {
     if (mode !== 'preorder' || !guideTraceSourceStep || nodePositions.length === 0) {
@@ -2703,6 +2723,7 @@ export function BinaryTreeTraversalPage() {
       nodePositions,
       treeLayout.top,
       treeLayout.yStep,
+      treeLayout.xInset,
       traceGeometry,
       guideTraceSourceStep.guideEvents,
     );
@@ -2715,7 +2736,7 @@ export function BinaryTreeTraversalPage() {
         order: index + 1,
         pathId: `${routeOrderIdPrefix}-route-order-${index}`,
       }));
-  }, [guideTraceSourceStep, mode, nodePositions, routeOrderIdPrefix, traceGeometry, treeLayout.top, treeLayout.yStep]);
+  }, [guideTraceSourceStep, mode, nodePositions, routeOrderIdPrefix, traceGeometry, treeLayout.top, treeLayout.xInset, treeLayout.yStep]);
   const fullGuideRawTraceSegments = useMemo(
     () =>
       guideTraceSourceStep
@@ -2724,18 +2745,19 @@ export function BinaryTreeTraversalPage() {
           nodePositions,
           treeLayout.top,
           treeLayout.yStep,
+          treeLayout.xInset,
           traceGeometry,
           guideTraceSourceStep.guideEvents,
         )
         : [],
-    [guideTraceSourceStep, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep],
+    [guideTraceSourceStep, nodePositions, traceGeometry, treeLayout.top, treeLayout.xInset, treeLayout.yStep],
   );
   const traceEntryMarkers = useMemo(
     () =>
       guideTraceSourceStep
-        ? buildCanonicalTraceEntryMarkers(treeState, nodePositions, treeLayout.top, treeLayout.yStep, traceGeometry)
+        ? buildCanonicalTraceEntryMarkers(treeState, nodePositions, treeLayout.top, treeLayout.yStep, treeLayout.xInset, traceGeometry)
         : [],
-    [guideTraceSourceStep, nodePositions, traceGeometry, treeLayout.top, treeLayout.yStep, treeState],
+    [guideTraceSourceStep, nodePositions, traceGeometry, treeLayout.top, treeLayout.xInset, treeLayout.yStep, treeState],
   );
   const traceEntryMarkersWithReveal = useMemo(
     () => buildTraceEntryMarkersWithReveal(traceEntryMarkers, fullGuideRawTraceSegments, traceGeometry.aspect),
@@ -2943,7 +2965,7 @@ export function BinaryTreeTraversalPage() {
         return;
       }
 
-      const nullPoint = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep);
+      const nullPoint = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep, treeLayout.xInset);
 
       nextEdges.push({
         key: `${hint.parentIndex}-${hint.side}`,
@@ -2952,7 +2974,7 @@ export function BinaryTreeTraversalPage() {
     });
 
     return nextEdges;
-  }, [nodePositions, nullHints, treeLayout.top, treeLayout.yStep]);
+  }, [nodePositions, nullHints, treeLayout.top, treeLayout.xInset, treeLayout.yStep]);
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -3477,7 +3499,7 @@ export function BinaryTreeTraversalPage() {
 
               <div className="tree-null-layer" aria-hidden="true">
                 {nullHints.map((hint) => {
-                  const point = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep);
+                  const point = getNullPoint(hint.parentIndex, hint.side, treeLayout.top, treeLayout.yStep, treeLayout.xInset);
 
                   const isActiveNull =
                     currentSnapshot?.guideNull?.parentIndex === hint.parentIndex && currentSnapshot?.guideNull?.side === hint.side;

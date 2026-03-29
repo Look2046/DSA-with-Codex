@@ -88,6 +88,16 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - split the sheet into three stable regions: top label, middle changing copy, bottom metadata
   - kept the panel height fixed while centering the changing explanation text inside the middle region
   - re-verified in Playwright across multiple playback steps that the sheet top, label position, middle copy area, and bottom metadata position all stay constant
+- Applied a tree-height safety pass after user feedback:
+  - diagnosed that recursive traversal layouts were computing vertical spacing only from real node depth, while `null` hints were rendered one level deeper
+  - reserved one extra display level for recursive modes so null children no longer fall outside the stage when the algorithm reaches leaf edges
+  - tightened the stage bottom anchor slightly so the final null row stays inside the visible canvas with breathing room
+  - re-verified in Playwright that all visible null nodes now stay within the stage bounds
+- Applied a wide-tree horizontal spacing pass after user feedback:
+  - diagnosed that large complete trees were still using a fixed horizontal span plus hard edge clamps, which collapsed the outermost null children into near-identical x positions
+  - replaced the old fixed `56 +/- 54` x formula with a stage-width-aware horizontal inset so node/null positions distribute across the full stage without saturating the left/right clamps
+  - threaded the same adaptive x inset through node placement, null placement, guide traces, null-edge hints, and entry-marker geometry so the main tree and overlay layers stay aligned
+  - re-verified in Playwright on a 15-node complete tree that all 16 null hints render separately and the outermost child-to-null edges keep visible horizontal spread instead of turning vertical
 - Captured refreshed browser artifact after the refinement pass:
   - `output/playwright/t01-round12-live-v2-default.png`
   - `output/playwright/t01-round12-live-v3-default.png`
@@ -95,6 +105,8 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `output/playwright/t01-round12-live-v5-horizontal-header.png`
   - `output/playwright/t01-round12-live-v9-adaptive-stage-balanced.png`
   - `output/playwright/t01-round12-live-v11-no-legend-fresh-preview.png`
+  - `output/playwright/t01-size15-step1-before-fix.png`
+  - `output/playwright/t01-size15-step1-after-fix.png`
 - Re-ran the full local quality gate successfully after the shell change:
   - `npm run check`
 
@@ -114,6 +126,8 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - the `步骤` label is pinned at the top
   - changing explanation copy lives in a dedicated middle area
   - the panel height stays fixed while the playback advances
+- Recursive tree layouts now reserve room for null-child hints, so leaf-expansion steps stay inside the stage.
+- Wide complete-tree layouts now keep the outermost null children distinct and visible, and the leaf-to-null edges no longer collapse into near-vertical lines at the stage boundaries.
 - The first browser artifact shows the intended priority shift is working, but this is still a spike-quality pass:
   - control tab affordance likely needs another refinement pass
   - the in-stage meta / legend density may need one more spacing pass after more user review
