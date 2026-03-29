@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
-import { VisualizationCanvas } from '../../components/VisualizationCanvas';
-import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import {
   buildBinaryTreeTraversalTimelineFromInput,
 } from '../../modules/tree/binaryTreeTraversalTimelineAdapter';
 import { buildOffsetEdgeSegment, pickAbsoluteSidePair } from '../../modules/tree/preorderTraceRules';
-import type { HighlightType, PlaybackStatus } from '../../types/animation';
+import type { PlaybackStatus } from '../../types/animation';
 import type {
   BinaryTreeGuideEvent,
   BinaryTreeGuideNullHint,
@@ -176,7 +174,7 @@ type TraceGeometry = {
 const DEFAULT_STAGE_WIDTH = 1200;
 const DEFAULT_STAGE_HEIGHT = 460;
 const TREE_STAGE_TOP = 16;
-const TREE_STAGE_BOTTOM = 92;
+const TREE_STAGE_BOTTOM = 88;
 const TREE_NODE_DIAMETER_PX = 62;
 const TREE_NULL_DIAMETER_PX = 24;
 const TRACE_SHELL_GAP_PX = 4.5;
@@ -798,25 +796,6 @@ function getAlgorithmStatusText(
   return getRecursionStatusText(step, t);
 }
 
-function isRecursionVisitStep(
-  step: BinaryTreeTraversalStep | undefined,
-  mode: BinaryTreeTraversalMode,
-): boolean {
-  if (!step) {
-    return false;
-  }
-
-  if (mode === 'preorder') {
-    return step.action === 'guideStart' || step.action === 'descendLeft' || step.action === 'descendRight';
-  }
-
-  if (mode === 'inorder' || mode === 'postorder') {
-    return step.action === 'visit';
-  }
-
-  return false;
-}
-
 function getStepDescription(
   step: BinaryTreeTraversalStep | undefined,
   t: ReturnType<typeof useI18n>['t'],
@@ -861,16 +840,6 @@ function getStepDescription(
   }
 
   return t('module.t01.step.completed');
-}
-
-function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t']): string {
-  if (type === 'visiting') {
-    return t('module.sr01.highlight.visited');
-  }
-  if (type === 'matched') {
-    return t('module.sr01.highlight.found');
-  }
-  return t('module.s01.highlight.default');
 }
 
 function formatTreePreviewValue(value: BinaryTreeInputValue): string {
@@ -918,7 +887,8 @@ function getTreePointByIndex(index: number, top: number, yStep: number): NodePoi
   const firstIndexOfLevel = 2 ** level - 1;
   const positionInLevel = index - firstIndexOfLevel;
   const nodesInLevel = 2 ** level;
-  const x = ((positionInLevel + 1) / (nodesInLevel + 1)) * 100;
+  const ratio = (positionInLevel + 0.5) / nodesInLevel;
+  const x = clampPoint(56 + (ratio - 0.5) * 108, 12, 96);
   const y = clampPoint(top + level * yStep, 2, 98);
   return { x, y };
 }
@@ -2604,7 +2574,6 @@ function getLevelorderNewQueueNodeIndices(step: BinaryTreeTraversalStep | undefi
 
 export function BinaryTreeTraversalPage() {
   const { t } = useI18n();
-  const currentModule = useCurrentModule();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const routeOrderIdPrefix = useId().replace(/:/g, '');
   const initialViewport = useMemo(() => getViewportSize(), []);
@@ -2613,6 +2582,8 @@ export function BinaryTreeTraversalPage() {
   const [treeShapeMode, setTreeShapeMode] = useState<BinaryTreeShapeMode>('complete');
   const [mode, setMode] = useState<BinaryTreeTraversalMode>('preorder');
   const [valueDisplayMode, setValueDisplayMode] = useState<ValueDisplayMode>('number');
+  const [showStageControls, setShowStageControls] = useState(false);
+  const [showContextSheet, setShowContextSheet] = useState(false);
   const [showRecursionView, setShowRecursionView] = useState(false);
   const [viewportSize, setViewportSize] = useState<ViewportSize>(initialViewport);
   const [recursionPanelRect, setRecursionPanelRect] = useState<FloatingPanelRect>(
@@ -2653,8 +2624,8 @@ export function BinaryTreeTraversalPage() {
     const top = TREE_STAGE_TOP;
     const bottom = TREE_STAGE_BOTTOM;
     const maxNodeLevel = lastTreeNodeIndex >= 0 ? getNodeLevel(lastTreeNodeIndex) : 0;
-    const maxDisplayLevel = maxNodeLevel + 1;
-    const yStep = (bottom - top) / Math.max(maxDisplayLevel, 1);
+    const maxDisplayLevel = Math.max(maxNodeLevel, 1);
+    const yStep = (bottom - top) / maxDisplayLevel;
     return { top, yStep };
   }, [lastTreeNodeIndex]);
   const traceGeometry = useMemo(() => buildTraceGeometry(stageSize.width, stageSize.height), [stageSize.height, stageSize.width]);
@@ -2841,20 +2812,21 @@ export function BinaryTreeTraversalPage() {
     () => getAlgorithmStatusText(currentSnapshot, mode, t, formatDisplayValue),
     [currentSnapshot, formatDisplayValue, mode, t],
   );
-  const recursionVisitPointText = useMemo(
-    () => getRecursionCheckpointText(guideVisitMarkerLabel, t),
-    [guideVisitMarkerLabel, t],
-  );
-  const algorithmCodeNote = (() => {
-    const notes = [`${t('module.t01.meta.mode')}: ${modeLabel}`];
-    if (!isLevelorderMode && recursionVisitPointText) {
-      notes.push(recursionVisitPointText);
+  const algorithmVisitHint = useMemo(() => {
+    if (mode === 'preorder') {
+      return t('module.t01.recursion.visitTiming.preorder');
     }
-    if (isLevelorderMode && currentSnapshot?.queueState) {
-      notes.push(`${t('module.t01.levelorder.queue.count')}: ${currentSnapshot.queueState.length}`);
+
+    if (mode === 'inorder') {
+      return t('module.t01.recursion.visitTiming.inorder');
     }
-    return notes.join(' · ');
-  })();
+
+    if (mode === 'postorder') {
+      return t('module.t01.recursion.visitTiming.postorder');
+    }
+
+    return t('module.t01.recursion.visitTiming.levelorder');
+  }, [mode, t]);
   const recursionStackEntries = useMemo(
     () =>
       !isLevelorderMode
@@ -2957,10 +2929,6 @@ export function BinaryTreeTraversalPage() {
     const enqueueLabels = levelorderQueueSummary.enqueue.map((entry) => formatDisplayValue(entry.value)).join(', ');
     return `${t('module.t01.levelorder.summary.dequeuePrefix')} ${currentLabel} · ${t('module.t01.levelorder.summary.enqueuePrefix')} ${enqueueLabels}`;
   }, [currentSnapshot, formatDisplayValue, isLevelorderMode, levelorderQueueSummary, t, treeState]);
-  const algorithmWindowBody = useMemo(
-    () => (isLevelorderMode ? t('module.t01.window.body.levelorder') : t('module.t01.window.body.recursion')),
-    [isLevelorderMode, t],
-  );
   const algorithmCodeTitle = useMemo(
     () => (isLevelorderMode ? t('module.t01.levelorder.code.title') : t('module.t01.recursion.code.title')),
     [isLevelorderMode, t],
@@ -3228,130 +3196,204 @@ export function BinaryTreeTraversalPage() {
 
   const modeOptions: BinaryTreeTraversalMode[] = ['preorder', 'inorder', 'postorder', 'levelorder'];
   const treeShapeOptions: BinaryTreeShapeMode[] = ['random', 'complete'];
+  const stepSummaryText = isLevelorderMode
+    ? levelorderActionText
+    : getStepDescription(currentSnapshot, t, (value) => formatDisplayValue(value));
 
   return (
     <section className="array-page tree-page">
-      <h2>{t('module.t01.title')}</h2>
-      <p>{t('module.t01.body')}</p>
-
-      <div className="bubble-toolbar">
-        <label htmlFor="dataset-size-t01" className="control-inline">
-          <span>{t('module.s01.dataSize')}</span>
-          <input
-            id="dataset-size-t01"
-            type="range"
-            min={MIN_SIZE}
-            max={MAX_SIZE}
-            value={datasetSize}
-            onChange={(event) => setDatasetSize(Number(event.target.value))}
-          />
-          <strong>{datasetSize}</strong>
-        </label>
-        <div className="speed-group">
-          <button type="button" onClick={regenerateData}>
-            {t('module.s01.regenerate')}
-          </button>
-        </div>
+      <div className="tree-workspace-header">
+        <h2>{t('module.t01.title')}</h2>
+        <p>{t('module.t01.body')}</p>
       </div>
 
-      <div className="bubble-toolbar">
-        <span>{t('module.t01.treeKind.label')}</span>
-        <div className="speed-group">
-          {treeShapeOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={treeShapeMode === option ? 'speed-active' : ''}
-              onClick={() => {
-                setTreeShapeMode(option);
-                setInputData(createBinaryTreeDataset(datasetSize, option));
-                reset();
-              }}
-            >
-              {t(`module.t01.treeKind.${option}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="bubble-toolbar">
-        <span>{t('module.t01.mode.label')}</span>
-        <div className="speed-group">
-          {modeOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={mode === option ? 'speed-active' : ''}
-              onClick={() => {
-                setMode(option);
-                reset();
-              }}
-            >
-              {getModeLabel(option, t)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="bubble-toolbar">
-        <span>{t('module.t01.valueMode.label')}</span>
-        <div className="speed-group">
+      <section className="tree-workspace-shell">
+        <div className="tree-workspace-controls-anchor">
           <button
             type="button"
-            className={valueDisplayMode === 'number' ? 'speed-active' : ''}
-            onClick={() => setValueDisplayMode('number')}
+            className="tree-workspace-edge-tab"
+            onClick={() => setShowStageControls((previous) => !previous)}
+            aria-expanded={showStageControls}
           >
-            {t('module.t01.valueMode.number')}
+            {t('module.t01.workspace.controls')}
           </button>
-          <button
-            type="button"
-            className={valueDisplayMode === 'letter' ? 'speed-active' : ''}
-            onClick={() => setValueDisplayMode('letter')}
-          >
-            {t('module.t01.valueMode.letter')}
-          </button>
-        </div>
-      </div>
 
-      <div className="bubble-toolbar">
-        <span>{t('module.s01.speed')}</span>
-        <div className="speed-group">
-          {speedOptions.map((option) => (
+          {showStageControls ? (
+            <div className="tree-workspace-drawer" aria-label={t('module.t01.workspace.controls')}>
+              <div className="tree-workspace-drawer-head">
+                <strong>{t('module.t01.workspace.controls')}</strong>
+                <span>{t('module.t01.workspace.onDemand')}</span>
+              </div>
+
+              <label className="tree-workspace-field" htmlFor="dataset-size-t01">
+                <span>{t('module.s01.dataSize')}</span>
+                <input
+                  id="dataset-size-t01"
+                  type="range"
+                  min={MIN_SIZE}
+                  max={MAX_SIZE}
+                  value={datasetSize}
+                  onChange={(event) => setDatasetSize(Number(event.target.value))}
+                />
+                <strong>{datasetSize}</strong>
+              </label>
+
+              <label className="tree-workspace-field" htmlFor="tree-shape-t01">
+                <span>{t('module.t01.treeKind.label')}</span>
+                <select
+                  id="tree-shape-t01"
+                  value={treeShapeMode}
+                  onChange={(event) => {
+                    const nextValue = event.target.value as BinaryTreeShapeMode;
+                    setTreeShapeMode(nextValue);
+                    setInputData(createBinaryTreeDataset(datasetSize, nextValue));
+                    reset();
+                  }}
+                >
+                  {treeShapeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {t(`module.t01.treeKind.${option}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="tree-workspace-field" htmlFor="traversal-mode-t01">
+                <span>{t('module.t01.mode.label')}</span>
+                <select
+                  id="traversal-mode-t01"
+                  value={mode}
+                  onChange={(event) => {
+                    const nextValue = event.target.value as BinaryTreeTraversalMode;
+                    setMode(nextValue);
+                    reset();
+                  }}
+                >
+                  {modeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {getModeLabel(option, t)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="tree-workspace-field">
+                <span>{t('module.s01.speed')}</span>
+                <div className="tree-workspace-toggle-row">
+                  {speedOptions.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                      onClick={() => setSpeed(option.value)}
+                    >
+                      {t(option.key)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="tree-workspace-field">
+                <span>{t('module.t01.valueMode.label')}</span>
+                <div className="tree-workspace-toggle-row">
+                  <button
+                    type="button"
+                    className={`tree-workspace-toggle${valueDisplayMode === 'number' ? ' tree-workspace-toggle-active' : ''}`}
+                    onClick={() => setValueDisplayMode('number')}
+                  >
+                    {t('module.t01.valueMode.number')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`tree-workspace-toggle${valueDisplayMode === 'letter' ? ' tree-workspace-toggle-active' : ''}`}
+                    onClick={() => setValueDisplayMode('letter')}
+                  >
+                    {t('module.t01.valueMode.letter')}
+                  </button>
+                </div>
+              </div>
+
+              <div className="tree-workspace-drawer-actions">
+                <button type="button" className="tree-workspace-ghost-button" onClick={regenerateData}>
+                  {t('module.s01.regenerate')}
+                </button>
+                <button type="button" className="tree-workspace-ghost-button" onClick={toggleRecursionView}>
+                  {isAlgorithmWindowOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
+                </button>
+              </div>
+
+              <div className="tree-workspace-sample-block">
+                <span>{t('module.s01.sample')}</span>
+                <code>[{formatArrayPreview(inputData)}]</code>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="tree-workspace-context-anchor">
+          <div className="tree-workspace-context-rail">
             <button
-              key={option.key}
               type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
+              className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
+                showContextSheet ? ' tree-workspace-context-tab-active' : ''
+              }`}
+              onClick={() => setShowContextSheet((previous) => !previous)}
+              aria-pressed={showContextSheet}
             >
-              {t(option.key)}
+              {t('playback.step')}
             </button>
-          ))}
+            <button
+              type="button"
+              className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${isAlgorithmWindowOpen ? ' tree-workspace-context-tab-active' : ''}`}
+              onClick={toggleRecursionView}
+              disabled={!supportsAlgorithmWindow}
+            >
+              {t('module.t01.workspace.algorithmTab')}
+            </button>
+          </div>
+
+          {showContextSheet ? (
+            <aside className="tree-workspace-context-sheet">
+              <>
+                <strong>{t('playback.step')}</strong>
+                <h3>{stepSummaryText}</h3>
+                <p>{algorithmStatusText}</p>
+                <dl className="tree-workspace-kv">
+                  <div>
+                    <dt>{t('module.t01.meta.mode')}</dt>
+                    <dd>{modeLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('module.t01.meta.currentNode')}</dt>
+                    <dd>{currentSnapshot?.currentIndex ?? '-'}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('module.t01.meta.currentValue')}</dt>
+                    <dd>{formatDisplayValue(currentSnapshot?.currentValue)}</dd>
+                  </div>
+                  <div>
+                    <dt>{t('module.t01.meta.structure')}</dt>
+                    <dd>{t(`module.t01.meta.structure.${treeShapeMode}`)}</dd>
+                  </div>
+                </dl>
+              </>
+            </aside>
+          ) : null}
         </div>
-      </div>
 
-      <div className="module-status-block">
-        <p className="module-status-line">
-          {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
-          {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
-        </p>
-        <p className="module-status-line">{getStepDescription(currentSnapshot, t, (value) => formatDisplayValue(value))}</p>
-        <p className="module-status-line">
-          {t('module.t01.meta.mode')}: {modeLabel} | {t('module.t01.meta.currentNode')}:{' '}
-          {currentSnapshot?.currentIndex ?? '-'} | {t('module.t01.meta.currentValue')}:{' '}
-          {formatDisplayValue(currentSnapshot?.currentValue)}
-        </p>
-        <p className="module-status-line">{t('module.t01.meta.output')}: [{outputSequence.join(', ')}]</p>
-        <p className="module-status-line">
-          {t('module.t01.meta.structure')}: {t(`module.t01.meta.structure.${treeShapeMode}`)}
-        </p>
-      </div>
+        <div ref={stageRef} className="tree-stage tree-stage-visual" aria-label="binary-tree-stage">
+          <div className="tree-workspace-stage-meta">
+            <span className="tree-workspace-pill">{modeLabel}</span>
+            <span className="tree-workspace-pill tree-workspace-pill-active">
+              {t('module.t01.meta.currentValue')}: {formatDisplayValue(currentSnapshot?.currentValue)}
+            </span>
+            <span className="tree-workspace-pill">{t(`module.t01.treeKind.${treeShapeMode}`)}</span>
+            <span className="tree-workspace-pill">
+              {valueDisplayMode === 'number' ? t('module.t01.valueMode.number') : t('module.t01.valueMode.letter')}
+            </span>
+            <span className="tree-workspace-pill">{t('playback.status')}: {getStatusLabel(status, t)}</span>
+          </div>
 
-      <p className="array-preview">
-        {t('module.s01.sample')}: [{formatArrayPreview(inputData)}]
-      </p>
-
-      <VisualizationCanvas title={t('module.t01.title')} subtitle={t('module.t01.stage')} stageClassName="viz-canvas-stage-tree">
-        <div ref={stageRef} className="tree-stage" aria-label="binary-tree-stage">
           <svg className="tree-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             {edges.map((edge) => {
               const from = nodePositions[edge.from];
@@ -3562,60 +3604,58 @@ export function BinaryTreeTraversalPage() {
               );
             })}
           </svg>
-        </div>
-      </VisualizationCanvas>
 
-      <div className="tree-sequence-block" aria-live="polite">
-        <span className="tree-sequence-label">{t('module.t01.meta.output')}</span>
-        <div className="tree-sequence-list">
-          {outputSequence.length === 0 ? (
-            <span className="tree-sequence-empty">{t('module.t01.sequence.empty')}</span>
-          ) : (
-            outputSequence.map((value, index) => (
-              <span
-                key={`${value}-${index}`}
-                className={`tree-sequence-chip${index === outputSequence.length - 1 ? ' tree-sequence-chip-active' : ''}`}
+          <div className="tree-workspace-transport">
+            <div className="tree-workspace-transport-left">
+              <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0}>
+                {t('playback.prev')}
+              </button>
+              <button
+                type="button"
+                className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+                onClick={status === 'playing' ? pause : play}
+                disabled={steps.length === 0}
               >
-                {value}
+                {status === 'playing' ? t('playback.pause') : t('playback.play')}
+              </button>
+              <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={steps.length === 0}>
+                {t('playback.next')}
+              </button>
+              <button type="button" className="tree-workspace-transport-btn" onClick={reset} disabled={steps.length === 0}>
+                {t('playback.reset')}
+              </button>
+              <div className="tree-workspace-transport-progress" aria-hidden="true">
+                <span
+                  className="tree-workspace-transport-progress-fill"
+                  style={{
+                    width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+                  }}
+                />
+              </div>
+              <span className="tree-workspace-transport-step">
+                {currentStep}/{Math.max(steps.length - 1, 0)}
               </span>
-            ))
-          )}
+            </div>
+
+            <div className="tree-workspace-transport-right" aria-live="polite">
+              {outputSequence.length === 0 ? (
+                <span className="tree-workspace-transport-empty">{t('module.t01.sequence.empty')}</span>
+              ) : (
+                outputSequence.map((value, index) => (
+                  <span
+                    key={`${value}-${index}`}
+                    className={`tree-workspace-transport-chip${
+                      index === outputSequence.length - 1 ? ' tree-workspace-transport-chip-active' : ''
+                    }`}
+                  >
+                    {value}
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="legend-row">
-        <span className="legend-item legend-visiting">{t('module.t01.legend.visiting')}</span>
-        <span className="legend-item legend-matched">{t('module.t01.legend.visited')}</span>
-        <span className="legend-item legend-moving">{t('module.t01.legend.path')}</span>
-        {!isLevelorderMode ? <span className="legend-item legend-default">{t('module.t01.legend.null')}</span> : null}
-      </div>
-
-      <p>
-        {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? []).map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`).join(' | ') ||
-          t('module.s01.none')}
-      </p>
-
-      <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
-          {t('playback.play')}
-        </button>
-        <button type="button" onClick={pause} disabled={status !== 'playing'}>
-          {t('playback.pause')}
-        </button>
-        <button type="button" onClick={prev} disabled={steps.length === 0}>
-          {t('playback.prev')}
-        </button>
-        <button type="button" onClick={next} disabled={steps.length === 0}>
-          {t('playback.next')}
-        </button>
-        <button type="button" onClick={reset} disabled={steps.length === 0}>
-          {t('playback.reset')}
-        </button>
-        <button type="button" onClick={toggleRecursionView} disabled={!supportsAlgorithmWindow}>
-          {isAlgorithmWindowOpen ? t('module.t01.recursion.toggle.hide') : t('module.t01.recursion.toggle.show')}
-        </button>
-      </div>
+      </section>
 
       {isAlgorithmWindowOpen ? (
         <div className="tree-recursion-floating-shell" aria-live="polite">
@@ -3633,7 +3673,6 @@ export function BinaryTreeTraversalPage() {
             <div className="tree-recursion-header tree-recursion-window-bar" onPointerDown={startRecursionPanelDrag}>
               <div className="tree-recursion-window-title-group">
                 <h3>{t('module.t01.recursion.title')}</h3>
-                <p>{algorithmWindowBody}</p>
               </div>
               <div className="tree-recursion-window-controls">
                 <button
@@ -3661,45 +3700,11 @@ export function BinaryTreeTraversalPage() {
             </div>
 
             <div className="tree-recursion-window-content">
-              <div className="tree-recursion-tip" role="note">
-                {t('module.t01.recursion.tip')}
-              </div>
-
-              <div className="tree-recursion-status-block">
-                <span className="tree-recursion-status-label">{t('module.t01.recursion.status.label')}</span>
-                <strong>{algorithmStatusText}</strong>
-                {!isLevelorderMode &&
-                isRecursionVisitStep(currentSnapshot, mode) &&
-                currentSnapshot?.recursionCheckpoint !== null &&
-                currentSnapshot?.recursionCheckpoint === guideVisitMarkerLabel ? (
-                  <span className="tree-recursion-visit-now">{t('module.t01.recursion.status.visitNow')}</span>
-                ) : null}
-              </div>
-
-              {!isLevelorderMode ? (
-                <div className="tree-recursion-points" aria-hidden="true">
-                  {(['1', '2', '3'] as const).map((checkpoint) => {
-                    const pointText = getRecursionCheckpointText(checkpoint, t) ?? checkpoint;
-                    const isCurrent = currentSnapshot?.recursionCheckpoint === checkpoint;
-                    const isVisitPoint = guideVisitMarkerLabel === checkpoint;
-                    return (
-                      <span
-                        key={checkpoint}
-                        className={`tree-recursion-point${isCurrent ? ' tree-recursion-point-current' : ''}${isVisitPoint ? ' tree-recursion-point-visit' : ''}`}
-                      >
-                        <strong>{checkpoint}</strong>
-                        <span>{pointText}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              ) : null}
-
               <div className={`tree-recursion-grid${isLevelorderMode ? ' tree-recursion-grid-levelorder' : ''}`}>
                 <div className="tree-recursion-card">
                   <div className="tree-recursion-card-head">
                     <span>{algorithmCodeTitle}</span>
-                    <span className="tree-recursion-card-note">{algorithmCodeNote}</span>
+                    <span className="tree-recursion-card-note">{algorithmVisitHint}</span>
                   </div>
                   <ol className="tree-recursion-code-list">
                     {algorithmCodeLines.map((item) => (
@@ -3803,13 +3808,15 @@ export function BinaryTreeTraversalPage() {
                               key={`${entry.nodeIndex}-${entry.depth}`}
                               className={`tree-recursion-stack-item${isCurrentFrame ? ' tree-recursion-stack-item-current' : ''}`}
                             >
-                              <span className="tree-recursion-stack-depth">
-                                {t('module.t01.recursion.stack.depth')} {entry.depth}
-                              </span>
-                              <span className="tree-recursion-stack-call">
-                                traverse({formatDisplayValue(entry.value)})
-                                <span className="tree-recursion-stack-index">#{entry.nodeIndex}</span>
-                              </span>
+                              <div className="tree-recursion-stack-row">
+                                <span className="tree-recursion-stack-depth">
+                                  {t('module.t01.recursion.stack.depth')} {entry.depth}
+                                </span>
+                                <span className="tree-recursion-stack-call">
+                                  traverse({formatDisplayValue(entry.value)})
+                                  <span className="tree-recursion-stack-index">#{entry.nodeIndex}</span>
+                                </span>
+                              </div>
                               {isCurrentFrame ? (
                                 <span className="tree-recursion-stack-current">{t('module.t01.recursion.stack.current')}</span>
                               ) : null}
@@ -3842,20 +3849,6 @@ export function BinaryTreeTraversalPage() {
         </div>
       ) : null}
 
-      <div className="pseudocode-block">
-        <h3>{t('module.s01.pseudocode')}</h3>
-        <ol>
-          <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.t01.code.line1')}</li>
-          <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.t01.code.line2')}</li>
-          <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.t01.code.line3')}</li>
-          <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.t01.code.line4')}</li>
-          <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.t01.code.line5')}</li>
-          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.t01.code.line6')}</li>
-          <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.t01.code.line7')}</li>
-          <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.t01.code.line8')}</li>
-          <li className={currentSnapshot?.codeLines.includes(9) ? 'code-active' : ''}>{t('module.t01.code.line9')}</li>
-        </ol>
-      </div>
     </section>
   );
 }

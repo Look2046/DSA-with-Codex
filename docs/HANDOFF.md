@@ -2,6 +2,303 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-03-29 (T-01 single-stage production shell spike)
+
+### Today Done
+- Moved the `T-01` production page away from the old stacked-toolbar shell and into a first-pass single-stage layout in `src/pages/modules/BinaryTreeTraversalPage.tsx`.
+- Landed the first real-page implementation of the new organization principle:
+  - persistent UI reduced to a thin micro header
+  - controls moved into a left edge drawer
+  - step / sequence / pseudocode / legend moved into a right context sheet
+  - playback controls moved into a thin bottom transport strip
+  - the tree animation area now expands and contracts based on whether the edge layers are open
+- Added new workspace-specific styling in `src/index.css` and minimal i18n copy in `src/i18n/translations.ts`.
+- Captured a real rendered browser artifact of the new default state from the production route:
+  - `output/playwright/t01-round12-live-default.png`
+- Applied the first user-feedback refinement pass directly on the production shell:
+  - left control drawer now overlays the stage instead of squeezing the drawing area
+  - output sequence and legend moved into the animation area corners
+  - duplicate top-level title / step emphasis removed from the shell itself
+  - right-side controls collapsed into vertical edge tabs for `步骤 / 伪代码 / 算法窗`
+  - shell height tightened so the full tree + transport fit inside one desktop viewport more reliably
+- Applied a follow-up sequence cleanup pass:
+  - removed the top-left in-stage output-sequence panel entirely
+  - removed the explanatory transport hint text
+  - bottom transport sequence now renders the full output order instead of truncating to the latest three items
+- Applied a stage-embedded meta pass after user feedback:
+  - moved traversal mode / current value / tree kind / label mode / status chips out of the shell header
+  - embedded those chips directly inside the animation stage at the top-left corner
+  - reduced the outer stage top offset so the tree keeps more vertical room after the chip row moved inward
+- Applied a header compression pass after user feedback:
+  - converted the page title + description area into one horizontal intro row instead of a stacked block
+  - reduced the desktop shell height offset so more viewport height is returned to the tree stage
+- Applied an adaptive stage occupancy pass after user feedback:
+  - let `T-01` break out of the shared `1200px` app-main width on large desktop screens so the workspace can use near-full viewport width
+  - expanded node x-placement from the old conservative level formula to a wider edge-aware spread
+  - changed the vertical level-step calculation so the last visible node row sits much closer to the bottom of the stage instead of reserving an extra empty row
+  - rebalanced the final bottom depth so leaves no longer disappear under the transport strip while still using more bottom space than before
+- Applied a follow-up asymmetry pass after user feedback:
+  - removed the in-stage legend block entirely
+  - shifted the tree layout further right so the left side no longer feels over-compressed by the controls tab
+  - pulled the bottom row slightly back up after the stronger right/down expansion so leaf nodes stay readable above the transport bar
+- Applied a transport integration pass after user feedback:
+  - confirmed the old "bottom plate" was real: the animation surface previously stopped early and reserved a separate bottom band for transport
+  - moved the transport into the stage as an overlay instead of letting it occupy its own dedicated shelf
+  - expanded the stage surface downward (`bottom: 64px -> 18px`) and softened the transport into a lighter floating strip
+  - nudged the tree further right while keeping the lower node row readable above the transport
+- Applied a transport breakup pass after user feedback:
+  - confirmed the first overlay pass still read like a full-width bottom plate because the transport itself remained a continuous strip
+  - split transport into two compact floating groups instead of one full-width band
+  - pushed the tree lower again once the transport stopped occupying the entire bottom edge
+  - refreshed the browser checkpoint at `output/playwright/t01-round12-live-v14-floating-transport.png`
+- Applied a shell-removal pass after user feedback:
+  - confirmed the larger frame the user meant was the outer workspace shell rather than the transport overlay
+  - expanded `T-01` to a stronger full-width breakout on large screens
+  - removed the outer shell's visible border/background/shadow so the only visible main frame is the stage itself
+  - stretched the stage to fill the shell bounds instead of keeping a second inset margin inside that outer frame
+  - refreshed the browser checkpoint at `output/playwright/t01-round12-live-v15-shell-removed.png`
+- Fixed the edge-tab interaction regression after user feedback:
+  - reproduced the failure in Playwright against the real `T-01` route
+  - confirmed `控制` already opened but `步骤` failed specifically when it matched the default current tab
+  - traced the root cause to `handleContextTabSelect` coupling a `showContextSheet` side effect to `setContextTab`'s updater, which could bail out when the next tab equaled the current tab
+  - rewrote the handler to compute the open/close intent from current render state first, then update `contextTab` and `showContextSheet` separately
+  - re-verified in browser that `控制` drawer, `步骤`, `伪代码`, and `算法图` now all reveal real content
+- Applied a side-tab simplification pass after user feedback:
+  - removed the `伪代码` edge tab from the production shell entirely
+  - kept the right context sheet focused on `步骤` only, while retaining pseudocode inside the floating algorithm window
+  - renamed the Chinese algorithm edge label from `算法窗` to `算法`
+  - removed the 180-degree rotation on vertical edge tabs and switched to upright vertical text so the Chinese labels are no longer upside down
+  - re-verified in Playwright that the visible edge tabs are now `控制 / 步骤 / 算法`, `步骤` still opens its sheet, and `算法` still opens the floating algorithm window
+- Applied an algorithm-window trim pass after user feedback:
+  - removed the subtitle line under the algorithm window title
+  - removed the single-step usage tip block entirely
+  - removed the `当前算法阶段` status block entirely
+  - removed the recursive `1 / 2 / 3` checkpoint explanation pills entirely
+  - replaced the old dynamic code-note summary with a much shorter visit-timing note such as `在首次进入节点时访问。`
+  - collapsed each recursion stack item so `深度 N` and `traverse(...)` now sit on the same row
+  - re-verified in Playwright that the trimmed window still opens correctly and the stack row now renders as a single flex row once frames exist
+- Captured refreshed browser artifact after the refinement pass:
+  - `output/playwright/t01-round12-live-v2-default.png`
+  - `output/playwright/t01-round12-live-v3-default.png`
+  - `output/playwright/t01-round12-live-v4-stage-meta.png`
+  - `output/playwright/t01-round12-live-v5-horizontal-header.png`
+  - `output/playwright/t01-round12-live-v9-adaptive-stage-balanced.png`
+  - `output/playwright/t01-round12-live-v11-no-legend-fresh-preview.png`
+- Re-ran the full local quality gate successfully after the shell change:
+  - `npm run check`
+
+### Current State
+- `T-01` is no longer just prototype-only; the new shell idea is now visible in the real page.
+- The current implementation defaults to a stage-first view with both edge layers collapsed.
+- Edge-tab interactions are working again in the production route:
+  - `控制` reveals the left drawer
+  - `步骤` reveals the step context sheet even from the default `step` tab
+  - the right edge is simplified to `步骤 / 算法`
+  - `算法` opens the floating algorithm window
+- The algorithm window is now visibly leaner:
+  - header subtitle / tip / status block / checkpoint pills are all removed
+  - the code panel keeps only a concise visit-timing note
+  - recursion stack entries now use a denser single-row layout
+- The first browser artifact shows the intended priority shift is working, but this is still a spike-quality pass:
+  - control tab affordance likely needs another refinement pass
+  - the in-stage meta / legend density may need one more spacing pass after more user review
+  - mobile/tablet fallback for the new overlay-first shell still needs a dedicated pass
+- `T-02` has not been migrated to the same shell yet.
+
+### Next Step
+- Review the real `T-01` screenshot with the user and decide whether the new shell principle is correct before polishing details.
+- If the direction is accepted, next implementation tasks are:
+  - refine the collapsed/expanded affordance of the left control drawer
+  - refine the right context sheet density and decide whether one tab should stay visible by default
+  - align `T-02` to the same stage-first shell after `T-01` stabilizes
+
+## 2026-03-28 (T-01 module workspace handoff before Codex restart)
+
+### Today Done
+- Continued `T-01` module workspace design exploration without touching production page code.
+- Added prototype rounds through `round8`, focusing on alternative component patterns for the top control area and the in-canvas playback area.
+- Added `round9` convergence prototype for the recommended `T-01` main workspace direction:
+  - slim hybrid top toolbar
+  - lighter glass-rail visual treatment
+  - in-canvas transport strip
+  - right-side narrow inspector
+  - floating algorithm window kept as a separate depth layer
+- Repaired the mixed Windows/WSL frontend runtime environment:
+  - added direct `nvm` loading to `/home/haoyu/.profile` so `wsl bash -lc` resolves WSL-native `node/npm/npx`
+  - reinstalled repo dependencies with WSL-native `npm ci`
+  - verified `playwright` import now resolves correctly in WSL
+  - verified headless Firefox launch works in WSL
+  - verified `docs/design-prototypes/render-t01-workspace-round9.mjs` now renders successfully in WSL
+  - re-ran `npm run check` successfully in WSL-native environment
+- Current explored component directions include:
+  - `command bar + scrubber`
+  - `accordion summary + stepper`
+  - `tool tabs + transport`
+- Installed the official curated Codex skills locally so the next session can use built-in frontend / figma / playwright workflows instead of relying only on ad-hoc tool orchestration.
+- Added `round10` as a deliberate reset instead of another refinement pass. This version abandons the previous "toolbar-first workspace shell" and explores a more editorial teaching-board composition:
+  - left-side director rail instead of a traditional top-heavy control stack
+  - oversized poster-like traversal stage with stronger typography and negative space
+  - right-side dossier / annotation column instead of a generic inspector card stack
+  - tape-style bottom transport and sequence strip
+  - warm print-editorial palette rather than glassy app chrome
+- Added `round11` as a compact-control pass on top of the editorial direction:
+  - shrank the left column from a full "director rail" into a narrow control strip
+  - replaced multi-panel grouping with dropdowns plus compact segmented pills
+  - removed category-heavy visual treatment so the stage regains priority
+  - kept the editorial stage / dossier structure intact while reducing chrome cost
+- Added `round12` as a structural reset inspired by the "animation first, everything else on demand" principle:
+  - abandoned permanent three-column layout in favor of one large stage
+  - reduced the persistent top area to a micro header only
+  - moved controls into a left edge drawer instead of a reserved layout column
+  - moved explanation / sequence / legend into a right context sheet instead of a permanent inspector
+  - kept the bottom transport as a thin edge strip so the canvas remains dominant
+
+### Current State
+- Design work is still in the prototype comparison phase; no final component pattern has been locked yet.
+- `round9` is the first convergence prototype rather than another branch exploration. It visualizes the recommended combined direction (`round6` structure + lighter `glass` treatment).
+- `round10` is the first intentionally non-derivative concept. It should be treated as a fresh visual-language candidate rather than an iteration of the earlier workspace shell.
+- `round11` is the first usability correction to that new language. It keeps the editorial composition but responds to the critique that the left controls were visually overbuilt for low-text actions.
+- `round12` is the first concept that fully pivots away from the three-region shell. It should be evaluated as a new product-layout principle, not as a skin variation.
+- Repo execution environment is now healthy when commands are run through WSL-native Node (`/home/haoyu/.nvm/versions/node/v24.14.0/bin/node`).
+- Historical issue confirmed: running Windows `node/npm` directly against the `\\wsl$\\...` workspace caused broken package resolution and `.sh` execution friction; avoid that path going forward.
+- The new workspace shell has not been implemented in the production `T-01` page yet.
+- Prototype artifacts are stored under:
+  - `docs/design-prototypes/`
+  - `output/design/`
+- New prototype source:
+  - `docs/design-prototypes/t01-workspace-round9.html`
+  - `docs/design-prototypes/render-t01-workspace-round9.mjs`
+  - `docs/design-prototypes/t01-workspace-round9-wireframe.svg`
+  - `docs/design-prototypes/t01-workspace-round10.html`
+  - `docs/design-prototypes/render-t01-workspace-round10.mjs`
+  - `docs/design-prototypes/t01-workspace-round11.html`
+  - `docs/design-prototypes/render-t01-workspace-round11.mjs`
+  - `docs/design-prototypes/t01-workspace-round12.html`
+  - `docs/design-prototypes/render-t01-workspace-round12.mjs`
+- Generated visual artifact:
+  - `output/design/t01-workspace-round9-glass-hybrid-teaching-desk-wireframe.png`
+  - `output/design/t01-workspace-round9-glass-hybrid-teaching-desk.png`
+  - `output/design/t01-workspace-round10-algorithm-editorial-board.png`
+  - `output/design/t01-workspace-round11-compact-editorial-board.png`
+  - `output/design/t01-workspace-round12-single-stage-edge-drawers.png`
+
+### Environment Note
+- Newly installed curated Codex skills require a Codex restart before they become available in a new session.
+- The most relevant newly installed skills for the next session are expected to be:
+  - `frontend-skill`
+  - `figma`
+  - `figma-use`
+  - `figma-generate-design`
+  - `figma-implement-design`
+  - `playwright`
+  - `playwright-interactive`
+  - `screenshot`
+
+### Next Step
+- After restart, first verify that the newly installed skills are visible in the session.
+- Then compare `round9` against the reset `round10` concept and explicitly choose whether `T-01` should stay as a compact app workspace or pivot into a more editorial teaching-board experience.
+- The newest decision point is now whether `round12` should replace the earlier shell-based directions as the main convergence candidate.
+- If `round12` is favored, the next concrete design decisions are:
+  - whether the left edge drawer should default closed and only peek via a vertical tab
+  - whether the right context sheet should hold only one panel at a time or support stacked mini cards
+  - whether the output sequence should live in the right sheet by default and only echo briefly in the bottom transport
+
+## 2026-03-27 (T-01 module workspace design prototype round 8)
+
+### Today Done
+- Added round 8 as a true component-pattern exploration instead of another visual skin pass.
+- New interaction/component options:
+  - `M. Command Bar + Scrubber`: command-style top bar with a search/command field and a timeline scrubber playback control
+  - `N. Accordion Summary + Stepper`: summary chips plus expandable config groups and an algorithm stepper instead of a media player
+  - `O. Tool Tabs + Transport`: tabbed top tool area with a compact transport strip at the bottom
+- All three keep the same canvas/right-inspector structure so feedback can focus purely on which components fit the product best.
+
+### Current State
+- Prototype source: `docs/design-prototypes/t01-workspace-round8.html`
+- Render script: `docs/design-prototypes/render-t01-workspace-round8.mjs`
+- Next step: render/share the three component variants, pick one structural direction, then fold that choice back into the approved compact workspace shell.
+
+## 2026-03-27 (T-01 module workspace design prototype round 7)
+
+### Today Done
+- Added round 7 style explorations specifically for the visual language of the top control area and in-canvas playback controls.
+- New options:
+  - `J. Glass Rail`: airy translucent toolbar plus minimal glass transport strip
+  - `K. Studio Tabs`: tabbed lecture/workbench toolbar plus compact studio-style transport
+  - `L. Control Console`: darker technical console controls with a small instrument-panel transport
+- Information architecture stays unchanged across all three options so feedback can focus only on visual treatment rather than layout differences.
+
+### Current State
+- Prototype source: `docs/design-prototypes/t01-workspace-round7.html`
+- Render script: `docs/design-prototypes/render-t01-workspace-round7.mjs`
+- Next step: render/share the three styles, let the user pick the preferred visual language, then merge that style back into the chosen compact layout direction.
+
+## 2026-03-27 (T-01 module workspace design prototype round 6)
+
+### Today Done
+- Added round 6 prototype to keep the round 5 hybrid interaction model while reducing the vertical footprint of both the top toolbar and the in-canvas playback dock.
+- Toolbar changes:
+  - title row compressed into a single slim line
+  - hybrid control row keeps dropdowns for low-frequency options and segmented buttons for high-frequency teaching actions, but with smaller paddings and tighter spacing
+- Playback changes:
+  - replaced the chunkier floating dock with a slimmer pill-style transport strip using smaller icon buttons
+
+### Current State
+- Prototype source: `docs/design-prototypes/t01-workspace-round6.html`
+- Render script: `docs/design-prototypes/render-t01-workspace-round6.mjs`
+- Next step: render/share the slim variant, then decide whether to accept it directly or do one more pass to merge status chips into the toolbar.
+
+## 2026-03-27 (T-01 module workspace design prototype round 5)
+
+### Today Done
+- Added a focused round 5 prototype for the preferred hybrid control-bar direction.
+- `H. Hybrid Toolbar` keeps low-frequency configuration (`树形态`, `样例`) as dropdowns while preserving high-frequency teaching actions (`遍历`, `显示`, `速度`) as visible segmented buttons.
+- This round intentionally keeps the round 3/4 stage, in-canvas playback controls, and right-side inspector unchanged so only the top control pattern is being evaluated.
+
+### Current State
+- Prototype source: `docs/design-prototypes/t01-workspace-round5.html`
+- Render script: `docs/design-prototypes/render-t01-workspace-round5.mjs`
+- Next step: render/share the hybrid screenshot, collect approval or one more compactness pass, then move into real `T-01` implementation.
+
+## 2026-03-27 (T-01 module workspace design prototype round 4)
+
+### Today Done
+- Added round 4 prototype comparisons focused only on tightening the top control area of the new module workspace shell.
+- New options:
+  - `F. Compact Segmented Rack`: keeps button visibility but compresses tree/sample/traversal/display/speed into a denser segmented toolbar.
+  - `G. Select-Style Toolbar`: converts the same controls into dropdown-style selectors for a calmer, more product-like top bar.
+- Canvas-first layout, in-canvas player controls, and narrow right-side inspector stay unchanged from round 3 so feedback stays isolated to the control-bar pattern.
+
+### Current State
+- Prototype source: `docs/design-prototypes/t01-workspace-round4.html`
+- Render script: `docs/design-prototypes/render-t01-workspace-round4.mjs`
+- Next step: render both variants, compare with the user, and carry the chosen top-control pattern into the real `T-01` page shell.
+
+## 2026-03-26 (T-01 module workspace design prototype round 2)
+
+### Today Done
+- Added non-production design prototypes for the next `T-01` module workspace direction:
+  - round 1 explored three information-architecture options under `docs/design-prototypes/t01-workspace-round1.html`
+  - round 2 narrowed toward an immersive stage-first layout under `docs/design-prototypes/t01-workspace-round2.html`
+  - exported PNG artifacts to `output/design/` for review and iteration
+- Current preferred direction after user feedback:
+  - maximize the traversal canvas
+  - compress non-essential controls into a thin top ribbon
+  - move playback controls into the canvas as music-player-style icon buttons for a tighter teaching workspace
+
+### Verified locally
+- Playwright-based local prototype rendering completed through an isolated Windows temp clone (used only for rendering because the UNC workspace still lacks a directly importable `playwright` package/runtime path)
+- Exported current review artifacts:
+  - `output/design/t01-workspace-round1-a-command-deck.png`
+  - `output/design/t01-workspace-round1-b-studio-ribbon.png`
+  - `output/design/t01-workspace-round1-c-teaching-desk.png`
+  - `output/design/t01-workspace-round2-d-immersive-canvas.png`
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Working tree status: design prototype files and exported review PNGs are local-only; legacy script mode changes still remain in the working tree
+- Remote: unchanged
+
 ## 2026-03-23 (P8-M3 T-01 level-order root arc clearance tweak)
 
 ### Today Done
