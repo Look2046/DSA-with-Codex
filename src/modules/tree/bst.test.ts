@@ -45,13 +45,25 @@ describe('bst step generation', () => {
 
     expect(collectVisitValues(steps)).toEqual([50, 70, 60, 65]);
     expect(steps.some((step) => step.action === 'found')).toBe(true);
+    expect(steps.at(-1)?.action).toBe('found');
     expect(steps.at(-1)?.outcome).toBe('found');
+  });
+
+  it('ends immediately on not-found without trailing empty frames', () => {
+    const steps = generateBstSteps(BASE_INPUT, 'searchPath', 999);
+
+    expect(collectVisitValues(steps)).toEqual([50, 70, 80]);
+    expect(steps.at(-1)?.action).toBe('notFound');
+    expect(steps.at(-1)?.outcome).toBe('notFound');
+    expect(steps.map((step) => step.action)).not.toContain('operationDone');
+    expect(steps.map((step) => step.action)).not.toContain('completed');
   });
 
   it('inserts new value into bst when target does not exist', () => {
     const steps = generateBstSteps(BASE_INPUT, 'insert', 35);
 
     expect(steps.some((step) => step.action === 'inserted')).toBe(true);
+    expect(steps.at(-1)?.action).toBe('inserted');
     expect(finalValues(steps)).toContain(35);
     expect(steps.at(-1)?.outcome).toBe('inserted');
   });
@@ -60,6 +72,7 @@ describe('bst step generation', () => {
     const steps = generateBstSteps(BASE_INPUT, 'insert', 40);
 
     expect(steps.some((step) => step.action === 'duplicate')).toBe(true);
+    expect(steps.at(-1)?.action).toBe('duplicate');
     expect(finalValues(steps)).toEqual([...BASE_INPUT].sort((left, right) => left - right));
     expect(steps.at(-1)?.outcome).toBe('duplicate');
   });
@@ -80,6 +93,7 @@ describe('bst step generation', () => {
 
     expect(steps.some((step) => step.deleteCase === 'twoChildren')).toBe(true);
     expect(steps.some((step) => step.action === 'successor')).toBe(true);
+    expect(steps.at(-1)?.action).toBe('deleted');
     expect(finalValues(steps)).not.toContain(50);
     expect(finalValues(steps)).toContain(60);
     expect(steps.at(-1)?.outcome).toBe('deleted');

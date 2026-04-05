@@ -82,22 +82,6 @@ function getOutcomeLabel(outcome: BstOutcome, t: ReturnType<typeof useI18n>['t']
   return t('module.t02.outcome.ongoing');
 }
 
-function getHighlightLabel(type: HighlightType, t: ReturnType<typeof useI18n>['t']): string {
-  if (type === 'visiting') {
-    return t('module.t01.legend.visiting');
-  }
-  if (type === 'comparing') {
-    return t('module.s01.highlight.comparing');
-  }
-  if (type === 'matched') {
-    return t('module.sr01.highlight.found');
-  }
-  if (type === 'new-node') {
-    return t('module.t02.legend.newNode');
-  }
-  return t('module.s01.highlight.default');
-}
-
 function formatArrayPreview(values: number[], maxVisible = 24): string {
   if (values.length <= maxVisible) {
     return values.join(', ');
@@ -148,10 +132,6 @@ function getStepDescription(step: BstStep | undefined, t: ReturnType<typeof useI
 
   if (step.action === 'deleted') {
     return t('module.t02.step.deleted');
-  }
-
-  if (step.action === 'operationDone') {
-    return t('module.t02.step.operationDone');
   }
 
   return t('module.t02.step.completed');
@@ -305,6 +285,10 @@ export function BstPage() {
   const currentTargetValue = currentSnapshot?.target ?? activeConfig.target;
   const currentNodeLabel = currentSnapshot?.currentId ?? '-';
   const currentSuccessorLabel = currentSnapshot?.successorId ?? '-';
+  const isDeleteFlow = (currentSnapshot?.operation ?? activeConfig.operation) === 'delete';
+  const showDeleteCase = isDeleteFlow && (currentSnapshot?.deleteCase ?? 'none') !== 'none';
+  const showSuccessor = isDeleteFlow && currentSnapshot?.successorId !== null;
+  const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
   const pathValues = useMemo(
     () =>
       (currentSnapshot?.pathIds ?? [])
@@ -460,14 +444,18 @@ export function BstPage() {
                   <dt>{t('module.t02.meta.current')}</dt>
                   <dd>{currentNodeLabel}</dd>
                 </div>
-                <div>
-                  <dt>{t('module.t02.meta.successor')}</dt>
-                  <dd>{currentSuccessorLabel}</dd>
-                </div>
-                <div>
-                  <dt>{t('module.t02.meta.case')}</dt>
-                  <dd>{currentDeleteCaseLabel}</dd>
-                </div>
+                {showSuccessor ? (
+                  <div>
+                    <dt>{t('module.t02.meta.successor')}</dt>
+                    <dd>{currentSuccessorLabel}</dd>
+                  </div>
+                ) : null}
+                {showDeleteCase ? (
+                  <div>
+                    <dt>{t('module.t02.meta.case')}</dt>
+                    <dd>{currentDeleteCaseLabel}</dd>
+                  </div>
+                ) : null}
                 <div>
                   <dt>{t('module.t02.meta.outcome')}</dt>
                   <dd>{currentOutcomeLabel}</dd>
@@ -554,18 +542,18 @@ export function BstPage() {
           
           <div className="tree-workspace-transport" onClick={(event) => event.stopPropagation()}>
             <div className="tree-workspace-transport-left">
-              <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0}>
+              <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0 || currentStep <= 0}>
                 {t('playback.prev')}
               </button>
               <button
                 type="button"
                 className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
                 onClick={status === 'playing' ? pause : play}
-                disabled={steps.length === 0}
+                disabled={steps.length === 0 || (status !== 'playing' && isAtLastFrame)}
               >
                 {status === 'playing' ? t('playback.pause') : t('playback.play')}
               </button>
-              <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={steps.length === 0}>
+              <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={isAtLastFrame}>
                 {t('playback.next')}
               </button>
               <button type="button" className="tree-workspace-transport-btn" onClick={reset} disabled={steps.length === 0}>
@@ -606,40 +594,6 @@ export function BstPage() {
       </section>
 
       {error && !showStageControls ? <p className="form-error">{error}</p> : null}
-
-      <div className="legend-row tree-workspace-legend-row">
-        <span className="legend-item legend-visiting">{t('module.s01.highlight.comparing')}</span>
-        <span className="legend-item legend-matched">{t('module.sr01.highlight.found')}</span>
-        <span className="legend-item legend-moving">{t('module.t02.legend.newNode')}</span>
-        <span className="legend-item legend-default">{t('module.t02.legend.path')}</span>
-      </div>
-
-      <p>
-        {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? [])
-          .map((entry) => `${entry.index}:${getHighlightLabel(entry.type, t)}`)
-          .join(' | ') || t('module.s01.none')}
-      </p>
-
-      <div className="pseudocode-block">
-        <h3>{t('module.s01.pseudocode')}</h3>
-        <ol>
-          <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.t02.code.line1')}</li>
-          <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.t02.code.line2')}</li>
-          <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.t02.code.line3')}</li>
-          <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.t02.code.line4')}</li>
-          <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.t02.code.line5')}</li>
-          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.t02.code.line6')}</li>
-          <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.t02.code.line7')}</li>
-          <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.t02.code.line8')}</li>
-          <li className={currentSnapshot?.codeLines.includes(9) ? 'code-active' : ''}>{t('module.t02.code.line9')}</li>
-          <li className={currentSnapshot?.codeLines.includes(10) ? 'code-active' : ''}>{t('module.t02.code.line10')}</li>
-          <li className={currentSnapshot?.codeLines.includes(11) ? 'code-active' : ''}>{t('module.t02.code.line11')}</li>
-          <li className={currentSnapshot?.codeLines.includes(12) ? 'code-active' : ''}>{t('module.t02.code.line12')}</li>
-          <li className={currentSnapshot?.codeLines.includes(13) ? 'code-active' : ''}>{t('module.t02.code.line13')}</li>
-          <li className={currentSnapshot?.codeLines.includes(14) ? 'code-active' : ''}>{t('module.t02.code.line14')}</li>
-        </ol>
-      </div>
     </section>
   );
 }

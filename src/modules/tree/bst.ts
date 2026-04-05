@@ -561,51 +561,13 @@ export function generateBstSteps(input: number[], operation: BstOperation, targe
 
   steps.push(createStep(tree, operation, target, 'initial', [1], [], null, null, [], 'none', null, 'ongoing'));
 
-  let outcome: BstOutcome = 'ongoing';
-
   if (operation === 'searchPath') {
-    outcome = runSearchOperation(steps, tree, target);
+    runSearchOperation(steps, tree, target);
   } else if (operation === 'insert') {
-    outcome = runInsertOperation(steps, tree, target);
+    runInsertOperation(steps, tree, target);
   } else {
-    outcome = runDeleteOperation(steps, tree, target);
+    runDeleteOperation(steps, tree, target);
   }
-
-  const lastSnapshot = steps.at(-1);
-
-  steps.push(
-    createStep(
-      tree,
-      operation,
-      target,
-      'operationDone',
-      [14],
-      lastSnapshot?.highlights ?? [],
-      lastSnapshot?.currentId ?? null,
-      null,
-      lastSnapshot?.pathIds ?? [],
-      lastSnapshot?.deleteCase ?? 'none',
-      lastSnapshot?.successorId ?? null,
-      outcome,
-    ),
-  );
-
-  steps.push(
-    createStep(
-      tree,
-      operation,
-      target,
-      'completed',
-      [14],
-      lastSnapshot?.highlights ?? [],
-      lastSnapshot?.currentId ?? null,
-      null,
-      lastSnapshot?.pathIds ?? [],
-      lastSnapshot?.deleteCase ?? 'none',
-      lastSnapshot?.successorId ?? null,
-      outcome,
-    ),
-  );
 
   return steps;
 }
