@@ -2,6 +2,136 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (T-01/T-02 draggable workspace panels + focus avoidance)
+
+### Today Done
+- Added reusable stage-anchored panel drag/avoidance hook in `src/hooks/useStageAnchorPanel.ts`.
+- Updated `T-01` and `T-02` so the left `Controls` panel and right `Step` panel are both draggable while open.
+- Refined the interaction after follow-up feedback so the edge buttons stay pinned in place; only the opened panels move/auto-avoid.
+- Kept the existing accepted workspace shell behavior intact:
+  - clicking empty animation area still collapses both panels
+  - transport clicks still work after panels are moved away
+  - `T-01` algorithm window behavior/style was left unchanged
+- Added automatic panel avoidance against the current animation focus:
+  - `T-01` uses the current traversal node / `enqueueRoot` root focus
+  - `T-02` uses the current BST node / successor focus when available
+- Adjusted the right-side step-sheet positioning rule from fixed `56px` offset to rail-relative positioning so drag/clamp math matches the real DOM layout.
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright against the live local app:
+  - `T-01` controls panel can be dragged away from transport
+  - `T-01` step panel can be dragged
+  - `T-01` panels auto-shift when playback focus moves into their covered region
+  - `T-01` clicking empty stage space still collapses both open panels
+  - `T-02` controls panel can be dragged
+  - `T-02` step panel can be dragged
+  - `T-02` clicking empty stage space still collapses both open panels
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Tree workspace shell now supports movable side panels on both implemented tree pages without breaking the accepted stage-first interaction model.
+- Relevant code changes are isolated to:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - `src/pages/modules/BstPage.tsx`
+  - `src/index.css`
+
+### Next Step
+- If we want to keep polishing this interaction, the next pass should decide whether auto-avoid should also reserve transport space so large drawers do not sit over the bottom playback strip by default.
+- After that, resume the planned `P8-M3` closure path:
+  - verify remaining `T-01` canonical-route parity details if still needed
+  - refresh milestone Playwright acceptance artifacts/report
+  - sync closure docs when tree-track consistency is considered complete
+
+## 2026-04-06 (T-01 panel dismissal + translucent algorithm window)
+
+### Today Done
+- Accepted the current `T-01` production workspace direction after manual review.
+- Updated `/modules/binary-tree` so clicking the animation stage now auto-collapses the left `Controls` drawer and right `Step` sheet.
+- Prevented the in-stage transport controls from accidentally triggering that collapse behavior.
+- Restyled the floating algorithm window to a translucent glass treatment while preserving readable inner cards/chips in both recursive and level-order modes.
+- Aligned `T-02 BST` to the same stage-first workspace language as `T-01`:
+  - moved config/actions into the left on-demand `Controls` drawer
+  - moved runtime detail into the right `Step` sheet
+  - moved playback into the in-stage floating transport
+- Fixed BST timeline tail semantics:
+  - removed extra `operationDone` / `completed` tail frames after the real result step
+  - not-found search now ends on the `notFound` step with corrected total-step count
+  - final-frame transport now disables `Play` / `Next` instead of allowing no-op clicks
+- Removed nonessential below-stage clutter from `T-02`:
+  - removed legend block
+  - removed highlights text dump
+  - removed pseudocode panel
+- Narrowed `Delete case` / `Successor` metadata in the `Step` sheet so they only appear during delete flows when relevant.
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified the key interaction in browser automation:
+  - opening `Controls` + `Step`, then clicking the stage collapses both panels
+  - computed style confirms the algorithm window now renders with translucent background + blur
+  - BST not-found flow now ends at `4/4` with `Status: Completed`, `Outcome: Not found`, and disabled `Next`
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- `T-01` main workspace is now acceptable for the current milestone direction.
+- `T-02` now matches the accepted tree workspace direction closely enough for ongoing `P8-M3` consistency work.
+- The validated code changes are ready to be isolated as focused commits without mixing the older launcher/design/artifact dirt into the same change set.
+
+### Next Step
+- Then finish the remaining `P8-M3` closure work:
+  - browser-verify canonical preorder route parity between `/modules/binary-tree` and `/playground/binary-tree-canvas`
+  - refresh full `p8m3-*` Playwright acceptance artifacts/report
+  - sync closure docs when tree-track consistency is complete
+
+## 2026-03-31 (manual savepoint)
+
+### Today Done
+- Saved the current repo state as a handoff-only checkpoint without touching implementation code.
+- Re-read the project source-of-truth docs and confirmed the active branch is still `feat/p8-m3-route-rules-spike`.
+- Confirmed the current mainline focus is still `P8-M3` tree consistency + acceptance closure.
+- Confirmed the Windows helper launcher from the previous session is still uncommitted:
+  - `start-project-wsl.bat`
+  - current intended behavior remains WSL-native startup through `npm run dev -- --host 0.0.0.0 --port 5173`
+- Captured the current working tree inventory for the next session:
+  - modified docs/script files: `docs/HANDOFF.md`, `scripts/check-doc-links.sh`, `scripts/playwright-cli.sh`
+  - untracked design/artifact folders: `docs/design-prototypes/`, `output/design/`
+  - untracked Playwright/tree investigation artifacts under `output/playwright/`
+  - untracked launcher file: `start-project-wsl.bat`
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Milestone state: `P8-M3` still in progress
+- Repo state is intentionally dirty; do not clean or revert blindly in the next session.
+- The most recent implementation focus remains `T-01` tree traversal shell / trace / algorithm-window polish, but the next coding session should first decide how to handle the mixed dirty tree:
+  - keep only the files needed for the next P8-M3 task
+  - or split launcher/docs work from tree-visualization work before deeper implementation continues
+
+### Next Step
+- First inspect the dirty tree and separate “keep for P8-M3” from “artifact/history only”.
+- Then resume the planned P8-M3 path:
+  - verify `/modules/binary-tree` against `/playground/binary-tree-canvas`
+  - align `T-01` / `T-02` controls, legend semantics, and status layout
+  - refresh acceptance artifacts and sync closure docs when the tree track is ready
+- If the launcher should be kept, commit it as a small isolated helper change instead of mixing it into the next tree-visualization patch.
+
+## 2026-03-30 (Windows one-click WSL launcher)
+
+### Today Done
+- Added a repo-root Windows batch launcher `start-project-wsl.bat`.
+- The launcher starts the project through WSL-native Node/npm instead of Windows Node so it stays aligned with the repo decision to avoid UNC-path runtime issues.
+- The script now:
+  - opens the repo at `/home/haoyu/data-structure-algorithm-visualizor`
+  - auto-installs dependencies if `node_modules` is missing
+  - runs `npm run dev -- --host 0.0.0.0 --port 5173`
+  - prints the current WSL IP so Windows can open the reachable URL directly
+  - keeps the console open if startup fails so the error is visible
+
+### Current State
+- User can now double-click `start-project-wsl.bat` from Windows to start the local dev server for manual testing.
+- This is intended for local project startup only; quality gates still remain `npm run check`.
+
+### Next Step
+- If needed later, add a second one-click batch file for `npm run check` or Playwright acceptance runs so manual test startup and validation are separated cleanly.
+
 ## 2026-03-29 (T-01 single-stage production shell spike)
 
 ### Today Done

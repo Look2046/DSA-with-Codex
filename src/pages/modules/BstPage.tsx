@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
+import { createFocusCollisionRect, useStageAnchorPanel } from '../../hooks/useStageAnchorPanel';
 import { useI18n } from '../../i18n/useI18n';
 import { buildBstTimelineFromInput } from '../../modules/tree/bstTimelineAdapter';
 import type { BstDeleteCase, BstOperation, BstOutcome, BstStep } from '../../modules/tree/bst';
@@ -8,10 +9,28 @@ import type { HighlightType, PlaybackStatus } from '../../types/animation';
 const DEFAULT_DATASET = [50, 30, 70, 20, 40, 60, 80, 65];
 const MIN_SIZE = 5;
 const MAX_SIZE = 15;
+const DEFAULT_STAGE_SIZE = { width: 1200, height: 460 };
+const WORKSPACE_PANEL_TOP = 118;
+const WORKSPACE_PANEL_SIDE_MARGIN = 18;
+const WORKSPACE_PANEL_GAP = 8;
+const CONTROLS_TAB_FALLBACK_SIZE = { width: 48, height: 96 };
+const CONTROLS_PANEL_FALLBACK_SIZE = { width: 226, height: 412 };
+const CONTEXT_RAIL_FALLBACK_SIZE = { width: 54, height: 92 };
+const CONTEXT_PANEL_FALLBACK_SIZE = { width: 286, height: 372 };
 
 type BstOperationConfig = {
   operation: BstOperation;
   target: number;
+};
+
+type StageSize = {
+  width: number;
+  height: number;
+};
+
+type StagePoint = {
+  x: number;
+  y: number;
 };
 
 function createRandomUniqueDataset(size: number): number[] {
@@ -137,8 +156,34 @@ function getStepDescription(step: BstStep | undefined, t: ReturnType<typeof useI
   return t('module.t02.step.completed');
 }
 
+function getControlsPanelDefaultAnchorPosition(
+  _stageSize: StageSize,
+  anchorSize: StageSize,
+): StagePoint {
+  return {
+    x: WORKSPACE_PANEL_SIDE_MARGIN,
+    y: WORKSPACE_PANEL_TOP + anchorSize.height + WORKSPACE_PANEL_GAP,
+  };
+}
+
+function getContextPanelDefaultAnchorPosition(
+  stageSize: StageSize,
+  anchorSize: StageSize,
+  panelSize: StageSize,
+): StagePoint {
+  return {
+    x: stageSize.width - WORKSPACE_PANEL_SIDE_MARGIN - anchorSize.width - WORKSPACE_PANEL_GAP - panelSize.width,
+    y: WORKSPACE_PANEL_TOP,
+  };
+}
+
 export function BstPage() {
   const { t } = useI18n();
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const controlsTabRef = useRef<HTMLButtonElement | null>(null);
+  const controlsPanelRef = useRef<HTMLDivElement | null>(null);
+  const contextRailRef = useRef<HTMLDivElement | null>(null);
+  const contextPanelRef = useRef<HTMLElement | null>(null);
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_DATASET.length);
   const [seedData, setSeedData] = useState<number[]>(DEFAULT_DATASET);
@@ -147,6 +192,7 @@ export function BstPage() {
   const [error, setError] = useState('');
   const [showStageControls, setShowStageControls] = useState(false);
   const [showContextSheet, setShowContextSheet] = useState(false);
+  const [stageSize, setStageSize] = useState<StageSize>(DEFAULT_STAGE_SIZE);
   const [activeConfig, setActiveConfig] = useState<BstOperationConfig>({
     operation: 'searchPath',
     target: DEFAULT_DATASET[0] ?? 0,
@@ -166,6 +212,38 @@ export function BstPage() {
     setTotalFrames(steps.length);
     reset();
   }, [reset, setTotalFrames, steps.length]);
+
+  useEffect(() => {
+    const stageElement = stageRef.current;
+    if (!stageElement) {
+      return;
+    }
+
+    const updateSize = () => {
+      const rect = stageElement.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) {
+        return;
+      }
+
+      setStageSize((previous) =>
+        Math.abs(previous.width - rect.width) < 0.5 && Math.abs(previous.height - rect.height) < 0.5
+          ? previous
+          : {
+            width: rect.width,
+            height: rect.height,
+          },
+      );
+    };
+
+    updateSize();
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => updateSize());
+    observer.observe(stageElement);
+    return () => observer.disconnect();
+  }, []);
 
   const nodeMap = useMemo(
     () => new Map((currentSnapshot?.treeState ?? []).map((node) => [node.id, node])),
@@ -299,6 +377,38 @@ export function BstPage() {
   const stepDetailText = `${currentOperationLabel} · ${t('module.t02.meta.target')}: ${currentTargetValue} · ${
     t('module.t02.meta.outcome')
   }: ${currentOutcomeLabel}`;
+  const floatingPanelsEnabled = stageSize.width >= 960;
+  const focusNodeId = currentSnapshot?.currentId ?? currentSnapshot?.successorId ?? null;
+  const focusPoint = useMemo(
+    () => (focusNodeId === null ? null : (positionMap.get(focusNodeId) ?? null)),
+    [focusNodeId, positionMap],
+  );
+  const focusCollisionRect = useMemo(
+    () => createFocusCollisionRect(focusPoint, stageSize),
+    [focusPoint, stageSize],
+  );
+  const controlsPanelAnchor = useStageAnchorPanel({
+    stageRef,
+    anchorRef: controlsTabRef,
+    panelRef: controlsPanelRef,
+    isOpen: showStageControls,
+    defaultPanelPosition: getControlsPanelDefaultAnchorPosition,
+    defaultAnchorSize: CONTROLS_TAB_FALLBACK_SIZE,
+    defaultPanelSize: CONTROLS_PANEL_FALLBACK_SIZE,
+    collisionTarget: focusCollisionRect,
+    enabled: floatingPanelsEnabled,
+  });
+  const contextPanelAnchor = useStageAnchorPanel({
+    stageRef,
+    anchorRef: contextRailRef,
+    panelRef: contextPanelRef,
+    isOpen: showContextSheet,
+    defaultPanelPosition: getContextPanelDefaultAnchorPosition,
+    defaultAnchorSize: CONTEXT_RAIL_FALLBACK_SIZE,
+    defaultPanelSize: CONTEXT_PANEL_FALLBACK_SIZE,
+    collisionTarget: focusCollisionRect,
+    enabled: floatingPanelsEnabled,
+  });
 
   return (
     <section className="array-page tree-page bst-page">
@@ -309,18 +419,31 @@ export function BstPage() {
 
       <section className="tree-workspace-shell">
         <div className="tree-workspace-controls-anchor">
-          <button
-            type="button"
-            className="tree-workspace-edge-tab"
-            onClick={() => setShowStageControls((previous) => !previous)}
-            aria-expanded={showStageControls}
-          >
-            {t('module.t01.workspace.controls')}
-          </button>
+          <div className="tree-workspace-controls-tab-pin">
+            <button
+              ref={controlsTabRef}
+              type="button"
+              className="tree-workspace-edge-tab"
+              onClick={() => setShowStageControls((previous) => !previous)}
+              aria-expanded={showStageControls}
+            >
+              {t('module.t01.workspace.controls')}
+            </button>
+          </div>
 
           {showStageControls ? (
-            <div className="tree-workspace-drawer" aria-label={t('module.t01.workspace.controls')}>
-              <div className="tree-workspace-drawer-head">
+            <div
+              ref={controlsPanelRef}
+              className="tree-workspace-drawer"
+              style={controlsPanelAnchor.panelStyle}
+              aria-label={t('module.t01.workspace.controls')}
+            >
+              <div
+                className={`tree-workspace-drawer-head tree-workspace-panel-drag-handle${
+                  controlsPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+                }`}
+                onPointerDown={controlsPanelAnchor.startDrag}
+              >
                 <strong>{t('module.t01.workspace.controls')}</strong>
                 <span>{t('module.t01.workspace.onDemand')}</span>
               </div>
@@ -407,7 +530,7 @@ export function BstPage() {
         </div>
 
         <div className="tree-workspace-context-anchor">
-          <div className="tree-workspace-context-rail">
+          <div ref={contextRailRef} className="tree-workspace-context-rail">
             <button
               type="button"
               className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
@@ -421,8 +544,19 @@ export function BstPage() {
           </div>
 
           {showContextSheet ? (
-            <aside className="tree-workspace-context-sheet tree-workspace-context-sheet-step">
-              <strong className="tree-workspace-step-label">{t('playback.step')}</strong>
+            <aside
+              ref={contextPanelRef}
+              className="tree-workspace-context-sheet tree-workspace-context-sheet-step"
+              style={contextPanelAnchor.panelStyle}
+            >
+              <div
+                className={`tree-workspace-panel-drag-handle${
+                  contextPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+                }`}
+                onPointerDown={contextPanelAnchor.startDrag}
+              >
+                <strong className="tree-workspace-step-label">{t('playback.step')}</strong>
+              </div>
               <div className="tree-workspace-step-copy">
                 <h3>{currentStepDescription}</h3>
                 <p>{stepDetailText}</p>
@@ -465,7 +599,7 @@ export function BstPage() {
           ) : null}
         </div>
 
-        <div className="tree-stage tree-stage-visual bst-stage" aria-label="bst-stage" onClick={collapseWorkspacePanels}>
+        <div ref={stageRef} className="tree-stage tree-stage-visual bst-stage" aria-label="bst-stage" onClick={collapseWorkspacePanels}>
           <div className="tree-workspace-stage-meta">
             <span className="tree-workspace-pill">{currentOperationLabel}</span>
             <span className="tree-workspace-pill tree-workspace-pill-active">

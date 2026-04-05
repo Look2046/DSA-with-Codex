@@ -1230,18 +1230,23 @@ body {
 .tree-workspace-controls-anchor,
 .tree-workspace-context-anchor {
   position: absolute;
+  inset: 0;
   z-index: 10;
+  pointer-events: none;
 }
 
-.tree-workspace-controls-anchor {
+.tree-workspace-controls-tab-pin {
+  position: absolute;
   top: 118px;
   left: 18px;
+  pointer-events: auto;
 }
 
-.tree-workspace-context-anchor {
+.tree-workspace-context-rail {
+  position: absolute;
   top: 118px;
   right: 18px;
-  width: auto;
+  pointer-events: auto;
 }
 
 .tree-workspace-edge-tab {
@@ -1279,6 +1284,7 @@ body {
   border: 1px solid rgba(31, 94, 156, 0.1);
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 18px 34px rgba(31, 96, 163, 0.12);
+  pointer-events: auto;
 }
 
 .tree-workspace-drawer {
@@ -1293,6 +1299,16 @@ body {
   justify-content: space-between;
   gap: 12px;
   align-items: baseline;
+}
+
+.tree-workspace-panel-drag-handle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.tree-workspace-panel-dragging {
+  cursor: grabbing;
 }
 
 .tree-workspace-drawer-head strong,
@@ -1397,7 +1413,7 @@ body {
 .tree-workspace-context-sheet {
   position: absolute;
   top: 0;
-  right: 56px;
+  right: calc(100% + 8px);
   width: 286px;
   padding: 16px;
   display: grid;
@@ -3303,14 +3319,22 @@ body {
 
   .tree-workspace-context-anchor,
   .tree-workspace-controls-anchor {
+    inset: auto;
     margin: 0 14px 12px;
     max-width: none;
+    pointer-events: auto;
     width: auto;
   }
 
   .tree-workspace-controls-anchor {
     display: grid;
     gap: 8px;
+  }
+
+  .tree-workspace-controls-tab-pin,
+  .tree-workspace-context-rail {
+    position: static;
+    pointer-events: auto;
   }
 
   .tree-workspace-edge-tab {

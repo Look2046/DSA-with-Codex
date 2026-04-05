@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
+import { createFocusCollisionRect, useStageAnchorPanel } from '../../hooks/useStageAnchorPanel';
 import { useI18n } from '../../i18n/useI18n';
 import {
   buildBinaryTreeTraversalTimelineFromInput,
@@ -189,6 +190,13 @@ const DEFAULT_PAGE_SPEED_MS = 1000;
 const TRACE_STEP_DRAW_MIN_MS = 750;
 const TRACE_STEP_DRAW_MAX_MS = 1500;
 const SHOW_LEGACY_GUIDE_OVERLAY = false;
+const WORKSPACE_PANEL_TOP = 118;
+const WORKSPACE_PANEL_SIDE_MARGIN = 18;
+const WORKSPACE_PANEL_GAP = 8;
+const CONTROLS_TAB_FALLBACK_SIZE = { width: 48, height: 96 };
+const CONTROLS_PANEL_FALLBACK_SIZE = { width: 226, height: 432 };
+const CONTEXT_RAIL_FALLBACK_SIZE = { width: 54, height: 152 };
+const CONTEXT_PANEL_FALLBACK_SIZE = { width: 286, height: 372 };
 
 function createShuffledNodeValues(size: number): number[] {
   const poolSize = Math.max(99, size);
@@ -2589,9 +2597,54 @@ function getLevelorderNewQueueNodeIndices(step: BinaryTreeTraversalStep | undefi
   return [step.currentIndex * 2 + 1, step.currentIndex * 2 + 2].filter((index) => hasTreeNode(step.treeState, index));
 }
 
+function getControlsPanelDefaultAnchorPosition(
+  _stageSize: ViewportSize,
+  anchorSize: ViewportSize,
+): NodePoint {
+  return {
+    x: WORKSPACE_PANEL_SIDE_MARGIN,
+    y: WORKSPACE_PANEL_TOP + anchorSize.height + WORKSPACE_PANEL_GAP,
+  };
+}
+
+function getContextPanelDefaultAnchorPosition(
+  stageSize: ViewportSize,
+  anchorSize: ViewportSize,
+  panelSize: ViewportSize,
+): NodePoint {
+  return {
+    x: stageSize.width - WORKSPACE_PANEL_SIDE_MARGIN - anchorSize.width - WORKSPACE_PANEL_GAP - panelSize.width,
+    y: WORKSPACE_PANEL_TOP,
+  };
+}
+
+function getTraversalFocusPoint(
+  step: BinaryTreeTraversalStep | undefined,
+  nodePositions: NodePoint[],
+): NodePoint | null {
+  if (!step) {
+    return null;
+  }
+
+  if (step.currentIndex !== null && step.currentIndex !== undefined) {
+    return nodePositions[step.currentIndex] ?? null;
+  }
+
+  if (step.action === 'enqueueRoot') {
+    const rootIndex = step.queueState[0];
+    return rootIndex === undefined ? null : (nodePositions[rootIndex] ?? null);
+  }
+
+  return null;
+}
+
 export function BinaryTreeTraversalPage() {
   const { t } = useI18n();
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const controlsTabRef = useRef<HTMLButtonElement | null>(null);
+  const controlsPanelRef = useRef<HTMLDivElement | null>(null);
+  const contextRailRef = useRef<HTMLDivElement | null>(null);
+  const contextPanelRef = useRef<HTMLElement | null>(null);
   const routeOrderIdPrefix = useId().replace(/:/g, '');
   const initialViewport = useMemo(() => getViewportSize(), []);
 
@@ -3226,6 +3279,37 @@ export function BinaryTreeTraversalPage() {
   const stepSummaryText = isLevelorderMode
     ? levelorderActionText
     : getStepDescription(currentSnapshot, t, (value) => formatDisplayValue(value));
+  const floatingPanelsEnabled = viewportSize.width >= 960;
+  const currentFocusPoint = useMemo(
+    () => getTraversalFocusPoint(currentSnapshot, nodePositions),
+    [currentSnapshot, nodePositions],
+  );
+  const currentFocusCollisionRect = useMemo(
+    () => createFocusCollisionRect(currentFocusPoint, stageSize),
+    [currentFocusPoint, stageSize],
+  );
+  const controlsPanelAnchor = useStageAnchorPanel({
+    stageRef,
+    anchorRef: controlsTabRef,
+    panelRef: controlsPanelRef,
+    isOpen: showStageControls,
+    defaultPanelPosition: getControlsPanelDefaultAnchorPosition,
+    defaultAnchorSize: CONTROLS_TAB_FALLBACK_SIZE,
+    defaultPanelSize: CONTROLS_PANEL_FALLBACK_SIZE,
+    collisionTarget: currentFocusCollisionRect,
+    enabled: floatingPanelsEnabled,
+  });
+  const contextPanelAnchor = useStageAnchorPanel({
+    stageRef,
+    anchorRef: contextRailRef,
+    panelRef: contextPanelRef,
+    isOpen: showContextSheet,
+    defaultPanelPosition: getContextPanelDefaultAnchorPosition,
+    defaultAnchorSize: CONTEXT_RAIL_FALLBACK_SIZE,
+    defaultPanelSize: CONTEXT_PANEL_FALLBACK_SIZE,
+    collisionTarget: currentFocusCollisionRect,
+    enabled: floatingPanelsEnabled,
+  });
 
   return (
     <section className="array-page tree-page">
@@ -3236,18 +3320,31 @@ export function BinaryTreeTraversalPage() {
 
       <section className="tree-workspace-shell">
         <div className="tree-workspace-controls-anchor">
-          <button
-            type="button"
-            className="tree-workspace-edge-tab"
-            onClick={() => setShowStageControls((previous) => !previous)}
-            aria-expanded={showStageControls}
-          >
-            {t('module.t01.workspace.controls')}
-          </button>
+          <div className="tree-workspace-controls-tab-pin">
+            <button
+              ref={controlsTabRef}
+              type="button"
+              className="tree-workspace-edge-tab"
+              onClick={() => setShowStageControls((previous) => !previous)}
+              aria-expanded={showStageControls}
+            >
+              {t('module.t01.workspace.controls')}
+            </button>
+          </div>
 
           {showStageControls ? (
-            <div className="tree-workspace-drawer" aria-label={t('module.t01.workspace.controls')}>
-              <div className="tree-workspace-drawer-head">
+            <div
+              ref={controlsPanelRef}
+              className="tree-workspace-drawer"
+              style={controlsPanelAnchor.panelStyle}
+              aria-label={t('module.t01.workspace.controls')}
+            >
+              <div
+                className={`tree-workspace-drawer-head tree-workspace-panel-drag-handle${
+                  controlsPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+                }`}
+                onPointerDown={controlsPanelAnchor.startDrag}
+              >
                 <strong>{t('module.t01.workspace.controls')}</strong>
                 <span>{t('module.t01.workspace.onDemand')}</span>
               </div>
@@ -3358,7 +3455,7 @@ export function BinaryTreeTraversalPage() {
         </div>
 
         <div className="tree-workspace-context-anchor">
-          <div className="tree-workspace-context-rail">
+          <div ref={contextRailRef} className="tree-workspace-context-rail">
             <button
               type="button"
               className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
@@ -3380,8 +3477,19 @@ export function BinaryTreeTraversalPage() {
           </div>
 
           {showContextSheet ? (
-            <aside className="tree-workspace-context-sheet tree-workspace-context-sheet-step">
-              <strong className="tree-workspace-step-label">{t('playback.step')}</strong>
+            <aside
+              ref={contextPanelRef}
+              className="tree-workspace-context-sheet tree-workspace-context-sheet-step"
+              style={contextPanelAnchor.panelStyle}
+            >
+              <div
+                className={`tree-workspace-panel-drag-handle${
+                  contextPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+                }`}
+                onPointerDown={contextPanelAnchor.startDrag}
+              >
+                <strong className="tree-workspace-step-label">{t('playback.step')}</strong>
+              </div>
               <div className="tree-workspace-step-copy">
                 <h3>{stepSummaryText}</h3>
                 <p>{algorithmStatusText}</p>
