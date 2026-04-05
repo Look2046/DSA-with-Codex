@@ -1,0 +1,46 @@
+# P8-M3 Acceptance Report
+
+Date: 2026-04-06
+Local Dev URL: http://127.0.0.1:5173
+Browser: Firefox (repo-local `./scripts/playwright-cli.sh`)
+
+## Discovery Consistency (/modules)
+
+- Total module cards: 19
+- Filter counts: Sorting=6, Linear=5, Search=2, Tree=6
+- Ready badges / open links: 15 / 15
+- Screenshot: `output/playwright/p8m3-modules.png`
+
+## Tree Workspace Consistency Sweep (T-01 / T-02)
+
+- Verified `T-01` keeps pinned `Controls` / `Step` edge buttons while the opened panels move independently.
+- Verified `T-01` controls panel and step sheet both drag successfully, clicking empty stage space collapses both, and forced focus overlap triggers auto-avoid on both panels.
+- Verified `T-02` matches the same interaction contract: pinned buttons, movable panels, stage-click collapse, and auto-avoid when a panel is dragged over the current focus node.
+- The tree-track shell now holds one consistent rule across both implemented tree pages: buttons stay discoverable on the rail; only the opened panels move.
+
+## Module Runtime Smoke (15 implemented routes)
+
+- `S-01` `/modules/bubble-sort` -> `output/playwright/p8m3-s01-bubble-sort.png`
+- `S-02` `/modules/selection-sort` -> `output/playwright/p8m3-s02-selection-sort.png`
+- `S-03` `/modules/insertion-sort` -> `output/playwright/p8m3-s03-insertion-sort.png`
+- `S-04` `/modules/shell-sort` -> `output/playwright/p8m3-s04-shell-sort.png`
+- `S-05` `/modules/quick-sort` -> `output/playwright/p8m3-s05-quick-sort.png`
+- `S-06` `/modules/merge-sort` -> `output/playwright/p8m3-s06-merge-sort.png`
+- `SR-01` `/modules/linear-search` -> `output/playwright/p8m3-sr01-linear-search.png`
+- `SR-02` `/modules/binary-search` -> `output/playwright/p8m3-sr02-binary-search.png`
+- `L-01` `/modules/array` -> `output/playwright/p8m3-l01-array.png`
+- `L-02` `/modules/dynamic-array` -> `output/playwright/p8m3-l02-dynamic-array.png`
+- `L-03` `/modules/linked-list` -> `output/playwright/p8m3-l03-linked-list.png`
+- `L-04` `/modules/stack` -> `output/playwright/p8m3-l04-stack.png`
+- `L-05` `/modules/queue` -> `output/playwright/p8m3-l05-queue.png`
+- `T-01` `/modules/binary-tree` -> `output/playwright/p8m3-t01-binary-tree.png`
+- `T-02` `/modules/bst` -> `output/playwright/p8m3-t02-bst.png`
+
+Detailed smoke log: `output/playwright/p8m3-runtime-smoke.txt`
+
+## Conclusion
+
+- All 15 implemented modules are reachable from `/modules` and keep route-safe navigation.
+- No route-level runtime error was detected in this smoke pass.
+- `T-01` and `T-02` now share the accepted tree workspace interaction model with pinned edge buttons plus movable / auto-avoiding panels.
+- P8-M3 acceptance evidence is complete locally.

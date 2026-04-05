@@ -446,3 +446,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: merge the Windows copy back into the active branch; move the active repo to a native Windows path to avoid UNC/toolchain friction.
 - Consequences: work stays on the already-validated WSL-native toolchain and avoids reopening mixed-environment drift; if the Windows copy ever needs to be consulted, treat it as read-only comparison material rather than a live branch to merge blindly.
 - Owner: haoyu + codex
+
+## DEC-20260406-49
+- Date: 2026-04-06
+- Status: accepted
+- Context: In the new tree workspace shell, dragging the edge buttons together with the opened panels made the control entrypoints harder to rediscover, but leaving the panels fixed risked covering the active animation focus.
+- Decision: Keep the tree workspace edge buttons pinned in place, allow only the opened control/step panels to move, and let those panels auto-avoid the current animation focus on `T-01` / `T-02`.
+- Alternatives considered: move buttons and panels together; keep panels fixed with no avoidance; fall back to non-draggable sidebars.
+- Consequences: the entry buttons remain stable and discoverable while the animation area can still reclaim space through drag + auto-avoid; future tree pages should follow the same shell contract for consistency.
+- Owner: haoyu + codex

@@ -2,6 +2,39 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (P8-M3 acceptance closure)
+
+### Today Done
+- Refreshed Playwright acceptance artifacts for `/modules` + all 15 implemented routes under `output/playwright/p8m3-*.png`.
+- Added consolidated acceptance evidence:
+  - `output/playwright/p8m3-runtime-smoke.txt`
+  - `output/playwright/p8m3-acceptance-report.txt`
+- Re-verified the tree workspace shell in browser automation:
+  - `T-01` controls / step edge buttons stay pinned while the opened panels move
+  - `T-02` matches the same pinned-button rule
+  - both pages still collapse the opened panels when clicking empty stage space
+  - forcing either panel over the current animation focus now triggers auto-avoid on both pages
+- Synced milestone closure docs:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+
+### Current State
+- Branch: `feat/p8-m3-route-rules-spike`
+- Milestone state: `P8-M3` completed locally with acceptance evidence synced.
+- Tree track now has a stable two-page workspace shell contract:
+  - buttons stay pinned on the edge rail
+  - only the opened control/step panels move
+  - panel overlap against the active animation focus is resolved automatically
+- Unrelated dirty items still exist in the repo (`scripts/*`, design artifacts, launcher helper); do not mix them into the focused `P8-M3` closure commit.
+
+### Next Step
+- Create a focused `P8-M3` closure commit with only docs + `p8m3` artifacts.
+- Then define the post-`P8` planning boundary before new implementation work starts.
+
 ## 2026-04-06 (T-01/T-02 draggable workspace panels + focus avoidance)
 
 ### Today Done

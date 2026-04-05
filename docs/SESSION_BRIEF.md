@@ -5,9 +5,9 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p8-m3-route-rules-spike` (P8-M3 polish work in progress)
-- Current phase: P8-M3 in progress (tree consistency + acceptance closure)
-- Last local quality gate: `npm run check` (passed, 2026-03-29)
+- Active branch (expected): `feat/p8-m3-route-rules-spike` (P8 closed locally; next-phase planning pending)
+- Current phase: P8 complete locally (tree-track closure synced)
+- Last local quality gate: `npm run check` (passed, 2026-04-06)
 
 ## 2) What Is Already Done
 
@@ -80,6 +80,12 @@ Use this file as the first thing to read in a new chat/session.
   - browser-side Playwright verification confirms the traversal canvas keeps its width when the floating recursion window opens, and the window can be dragged/resized at `1280x720`
   - browser-side Playwright verification confirms level-order mode shows `0` null nodes / null-legend entries, the algorithm window opens, and the queue panel updates after stepping
   - script-level validation confirms right/bottom-edge resize now expands by shifting the popup inward when needed, and `enqueueRoot` now emits an active root-entry trace segment before the first dequeue/visit step
+- P8-M3 tree consistency + acceptance closure completed:
+  - `T-01` / `T-02` now share the accepted tree workspace shell with pinned edge buttons, draggable control/step panels, stage-click collapse, and focus-aware auto-avoid
+  - refreshed Playwright acceptance artifacts for `/modules` + all 15 implemented routes under `output/playwright/p8m3-*.png`
+  - added local smoke / acceptance evidence:
+    - `output/playwright/p8m3-runtime-smoke.txt`
+    - `output/playwright/p8m3-acceptance-report.txt`
 - P7-M3 sorting consistency/acceptance closure completed:
   - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
   - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
@@ -107,14 +113,11 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue P8-M3 (tree consistency + acceptance refresh):
+- Start post-P8 planning baseline:
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - visually verify `/modules/binary-tree` now matches `/playground/binary-tree-canvas` canonical preorder route in browser (no screenshots unless explicitly requested)
-  - continue dashed style beautification only if native SVG styling still falls short
-  - align `T-01`/`T-02` controls, legend semantics, and status layout
-  - decide whether the new level-order threading trace needs another pass for route aesthetics after user review
-  - refresh Playwright acceptance artifacts for `/modules` + all implemented routes
-  - sync closure docs (`SESSION_BRIEF`/`HANDOFF`/`DECISIONS`/`TODO`)
+  - define the next milestone boundary before new code lands
+  - decide whether the next phase should continue tree-track expansion or open the next category
+  - keep the same milestone workflow (`plan -> implementation -> npm run check -> Playwright acceptance refresh -> docs sync`)
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails

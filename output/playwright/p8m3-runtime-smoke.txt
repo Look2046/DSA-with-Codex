@@ -1,0 +1,219 @@
+[Discovery] /modules
+### Result
+{
+  "url": "/modules",
+  "totalCards": 19,
+  "filterCounts": {
+    "sort": 6,
+    "linear": 5,
+    "search": 2,
+    "tree": 6
+  },
+  "readyBadges": 15,
+  "openLinks": 15,
+  "screenshot": "output/playwright/p8m3-modules.png"
+}
+---
+[S-01] /modules/bubble-sort
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-s01-bubble-sort.png"
+}
+---
+[S-02] /modules/selection-sort
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-s02-selection-sort.png"
+}
+---
+[S-03] /modules/insertion-sort
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-s03-insertion-sort.png"
+}
+---
+[S-04] /modules/shell-sort
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-s04-shell-sort.png"
+}
+---
+[S-05] /modules/quick-sort
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-s05-quick-sort.png"
+}
+---
+[S-06] /modules/merge-sort
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-s06-merge-sort.png"
+}
+---
+[SR-01] /modules/linear-search
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-sr01-linear-search.png"
+}
+---
+[SR-02] /modules/binary-search
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-sr02-binary-search.png"
+}
+---
+[L-01] /modules/array
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-l01-array.png"
+}
+---
+[L-02] /modules/dynamic-array
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-l02-dynamic-array.png"
+}
+---
+[L-03] /modules/linked-list
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-l03-linked-list.png"
+}
+---
+[L-04] /modules/stack
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-l04-stack.png"
+}
+---
+[L-05] /modules/queue
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-l05-queue.png"
+}
+---
+[T-01] /modules/binary-tree
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-t01-binary-tree.png"
+}
+---
+[T-02] /modules/bst
+### Result
+{
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "hasPrev": true,
+  "hasPlayToggle": true,
+  "hasNext": true,
+  "hasReset": true,
+  "screenshot": "output/playwright/p8m3-t02-bst.png"
+}
+---
+[T-01 panels] /modules/binary-tree
+### Result
+{
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "controlsAvoidedFocus": true,
+  "stepAvoidedFocus": true
+}
+---
+[T-02 panels] /modules/bst
+### Result
+{
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "controlsAvoidedFocus": true,
+  "stepAvoidedFocus": true
+}

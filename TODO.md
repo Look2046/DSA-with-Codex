@@ -158,7 +158,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: route/runtime stability confirmed and quality gate remains green.
   - Done: refreshed `/modules` + all implemented-module Playwright artifacts (`output/playwright/p7m3-*.png`), generated `output/playwright/p7m3-acceptance-report.txt`, recorded detailed smoke evidence (`output/playwright/p7m3-runtime-smoke.txt`), and completed P7 closure docs sync.
 
-## P8 (In Progress)
+## P8 (Closed)
 - [x] P8 planning baseline
   - DoD: define P8 milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -174,7 +174,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: deterministic fixed-input replay with explicit delete-case behavior and `npm run check` pass.
   - Done: added `bst.ts` + `bstTimelineAdapter.ts` + `BstPage.tsx`, enabled route `/modules/bst` and registry `T-02 implemented=true`, landed deterministic tests (`bst.test.ts`, `bstTimelineReplay.test.ts`), and captured smoke artifacts (`output/playwright/p8m2-modules-tree-filter.png`, `output/playwright/p8m2-t02-bst-smoke.png`).
 
-- [ ] P8-M3 Tree-track consistency + acceptance refresh
+- [x] P8-M3 Tree-track consistency + acceptance refresh
   - DoD: `T-01`/`T-02` consistency pass + full implemented-route Playwright refresh + docs closure sync.
   - Acceptance: runtime stability confirmed across implemented routes and quality gate remains green.
   - Progress (2026-03-09):
@@ -223,6 +223,16 @@ Track actionable tasks here. Keep tasks small and testable.
     - continue dashed-path beautification only if native SVG styling still falls short
     - align `T-01`/`T-02` controls, legend semantics, and status layout
     - refresh full implemented-route acceptance artifacts/report and then sync closure docs
+  - Done (2026-04-06):
+    - refreshed Playwright artifacts for `/modules` + all 15 implemented routes (`output/playwright/p8m3-*.png`)
+    - added `output/playwright/p8m3-runtime-smoke.txt` and `output/playwright/p8m3-acceptance-report.txt`
+    - re-verified `T-01` / `T-02` pinned-button + movable-panel + stage-click-collapse + auto-avoid behavior in browser automation
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
+
+## P9 (Next)
+- [ ] P9 planning baseline
+  - DoD: define next milestone scope/order and acceptance criteria in docs.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
