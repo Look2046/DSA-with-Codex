@@ -3145,6 +3145,11 @@ export function BinaryTreeTraversalPage() {
     reset();
   };
 
+  const collapseWorkspacePanels = () => {
+    setShowStageControls(false);
+    setShowContextSheet(false);
+  };
+
   const toggleRecursionView = () => {
     if (!supportsAlgorithmWindow) {
       return;
@@ -3403,7 +3408,12 @@ export function BinaryTreeTraversalPage() {
           ) : null}
         </div>
 
-        <div ref={stageRef} className="tree-stage tree-stage-visual" aria-label="binary-tree-stage">
+        <div
+          ref={stageRef}
+          className="tree-stage tree-stage-visual"
+          aria-label="binary-tree-stage"
+          onClick={collapseWorkspacePanels}
+        >
           <div className="tree-workspace-stage-meta">
             <span className="tree-workspace-pill">{modeLabel}</span>
             <span className="tree-workspace-pill tree-workspace-pill-active">
@@ -3627,7 +3637,7 @@ export function BinaryTreeTraversalPage() {
             })}
           </svg>
 
-          <div className="tree-workspace-transport">
+          <div className="tree-workspace-transport" onClick={(event) => event.stopPropagation()}>
             <div className="tree-workspace-transport-left">
               <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0}>
                 {t('playback.prev')}

@@ -2192,7 +2192,9 @@ body {
   border-radius: 12px;
   background:
     radial-gradient(circle at top right, rgba(104, 169, 231, 0.12), transparent 28%),
-    #f8fbff;
+    rgba(248, 251, 255, 0.74);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
 }
 
 .tree-recursion-panel-floating {
@@ -2314,7 +2316,7 @@ body {
   height: 32px;
   border: 1px solid #cfe0f3;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.72);
   color: #244261;
   font-size: 1rem;
   cursor: pointer;
@@ -2351,7 +2353,7 @@ body {
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #dbeafb;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.76);
 }
 
 .tree-recursion-card-head {
@@ -2399,7 +2401,7 @@ body {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #ddeaf7;
-  background: #f8fbff;
+  background: rgba(248, 251, 255, 0.74);
 }
 
 .tree-recursion-stack-row {
@@ -2411,7 +2413,7 @@ body {
 
 .tree-recursion-stack-item-current {
   border-color: #8bc09a;
-  background: #eefaf2;
+  background: rgba(238, 250, 242, 0.82);
   box-shadow: 0 6px 14px rgba(62, 131, 81, 0.1);
 }
 
@@ -2454,7 +2456,7 @@ body {
   padding: 12px;
   border-radius: 12px;
   border: 1px solid #dbeafb;
-  background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+  background: linear-gradient(180deg, rgba(247, 251, 255, 0.76) 0%, rgba(238, 246, 255, 0.72) 100%);
 }
 
 .tree-levelorder-label {
@@ -2470,7 +2472,7 @@ body {
   padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid #d4e5f7;
-  background: #eef6ff;
+  background: rgba(238, 246, 255, 0.76);
   color: #1f4f7d;
   font-weight: 700;
 }
@@ -2505,7 +2507,7 @@ body {
   padding: 12px;
   border-radius: 12px;
   border: 1px solid #dbeafb;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.76);
   color: #244261;
 }
 
@@ -2571,14 +2573,14 @@ body {
   padding: 8px 10px;
   border-radius: 12px;
   border: 1px solid #dbeafb;
-  background: #f8fbff;
+  background: rgba(248, 251, 255, 0.76);
   color: #244261;
   flex: 0 0 auto;
 }
 
 .tree-levelorder-queue-chip-front {
   border-color: #7aaee1;
-  background: #edf6ff;
+  background: rgba(237, 246, 255, 0.8);
 }
 
 .tree-levelorder-queue-chip-rear {
@@ -2587,7 +2589,7 @@ body {
 
 .tree-levelorder-queue-chip-new {
   border-color: #8bc09a;
-  background: #eefaf2;
+  background: rgba(238, 250, 242, 0.82);
   box-shadow: 0 6px 14px rgba(62, 131, 81, 0.08);
 }
 
