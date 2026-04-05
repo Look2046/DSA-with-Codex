@@ -1321,11 +1321,13 @@ body {
 }
 
 .tree-workspace-field select,
-.tree-workspace-field input[type='range'] {
+.tree-workspace-field input[type='range'],
+.tree-workspace-field input[type='number'] {
   width: 100%;
 }
 
-.tree-workspace-field select {
+.tree-workspace-field select,
+.tree-workspace-field input[type='number'] {
   border: 1px solid #c9dbee;
   border-radius: 12px;
   background: #fff;

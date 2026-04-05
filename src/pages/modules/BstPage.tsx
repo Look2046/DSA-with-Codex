@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
-import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { buildBstTimelineFromInput } from '../../modules/tree/bstTimelineAdapter';
 import type { BstDeleteCase, BstOperation, BstOutcome, BstStep } from '../../modules/tree/bst';
@@ -161,13 +159,14 @@ function getStepDescription(step: BstStep | undefined, t: ReturnType<typeof useI
 
 export function BstPage() {
   const { t } = useI18n();
-  const currentModule = useCurrentModule();
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_DATASET.length);
   const [seedData, setSeedData] = useState<number[]>(DEFAULT_DATASET);
   const [operationInput, setOperationInput] = useState<BstOperation>('searchPath');
   const [targetInput, setTargetInput] = useState(String(DEFAULT_DATASET[0] ?? 0));
   const [error, setError] = useState('');
+  const [showStageControls, setShowStageControls] = useState(false);
+  const [showContextSheet, setShowContextSheet] = useState(false);
   const [activeConfig, setActiveConfig] = useState<BstOperationConfig>({
     operation: 'searchPath',
     target: DEFAULT_DATASET[0] ?? 0,
@@ -294,110 +293,207 @@ export function BstPage() {
     reset();
   };
 
+  const collapseWorkspacePanels = () => {
+    setShowStageControls(false);
+    setShowContextSheet(false);
+  };
+
+  const currentOperationLabel = getOperationLabel(currentSnapshot?.operation ?? activeConfig.operation, t);
+  const currentDeleteCaseLabel = getDeleteCaseLabel(currentSnapshot?.deleteCase ?? 'none', t);
+  const currentOutcomeLabel = getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t);
+  const currentStepDescription = getStepDescription(currentSnapshot, t);
+  const currentTargetValue = currentSnapshot?.target ?? activeConfig.target;
+  const currentNodeLabel = currentSnapshot?.currentId ?? '-';
+  const currentSuccessorLabel = currentSnapshot?.successorId ?? '-';
+  const pathValues = useMemo(
+    () =>
+      (currentSnapshot?.pathIds ?? [])
+        .map((nodeId) => nodeMap.get(nodeId)?.value)
+        .filter((value): value is number => value !== undefined),
+    [currentSnapshot?.pathIds, nodeMap],
+  );
+  const stepDetailText = `${currentOperationLabel} · ${t('module.t02.meta.target')}: ${currentTargetValue} · ${
+    t('module.t02.meta.outcome')
+  }: ${currentOutcomeLabel}`;
+
   return (
     <section className="array-page tree-page bst-page">
-      <h2>{t('module.t02.title')}</h2>
-      <p>{t('module.t02.body')}</p>
+      <div className="tree-workspace-header">
+        <h2>{t('module.t02.title')}</h2>
+        <p>{t('module.t02.body')}</p>
+      </div>
 
-      <div className="bubble-toolbar">
-        <label htmlFor="dataset-size-t02" className="control-inline">
-          <span>{t('module.s01.dataSize')}</span>
-          <input
-            id="dataset-size-t02"
-            type="range"
-            min={MIN_SIZE}
-            max={MAX_SIZE}
-            value={datasetSize}
-            onChange={(event) => setDatasetSize(Number(event.target.value))}
-          />
-          <strong>{datasetSize}</strong>
-        </label>
-        <div className="speed-group">
-          <button type="button" onClick={handleRegenerate}>
-            {t('module.s01.regenerate')}
+      <section className="tree-workspace-shell">
+        <div className="tree-workspace-controls-anchor">
+          <button
+            type="button"
+            className="tree-workspace-edge-tab"
+            onClick={() => setShowStageControls((previous) => !previous)}
+            aria-expanded={showStageControls}
+          >
+            {t('module.t01.workspace.controls')}
           </button>
-        </div>
-      </div>
 
-      <div className="bubble-toolbar">
-        <span>{t('module.t02.meta.operation')}</span>
-        <div className="speed-group">
-          {operationOptions.map((option) => (
+          {showStageControls ? (
+            <div className="tree-workspace-drawer" aria-label={t('module.t01.workspace.controls')}>
+              <div className="tree-workspace-drawer-head">
+                <strong>{t('module.t01.workspace.controls')}</strong>
+                <span>{t('module.t01.workspace.onDemand')}</span>
+              </div>
+
+              <label className="tree-workspace-field" htmlFor="dataset-size-t02">
+                <span>{t('module.s01.dataSize')}</span>
+                <input
+                  id="dataset-size-t02"
+                  type="range"
+                  min={MIN_SIZE}
+                  max={MAX_SIZE}
+                  value={datasetSize}
+                  onChange={(event) => setDatasetSize(Number(event.target.value))}
+                />
+                <strong>{datasetSize}</strong>
+              </label>
+
+              <div className="tree-workspace-field">
+                <span>{t('module.t02.meta.operation')}</span>
+                <div className="tree-workspace-toggle-row">
+                  {operationOptions.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`tree-workspace-toggle${operationInput === option ? ' tree-workspace-toggle-active' : ''}`}
+                      onClick={() => {
+                        setOperationInput(option);
+                        reset();
+                      }}
+                    >
+                      {getOperationLabel(option, t)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="tree-workspace-field" htmlFor="bst-target-input">
+                <span>{t('module.t02.input.target')}</span>
+                <input
+                  id="bst-target-input"
+                  type="number"
+                  value={targetInput}
+                  onChange={(event) => {
+                    setTargetInput(event.target.value);
+                    setError('');
+                    reset();
+                  }}
+                />
+              </label>
+
+              <div className="tree-workspace-field">
+                <span>{t('module.s01.speed')}</span>
+                <div className="tree-workspace-toggle-row">
+                  {speedOptions.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                      onClick={() => setSpeed(option.value)}
+                    >
+                      {t(option.key)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {error ? <p className="form-error">{error}</p> : null}
+
+              <div className="tree-workspace-drawer-actions">
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleRegenerate}>
+                  {t('module.s01.regenerate')}
+                </button>
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleApply}>
+                  {t('module.t02.apply')}
+                </button>
+              </div>
+
+              <div className="tree-workspace-sample-block">
+                <span>{t('module.t02.seed')}</span>
+                <code>[{formatArrayPreview(seedData)}]</code>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="tree-workspace-context-anchor">
+          <div className="tree-workspace-context-rail">
             <button
-              key={option}
               type="button"
-              className={operationInput === option ? 'speed-active' : ''}
-              onClick={() => {
-                setOperationInput(option);
-                reset();
-              }}
+              className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
+                showContextSheet ? ' tree-workspace-context-tab-active' : ''
+              }`}
+              onClick={() => setShowContextSheet((previous) => !previous)}
+              aria-pressed={showContextSheet}
             >
-              {getOperationLabel(option, t)}
+              {t('playback.step')}
             </button>
-          ))}
+          </div>
+
+          {showContextSheet ? (
+            <aside className="tree-workspace-context-sheet tree-workspace-context-sheet-step">
+              <strong className="tree-workspace-step-label">{t('playback.step')}</strong>
+              <div className="tree-workspace-step-copy">
+                <h3>{currentStepDescription}</h3>
+                <p>{stepDetailText}</p>
+              </div>
+              <dl className="tree-workspace-kv">
+                <div>
+                  <dt>{t('playback.status')}</dt>
+                  <dd>{getStatusLabel(status, t)}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t02.meta.operation')}</dt>
+                  <dd>{currentOperationLabel}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t02.meta.target')}</dt>
+                  <dd>{currentTargetValue}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t02.meta.current')}</dt>
+                  <dd>{currentNodeLabel}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t02.meta.successor')}</dt>
+                  <dd>{currentSuccessorLabel}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t02.meta.case')}</dt>
+                  <dd>{currentDeleteCaseLabel}</dd>
+                </div>
+                <div>
+                  <dt>{t('module.t02.meta.outcome')}</dt>
+                  <dd>{currentOutcomeLabel}</dd>
+                </div>
+              </dl>
+            </aside>
+          ) : null}
         </div>
-      </div>
 
-      <div className="array-form bst-input-form">
-        <label htmlFor="bst-target-input">
-          <span>{t('module.t02.input.target')}</span>
-          <input
-            id="bst-target-input"
-            type="number"
-            value={targetInput}
-            onChange={(event) => {
-              setTargetInput(event.target.value);
-              setError('');
-              reset();
-            }}
-          />
-        </label>
-        <button type="button" onClick={handleApply}>
-          {t('module.t02.apply')}
-        </button>
-      </div>
-      {error ? <p className="form-error">{error}</p> : null}
+        <div className="tree-stage tree-stage-visual bst-stage" aria-label="bst-stage" onClick={collapseWorkspacePanels}>
+          <div className="tree-workspace-stage-meta">
+            <span className="tree-workspace-pill">{currentOperationLabel}</span>
+            <span className="tree-workspace-pill tree-workspace-pill-active">
+              {t('playback.status')}: {getStatusLabel(status, t)}
+            </span>
+            <span className="tree-workspace-pill">
+              {t('module.t02.meta.target')}: {currentTargetValue}
+            </span>
+            <span className="tree-workspace-pill">
+              {t('module.t02.meta.current')}: {currentNodeLabel}
+            </span>
+            <span className="tree-workspace-pill">
+              {t('module.t02.meta.outcome')}: {currentOutcomeLabel}
+            </span>
+          </div>
 
-      <div className="bubble-toolbar">
-        <span>{t('module.s01.speed')}</span>
-        <div className="speed-group">
-          {speedOptions.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
-            >
-              {t(option.key)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="module-status-block">
-        <p className="module-status-line">
-          {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
-          {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
-        </p>
-        <p className="module-status-line">{getStepDescription(currentSnapshot, t)}</p>
-        <p className="module-status-line">
-          {t('module.t02.meta.operation')}: {getOperationLabel(currentSnapshot?.operation ?? activeConfig.operation, t)} |{' '}
-          {t('module.t02.meta.target')}: {currentSnapshot?.target ?? activeConfig.target}
-        </p>
-        <p className="module-status-line">
-          {t('module.t02.meta.current')}: {currentSnapshot?.currentId ?? '-'} | {t('module.t02.meta.successor')}:{' '}
-          {currentSnapshot?.successorId ?? '-'} | {t('module.t02.meta.case')}:{' '}
-          {getDeleteCaseLabel(currentSnapshot?.deleteCase ?? 'none', t)} | {t('module.t02.meta.outcome')}:{' '}
-          {getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t)}
-        </p>
-      </div>
-
-      <p className="array-preview">
-        {t('module.t02.seed')}: [{formatArrayPreview(seedData)}]
-      </p>
-
-      <VisualizationCanvas title={t('module.t02.title')} subtitle={t('module.t02.stage')} stageClassName="viz-canvas-stage-tree">
-        <div className="tree-stage bst-stage" aria-label="bst-stage">
           <svg className="tree-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             {edges.map((edge) => {
               const from = positionMap.get(edge.from);
@@ -455,10 +551,63 @@ export function BstPage() {
           </div>
 
           {(currentSnapshot?.treeState.length ?? 0) === 0 ? <p className="array-preview bst-empty">{t('module.t02.empty')}</p> : null}
-        </div>
-      </VisualizationCanvas>
+          
+          <div className="tree-workspace-transport" onClick={(event) => event.stopPropagation()}>
+            <div className="tree-workspace-transport-left">
+              <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0}>
+                {t('playback.prev')}
+              </button>
+              <button
+                type="button"
+                className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+                onClick={status === 'playing' ? pause : play}
+                disabled={steps.length === 0}
+              >
+                {status === 'playing' ? t('playback.pause') : t('playback.play')}
+              </button>
+              <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={steps.length === 0}>
+                {t('playback.next')}
+              </button>
+              <button type="button" className="tree-workspace-transport-btn" onClick={reset} disabled={steps.length === 0}>
+                {t('playback.reset')}
+              </button>
+              <div className="tree-workspace-transport-progress" aria-hidden="true">
+                <span
+                  className="tree-workspace-transport-progress-fill"
+                  style={{
+                    width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+                  }}
+                />
+              </div>
+              <span className="tree-workspace-transport-step">
+                {currentStep}/{Math.max(steps.length - 1, 0)}
+              </span>
+            </div>
 
-      <div className="legend-row">
+            <div className="tree-workspace-transport-right" aria-live="polite">
+              {pathValues.length === 0 ? (
+                <span className="tree-workspace-transport-empty">{t('module.t02.legend.path')}: -</span>
+              ) : (
+                <>
+                  <span className="tree-workspace-transport-empty">{t('module.t02.legend.path')}</span>
+                  {pathValues.map((value, index) => (
+                    <span
+                      key={`${value}-${index}`}
+                      className={`tree-workspace-transport-chip${index === pathValues.length - 1 ? ' tree-workspace-transport-chip-active' : ''}`}
+                    >
+                      {value}
+                    </span>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {error && !showStageControls ? <p className="form-error">{error}</p> : null}
+
+      <div className="legend-row tree-workspace-legend-row">
         <span className="legend-item legend-visiting">{t('module.s01.highlight.comparing')}</span>
         <span className="legend-item legend-matched">{t('module.sr01.highlight.found')}</span>
         <span className="legend-item legend-moving">{t('module.t02.legend.newNode')}</span>
@@ -471,24 +620,6 @@ export function BstPage() {
           .map((entry) => `${entry.index}:${getHighlightLabel(entry.type, t)}`)
           .join(' | ') || t('module.s01.none')}
       </p>
-
-      <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
-          {t('playback.play')}
-        </button>
-        <button type="button" onClick={pause} disabled={status !== 'playing'}>
-          {t('playback.pause')}
-        </button>
-        <button type="button" onClick={prev} disabled={steps.length === 0}>
-          {t('playback.prev')}
-        </button>
-        <button type="button" onClick={next} disabled={steps.length === 0}>
-          {t('playback.next')}
-        </button>
-        <button type="button" onClick={reset} disabled={steps.length === 0}>
-          {t('playback.reset')}
-        </button>
-      </div>
 
       <div className="pseudocode-block">
         <h3>{t('module.s01.pseudocode')}</h3>
