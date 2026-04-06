@@ -7,17 +7,21 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 ### Today Done
 - Fixed the post-`P9-M1` `S-01 Bubble Sort` layout regression where the sorting bars collapsed into a very short strip at the top of the stage and left a large blank area underneath.
 - Adjusted the shared workspace-shell sorting layout in `src/index.css` so pilot sorting tracks stretch to the full available stage height and keep the index row pinned below the bars.
+- Tuned the shared sorting-stage height so the bars no longer over-expand vertically after the first stretch fix.
+- Fixed `S-01` swap ghost geometry in `src/pages/modules/BubbleSortPage.tsx` so the moving bars reuse the real source bar `top/height/width` instead of animating as a tiny strip at the top of the stage.
 - Re-ran the required local quality gate successfully:
   - `npm run check`
 - Re-verified in a real browser against the built app:
   - `S-01` stage height remained ~`808px`
   - sorting track height remained ~`642px`
-  - bar container height now stretches to ~`610px` instead of ~`43px`
+  - bar container height now stays in a controlled working range instead of collapsing to ~`43px` or over-expanding to the full track
+  - swap frames now move full bar bodies instead of only a top `22px` ghost strip
 
 ### Current State
 - Branch: `feat/p9-m1-workspace-shell-pilots`
 - Fix scope:
   - `src/index.css`
+  - `src/pages/modules/BubbleSortPage.tsx`
 - This is a focused follow-up fix on top of `P9-M1`; milestone direction is unchanged.
 
 ### Next Step

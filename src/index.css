@@ -1589,9 +1589,9 @@ body {
 }
 
 .workspace-stage-body-sorting > .shell-stage-track > .array-bars {
-  height: 100%;
+  height: min(100%, clamp(280px, 78%, 520px));
   min-height: 0;
-  align-self: stretch;
+  align-self: end;
 }
 
 .workspace-stage-body-array {

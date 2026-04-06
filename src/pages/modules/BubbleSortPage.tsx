@@ -215,9 +215,19 @@ export function BubbleSortPage() {
         return;
       }
       const startLeft = sourceElement.offsetLeft;
+      const startTop = sourceElement.offsetTop;
       const deltaX = targetElement.offsetLeft - sourceElement.offsetLeft;
+      const deltaY = targetElement.offsetTop - sourceElement.offsetTop;
+      const startHeight = sourceElement.offsetHeight;
+      const endHeight = targetElement.offsetHeight;
+      const width = sourceElement.offsetWidth;
       ghostElement.style.setProperty('--shell-ghost-start-left', `${startLeft}px`);
+      ghostElement.style.setProperty('--shell-ghost-start-top', `${startTop}px`);
       ghostElement.style.setProperty('--shell-ghost-delta-x', `${deltaX}px`);
+      ghostElement.style.setProperty('--shell-ghost-delta-y', `${deltaY}px`);
+      ghostElement.style.setProperty('--shell-ghost-start-height', `${startHeight}px`);
+      ghostElement.style.setProperty('--shell-ghost-end-height', `${endHeight}px`);
+      ghostElement.style.setProperty('--shell-ghost-width', `${width}px`);
     });
   }, [motionGhosts]);
 
