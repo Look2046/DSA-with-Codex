@@ -2,6 +2,32 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (S-01 page-width breakout alignment)
+
+### Today Done
+- Investigated the final user report that `S-01` still was not using the maximum page width like `T-01`.
+- Confirmed the remaining root cause was outside the stage itself:
+  - `S-01` page only used `bubble-page`
+  - `T-01` uses `tree-page`, which breaks out of the shared `.app-main { max-width: 1200px; }` wrapper on wide screens
+- Updated `S-01` page class wiring so it now also uses the tree-shell breakout rule:
+  - `pageClassName="bubble-page tree-page"`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright at `1440x1100`:
+  - `S-01` page width is now `1416px`
+  - shell width is now `1416px`
+  - stage width is now `1416px`
+  - this now matches the same full-page breakout pattern used by `T-01`
+
+### Current State
+- Branch: `feat/p9-m1-workspace-shell-pilots`
+- Fix scope:
+  - `src/pages/modules/BubbleSortPage.tsx`
+- This is a focused layout-consistency follow-up; milestone direction is unchanged.
+
+### Next Step
+- Continue rolling the same page-level breakout decision across remaining non-tree modules that should share the `T-01` wide-workspace pattern.
+
 ## 2026-04-06 (S-01 inner-canvas removal toward T-01 full-stage)
 
 ### Today Done
