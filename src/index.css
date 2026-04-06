@@ -1580,6 +1580,20 @@ body {
   display: grid;
 }
 
+.workspace-stage-body-sorting > .shell-stage-track {
+  height: 100%;
+  min-height: 0;
+  align-content: stretch;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding-bottom: 0;
+}
+
+.workspace-stage-body-sorting > .shell-stage-track > .array-bars {
+  height: 100%;
+  min-height: 0;
+  align-self: stretch;
+}
+
 .workspace-stage-body-array {
   display: flex;
   align-items: flex-start;

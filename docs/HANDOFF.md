@@ -2,6 +2,28 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (S-01 sorting stage height follow-up)
+
+### Today Done
+- Fixed the post-`P9-M1` `S-01 Bubble Sort` layout regression where the sorting bars collapsed into a very short strip at the top of the stage and left a large blank area underneath.
+- Adjusted the shared workspace-shell sorting layout in `src/index.css` so pilot sorting tracks stretch to the full available stage height and keep the index row pinned below the bars.
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in a real browser against the built app:
+  - `S-01` stage height remained ~`808px`
+  - sorting track height remained ~`642px`
+  - bar container height now stretches to ~`610px` instead of ~`43px`
+
+### Current State
+- Branch: `feat/p9-m1-workspace-shell-pilots`
+- Fix scope:
+  - `src/index.css`
+- This is a focused follow-up fix on top of `P9-M1`; milestone direction is unchanged.
+
+### Next Step
+- Create a focused bug-fix commit for the shared sorting-stage stretch rule.
+- Then continue testing other pilot pages or move on to `P9-M2`.
+
 ## 2026-04-06 (P9-M1 workspace-shell pilot completion)
 
 ### Today Done
