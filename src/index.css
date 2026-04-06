@@ -1594,25 +1594,25 @@ body {
   align-self: end;
 }
 
-.workspace-shell-bubble {
+.workspace-shell-sorting {
   min-height: 560px;
   height: min(920px, calc(100svh - 152px));
 }
 
-.workspace-shell-bubble .tree-workspace-stage-meta {
+.workspace-shell-sorting .tree-workspace-stage-meta {
   max-width: min(68%, 640px);
 }
 
-.workspace-shell-bubble .workspace-stage-body {
+.workspace-shell-sorting .workspace-stage-body {
   padding: 38px 10px 62px;
 }
 
-.workspace-shell-bubble .workspace-stage-body-sorting {
+.workspace-shell-sorting .workspace-stage-body-sorting {
   align-items: stretch;
   justify-items: stretch;
 }
 
-.workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track {
+.workspace-shell-sorting .workspace-stage-body-sorting > .shell-stage-track {
   --shell-gap: clamp(0.5px, calc(6px - var(--shell-total-count) * 0.05px), 6px);
   --shell-slot-max-width: 132px;
   width: 100%;
@@ -1622,7 +1622,7 @@ body {
   justify-items: stretch;
 }
 
-.workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track > .array-bars {
+.workspace-shell-sorting .workspace-stage-body-sorting > .shell-stage-track > .array-bars {
   width: 100%;
   max-width: none;
   height: 100%;
@@ -3435,7 +3435,7 @@ body {
     min-height: 760px;
   }
 
-  .workspace-shell-bubble {
+  .workspace-shell-sorting {
     min-height: 820px;
     height: auto;
   }
@@ -3503,11 +3503,11 @@ body {
     min-height: 360px;
   }
 
-  .workspace-shell-bubble .workspace-stage-body {
+  .workspace-shell-sorting .workspace-stage-body {
     padding: 72px 14px 84px;
   }
 
-  .workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track {
+  .workspace-shell-sorting .workspace-stage-body-sorting > .shell-stage-track {
     width: 100%;
     max-width: none;
   }

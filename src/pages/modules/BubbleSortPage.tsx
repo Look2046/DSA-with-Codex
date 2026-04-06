@@ -279,7 +279,7 @@ export function BubbleSortPage() {
   return (
     <WorkspaceShell
       pageClassName="bubble-page tree-page"
-      shellClassName="workspace-shell-bubble"
+      shellClassName="workspace-shell-sorting"
       stageAriaLabel={t('module.s01.title')}
       title={t('module.s01.title')}
       description={t('module.s01.body')}

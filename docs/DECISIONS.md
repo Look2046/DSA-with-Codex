@@ -473,3 +473,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue per-page shell rewrites without shared composition; force a pixel-identical `T-01` layout on every page; postpone shell extraction until all non-tree pages were migrated together.
 - Consequences: the project now has one reusable stage-first shell primitive for the broader rollout, the pilot pages share a recognizable interaction baseline, and `P9-M2` can focus on migration breadth instead of repeating shell logic.
 - Owner: haoyu + codex
+
+## DEC-20260406-52
+- Date: 2026-04-06
+- Status: accepted
+- Context: After the `S-01` follow-up fixes, the remaining sorting pages still risked feeling narrower than `T-01` even if their inner stage content stretched correctly, because the real width bottleneck was the page-level wrapper (`.app-main { max-width: 1200px; }`) rather than the stage alone.
+- Decision: Sorting pages that adopt the shared workspace shell should also opt into the same wide-page breakout pattern as tree pages by using `pageClassName="bubble-page tree-page"`, and share the family-level shell styling through `shellClassName="workspace-shell-sorting"` instead of per-page one-off shell classes.
+- Alternatives considered: keep sorting pages on narrow page wrappers and only tune inner stage width; keep module-specific shell classes for each sorting page; treat `T-01` wide breakout as tree-only behavior.
+- Consequences: sorting modules now read as true full-stage workspace pages instead of narrow content cards, and future `P9-M2` sorting/search/linear migrations have an explicit page-level contract to follow rather than rediscovering the same width issue route by route.
+- Owner: haoyu + codex

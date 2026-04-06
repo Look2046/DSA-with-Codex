@@ -2,6 +2,57 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (P9-M2 sorting shell rollout batch 1)
+
+### Today Done
+- Continued `P9-M2` on the dedicated rollout branch and completed the first post-pilot sorting batch migration:
+  - `S-02` `/modules/selection-sort`
+  - `S-03` `/modules/insertion-sort`
+  - `S-04` `/modules/shell-sort`
+- Standardized the sorting family shell wiring around the same accepted breakout/shell contract:
+  - `pageClassName="bubble-page tree-page"`
+  - `shellClassName="workspace-shell-sorting"`
+- Moved the three pages off the older page-local canvas structure and onto shared `WorkspaceShell` composition:
+  - on-demand `Controls` drawer
+  - on-demand `Step` sheet
+  - in-stage transport
+  - `focusPoint`-driven panel avoidance where applicable
+- Fixed rollout follow-up lint blockers from React Compiler manual-memoization preservation on:
+  - `src/pages/modules/InsertionSortPage.tsx`
+  - `src/pages/modules/ShellSortPage.tsx`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified the migrated sorting routes in Playwright at `1440x1100`:
+  - `S-02` / `S-03` / `S-04` page width = `1416px`
+  - shell width = `1416px`
+  - stage width = `1416px`
+  - `S-02` confirmed pinned controls button + movable drawer behavior (`tabLeft 34 -> 34`, `drawerLeft 34 -> 214`)
+  - `S-02` confirmed stage-click collapse closes both open panels
+  - final-frame transport state now disables `Play` / `Next` on all three routes:
+    - `S-02` `81/81`
+    - `S-03` `84/84`
+    - `S-04` `114/114`
+
+### Current State
+- Branch: `feat/p9-m2-sorting-shell-rollout`
+- Validated scope in this batch:
+  - `src/index.css`
+  - `src/pages/modules/BubbleSortPage.tsx`
+  - `src/pages/modules/SelectionSortPage.tsx`
+  - `src/pages/modules/InsertionSortPage.tsx`
+  - `src/pages/modules/ShellSortPage.tsx`
+- Milestone state:
+  - `P9-M1` remains closed locally
+  - `P9-M2` is in progress, with sorting batch 1 now verified locally
+
+### Next Step
+- Create a focused commit for the validated sorting-shell rollout batch 1.
+- Then continue `P9-M2` breadth rollout from the same shell contract:
+  - `S-05` / `S-06`
+  - `SR-01`
+  - remaining linear pages
+- Keep unrelated dirty items out of the rollout commit (`scripts/*`, design artifacts, old Playwright images, launcher helper).
+
 ## 2026-04-06 (S-01 page-width breakout alignment)
 
 ### Today Done

@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p9-m1-workspace-shell-pilots`
-- Current phase: `P9-M1` workspace-shell foundation completed locally; `P9-M2` rollout is next
+- Active branch (expected): `feat/p9-m2-sorting-shell-rollout`
+- Current phase: `P9-M2` sorting-shell rollout batch 1 verified locally; remaining non-tree rollout is next
 - Last local quality gate: `npm run check` (passed locally, 2026-04-06)
 
 ## 2) What Is Already Done
@@ -46,6 +46,10 @@ Use this file as the first thing to read in a new chat/session.
   - migrated `S-01 Bubble Sort`, `L-01 Array`, and `SR-02 Binary Search`
   - moved pilot-page legend/pseudocode/runtime detail into the right `Step` panel where appropriate
   - refreshed local Playwright smoke artifacts under `output/playwright/p9m1-*`
+- P9-M2 sorting-shell rollout batch 1 completed locally:
+  - migrated `S-02 Selection Sort`, `S-03 Insertion Sort`, and `S-04 Shell Sort` to the shared `WorkspaceShell`
+  - standardized sorting-shell breakout with `pageClassName="bubble-page tree-page"` and `shellClassName="workspace-shell-sorting"`
+  - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, pinned edge buttons, movable panels, stage-click collapse, and final-frame disable on `S-02`~`S-04`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -119,10 +123,10 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P9-M2 rollout across remaining implemented non-tree modules:
+- Continue P9-M2 rollout across remaining implemented non-tree modules:
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
   - preserve `WorkspaceShell` as the shared interaction contract instead of copying page-specific markup again
-  - migrate the remaining implemented non-tree pages by family batch (`sorting`, `linear`, `search`)
+  - continue from the validated sorting batch 1 baseline and migrate the remaining implemented non-tree pages by family batch (`sorting`, `search`, `linear`)
   - keep tree pages behaviorally unchanged unless a compatibility fix is required
   - finish with a consistency sweep before `P9-M3` acceptance refresh
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).

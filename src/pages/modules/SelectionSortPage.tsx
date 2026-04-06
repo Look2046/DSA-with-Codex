@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
-import { VisualizationCanvas } from '../../components/VisualizationCanvas';
+import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useI18n } from '../../i18n/useI18n';
-import { useCurrentModule } from '../../hooks/useCurrentModule';
 import type { SelectionSortStep } from '../../modules/sorting/selectionSort';
 import { buildSelectionSortTimelineFromInput } from '../../modules/sorting/selectionTimelineAdapter';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
@@ -146,7 +145,6 @@ type MotionGhostSpec = {
 
 export function SelectionSortPage() {
   const { t } = useI18n();
-  const currentModule = useCurrentModule();
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [inputData, setInputData] = useState<number[]>(() => createRandomDataset(DEFAULT_SIZE));
@@ -168,6 +166,7 @@ export function SelectionSortPage() {
   const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
   const isFinaleFrame = currentSnapshot?.action === 'completed';
   const maxValue = useMemo(() => Math.max(...arrayState, 1), [arrayState]);
+  const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, SelectionSortStep['highlights'][number]['type']>();
@@ -235,6 +234,22 @@ export function SelectionSortPage() {
     }
     return sorted;
   }, [steps, currentStep]);
+  const focusPoint = useMemo(() => {
+    if (currentSnapshot.indices.length === 0 || arrayState.length === 0) {
+      return null;
+    }
+
+    const averageIndex = currentSnapshot.indices.reduce((sum, value) => sum + value, 0) / currentSnapshot.indices.length;
+    return {
+      x: ((averageIndex + 0.5) / arrayState.length) * 100,
+      y: 58,
+    };
+  }, [arrayState.length, currentSnapshot.indices]);
+  const currentIndicesText = currentSnapshot.indices.length > 0 ? currentSnapshot.indices.join(', ') : '-';
+  const highlightSummary =
+    (currentSnapshot?.highlights ?? [])
+      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
+      .join(' | ') || t('module.s01.none');
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -259,70 +274,154 @@ export function SelectionSortPage() {
   ] as const;
 
   return (
-    <section className="bubble-page">
-      <h2>{t('module.s02.title')}</h2>
-      <p>{t('module.s02.body')}</p>
+    <WorkspaceShell
+      pageClassName="bubble-page tree-page"
+      shellClassName="workspace-shell-sorting"
+      stageAriaLabel={t('module.s02.title')}
+      title={t('module.s02.title')}
+      description={t('module.s02.body')}
+      stageClassName="workspace-stage-sorting"
+      stageBodyClassName="workspace-stage-body-sorting"
+      controlsPanelClassName="workspace-drawer-wide workspace-drawer-scroll"
+      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
+      defaultControlsPanelSize={{ width: 286, height: 520 }}
+      defaultContextPanelSize={{ width: 320, height: 520 }}
+      focusPoint={focusPoint}
+      stageMeta={
+        <>
+          <span className="tree-workspace-pill tree-workspace-pill-active">
+            {t('playback.status')}: {getStatusLabel(status, t)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('playback.step')}: {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.s01.dataSize')}: {datasetSize}
+          </span>
+          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
+        </>
+      }
+      controlsContent={
+        <>
+          <label className="tree-workspace-field" htmlFor="dataset-size-s02">
+            <span>{t('module.s01.dataSize')}</span>
+            <input
+              id="dataset-size-s02"
+              type="range"
+              min={MIN_SIZE}
+              max={MAX_SIZE}
+              value={datasetSize}
+              onChange={(event) => setDatasetSize(Number(event.target.value))}
+            />
+            <strong>{datasetSize}</strong>
+          </label>
 
-      <div className="bubble-toolbar">
-        <label htmlFor="dataset-size-s02" className="control-inline">
-          <span>{t('module.s01.dataSize')}</span>
-          <input
-            id="dataset-size-s02"
-            type="range"
-            min={MIN_SIZE}
-            max={MAX_SIZE}
-            value={datasetSize}
-            onChange={(event) => setDatasetSize(Number(event.target.value))}
-          />
-          <strong>{datasetSize}</strong>
-        </label>
-        <div className="speed-group">
-          <button type="button" onClick={() => regenerateData(createRandomDataset)}>
-            {t('module.s01.generate.random')}
-          </button>
-          <button type="button" onClick={() => regenerateData(createNearlySortedDataset)}>
-            {t('module.s01.generate.nearlySorted')}
-          </button>
-          <button type="button" onClick={() => regenerateData(createAscendingDataset)}>
-            {t('module.s01.generate.ascending')}
-          </button>
-          <button type="button" onClick={() => regenerateData(createDescendingDataset)}>
-            {t('module.s01.generate.descending')}
-          </button>
+          <div className="tree-workspace-field">
+            <span>{t('module.s01.speed')}</span>
+            <div className="tree-workspace-toggle-row">
+              {speedOptions.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                  onClick={() => setSpeed(option.value)}
+                >
+                  {t(option.key)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="tree-workspace-field">
+            <span>{t('module.s01.regenerate')}</span>
+            <div className="tree-workspace-toggle-row">
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createRandomDataset)}>
+                {t('module.s01.generate.random')}
+              </button>
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createNearlySortedDataset)}>
+                {t('module.s01.generate.nearlySorted')}
+              </button>
+            </div>
+            <div className="tree-workspace-toggle-row">
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createAscendingDataset)}>
+                {t('module.s01.generate.ascending')}
+              </button>
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createDescendingDataset)}>
+                {t('module.s01.generate.descending')}
+              </button>
+            </div>
+          </div>
+
+          <div className="tree-workspace-sample-block">
+            <span>{t('module.s01.sample')}</span>
+            <code>[{formatArrayPreview(inputData)}]</code>
+          </div>
+        </>
+      }
+      stepContent={
+        <div className="workspace-panel-scroll">
+          <div className="workspace-panel-copy">
+            <h3>{getStepDescription(currentSnapshot, t)}</h3>
+            <p>
+              {t('module.s01.currentArray')}: [{formatArrayPreview(currentSnapshot?.arrayState ?? [])}]
+            </p>
+          </div>
+
+          <dl className="tree-workspace-kv">
+            <div>
+              <dt>{t('playback.status')}</dt>
+              <dd>{getStatusLabel(status, t)}</dd>
+            </div>
+            <div>
+              <dt>{t('playback.step')}</dt>
+              <dd>
+                {currentStep}/{Math.max(steps.length - 1, 0)}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.dataSize')}</dt>
+              <dd>{datasetSize}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.highlight')}</dt>
+              <dd>{highlightSummary}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.legend.sorted')}</dt>
+              <dd>
+                {sortedIndexSet.size}/{arrayState.length}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.highlight.comparing')}</dt>
+              <dd>{currentIndicesText}</dd>
+            </div>
+          </dl>
+
+          <div className="legend-row">
+            <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
+            <span className="legend-item legend-moving">{t('module.s01.legend.swapping')}</span>
+            <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
+            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
+          </div>
+
+          <div className="pseudocode-block">
+            <h3>{t('module.s01.pseudocode')}</h3>
+            <ol>
+              <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.s02.code.line1')}</li>
+              <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.s02.code.line2')}</li>
+              <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.s02.code.line3')}</li>
+              <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.s02.code.line4')}</li>
+              <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.s02.code.line5')}</li>
+              <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.s02.code.line6')}</li>
+              <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.s02.code.line7')}</li>
+              <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.s02.code.line8')}</li>
+              <li className={currentSnapshot?.codeLines.includes(9) ? 'code-active' : ''}>{t('module.s02.code.line9')}</li>
+            </ol>
+          </div>
         </div>
-      </div>
-
-      <div className="bubble-toolbar">
-        <span>{t('module.s01.speed')}</span>
-        <div className="speed-group">
-          {speedOptions.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
-            >
-              {t(option.key)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <p>
-        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
-        {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
-      </p>
-
-      <p>
-        {t('module.s01.sample')}: [{formatArrayPreview(inputData)}]
-      </p>
-      <p>{getStepDescription(currentSnapshot, t)}</p>
-
-      <VisualizationCanvas
-        title={t('module.s02.title')}
-        subtitle={t('module.canvas.sortingStage')}
-        stageClassName="viz-canvas-stage-sorting"
-      >
+      }
+      stageContent={
         <div
           className="shell-stage-track"
           style={
@@ -384,57 +483,55 @@ export function SelectionSortPage() {
             ))}
           </div>
         </div>
-      </VisualizationCanvas>
-
-      <div className="legend-row">
-        <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
-        <span className="legend-item legend-moving">{t('module.s01.legend.swapping')}</span>
-        <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
-        <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-      </div>
-
-      <p className="array-preview">
-        {t('module.s01.currentArray')}: [{formatArrayPreview(currentSnapshot?.arrayState ?? [])}]
-      </p>
-      <p>
-        {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? [])
-          .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
-          .join(' | ') || t('module.s01.none')}
-      </p>
-
-      <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
-          {t('playback.play')}
-        </button>
-        <button type="button" onClick={pause} disabled={status !== 'playing'}>
-          {t('playback.pause')}
-        </button>
-        <button type="button" onClick={prev} disabled={steps.length === 0}>
-          {t('playback.prev')}
-        </button>
-        <button type="button" onClick={next} disabled={steps.length === 0}>
-          {t('playback.next')}
-        </button>
-        <button type="button" onClick={reset} disabled={steps.length === 0}>
-          {t('playback.reset')}
-        </button>
-      </div>
-
-      <div className="pseudocode-block">
-        <h3>{t('module.s01.pseudocode')}</h3>
-        <ol>
-          <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.s02.code.line1')}</li>
-          <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.s02.code.line2')}</li>
-          <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.s02.code.line3')}</li>
-          <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.s02.code.line4')}</li>
-          <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.s02.code.line5')}</li>
-          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.s02.code.line6')}</li>
-          <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.s02.code.line7')}</li>
-          <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.s02.code.line8')}</li>
-          <li className={currentSnapshot?.codeLines.includes(9) ? 'code-active' : ''}>{t('module.s02.code.line9')}</li>
-        </ol>
-      </div>
-    </section>
+      }
+      transportLeft={
+        <>
+          <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0 || currentStep <= 0}>
+            {t('playback.prev')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+            onClick={status === 'playing' ? pause : play}
+            disabled={steps.length === 0 || (status !== 'playing' && isAtLastFrame)}
+          >
+            {status === 'playing' ? t('playback.pause') : t('playback.play')}
+          </button>
+          <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={isAtLastFrame}>
+            {t('playback.next')}
+          </button>
+          <button type="button" className="tree-workspace-transport-btn" onClick={reset} disabled={steps.length === 0}>
+            {t('playback.reset')}
+          </button>
+          <div className="tree-workspace-transport-progress" aria-hidden="true">
+            <span
+              className="tree-workspace-transport-progress-fill"
+              style={{
+                width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <span className="tree-workspace-transport-step">
+            {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+        </>
+      }
+      transportRight={
+        currentSnapshot.indices.length > 0 ? (
+          <>
+            {currentSnapshot.indices.map((index) => (
+              <span key={index} className="tree-workspace-transport-chip">
+                #{index}
+              </span>
+            ))}
+            <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
+              {sortedIndexSet.size}/{arrayState.length}
+            </span>
+          </>
+        ) : (
+          <span className="tree-workspace-transport-empty">{getStepDescription(currentSnapshot, t)}</span>
+        )
+      }
+    />
   );
 }

@@ -243,6 +243,10 @@ Track actionable tasks here. Keep tasks small and testable.
 - [ ] P9-M2 Roll unified workspace shell across remaining implemented non-tree modules
   - DoD: migrate all remaining implemented sorting/search/linear pages without regressing route/runtime behavior.
   - Acceptance: `npm run check` passes and targeted Playwright sweeps remain stable across migrated routes.
+  - Progress (2026-04-06):
+    - sorting rollout batch 1 migrated to `WorkspaceShell`: `S-02`, `S-03`, `S-04`
+    - standardized sorting-shell breakout with `pageClassName="bubble-page tree-page"` + `shellClassName="workspace-shell-sorting"`
+    - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, movable panels with pinned edge buttons, stage-click collapse, and final-frame disable on `S-02`~`S-04`
 
 - [ ] P9-M3 Cross-module consistency + acceptance closure after shell unification
   - DoD: align all 15 implemented modules to one recognizable shell contract, refresh Playwright acceptance artifacts/report, and sync closure docs.
