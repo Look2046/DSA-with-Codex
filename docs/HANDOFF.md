@@ -2,6 +2,35 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (manual savepoint after P9 planning baseline)
+
+### Today Done
+- Saved a fresh handoff checkpoint after the docs-only `P9` planning baseline branch landed.
+- Confirmed the latest planning commit on the current branch:
+  - `9b6082f docs(p9): plan workspace shell unification`
+- Confirmed the next implementation direction remains unchanged:
+  - start `P9-M1` on a fresh `feat/*` branch
+  - pilot the unified workspace shell on `S-01`, `L-01`, and `SR-02`
+- Confirmed unrelated dirty items are still intentionally outside the planning savepoint:
+  - modified helper scripts under `scripts/`
+  - untracked design/output artifacts
+  - untracked launcher helper
+
+### Current State
+- Branch: `docs/p9-workspace-shell-plan`
+- Milestone state: `P9` planning baseline committed; implementation not started.
+- Recommended first implementation branch: `feat/p9-m1-workspace-shell-pilots`
+- Recommended first execution order:
+  - extract minimal shared shell foundation
+  - migrate `S-01`
+  - migrate `L-01`
+  - migrate `SR-02`
+
+### Next Step
+- Open a new window/session on `docs/p9-workspace-shell-plan`.
+- Read `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`.
+- Then create the pilot implementation branch and start `P9-M1` only.
+
 ## 2026-04-06 (P9 workspace-shell planning baseline)
 
 ### Today Done
