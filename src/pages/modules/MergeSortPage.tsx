@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
-import { VisualizationCanvas } from '../../components/VisualizationCanvas';
 import { useI18n } from '../../i18n/useI18n';
-import { useCurrentModule } from '../../hooks/useCurrentModule';
 import type { MergeSortStep } from '../../modules/sorting/mergeSort';
 import { buildMergeSortTimelineFromInput, type MergeSortImplementation } from '../../modules/sorting/mergeTimelineAdapter';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
@@ -227,7 +226,6 @@ type MotionGhostSpec = {
 
 export function MergeSortPage() {
   const { t } = useI18n();
-  const currentModule = useCurrentModule();
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_SIZE);
   const [implementation, setImplementation] = useState<MergeSortImplementation>('topDown');
@@ -252,6 +250,7 @@ export function MergeSortPage() {
   const motionDurationMs = useMemo(() => Math.max(140, Math.floor(speedMs * 0.72)), [speedMs]);
   const isFinaleFrame = currentSnapshot?.action === 'completed';
   const maxValue = useMemo(() => Math.max(...arrayState, 1), [arrayState]);
+  const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, MergeSortStep['highlights'][number]['type']>();
@@ -447,7 +446,45 @@ export function MergeSortPage() {
     return hidden;
   }, [currentSnapshot]);
 
-  const previewArray = useMemo(() => bufferState.map((value) => (value === null ? '_' : String(value))), [bufferState]);
+  const focusPoint = useMemo(() => {
+    if (arrayState.length === 0) {
+      return null;
+    }
+
+    const focusIndices = new Set<number>();
+    if (currentSnapshot?.left !== null && currentSnapshot?.right !== null) {
+      focusIndices.add(currentSnapshot.left);
+      focusIndices.add(currentSnapshot.right);
+    }
+    if (currentSnapshot?.mid !== null) {
+      focusIndices.add(currentSnapshot.mid);
+    }
+    if (currentSnapshot?.i !== null) {
+      focusIndices.add(currentSnapshot.i);
+    }
+    if (currentSnapshot?.j !== null) {
+      focusIndices.add(currentSnapshot.j);
+    }
+    if (currentSnapshot?.k !== null) {
+      focusIndices.add(currentSnapshot.k);
+    }
+
+    if (focusIndices.size === 0) {
+      return null;
+    }
+
+    const averageIndex = [...focusIndices].reduce((sum, value) => sum + value, 0) / focusIndices.size;
+    return {
+      x: ((averageIndex + 0.5) / arrayState.length) * 100,
+      y: currentSnapshot?.k !== null ? 64 : 52,
+    };
+  }, [arrayState.length, currentSnapshot]);
+
+  const highlightSummary =
+    (currentSnapshot?.highlights ?? [])
+      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
+      .join(' | ') || t('module.s01.none');
+  const previewArray = bufferState.map((value) => (value === null ? '_' : String(value)));
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -474,114 +511,213 @@ export function MergeSortPage() {
   const implementationLabel = implementation === 'topDown' ? t('module.s06.mode.topDown') : t('module.s06.mode.bottomUp');
   const operationExpression = getOperationExpression(currentSnapshot, t, implementation);
   const pseudocodeKeys = implementation === 'topDown' ? TOP_DOWN_PSEUDOCODE_KEYS : BOTTOM_UP_PSEUDOCODE_KEYS;
+  const activeRangeText =
+    currentSnapshot?.left !== null && currentSnapshot?.right !== null ? `[${currentSnapshot.left}, ${currentSnapshot.right}]` : '-';
 
   return (
-    <section className="bubble-page">
-      <h2>{t('module.s06.title')}</h2>
-      <p>{t('module.s06.body')}</p>
+    <WorkspaceShell
+      pageClassName="bubble-page tree-page"
+      shellClassName="workspace-shell-sorting merge-sort-canvas"
+      stageAriaLabel={t('module.s06.title')}
+      title={t('module.s06.title')}
+      description={t('module.s06.body')}
+      stageClassName="workspace-stage-sorting viz-canvas-stage-sorting"
+      stageBodyClassName="workspace-stage-body-sorting"
+      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
+      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
+      defaultControlsPanelSize={{ width: 332, height: 560 }}
+      defaultContextPanelSize={{ width: 356, height: 580 }}
+      focusPoint={focusPoint}
+      stageMeta={
+        <>
+          <span className="tree-workspace-pill tree-workspace-pill-active">
+            {t('playback.status')}: {getStatusLabel(status, t)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('playback.step')}: {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.s06.mode.label')}: {implementationLabel}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.s06.meta.range')}: {activeRangeText}
+          </span>
+          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t, implementation)}</span>
+        </>
+      }
+      controlsContent={
+        <>
+          <label className="tree-workspace-field" htmlFor="dataset-size-s06">
+            <span>{t('module.s01.dataSize')}</span>
+            <input
+              id="dataset-size-s06"
+              type="range"
+              min={MIN_SIZE}
+              max={MAX_SIZE}
+              value={datasetSize}
+              onChange={(event) => setDatasetSize(Number(event.target.value))}
+            />
+            <strong>{datasetSize}</strong>
+          </label>
 
-      <div className="bubble-toolbar">
-        <label htmlFor="dataset-size-s06" className="control-inline">
-          <span>{t('module.s01.dataSize')}</span>
-          <input
-            id="dataset-size-s06"
-            type="range"
-            min={MIN_SIZE}
-            max={MAX_SIZE}
-            value={datasetSize}
-            onChange={(event) => setDatasetSize(Number(event.target.value))}
-          />
-          <strong>{datasetSize}</strong>
-        </label>
-        <div className="speed-group">
-          <button type="button" onClick={() => regenerateData(createRandomDataset)}>
-            {t('module.s01.generate.random')}
-          </button>
-          <button type="button" onClick={() => regenerateData(createNearlySortedDataset)}>
-            {t('module.s01.generate.nearlySorted')}
-          </button>
-          <button type="button" onClick={() => regenerateData(createAscendingDataset)}>
-            {t('module.s01.generate.ascending')}
-          </button>
-          <button type="button" onClick={() => regenerateData(createDescendingDataset)}>
-            {t('module.s01.generate.descending')}
-          </button>
+          <div className="tree-workspace-field">
+            <span>{t('module.s06.mode.label')}</span>
+            <div className="tree-workspace-toggle-row">
+              <button
+                type="button"
+                className={`tree-workspace-toggle${implementation === 'topDown' ? ' tree-workspace-toggle-active' : ''}`}
+                onClick={() => {
+                  setImplementation('topDown');
+                  reset();
+                }}
+              >
+                {t('module.s06.mode.topDown')}
+              </button>
+              <button
+                type="button"
+                className={`tree-workspace-toggle${implementation === 'bottomUp' ? ' tree-workspace-toggle-active' : ''}`}
+                onClick={() => {
+                  setImplementation('bottomUp');
+                  reset();
+                }}
+              >
+                {t('module.s06.mode.bottomUp')}
+              </button>
+            </div>
+          </div>
+
+          <div className="tree-workspace-field">
+            <span>{t('module.s01.speed')}</span>
+            <div className="tree-workspace-toggle-row">
+              {speedOptions.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                  onClick={() => setSpeed(option.value)}
+                >
+                  {t(option.key)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="tree-workspace-field">
+            <span>{t('module.s01.regenerate')}</span>
+            <div className="tree-workspace-toggle-row">
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createRandomDataset)}>
+                {t('module.s01.generate.random')}
+              </button>
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createNearlySortedDataset)}>
+                {t('module.s01.generate.nearlySorted')}
+              </button>
+            </div>
+            <div className="tree-workspace-toggle-row">
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createAscendingDataset)}>
+                {t('module.s01.generate.ascending')}
+              </button>
+              <button type="button" className="tree-workspace-ghost-button" onClick={() => regenerateData(createDescendingDataset)}>
+                {t('module.s01.generate.descending')}
+              </button>
+            </div>
+          </div>
+
+          <div className="tree-workspace-sample-block">
+            <span>{t('module.s01.sample')}</span>
+            <code>[{formatArrayPreview(inputData)}]</code>
+          </div>
+        </>
+      }
+      stepContent={
+        <div className="workspace-panel-scroll">
+          <div className="workspace-panel-copy">
+            <h3>{getStepDescription(currentSnapshot, t, implementation)}</h3>
+            <p>
+              {t('module.s06.meta.buffer')}: [{formatArrayPreview(previewArray)}]
+            </p>
+            {operationExpression ? (
+              <p>
+                {t('module.s06.meta.operation')}: {operationExpression}
+              </p>
+            ) : null}
+          </div>
+
+          <dl className="tree-workspace-kv">
+            <div>
+              <dt>{t('playback.status')}</dt>
+              <dd>{getStatusLabel(status, t)}</dd>
+            </div>
+            <div>
+              <dt>{t('playback.step')}</dt>
+              <dd>
+                {currentStep}/{Math.max(steps.length - 1, 0)}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.mode.label')}</dt>
+              <dd>{implementationLabel}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.dataSize')}</dt>
+              <dd>{datasetSize}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.left')}</dt>
+              <dd>{currentSnapshot?.left ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.mid')}</dt>
+              <dd>{currentSnapshot?.mid ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.right')}</dt>
+              <dd>{currentSnapshot?.right ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.leftPointer')}</dt>
+              <dd>{currentSnapshot?.i ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.rightPointer')}</dt>
+              <dd>{currentSnapshot?.j ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.writePointer')}</dt>
+              <dd>{currentSnapshot?.k ?? '-'}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s06.meta.range')}</dt>
+              <dd>{activeRangeText}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.highlight')}</dt>
+              <dd>{highlightSummary}</dd>
+            </div>
+          </dl>
+
+          <div className="legend-row">
+            <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
+            <span className="legend-item legend-moving">{t('module.s06.legend.moving')}</span>
+            <span className="legend-item legend-merge-left">{t('module.s06.legend.left')}</span>
+            <span className="legend-item legend-merge-right">{t('module.s06.legend.right')}</span>
+            <span className="legend-item legend-merge-buffer">{t('module.s06.legend.buffer')}</span>
+            <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
+            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
+          </div>
+
+          <div className="pseudocode-block">
+            <h3>{t('module.s01.pseudocode')}</h3>
+            <ol>
+              {pseudocodeKeys.map((lineKey, lineIndex) => (
+                <li key={lineKey} className={currentSnapshot?.codeLines.includes(lineIndex + 1) ? 'code-active' : ''}>
+                  {t(lineKey)}
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
-      </div>
-
-      <div className="bubble-toolbar">
-        <span>{t('module.s06.mode.label')}</span>
-        <div className="speed-group">
-          <button
-            type="button"
-            className={implementation === 'topDown' ? 'speed-active' : ''}
-            onClick={() => {
-              setImplementation('topDown');
-              reset();
-            }}
-          >
-            {t('module.s06.mode.topDown')}
-          </button>
-          <button
-            type="button"
-            className={implementation === 'bottomUp' ? 'speed-active' : ''}
-            onClick={() => {
-              setImplementation('bottomUp');
-              reset();
-            }}
-          >
-            {t('module.s06.mode.bottomUp')}
-          </button>
-        </div>
-      </div>
-
-      <div className="bubble-toolbar">
-        <span>{t('module.s01.speed')}</span>
-        <div className="speed-group">
-          {speedOptions.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
-            >
-              {t(option.key)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <p>
-        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
-        {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)} | {t('module.s06.mode.label')}:{' '}
-        {implementationLabel}
-      </p>
-
-      <p>
-        {t('module.s01.sample')}: [{formatArrayPreview(inputData)}]
-      </p>
-
-      <div className="shell-status-lines">
-        <p className="shell-status-line">{getStepDescription(currentSnapshot, t, implementation)}</p>
-        <p className="shell-status-line">
-          {t('module.s06.meta.left')}: {currentSnapshot?.left ?? '-'} | {t('module.s06.meta.mid')}: {currentSnapshot?.mid ?? '-'} |{' '}
-          {t('module.s06.meta.right')}: {currentSnapshot?.right ?? '-'}
-        </p>
-        <p className="shell-status-line">
-          {t('module.s06.meta.leftPointer')}: {currentSnapshot?.i ?? '-'} | {t('module.s06.meta.rightPointer')}: {currentSnapshot?.j ?? '-'} |{' '}
-          {t('module.s06.meta.writePointer')}: {currentSnapshot?.k ?? '-'}
-        </p>
-        <p className={`shell-status-line shell-operation-hint${operationExpression ? '' : ' shell-status-placeholder'}`}>
-          {operationExpression ? `${t('module.s06.meta.operation')}: ${operationExpression}` : '-'}
-        </p>
-      </div>
-
-      <VisualizationCanvas
-        className="merge-sort-canvas"
-        title={t('module.s06.title')}
-        subtitle={t('module.canvas.sortingStage')}
-        stageClassName="viz-canvas-stage-sorting"
-      >
+      }
+      stageContent={
         <div
           ref={stageTrackRef}
           className="shell-stage-track"
@@ -695,55 +831,51 @@ export function MergeSortPage() {
             </div>
           </div>
         </div>
-      </VisualizationCanvas>
-
-      <div className="legend-row">
-        <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
-        <span className="legend-item legend-moving">{t('module.s06.legend.moving')}</span>
-        <span className="legend-item legend-merge-left">{t('module.s06.legend.left')}</span>
-        <span className="legend-item legend-merge-right">{t('module.s06.legend.right')}</span>
-        <span className="legend-item legend-merge-buffer">{t('module.s06.legend.buffer')}</span>
-        <span className="legend-item legend-sorted">{t('module.s01.legend.sorted')}</span>
-        <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-      </div>
-
-      <p className="array-preview">
-        {t('module.s06.meta.buffer')}: [{formatArrayPreview(previewArray)}]
-      </p>
-
-      <p>
-        {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? []).map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`).join(' | ') || t('module.s01.none')}
-      </p>
-
-      <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || steps.length === 0}>
-          {t('playback.play')}
-        </button>
-        <button type="button" onClick={pause} disabled={status !== 'playing'}>
-          {t('playback.pause')}
-        </button>
-        <button type="button" onClick={prev} disabled={steps.length === 0}>
-          {t('playback.prev')}
-        </button>
-        <button type="button" onClick={next} disabled={steps.length === 0}>
-          {t('playback.next')}
-        </button>
-        <button type="button" onClick={reset} disabled={steps.length === 0}>
-          {t('playback.reset')}
-        </button>
-      </div>
-
-      <div className="pseudocode-block">
-        <h3>{t('module.s01.pseudocode')}</h3>
-        <ol>
-          {pseudocodeKeys.map((lineKey, lineIndex) => (
-            <li key={lineKey} className={currentSnapshot?.codeLines.includes(lineIndex + 1) ? 'code-active' : ''}>
-              {t(lineKey)}
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+      }
+      transportLeft={
+        <>
+          <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0 || currentStep <= 0}>
+            {t('playback.prev')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+            onClick={status === 'playing' ? pause : play}
+            disabled={steps.length === 0 || (status !== 'playing' && isAtLastFrame)}
+          >
+            {status === 'playing' ? t('playback.pause') : t('playback.play')}
+          </button>
+          <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={isAtLastFrame}>
+            {t('playback.next')}
+          </button>
+          <button type="button" className="tree-workspace-transport-btn" onClick={reset} disabled={steps.length === 0}>
+            {t('playback.reset')}
+          </button>
+          <div className="tree-workspace-transport-progress" aria-hidden="true">
+            <span
+              className="tree-workspace-transport-progress-fill"
+              style={{
+                width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <span className="tree-workspace-transport-step">
+            {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+        </>
+      }
+      transportRight={
+        <>
+          <span className="tree-workspace-transport-chip">{implementationLabel}</span>
+          <span className="tree-workspace-transport-chip">{activeRangeText}</span>
+          {currentSnapshot?.i !== null ? <span className="tree-workspace-transport-chip">L {currentSnapshot.i}</span> : null}
+          {currentSnapshot?.j !== null ? <span className="tree-workspace-transport-chip">R {currentSnapshot.j}</span> : null}
+          {currentSnapshot?.k !== null ? <span className="tree-workspace-transport-chip">W {currentSnapshot.k}</span> : null}
+          <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
+            {sortedIndexSet.size}/{arrayState.length}
+          </span>
+        </>
+      }
+    />
   );
 }

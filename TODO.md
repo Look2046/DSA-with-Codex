@@ -247,6 +247,10 @@ Track actionable tasks here. Keep tasks small and testable.
     - sorting rollout batch 1 migrated to `WorkspaceShell`: `S-02`, `S-03`, `S-04`
     - standardized sorting-shell breakout with `pageClassName="bubble-page tree-page"` + `shellClassName="workspace-shell-sorting"`
     - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, movable panels with pinned edge buttons, stage-click collapse, and final-frame disable on `S-02`~`S-04`
+  - Progress (2026-04-06, batch 2):
+    - sorting rollout batch 2 migrated to `WorkspaceShell`: `S-05`, `S-06`
+    - preserved quick-sort pivot/hole/group visuals and merge-sort buffer + mode semantics under the shared shell
+    - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, working `S-06` implementation toggle, and final-frame disable on `S-05` / `S-06`
 
 - [ ] P9-M3 Cross-module consistency + acceptance closure after shell unification
   - DoD: align all 15 implemented modules to one recognizable shell contract, refresh Playwright acceptance artifacts/report, and sync closure docs.

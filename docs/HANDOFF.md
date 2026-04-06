@@ -2,6 +2,46 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (P9-M2 sorting shell rollout batch 2)
+
+### Today Done
+- Continued `P9-M2` from the validated sorting batch 1 baseline and migrated the remaining sorting pages:
+  - `S-05` `/modules/quick-sort`
+  - `S-06` `/modules/merge-sort`
+- Moved both routes from the old page-flow shell (`VisualizationCanvas`, below-stage controls, page-flow pseudocode/legend) to shared `WorkspaceShell` composition:
+  - pinned `Controls` / `Step` edge entrypoints
+  - in-stage transport
+  - stage-click collapse
+  - focus-aware panel avoidance
+- Preserved the sorting-family teaching semantics while changing only the shell contract:
+  - `S-05` kept pivot / hole / active partition group visualization
+  - `S-06` kept merge buffer visualization and top-down / bottom-up mode switching
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright at `1440x1100`:
+  - `S-05` page / shell / stage width = `1416px`
+  - `S-06` page / shell / stage width = `1416px`
+  - both pages open `Controls` + `Step` panels correctly
+  - `S-05` final frame ends at `55/55` with disabled `Play` / `Next`
+  - `S-06` control-drawer mode switch updates the stage-meta chip to `Implementation: Bottom-up iterative`
+  - `S-06` final frame ends at `85/85` with disabled `Play` / `Next`
+
+### Current State
+- Branch: `feat/p9-m2-sorting-shell-rollout`
+- Validated scope in this batch:
+  - `src/pages/modules/QuickSortPage.tsx`
+  - `src/pages/modules/MergeSortPage.tsx`
+- Milestone state:
+  - sorting family shell rollout is now locally verified through `S-01`~`S-06`
+  - `P9-M2` remains in progress; search + linear families are still pending rollout
+
+### Next Step
+- Create a focused commit for the validated sorting-shell rollout batch 2.
+- Then continue `P9-M2` on the remaining non-tree families:
+  - `SR-01`
+  - `L-02`, `L-03`, `L-04`, `L-05`
+- Keep unrelated dirty items out of the rollout commit (`scripts/*`, design artifacts, old Playwright images, launcher helper).
+
 ## 2026-04-06 (P9-M2 sorting shell rollout batch 1)
 
 ### Today Done
