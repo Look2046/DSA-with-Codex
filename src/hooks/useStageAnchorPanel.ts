@@ -34,6 +34,7 @@ type DefaultAnchorPositionResolver = (
 
 type UseStageAnchorPanelOptions = {
   stageRef: RefObject<HTMLElement | null>;
+  boundsRef?: RefObject<HTMLElement | null>;
   anchorRef: RefObject<HTMLElement | null>;
   panelRef: RefObject<HTMLElement | null>;
   isOpen: boolean;
@@ -42,6 +43,7 @@ type UseStageAnchorPanelOptions = {
   defaultPanelSize: StageSize;
   collisionTarget?: StageRect | null;
   margin?: number;
+  overflowMargin?: number;
   autoAvoid?: boolean;
   enabled?: boolean;
 };
@@ -97,13 +99,21 @@ function buildBoundingBox(anchorPosition: StagePoint, metrics: LayoutMetrics): S
   };
 }
 
-function clampBoxOrigin(boxOrigin: StagePoint, boxSize: StageSize, stageSize: StageSize, margin: number): StagePoint {
-  const maxX = Math.max(margin, stageSize.width - boxSize.width - margin);
-  const maxY = Math.max(margin, stageSize.height - boxSize.height - margin);
+function clampBoxOrigin(
+  boxOrigin: StagePoint,
+  boxSize: StageSize,
+  stageSize: StageSize,
+  margin: number,
+  overflowMargin: number,
+): StagePoint {
+  const minX = margin - overflowMargin;
+  const minY = margin - overflowMargin;
+  const maxX = Math.max(minX, stageSize.width - boxSize.width - margin + overflowMargin);
+  const maxY = Math.max(minY, stageSize.height - boxSize.height - margin + overflowMargin);
 
   return {
-    x: clampNumber(boxOrigin.x, margin, maxX),
-    y: clampNumber(boxOrigin.y, margin, maxY),
+    x: clampNumber(boxOrigin.x, minX, maxX),
+    y: clampNumber(boxOrigin.y, minY, maxY),
   };
 }
 
@@ -112,6 +122,7 @@ function clampAnchorPosition(
   metrics: LayoutMetrics,
   stageSize: StageSize,
   margin: number,
+  overflowMargin: number,
 ): StagePoint {
   const boxOrigin = clampBoxOrigin(
     {
@@ -121,6 +132,7 @@ function clampAnchorPosition(
     { width: metrics.width, height: metrics.height },
     stageSize,
     margin,
+    overflowMargin,
   );
 
   return {
@@ -183,6 +195,7 @@ function resolveBestAnchorPosition(
   stageSize: StageSize,
   target: StageRect,
   margin: number,
+  overflowMargin: number,
 ): StagePoint {
   const currentBox = buildBoundingBox(currentAnchorPosition, metrics);
   if (getRectOverlapArea(currentBox, target) <= 0) {
@@ -190,16 +203,18 @@ function resolveBestAnchorPosition(
   }
 
   const preferredBox = buildBoundingBox(
-    clampAnchorPosition(preferredAnchorPosition, metrics, stageSize, margin),
+    clampAnchorPosition(preferredAnchorPosition, metrics, stageSize, margin, overflowMargin),
     metrics,
   );
-  const cornerMaxX = Math.max(margin, stageSize.width - metrics.width - margin);
-  const cornerMaxY = Math.max(margin, stageSize.height - metrics.height - margin);
+  const cornerMinX = margin - overflowMargin;
+  const cornerMinY = margin - overflowMargin;
+  const cornerMaxX = Math.max(cornerMinX, stageSize.width - metrics.width - margin + overflowMargin);
+  const cornerMaxY = Math.max(cornerMinY, stageSize.height - metrics.height - margin + overflowMargin);
   const candidateOrigins = [
     ...buildCandidateBoxOrigins(currentBox, preferredBox, target),
-    { x: margin, y: margin },
-    { x: cornerMaxX, y: margin },
-    { x: margin, y: cornerMaxY },
+    { x: cornerMinX, y: cornerMinY },
+    { x: cornerMaxX, y: cornerMinY },
+    { x: cornerMinX, y: cornerMaxY },
     { x: cornerMaxX, y: cornerMaxY },
   ];
 
@@ -213,6 +228,7 @@ function resolveBestAnchorPosition(
       { width: metrics.width, height: metrics.height },
       stageSize,
       margin,
+      overflowMargin,
     );
     const key = createUniquePointKey(clampedOrigin);
     if (visited.has(key)) {
@@ -239,8 +255,7 @@ function resolveBestAnchorPosition(
   return bestAnchor;
 }
 
-function getStageSize(stageRef: RefObject<HTMLElement | null>): StageSize {
-  const element = stageRef.current;
+function getElementSize(element: HTMLElement | null): StageSize {
   if (!element) {
     return DEFAULT_STAGE_SIZE;
   }
@@ -271,6 +286,7 @@ export function createFocusCollisionRect(
 
 export function useStageAnchorPanel({
   stageRef,
+  boundsRef,
   anchorRef,
   panelRef,
   isOpen,
@@ -279,10 +295,11 @@ export function useStageAnchorPanel({
   defaultPanelSize,
   collisionTarget = null,
   margin = DEFAULT_MARGIN,
+  overflowMargin = 0,
   autoAvoid = true,
   enabled = true,
 }: UseStageAnchorPanelOptions): UseStageAnchorPanelResult {
-  const [stageSize, setStageSize] = useState<StageSize>(DEFAULT_STAGE_SIZE);
+  const [boundsSize, setBoundsSize] = useState<StageSize>(DEFAULT_STAGE_SIZE);
   const [anchorSize, setAnchorSize] = useState<StageSize>(defaultAnchorSize);
   const [panelSize, setPanelSize] = useState<StageSize>(defaultPanelSize);
   const [dragState, setDragState] = useState<AnchorPanelDragState | null>(null);
@@ -304,43 +321,52 @@ export function useStageAnchorPanel({
       return anchorPosition;
     }
 
-    const clamped = clampAnchorPosition(anchorPosition, metrics, stageSize, margin);
+    const clamped = clampAnchorPosition(anchorPosition, metrics, boundsSize, margin, overflowMargin);
     if (!isOpen || !autoAvoid || !collisionTarget) {
       return clamped;
     }
 
-    const preferredAnchor = defaultPanelPosition(stageSize, anchorSize, panelSize);
-    return resolveBestAnchorPosition(clamped, preferredAnchor, metrics, stageSize, collisionTarget, margin);
+    const preferredAnchor = defaultPanelPosition(boundsSize, anchorSize, panelSize);
+    return resolveBestAnchorPosition(
+      clamped,
+      preferredAnchor,
+      metrics,
+      boundsSize,
+      collisionTarget,
+      margin,
+      overflowMargin,
+    );
   }, [
     anchorPosition,
     anchorSize,
     autoAvoid,
+    boundsSize,
     collisionTarget,
     defaultPanelPosition,
     enabled,
     isOpen,
     margin,
     metrics,
+    overflowMargin,
     panelSize,
-    stageSize,
   ]);
 
   useEffect(() => {
-    const updateStageSize = () => {
-      const nextSize = getStageSize(stageRef);
-      setStageSize((previous) => (areSizesEqual(previous, nextSize) ? previous : nextSize));
+    const updateBoundsSize = () => {
+      const nextSize = getElementSize(boundsRef?.current ?? stageRef.current);
+      setBoundsSize((previous) => (areSizesEqual(previous, nextSize) ? previous : nextSize));
     };
 
-    updateStageSize();
-    const stageElement = stageRef.current;
-    if (!stageElement || typeof ResizeObserver === 'undefined') {
+    updateBoundsSize();
+    const boundsElement = boundsRef?.current ?? stageRef.current;
+    if (!boundsElement || typeof ResizeObserver === 'undefined') {
       return;
     }
 
-    const observer = new ResizeObserver(() => updateStageSize());
-    observer.observe(stageElement);
+    const observer = new ResizeObserver(() => updateBoundsSize());
+    observer.observe(boundsElement);
     return () => observer.disconnect();
-  }, [stageRef]);
+  }, [boundsRef, stageRef]);
 
   useEffect(() => {
     const updateElementSizes = () => {
@@ -372,20 +398,21 @@ export function useStageAnchorPanel({
     }
 
     const handlePointerMove = (event: PointerEvent) => {
-      const stageElement = stageRef.current;
-      if (!stageElement) {
+      const boundsElement = boundsRef?.current ?? stageRef.current;
+      if (!boundsElement) {
         return;
       }
 
-      const stageRect = stageElement.getBoundingClientRect();
+      const boundsRect = boundsElement.getBoundingClientRect();
       const nextAnchor = clampAnchorPosition(
         {
-          x: event.clientX - stageRect.left - dragState.offsetX,
-          y: event.clientY - stageRect.top - dragState.offsetY,
+          x: event.clientX - boundsRect.left - dragState.offsetX,
+          y: event.clientY - boundsRect.top - dragState.offsetY,
         },
         metrics,
-        stageSize,
+        boundsSize,
         margin,
+        overflowMargin,
       );
 
       setAnchorPosition((previous) => (arePointsEqual(previous, nextAnchor) ? previous : nextAnchor));
@@ -405,7 +432,7 @@ export function useStageAnchorPanel({
       window.removeEventListener('pointerup', handlePointerEnd);
       window.removeEventListener('pointercancel', handlePointerEnd);
     };
-  }, [dragState, margin, metrics, stageRef, stageSize]);
+  }, [boundsRef, boundsSize, dragState, margin, metrics, overflowMargin, stageRef]);
 
   useEffect(() => {
     if (!dragState) {
@@ -432,23 +459,23 @@ export function useStageAnchorPanel({
         return;
       }
 
-      const stageElement = stageRef.current;
-      if (!stageElement) {
+      const boundsElement = boundsRef?.current ?? stageRef.current;
+      if (!boundsElement) {
         return;
       }
 
-      const stageRect = stageElement.getBoundingClientRect();
+      const boundsRect = boundsElement.getBoundingClientRect();
       event.preventDefault();
       event.stopPropagation();
       event.currentTarget.setPointerCapture?.(event.pointerId);
 
       setDragState({
         pointerId: event.pointerId,
-        offsetX: event.clientX - stageRect.left - resolvedAnchorPosition.x,
-        offsetY: event.clientY - stageRect.top - resolvedAnchorPosition.y,
+        offsetX: event.clientX - boundsRect.left - resolvedAnchorPosition.x,
+        offsetY: event.clientY - boundsRect.top - resolvedAnchorPosition.y,
       });
     },
-    [enabled, resolvedAnchorPosition.x, resolvedAnchorPosition.y, stageRef],
+    [boundsRef, enabled, resolvedAnchorPosition.x, resolvedAnchorPosition.y, stageRef],
   );
 
   const panelStyle = useMemo<CSSProperties>(

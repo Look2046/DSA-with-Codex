@@ -1185,7 +1185,7 @@ body {
   height: min(920px, calc(100svh - 152px));
   border: 0;
   border-radius: 24px;
-  overflow: hidden;
+  overflow: visible;
   background: transparent;
   box-shadow: none;
 }
@@ -1594,6 +1594,36 @@ body {
   align-self: end;
 }
 
+.workspace-shell-bubble {
+  min-height: 620px;
+  height: min(980px, calc(100svh - 124px));
+}
+
+.workspace-shell-bubble .tree-workspace-stage-meta {
+  max-width: min(54%, 620px);
+}
+
+.workspace-shell-bubble .workspace-stage-body {
+  padding: 76px 18px 86px;
+}
+
+.workspace-shell-bubble .workspace-stage-body-sorting {
+  align-items: stretch;
+  justify-items: center;
+}
+
+.workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track {
+  --shell-gap: clamp(0.5px, calc(5px - var(--shell-total-count) * 0.04px), 4.5px);
+  --shell-slot-max-width: 92px;
+  width: min(100%, clamp(600px, 72%, 920px));
+  max-width: 920px;
+  gap: 12px;
+}
+
+.workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track > .array-bars {
+  height: min(100%, clamp(420px, 86%, 680px));
+}
+
 .workspace-stage-body-array {
   display: flex;
   align-items: flex-start;
@@ -1656,6 +1686,8 @@ body {
   right: 0;
   bottom: 0;
   min-height: auto;
+  overflow: hidden;
+  border-radius: 24px;
   background:
     radial-gradient(circle at 20% 12%, rgba(102, 162, 219, 0.1), transparent 36%),
     radial-gradient(circle at 82% 18%, rgba(85, 149, 211, 0.08), transparent 34%),
@@ -3394,6 +3426,11 @@ body {
     min-height: 760px;
   }
 
+  .workspace-shell-bubble {
+    min-height: 820px;
+    height: auto;
+  }
+
   .tree-workspace-controls-anchor,
   .tree-workspace-context-anchor,
   .tree-workspace-transport,
@@ -3455,6 +3492,15 @@ body {
   .tree-stage-visual {
     margin: 0 14px 12px;
     min-height: 360px;
+  }
+
+  .workspace-shell-bubble .workspace-stage-body {
+    padding: 72px 14px 84px;
+  }
+
+  .workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track {
+    width: 100%;
+    max-width: none;
   }
 
   .tree-workspace-context-sheet {

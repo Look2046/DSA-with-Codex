@@ -2,6 +2,39 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (S-01 shell rebalance + overflow panel drag)
+
+### Today Done
+- Refined the `S-01 Bubble Sort` workspace shell after another layout review:
+  - narrowed the sorting track so the bar chart reads slimmer left-to-right
+  - increased the shell/stage working height so the bars use more vertical space
+  - kept the swap-ghost rendering intact while rebalancing the shell proportions
+- Extended the shared workspace-shell panel behavior:
+  - `Controls` / `Step` drawers can now be dragged beyond the stage card instead of being hard-clamped inside it
+  - the edge buttons stay pinned in place while only the open panels move
+  - focus-based auto-avoid still works with the expanded movement range
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright against the live local app:
+  - `S-01` shell height grew to about `976px`
+  - sorting track width is now about `814px` inside a `1168px` shell, leaving more breathing room on both sides
+  - bar container height is now about `669px`, and the first bar stayed at full-body height (`~647px`) instead of flattening
+  - dragging the left/right panels can place them outside the shell while the blue edge tabs remain pinned
+  - swap step still renders two full-height motion ghosts (`73x647`) instead of a top-strip artifact
+
+### Current State
+- Branch: `feat/p9-m1-workspace-shell-pilots`
+- Fix scope:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/components/WorkspaceShell.tsx`
+  - `src/pages/modules/BubbleSortPage.tsx`
+  - `src/index.css`
+- This is still a focused `P9-M1` follow-up fix; milestone direction is unchanged.
+
+### Next Step
+- Create a focused commit for the workspace-shell overflow drag range + `S-01` shell proportion rebalance.
+- Then continue the broader `P9-M2` rollout / consistency sweep.
+
 ## 2026-04-06 (S-01 sorting stage height follow-up)
 
 ### Today Done

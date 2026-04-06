@@ -92,6 +92,7 @@ export function WorkspaceShell({
   floatingPanelsEnabledMinWidth = 960,
 }: WorkspaceShellProps) {
   const { t } = useI18n();
+  const shellRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const controlsTabRef = useRef<HTMLButtonElement | null>(null);
   const controlsPanelRef = useRef<HTMLDivElement | null>(null);
@@ -138,6 +139,7 @@ export function WorkspaceShell({
   );
   const controlsPanelAnchor = useStageAnchorPanel({
     stageRef,
+    boundsRef: shellRef,
     anchorRef: controlsTabRef,
     panelRef: controlsPanelRef,
     isOpen: showControls,
@@ -145,10 +147,12 @@ export function WorkspaceShell({
     defaultAnchorSize: defaultControlsTabSize,
     defaultPanelSize: defaultControlsPanelSize,
     collisionTarget: focusCollisionRect,
+    overflowMargin: 320,
     enabled: floatingPanelsEnabled,
   });
   const stepPanelAnchor = useStageAnchorPanel({
     stageRef,
+    boundsRef: shellRef,
     anchorRef: contextRailRef,
     panelRef: contextPanelRef,
     isOpen: showStep,
@@ -156,6 +160,7 @@ export function WorkspaceShell({
     defaultAnchorSize: defaultContextRailSize,
     defaultPanelSize: defaultContextPanelSize,
     collisionTarget: focusCollisionRect,
+    overflowMargin: 320,
     enabled: floatingPanelsEnabled,
   });
 
@@ -175,7 +180,7 @@ export function WorkspaceShell({
         <p>{description}</p>
       </div>
 
-      <section className={joinClasses('tree-workspace-shell', shellClassName)}>
+      <section ref={shellRef} className={joinClasses('tree-workspace-shell', shellClassName)}>
         <div className="tree-workspace-controls-anchor">
           <div className="tree-workspace-controls-tab-pin">
             <button
