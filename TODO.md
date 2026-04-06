@@ -240,7 +240,7 @@ Track actionable tasks here. Keep tasks small and testable.
   - Acceptance: `npm run check` passes and Playwright confirms stable pilot flows with the unified shell.
   - Done: added shared `WorkspaceShell`, migrated `S-01` / `L-01` / `SR-02`, refreshed local `p9m1-*` Playwright smoke artifacts, and synced milestone docs.
 
-- [ ] P9-M2 Roll unified workspace shell across remaining implemented non-tree modules
+- [x] P9-M2 Roll unified workspace shell across remaining implemented non-tree modules
   - DoD: migrate all remaining implemented sorting/search/linear pages without regressing route/runtime behavior.
   - Acceptance: `npm run check` passes and targeted Playwright sweeps remain stable across migrated routes.
   - Progress (2026-04-06):
@@ -251,6 +251,10 @@ Track actionable tasks here. Keep tasks small and testable.
     - sorting rollout batch 2 migrated to `WorkspaceShell`: `S-05`, `S-06`
     - preserved quick-sort pivot/hole/group visuals and merge-sort buffer + mode semantics under the shared shell
     - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, working `S-06` implementation toggle, and final-frame disable on `S-05` / `S-06`
+  - Done (2026-04-06, search + linear):
+    - migrated `SR-01`, `L-02`, `L-03`, `L-04`, and `L-05` to `WorkspaceShell`
+    - added shared-shell compatibility styling for linked/linear stages and fixed `L-04` stack auto-sync timing so intermediate steps remain visible until completion
+    - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths across `SR-01` / `L-02` / `L-03` / `L-04` / `L-05`, plus working queue circular mode, resize playback, linked-list step progression, and stack `Next` progression
 
 - [ ] P9-M3 Cross-module consistency + acceptance closure after shell unification
   - DoD: align all 15 implemented modules to one recognizable shell contract, refresh Playwright acceptance artifacts/report, and sync closure docs.

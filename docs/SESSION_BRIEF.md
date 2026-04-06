@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p9-m2-sorting-shell-rollout`
-- Current phase: `P9-M2` sorting-shell rollout batch 2 verified locally; search/linear rollout is next
+- Current phase: `P9-M2` non-tree workspace-shell rollout completed locally; `P9-M3` acceptance refresh is next
 - Last local quality gate: `npm run check` (passed locally, 2026-04-06)
 
 ## 2) What Is Already Done
@@ -54,6 +54,11 @@ Use this file as the first thing to read in a new chat/session.
   - migrated `S-05 Quick Sort` and `S-06 Merge Sort` to the shared `WorkspaceShell`
   - preserved quick-sort pivot/hole/group semantics and merge-sort buffer + implementation-mode semantics inside the shared shell
   - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, working control/step panels, `S-06` bottom-up mode switching, and final-frame disable on `S-05` / `S-06`
+- P9-M2 search + linear shell rollout completed locally:
+  - migrated `SR-01`, `L-02`, `L-03`, `L-04`, and `L-05` to the shared `WorkspaceShell`
+  - aligned these routes to the same pinned-button / movable-panel / stage-first interaction contract and added shared-shell compatibility styling for linked/linear stages
+  - fixed `L-04` stack auto-sync timing so visible push/pop intermediate steps are no longer skipped before completion
+  - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths across `SR-01` / `L-02` / `L-03` / `L-04` / `L-05`, circular queue mode switching, resize playback progression, linked-list step progression, and stack `Next` progression after the timing fix
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -127,12 +132,12 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue P9-M2 rollout across remaining implemented non-tree modules:
+- Start `P9-M3` cross-module consistency + acceptance closure:
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - preserve `WorkspaceShell` as the shared interaction contract instead of copying page-specific markup again
-  - continue from the validated sorting batches 1-2 baseline and migrate the remaining implemented non-tree pages by family batch (`search`, `linear`)
-  - keep tree pages behaviorally unchanged unless a compatibility fix is required
-  - finish with a consistency sweep before `P9-M3` acceptance refresh
+  - preserve `WorkspaceShell` as the shared interaction contract and verify the pilot/sorting/search/linear/tree routes still read as one cohesive product
+  - refresh Playwright acceptance artifacts/report for `/modules` + all implemented routes under `output/playwright/p9m3-*`
+  - keep tree pages behaviorally unchanged unless a final consistency fix is required
+  - close the milestone only after docs/artifact references are internally consistent
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails

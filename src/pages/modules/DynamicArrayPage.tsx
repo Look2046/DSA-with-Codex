@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
-import { VisualizationCanvas } from '../../components/VisualizationCanvas';
-import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { buildDynamicArrayTimelineFromInput } from '../../modules/linear/dynamicArrayTimelineAdapter';
 import {
@@ -27,7 +26,6 @@ function createRandomAppendValue(): number {
 
 export function DynamicArrayPage() {
   const { t } = useI18n();
-  const currentModule = useCurrentModule();
 
   const [arrayInput, setArrayInput] = useState(DEFAULT_CONFIG.array.join(', '));
   const [capacityInput, setCapacityInput] = useState(String(DEFAULT_CONFIG.capacity));
@@ -98,20 +96,33 @@ export function DynamicArrayPage() {
     target.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'auto' });
   }, [currentStep, currentSnapshot]);
 
-  const syncInputToCompletedState = useCallback((nextValueInput = valueInput) => {
-    if (!hasValidConfig || steps.length === 0) {
-      return;
-    }
+  const syncInputToCompletedState = useCallback(
+    (nextValueInput = valueInput) => {
+      if (!hasValidConfig || steps.length === 0) {
+        return;
+      }
 
-    if (arrayInput === completedArrayText && capacityInput === completedCapacityText) {
-      return;
-    }
+      if (arrayInput === completedArrayText && capacityInput === completedCapacityText) {
+        return;
+      }
 
-    reset();
-    setArrayInput(completedArrayText);
-    setCapacityInput(completedCapacityText);
-    recomputeInputState(completedArrayText, completedCapacityText, nextValueInput);
-  }, [arrayInput, capacityInput, completedArrayText, completedCapacityText, hasValidConfig, recomputeInputState, reset, steps.length, valueInput]);
+      reset();
+      setArrayInput(completedArrayText);
+      setCapacityInput(completedCapacityText);
+      recomputeInputState(completedArrayText, completedCapacityText, nextValueInput);
+    },
+    [
+      arrayInput,
+      capacityInput,
+      completedArrayText,
+      completedCapacityText,
+      hasValidConfig,
+      recomputeInputState,
+      reset,
+      steps.length,
+      valueInput,
+    ],
+  );
 
   useEffect(() => {
     if (!hasValidConfig || steps.length === 0) {
@@ -194,7 +205,6 @@ export function DynamicArrayPage() {
       return;
     }
 
-    // Dynamic-array flow requirement: after user triggers next, continue playing remaining steps automatically.
     window.setTimeout(() => {
       play();
     }, 0);
@@ -217,6 +227,34 @@ export function DynamicArrayPage() {
   const isCapacityFull = currentLength === currentCapacity;
   const isResizePhase = currentSnapshot?.action === 'resize-start' || currentSnapshot?.action === 'migrate';
   const isPromotePhase = currentSnapshot?.action === 'resize-complete';
+  const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
+  const focusPoint = useMemo(() => {
+    const resolvedCapacity = Math.max(currentSnapshot?.capacity ?? config.capacity, 1);
+    const activeIndex =
+      currentSnapshot?.migratedIndex ??
+      currentSnapshot?.highlights[0]?.index ??
+      Math.max(0, Math.min((currentSnapshot?.size ?? 1) - 1, resolvedCapacity - 1));
+    return {
+      x: ((activeIndex + 0.5) / resolvedCapacity) * 100,
+      y: isResizePhase || isPromotePhase ? 60 : 42,
+    };
+  }, [
+    config.capacity,
+    currentSnapshot?.capacity,
+    currentSnapshot?.highlights,
+    currentSnapshot?.migratedIndex,
+    currentSnapshot?.size,
+    isPromotePhase,
+    isResizePhase,
+  ]);
+  const highlightSummary =
+    (currentSnapshot?.highlights ?? [])
+      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
+      .join(' | ') || t('module.s01.none');
+  const resizeHintText =
+    isResizePhase || isPromotePhase
+      ? `${t('module.l02.resizeHint')} ${currentSnapshot?.resizeFrom ?? currentCapacity} -> ${currentSnapshot?.resizeTo ?? currentCapacity}`
+      : '';
 
   const renderArrayCells = (
     buffer: Array<number | null>,
@@ -227,7 +265,12 @@ export function DynamicArrayPage() {
     <div className="array-cells dynamic-array-cells-row" aria-label={`dynamic-array-cells-${rowType}`}>
       {Array.from({ length: rowCapacity }, (_, index) => {
         const value = buffer[index] ?? null;
-        const highlight = rowType === 'source' || rowType === 'target' ? (index === migratedIndex ? 'moving' : 'default') : (highlightMap.get(index) ?? 'default');
+        const highlight =
+          rowType === 'source' || rowType === 'target'
+            ? index === migratedIndex
+              ? 'moving'
+              : 'default'
+            : (highlightMap.get(index) ?? 'default');
         const isUnused = value === null;
 
         return (
@@ -254,138 +297,200 @@ export function DynamicArrayPage() {
   }, []);
 
   return (
-    <section className="array-page">
-      <h2>{t('module.l02.title')}</h2>
-      <p>{t('module.l02.body')}</p>
+    <WorkspaceShell
+      pageClassName="array-page tree-page"
+      stageAriaLabel={t('module.l02.title')}
+      title={t('module.l02.title')}
+      description={t('module.l02.body')}
+      stageClassName="workspace-stage-array"
+      stageBodyClassName="workspace-stage-body-array"
+      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
+      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
+      defaultControlsPanelSize={{ width: 332, height: 620 }}
+      defaultContextPanelSize={{ width: 340, height: 560 }}
+      focusPoint={focusPoint}
+      stageMeta={
+        <>
+          <span className="tree-workspace-pill tree-workspace-pill-active">
+            {t('playback.status')}: {getStatusLabel(status, t)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('playback.step')}: {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.l01.lengthCapacity')}: {currentLength}/{currentCapacity}
+          </span>
+          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
+          {resizeHintText ? <span className="tree-workspace-pill">{resizeHintText}</span> : null}
+        </>
+      }
+      controlsContent={
+        <>
+          <label className="tree-workspace-field" htmlFor="dynamic-array-input">
+            <span>{t('module.l02.input.array')}</span>
+            <input
+              id="dynamic-array-input"
+              type="text"
+              value={arrayInput}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                reset();
+                setArrayInput(nextValue);
+                recomputeInputState(nextValue, capacityInput, valueInput);
+              }}
+              placeholder="3, 8"
+            />
+          </label>
 
-      <div className="array-form">
-        <label htmlFor="dynamic-array-input">
-          <span>{t('module.l02.input.array')}</span>
-          <input
-            id="dynamic-array-input"
-            value={arrayInput}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              reset();
-              setArrayInput(nextValue);
-              recomputeInputState(nextValue, capacityInput, valueInput);
-            }}
-            placeholder="3, 8"
-          />
-        </label>
-        <label htmlFor="dynamic-array-capacity">
-          <span>{t('module.l02.input.capacity')}</span>
-          <input
-            id="dynamic-array-capacity"
-            type="number"
-            min={1}
-            value={capacityInput}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              reset();
-              setCapacityInput(nextValue);
-              recomputeInputState(arrayInput, nextValue, valueInput);
-            }}
-          />
-        </label>
-        <label htmlFor="dynamic-array-value">
-          <span>{t('module.l02.input.value')}</span>
-          <input
-            id="dynamic-array-value"
-            type="number"
-            value={valueInput}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              reset();
-              setValueInput(nextValue);
-              recomputeInputState(arrayInput, capacityInput, nextValue);
-            }}
-          />
-        </label>
-      </div>
+          <label className="tree-workspace-field" htmlFor="dynamic-array-capacity">
+            <span>{t('module.l02.input.capacity')}</span>
+            <input
+              id="dynamic-array-capacity"
+              type="number"
+              min={1}
+              value={capacityInput}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                reset();
+                setCapacityInput(nextValue);
+                recomputeInputState(arrayInput, nextValue, valueInput);
+              }}
+            />
+          </label>
 
-      {error ? <p className="form-error">{error}</p> : null}
+          <label className="tree-workspace-field" htmlFor="dynamic-array-value">
+            <span>{t('module.l02.input.value')}</span>
+            <input
+              id="dynamic-array-value"
+              type="number"
+              value={valueInput}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                reset();
+                setValueInput(nextValue);
+                recomputeInputState(arrayInput, capacityInput, nextValue);
+              }}
+            />
+          </label>
 
-      <div className="array-form">
-        <label htmlFor="dynamic-array-json-input">
-          <span>{t('module.l02.json.label')}</span>
-          <textarea
-            id="dynamic-array-json-input"
-            value={jsonInput}
-            onChange={(event) => setJsonInput(event.target.value)}
-            rows={6}
-            placeholder={t('module.l02.json.placeholder')}
-          />
-        </label>
-      </div>
-      <div className="playback-actions">
-        <button type="button" onClick={handleExportJson}>
-          {t('module.l02.json.export')}
-        </button>
-        <button type="button" onClick={handleImportJson}>
-          {t('module.l02.json.import')}
-        </button>
-      </div>
-      {jsonFeedback ? <p className={hasJsonError ? 'form-error' : 'array-preview'}>{jsonFeedback}</p> : null}
+          <div className="tree-workspace-field">
+            <span>{t('module.s01.speed')}</span>
+            <div className="tree-workspace-toggle-row">
+              {speedOptions.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                  onClick={() => setSpeed(option.value)}
+                >
+                  {t(option.key)}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className="bubble-toolbar">
-        <span>{t('module.s01.speed')}</span>
-        <div className="speed-group">
-          {speedOptions.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
-            >
-              {t(option.key)}
+          <label className="tree-workspace-field" htmlFor="dynamic-array-json-input">
+            <span>{t('module.l02.json.label')}</span>
+            <textarea
+              id="dynamic-array-json-input"
+              value={jsonInput}
+              onChange={(event) => setJsonInput(event.target.value)}
+              rows={6}
+              placeholder={t('module.l02.json.placeholder')}
+            />
+          </label>
+
+          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
+          {jsonFeedback ? (
+            <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
+          ) : null}
+
+          <div className="tree-workspace-drawer-actions">
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
+              {t('module.l02.json.export')}
             </button>
-          ))}
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
+              {t('module.l02.json.import')}
+            </button>
+          </div>
+        </>
+      }
+      stepContent={
+        <div className="workspace-panel-scroll">
+          <div className="workspace-panel-copy">
+            <h3>{getStepDescription(currentSnapshot, t)}</h3>
+            <p>
+              {t('module.l02.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+            </p>
+            {resizeHintText ? <p>{resizeHintText}</p> : null}
+            {currentSnapshot?.action === 'append' ? (
+              <p>
+                {t('module.l02.appendedItem')}: {currentSnapshot.appendedValue ?? valueInput}
+              </p>
+            ) : null}
+          </div>
+
+          <dl className="tree-workspace-kv">
+            <div>
+              <dt>{t('playback.status')}</dt>
+              <dd>{getStatusLabel(status, t)}</dd>
+            </div>
+            <div>
+              <dt>{t('playback.step')}</dt>
+              <dd>
+                {currentStep}/{Math.max(steps.length - 1, 0)}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('module.l02.meta.currentCapacity')}</dt>
+              <dd>{currentCapacity}</dd>
+            </div>
+            <div>
+              <dt>{t('module.l02.meta.size')}</dt>
+              <dd>{currentLength}</dd>
+            </div>
+            <div>
+              <dt>{t('module.l02.input.value')}</dt>
+              <dd>{config.operation.value}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.highlight')}</dt>
+              <dd>{highlightSummary}</dd>
+            </div>
+          </dl>
+
+          <div className="legend-row">
+            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
+            <span className="legend-item legend-moving">{t('module.l02.highlight.migrating')}</span>
+            <span className="legend-item legend-inserted">{t('module.l02.highlight.appended')}</span>
+          </div>
+
+          <p
+            className={`array-preview${isCapacityFull ? ' dynamic-array-capacity-full' : ''}${
+              fullWarningFlash ? ' dynamic-array-capacity-flash' : ''
+            }`}
+          >
+            {t('module.l02.meta.currentCapacity')}: {currentCapacity} | {t('module.l02.meta.size')}: {currentLength}
+          </p>
+          <p className={isCapacityFull ? 'dynamic-array-capacity-full dynamic-array-status-line' : 'dynamic-array-status-line dynamic-array-status-placeholder'}>
+            {isCapacityFull ? t('module.l02.fullWarning') : '-'}
+          </p>
+
+          <div className="pseudocode-block">
+            <h3>{t('module.l02.pseudocode')}</h3>
+            <ol>
+              <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l02.code.line1')}</li>
+              <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l02.code.line2')}</li>
+              <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l02.code.line3')}</li>
+              <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l02.code.line4')}</li>
+              <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l02.code.line5')}</li>
+              <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l02.code.line6')}</li>
+              <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.l02.code.line7')}</li>
+            </ol>
+          </div>
         </div>
-      </div>
-
-      <p>
-        {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
-        {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
-      </p>
-
-      <p>{getStepDescription(currentSnapshot, t)}</p>
-      <p className="array-preview">
-        {t('module.l02.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
-      </p>
-      <p className="array-preview">
-        {t('module.l01.lengthCapacity')}: {currentLength}/{currentCapacity}
-      </p>
-      <div className="dynamic-array-status-lines">
-        <p
-          className={`array-preview${isCapacityFull ? ' dynamic-array-capacity-full' : ''}${fullWarningFlash ? ' dynamic-array-capacity-flash' : ''}`}
-        >
-          {t('module.l02.meta.currentCapacity')}: {currentCapacity} | {t('module.l02.meta.size')}: {currentLength}
-        </p>
-        <p className={isCapacityFull ? 'dynamic-array-capacity-full dynamic-array-status-line' : 'dynamic-array-status-line dynamic-array-status-placeholder'}>
-          {isCapacityFull ? t('module.l02.fullWarning') : '-'}
-        </p>
-        <p className={isResizePhase || isPromotePhase ? 'array-preview dynamic-array-status-line' : 'array-preview dynamic-array-status-line dynamic-array-status-placeholder'}>
-          {isResizePhase || isPromotePhase
-            ? `${t('module.l02.resizeHint')} ${currentSnapshot?.resizeFrom ?? currentCapacity} -> ${currentSnapshot?.resizeTo ?? currentCapacity}`
-            : '-'}
-        </p>
-        <p className={currentSnapshot?.action === 'append' ? 'array-preview dynamic-array-status-line' : 'array-preview dynamic-array-status-line dynamic-array-status-placeholder'}>
-          {currentSnapshot?.action === 'append' ? `${t('module.l02.appendedItem')}: ${currentSnapshot.appendedValue ?? valueInput}` : '-'}
-        </p>
-      </div>
-      <p>
-        {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? [])
-          .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
-          .join(' | ') || t('module.s01.none')}
-      </p>
-
-      <VisualizationCanvas
-        title={t('module.l02.title')}
-        subtitle={t('module.l02.stage')}
-        stageClassName="viz-canvas-stage-array"
-      >
+      }
+      stageContent={
         <div ref={arrayCellsRef} className="dynamic-array-stage-content">
           {isResizePhase ? (
             <div className="dynamic-array-dual">
@@ -418,44 +523,64 @@ export function DynamicArrayPage() {
             renderArrayCells(currentSnapshot?.bufferState ?? [], 'single', currentCapacity)
           )}
         </div>
-      </VisualizationCanvas>
-
-      <div className="legend-row">
-        <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-        <span className="legend-item legend-moving">{t('module.l02.highlight.migrating')}</span>
-        <span className="legend-item legend-inserted">{t('module.l02.highlight.appended')}</span>
-      </div>
-
-      <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
-          {t('playback.play')}
-        </button>
-        <button type="button" onClick={pause} disabled={status !== 'playing'}>
-          {t('playback.pause')}
-        </button>
-        <button type="button" onClick={prev} disabled={!hasValidConfig || steps.length === 0}>
-          {t('playback.prev')}
-        </button>
-        <button type="button" onClick={handleNextStep} disabled={!hasValidConfig || steps.length === 0}>
-          {t('playback.next')}
-        </button>
-        <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
-          {t('playback.reset')}
-        </button>
-      </div>
-
-      <div className="pseudocode-block">
-        <h3>{t('module.l02.pseudocode')}</h3>
-        <ol>
-          <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l02.code.line1')}</li>
-          <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l02.code.line2')}</li>
-          <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l02.code.line3')}</li>
-          <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l02.code.line4')}</li>
-          <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l02.code.line5')}</li>
-          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l02.code.line6')}</li>
-          <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.l02.code.line7')}</li>
-        </ol>
-      </div>
-    </section>
+      }
+      transportLeft={
+        <>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn"
+            onClick={prev}
+            disabled={!hasValidConfig || steps.length === 0 || currentStep <= 0}
+          >
+            {t('playback.prev')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+            onClick={status === 'playing' ? pause : play}
+            disabled={!hasValidConfig || steps.length === 0 || (status !== 'playing' && isAtLastFrame)}
+          >
+            {status === 'playing' ? t('playback.pause') : t('playback.play')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn"
+            onClick={handleNextStep}
+            disabled={!hasValidConfig || isAtLastFrame}
+          >
+            {t('playback.next')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn"
+            onClick={reset}
+            disabled={!hasValidConfig || steps.length === 0}
+          >
+            {t('playback.reset')}
+          </button>
+          <div className="tree-workspace-transport-progress" aria-hidden="true">
+            <span
+              className="tree-workspace-transport-progress-fill"
+              style={{
+                width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <span className="tree-workspace-transport-step">
+            {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+        </>
+      }
+      transportRight={
+        <>
+          <span className="tree-workspace-transport-chip">{currentLength}/{currentCapacity}</span>
+          <span className="tree-workspace-transport-chip">+{config.operation.value}</span>
+          {resizeHintText ? <span className="tree-workspace-transport-chip">{resizeHintText}</span> : null}
+          <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
+            {isCapacityFull ? t('module.l02.fullWarning') : t('module.l02.meta.size')}
+          </span>
+        </>
+      }
+    />
   );
 }

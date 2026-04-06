@@ -2,6 +2,56 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (P9-M2 search + linear shell rollout)
+
+### Today Done
+- Continued `P9-M2` after sorting batches 1-2 and migrated the remaining implemented non-tree routes to shared `WorkspaceShell`:
+  - `SR-01` `/modules/linear-search`
+  - `L-02` `/modules/dynamic-array`
+  - `L-03` `/modules/linked-list`
+  - `L-04` `/modules/stack`
+  - `L-05` `/modules/queue`
+- Standardized these routes onto the same shell contract used by the accepted pilot/tree pages:
+  - pinned `Controls` / `Step` edge entrypoints
+  - in-stage transport
+  - stage-click collapse
+  - `tree-page` breakout for full-stage width at large viewports
+  - focus-aware panel avoidance where the animation has a clear active region
+- Added shared-shell compatibility styling for linear/list stages so stack/queue/dynamic-array/linked-list fill the workspace better instead of sitting inside the old inner frame assumptions.
+- Caught and fixed a real runtime behavior regression during smoke:
+  - `L-04` was auto-syncing input + resetting on `push/pop` action frames, which skipped visible intermediate steps
+  - fixed it so stack input only syncs after the `completed` frame
+- Re-ran the required local quality gate successfully after the rollout and fix:
+  - `npm run check`
+- Re-verified in Playwright at `1440x1100`:
+  - `SR-01`, `L-02`, `L-03`, `L-04`, `L-05` page / shell / stage width = `1416px`
+  - `SR-01` `Next` advances to `1/7`
+  - `L-02` `Next` advances into resize playback (`2/6`, `Migrate value at index 0`)
+  - `L-03` `Next` advances to `1/4` with linked-diagram width `1382px`
+  - `L-04` `Next` now advances to `1/2` (`Push value 9`) after the reset-timing fix
+  - `L-05` circular mode toggle works inside the control drawer, ring stage renders, and `Next` advances to `1/2`
+
+### Current State
+- Branch: `feat/p9-m2-sorting-shell-rollout`
+- Validated scope in this batch:
+  - `src/pages/modules/LinearSearchPage.tsx`
+  - `src/pages/modules/DynamicArrayPage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/index.css`
+- Milestone state:
+  - `P9-M2` unified workspace-shell rollout is now locally complete across all implemented non-tree modules
+  - next priority is `P9-M3` cross-module consistency / acceptance refresh
+
+### Next Step
+- Create a focused commit for the validated search + linear shell rollout.
+- Then continue directly into `P9-M3`:
+  - refresh Playwright acceptance artifacts/report for `/modules` + all implemented routes
+  - do a final consistency pass across pilot/sorting/search/linear/tree shells
+  - sync closure docs once acceptance evidence is complete
+- Keep unrelated dirty items out of the rollout commit (`scripts/*`, design artifacts, old Playwright images, launcher helper).
+
 ## 2026-04-06 (P9-M2 sorting shell rollout batch 2)
 
 ### Today Done
