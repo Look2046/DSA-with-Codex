@@ -1595,33 +1595,37 @@ body {
 }
 
 .workspace-shell-bubble {
-  min-height: 620px;
-  height: min(980px, calc(100svh - 124px));
+  min-height: 560px;
+  height: min(920px, calc(100svh - 152px));
 }
 
 .workspace-shell-bubble .tree-workspace-stage-meta {
-  max-width: min(54%, 620px);
+  max-width: min(68%, 640px);
 }
 
 .workspace-shell-bubble .workspace-stage-body {
-  padding: 76px 18px 86px;
+  padding: 72px 16px 92px;
 }
 
 .workspace-shell-bubble .workspace-stage-body-sorting {
   align-items: stretch;
-  justify-items: center;
+  justify-items: stretch;
 }
 
 .workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track {
-  --shell-gap: clamp(0.5px, calc(5px - var(--shell-total-count) * 0.04px), 4.5px);
-  --shell-slot-max-width: 92px;
-  width: min(100%, clamp(600px, 72%, 920px));
-  max-width: 920px;
-  gap: 12px;
+  --shell-gap: clamp(0.5px, calc(6px - var(--shell-total-count) * 0.05px), 6px);
+  --shell-slot-max-width: 132px;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  gap: 10px;
+  justify-items: stretch;
 }
 
 .workspace-shell-bubble .workspace-stage-body-sorting > .shell-stage-track > .array-bars {
-  height: min(100%, clamp(420px, 86%, 680px));
+  width: 100%;
+  max-width: none;
+  height: 100%;
 }
 
 .workspace-stage-body-array {

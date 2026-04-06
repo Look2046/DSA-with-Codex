@@ -2,6 +2,31 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (S-01 full-stage alignment toward T-01)
+
+### Today Done
+- Continued the `S-01 Bubble Sort` shell alignment after the follow-up question about why the animation felt much smaller than `T-01`.
+- Reworked `S-01` from the temporary centered narrow-track layout back toward the `T-01` full-stage pattern:
+  - removed the pilot-only inner width clamp (`72%` / `920px`) on the sorting track
+  - restored the shared shell height/padding footprint so the page matches the tree-shell proportions more closely
+  - let the bar track and bar container stretch across the available stage width again while keeping sorting-specific slot width control
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright against the live local app:
+  - `S-01` shell/stage now match the shared workspace size again (`1168x920`)
+  - sorting track width increased from the prior narrowed ~`814px` to ~`1134px`
+  - bar container now spans the full track and reaches ~`722px` height
+  - swap step still renders full-height motion ghosts (`104x642`) instead of thin top strips
+
+### Current State
+- Branch: `feat/p9-m1-workspace-shell-pilots`
+- Fix scope:
+  - `src/index.css`
+- This is still a focused workspace-shell follow-up; milestone direction is unchanged.
+
+### Next Step
+- Continue the broader `P9-M2` shell unification by removing remaining page-specific inner-track assumptions module by module.
+
 ## 2026-04-06 (S-01 shell rebalance + overflow panel drag)
 
 ### Today Done
