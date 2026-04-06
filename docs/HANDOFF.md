@@ -2,6 +2,34 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (S-01 inner-canvas removal toward T-01 full-stage)
+
+### Today Done
+- Re-checked the user concern that `S-01` still did not feel like `T-01` full-stage even after removing the width clamp.
+- Identified the remaining gap:
+  - `S-01` still kept a padded `workspace-stage-body` inset
+  - the sorting bars still rendered inside their own bordered/background inner frame, which visually looked like a second smaller canvas inside the stage
+- Tightened the `S-01` bubble-shell styling again in `src/index.css`:
+  - reduced the bubble-stage body inset (`38px 10px 62px`)
+  - reduced the sorting-track gap
+  - removed the inner bar-frame border/background/radius and let the bars sit directly on the stage background
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright against the live local app:
+  - `S-01` stage remains `1168x920`
+  - stage-content track now spans ~`1146x818`
+  - bar area now spans ~`1146x790`
+  - the inner framed sub-canvas is gone, so the visual reads much closer to `T-01`'s direct-on-stage layout
+
+### Current State
+- Branch: `feat/p9-m1-workspace-shell-pilots`
+- Fix scope:
+  - `src/index.css`
+- This is still a focused shell follow-up; milestone direction is unchanged.
+
+### Next Step
+- Continue migrating other non-tree modules away from page-specific inset canvases so the `T-01` workspace language becomes the default shell, not a tree-only exception.
+
 ## 2026-04-06 (S-01 full-stage alignment toward T-01)
 
 ### Today Done

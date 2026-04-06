@@ -1604,7 +1604,7 @@ body {
 }
 
 .workspace-shell-bubble .workspace-stage-body {
-  padding: 72px 16px 92px;
+  padding: 38px 10px 62px;
 }
 
 .workspace-shell-bubble .workspace-stage-body-sorting {
@@ -1618,7 +1618,7 @@ body {
   width: 100%;
   max-width: none;
   height: 100%;
-  gap: 10px;
+  gap: 6px;
   justify-items: stretch;
 }
 
@@ -1626,6 +1626,11 @@ body {
   width: 100%;
   max-width: none;
   height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 8px 0;
 }
 
 .workspace-stage-body-array {
