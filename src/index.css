@@ -1338,17 +1338,27 @@ body {
 
 .tree-workspace-field select,
 .tree-workspace-field input[type='range'],
-.tree-workspace-field input[type='number'] {
+.tree-workspace-field input[type='number'],
+.tree-workspace-field input[type='text'],
+.tree-workspace-field textarea {
   width: 100%;
 }
 
 .tree-workspace-field select,
-.tree-workspace-field input[type='number'] {
+.tree-workspace-field input[type='number'],
+.tree-workspace-field input[type='text'],
+.tree-workspace-field textarea {
   border: 1px solid #c9dbee;
   border-radius: 12px;
   background: #fff;
   color: #2a567f;
   padding: 8px 10px;
+}
+
+.tree-workspace-field textarea {
+  resize: vertical;
+  min-height: 132px;
+  font: inherit;
 }
 
 .tree-workspace-toggle {
@@ -1557,6 +1567,72 @@ body {
 .tree-workspace-code-list .code-active {
   color: #0b4f90;
   font-weight: 700;
+}
+
+.workspace-stage-body {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 72px 16px 92px;
+}
+
+.workspace-stage-body-sorting {
+  display: grid;
+}
+
+.workspace-stage-body-array {
+  display: flex;
+  align-items: flex-start;
+}
+
+.workspace-stage-sorting .array-bars {
+  min-height: 0;
+}
+
+.workspace-stage-array .array-cells {
+  height: 100%;
+  align-self: stretch;
+}
+
+.workspace-drawer-wide {
+  width: 286px;
+}
+
+.workspace-drawer-xl {
+  width: 332px;
+}
+
+.workspace-drawer-scroll {
+  max-height: clamp(360px, 64svh, 620px);
+  overflow: auto;
+}
+
+.workspace-context-sheet-wide {
+  width: 320px;
+}
+
+.workspace-context-sheet-rich {
+  height: clamp(360px, 60svh, 560px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+}
+
+.workspace-panel-scroll {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding-right: 2px;
+}
+
+.workspace-panel-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.workspace-inline-feedback {
+  margin: 0;
 }
 
 .tree-stage-visual {

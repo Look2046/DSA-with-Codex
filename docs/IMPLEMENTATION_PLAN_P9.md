@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P9
 
-Status: proposed for execution
+Status: `P9-M1` completed locally; `P9-M2` next
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: unify all implemented module pages around the stage-first workspace shell validated on `T-01` / `T-02`, while preserving family-specific teaching visuals and interaction needs
 
@@ -63,6 +63,20 @@ DoD
 Acceptance
 - `npm run check` passes
 - Playwright confirms stable pilot flows on `/modules`, `T-01`, `T-02`, `S-01`, `L-01`, and `SR-02`
+
+Done (2026-04-06)
+- added reusable `WorkspaceShell` foundation in `src/components/WorkspaceShell.tsx`
+- migrated pilot pages:
+  - `S-01` `/modules/bubble-sort`
+  - `L-01` `/modules/array`
+  - `SR-02` `/modules/binary-search`
+- aligned pilot pages to the shared shell contract:
+  - pinned `Controls` / `Step` entrypoints
+  - in-stage transport with final-frame boundary disable
+  - empty-stage click collapse
+  - draggable panels with optional focus-aware avoidance
+  - legend/pseudocode/runtime detail moved into the `Step` panel where appropriate
+- captured local Playwright smoke artifacts under `output/playwright/p9m1-*`
 
 ### P9-M2 Rollout Across Remaining Implemented Non-Tree Modules
 

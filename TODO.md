@@ -229,15 +229,16 @@ Track actionable tasks here. Keep tasks small and testable.
     - re-verified `T-01` / `T-02` pinned-button + movable-panel + stage-click-collapse + auto-avoid behavior in browser automation
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-## P9 (Planned)
+## P9 (In Progress)
 - [x] P9 planning baseline
   - DoD: define next milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
   - Done: added `docs/IMPLEMENTATION_PLAN_P9.md`, closed `P8` planning state in `docs/IMPLEMENTATION_PLAN_P8.md`, and synced the next-phase boundary docs.
 
-- [ ] P9-M1 Workspace shell foundation + pilot migrations
+- [x] P9-M1 Workspace shell foundation + pilot migrations
   - DoD: define the shared shell contract in code and migrate `S-01`, `L-01`, and `SR-02` as pilot pages.
   - Acceptance: `npm run check` passes and Playwright confirms stable pilot flows with the unified shell.
+  - Done: added shared `WorkspaceShell`, migrated `S-01` / `L-01` / `SR-02`, refreshed local `p9m1-*` Playwright smoke artifacts, and synced milestone docs.
 
 - [ ] P9-M2 Roll unified workspace shell across remaining implemented non-tree modules
   - DoD: migrate all remaining implemented sorting/search/linear pages without regressing route/runtime behavior.

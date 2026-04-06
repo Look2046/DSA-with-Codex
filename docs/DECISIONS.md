@@ -464,3 +464,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue tree-track expansion first; do ad-hoc page polish without a milestone; force an exact `T-01` UI clone on every module.
 - Consequences: `P9` focuses on UX/platform consistency instead of new algorithm count, but lowers future migration cost and creates a clearer shared baseline for later modules such as `AVL` and `Heap`.
 - Owner: haoyu + codex
+
+## DEC-20260406-51
+- Date: 2026-04-06
+- Status: accepted
+- Context: `P9-M1` needed to reuse the accepted tree workspace interaction on non-tree modules, but copy-pasting `T-01`/`T-02` page structure would create new drift and make the later rollout harder to maintain.
+- Decision: Extract a shared `WorkspaceShell` component that keeps the validated shell contract (`Controls`/`Step` edge entrypoints, draggable opened panels, in-stage transport, empty-stage click collapse, optional `focusPoint` auto-avoid) and pilot it on `S-01`, `L-01`, and `SR-02`. For pilot pages, move legend/pseudocode/runtime detail into the right `Step` panel instead of keeping duplicate blocks below the stage.
+- Alternatives considered: continue per-page shell rewrites without shared composition; force a pixel-identical `T-01` layout on every page; postpone shell extraction until all non-tree pages were migrated together.
+- Consequences: the project now has one reusable stage-first shell primitive for the broader rollout, the pilot pages share a recognizable interaction baseline, and `P9-M2` can focus on migration breadth instead of repeating shell logic.
+- Owner: haoyu + codex

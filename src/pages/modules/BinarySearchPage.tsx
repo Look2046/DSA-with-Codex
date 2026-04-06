@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
-import { VisualizationCanvas } from '../../components/VisualizationCanvas';
-import { useCurrentModule } from '../../hooks/useCurrentModule';
 import { useI18n } from '../../i18n/useI18n';
 import { buildBinarySearchTimelineFromInput } from '../../modules/search/binarySearchTimelineAdapter';
 import {
-  BINARY_SEARCH_CAPACITY,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
@@ -33,7 +31,6 @@ function createRandomSortedDataset(size: number): number[] {
 
 export function BinarySearchPage() {
   const { t } = useI18n();
-  const currentModule = useCurrentModule();
 
   const [datasetSize, setDatasetSize] = useState(DEFAULT_CONFIG.array.length);
   const [arrayInput, setArrayInput] = useState(DEFAULT_CONFIG.array.join(', '));
@@ -63,7 +60,26 @@ export function BinarySearchPage() {
   const timelineFrames = useMemo(() => buildBinarySearchTimelineFromInput(config.array, config.target), [config]);
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentSnapshot = steps[currentStep] ?? steps[0];
-  const maxValue = useMemo(() => Math.max(...(currentSnapshot?.arrayState ?? config.array), 1), [config.array, currentSnapshot?.arrayState]);
+  const maxValue = useMemo(
+    () => Math.max(...(currentSnapshot?.arrayState ?? config.array), 1),
+    [config.array, currentSnapshot?.arrayState],
+  );
+  const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
+  const focusPoint = useMemo(() => {
+    const focusedIndex =
+      typeof currentSnapshot?.foundIndex === 'number' && currentSnapshot.foundIndex >= 0
+        ? currentSnapshot.foundIndex
+        : (currentSnapshot?.mid ?? 0);
+    const arrayLength = currentSnapshot?.arrayState.length ?? config.array.length;
+    return {
+      x: ((focusedIndex + 0.5) / Math.max(arrayLength, 1)) * 100,
+      y: 58,
+    };
+  }, [config.array.length, currentSnapshot?.arrayState.length, currentSnapshot?.foundIndex, currentSnapshot?.mid]);
+  const highlightSummary =
+    (currentSnapshot?.highlights ?? [])
+      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
+      .join(' | ') || t('module.s01.none');
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -133,131 +149,189 @@ export function BinarySearchPage() {
   };
 
   return (
-    <section className="array-page">
-      <h2>{t('module.sr02.title')}</h2>
-      <p>{t('module.sr02.body')}</p>
+    <WorkspaceShell
+      pageClassName="array-page"
+      stageAriaLabel={t('module.sr02.title')}
+      title={t('module.sr02.title')}
+      description={t('module.sr02.body')}
+      stageClassName="workspace-stage-sorting"
+      stageBodyClassName="workspace-stage-body-sorting"
+      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
+      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
+      defaultControlsPanelSize={{ width: 332, height: 620 }}
+      defaultContextPanelSize={{ width: 320, height: 540 }}
+      focusPoint={focusPoint}
+      stageMeta={
+        <>
+          <span className="tree-workspace-pill tree-workspace-pill-active">
+            {t('playback.status')}: {getStatusLabel(status, t)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('playback.step')}: {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.sr02.meta.target')}: {config.target}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.sr02.meta.foundIndex')}: {currentSnapshot?.foundIndex ?? -1}
+          </span>
+          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
+        </>
+      }
+      controlsContent={
+        <>
+          <label className="tree-workspace-field" htmlFor="binary-search-size">
+            <span>{t('module.s01.dataSize')}</span>
+            <input
+              id="binary-search-size"
+              type="range"
+              min={MIN_SIZE}
+              max={MAX_SIZE}
+              value={datasetSize}
+              onChange={(event) => setDatasetSize(Number(event.target.value))}
+            />
+            <strong>{datasetSize}</strong>
+          </label>
 
-      <div className="array-form">
-        <label htmlFor="binary-search-size">
-          <span>{t('module.s01.dataSize')}</span>
-          <input
-            id="binary-search-size"
-            type="range"
-            min={MIN_SIZE}
-            max={MAX_SIZE}
-            value={datasetSize}
-            onChange={(event) => setDatasetSize(Number(event.target.value))}
-          />
-          <strong>{datasetSize}</strong>
-        </label>
-        <label htmlFor="binary-search-array">
-          <span>{t('module.sr02.input.array')}</span>
-          <input
-            id="binary-search-array"
-            value={arrayInput}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              reset();
-              setArrayInput(nextValue);
-              recomputeInputState(nextValue, targetInput);
-            }}
-            placeholder="1, 3, 5, 7, 9"
-          />
-        </label>
-        <label htmlFor="binary-search-target">
-          <span>{t('module.sr02.input.target')}</span>
-          <input
-            id="binary-search-target"
-            type="number"
-            value={targetInput}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              reset();
-              setTargetInput(nextValue);
-              recomputeInputState(arrayInput, nextValue);
-            }}
-          />
-        </label>
-        <button type="button" onClick={handleRegenerate}>
-          {t('module.s01.regenerate')}
-        </button>
-      </div>
+          <label className="tree-workspace-field" htmlFor="binary-search-array">
+            <span>{t('module.sr02.input.array')}</span>
+            <input
+              id="binary-search-array"
+              type="text"
+              value={arrayInput}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                reset();
+                setArrayInput(nextValue);
+                recomputeInputState(nextValue, targetInput);
+              }}
+              placeholder="1, 3, 5, 7, 9"
+            />
+          </label>
 
-      {error ? <p className="form-error">{error}</p> : null}
+          <label className="tree-workspace-field" htmlFor="binary-search-target">
+            <span>{t('module.sr02.input.target')}</span>
+            <input
+              id="binary-search-target"
+              type="number"
+              value={targetInput}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                reset();
+                setTargetInput(nextValue);
+                recomputeInputState(arrayInput, nextValue);
+              }}
+            />
+          </label>
 
-      <div className="array-form">
-        <label htmlFor="binary-search-json-input">
-          <span>{t('module.sr02.json.label')}</span>
-          <textarea
-            id="binary-search-json-input"
-            value={jsonInput}
-            onChange={(event) => setJsonInput(event.target.value)}
-            rows={6}
-            placeholder={t('module.sr02.json.placeholder')}
-          />
-        </label>
-      </div>
-      <div className="playback-actions">
-        <button type="button" onClick={handleExportJson}>
-          {t('module.sr02.json.export')}
-        </button>
-        <button type="button" onClick={handleImportJson}>
-          {t('module.sr02.json.import')}
-        </button>
-      </div>
-      {jsonFeedback ? <p className={hasJsonError ? 'form-error' : 'array-preview'}>{jsonFeedback}</p> : null}
+          <div className="tree-workspace-field">
+            <span>{t('module.s01.speed')}</span>
+            <div className="tree-workspace-toggle-row">
+              {speedOptions.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                  onClick={() => setSpeed(option.value)}
+                >
+                  {t(option.key)}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className="bubble-toolbar">
-        <span>{t('module.s01.speed')}</span>
-        <div className="speed-group">
-          {speedOptions.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              className={speedMs === option.value ? 'speed-active' : ''}
-              onClick={() => setSpeed(option.value)}
-            >
-              {t(option.key)}
+          <label className="tree-workspace-field" htmlFor="binary-search-json-input">
+            <span>{t('module.sr02.json.label')}</span>
+            <textarea
+              id="binary-search-json-input"
+              value={jsonInput}
+              onChange={(event) => setJsonInput(event.target.value)}
+              rows={6}
+              placeholder={t('module.sr02.json.placeholder')}
+            />
+          </label>
+
+          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
+          {jsonFeedback ? (
+            <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
+          ) : null}
+
+          <div className="tree-workspace-drawer-actions">
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleRegenerate}>
+              {t('module.s01.regenerate')}
             </button>
-          ))}
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
+              {t('module.sr02.json.export')}
+            </button>
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
+              {t('module.sr02.json.import')}
+            </button>
+          </div>
+        </>
+      }
+      stepContent={
+        <div className="workspace-panel-scroll">
+          <div className="workspace-panel-copy">
+            <h3>{getStepDescription(currentSnapshot, t)}</h3>
+            <p>
+              {t('module.sr02.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+            </p>
+          </div>
+
+          <dl className="tree-workspace-kv">
+            <div>
+              <dt>{t('playback.status')}</dt>
+              <dd>{getStatusLabel(status, t)}</dd>
+            </div>
+            <div>
+              <dt>{t('playback.step')}</dt>
+              <dd>
+                {currentStep}/{Math.max(steps.length - 1, 0)}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('module.sr02.meta.target')}</dt>
+              <dd>{config.target}</dd>
+            </div>
+            <div>
+              <dt>L / M / H</dt>
+              <dd>
+                {currentSnapshot?.low ?? '-'} / {currentSnapshot?.mid ?? '-'} / {currentSnapshot?.high ?? '-'}
+              </dd>
+            </div>
+            <div>
+              <dt>{t('module.sr02.meta.foundIndex')}</dt>
+              <dd>{currentSnapshot?.foundIndex ?? -1}</dd>
+            </div>
+            <div>
+              <dt>{t('module.s01.highlight')}</dt>
+              <dd>{highlightSummary}</dd>
+            </div>
+          </dl>
+
+          <div className="legend-row">
+            <span className="legend-item legend-visiting">{t('module.sr02.legend.window')}</span>
+            <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
+            <span className="legend-item legend-matched">{t('module.sr02.legend.found')}</span>
+            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
+          </div>
+
+          <div className="pseudocode-block">
+            <h3>{t('module.s01.pseudocode')}</h3>
+            <ol>
+              <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.sr02.code.line1')}</li>
+              <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.sr02.code.line2')}</li>
+              <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.sr02.code.line3')}</li>
+              <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.sr02.code.line4')}</li>
+              <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.sr02.code.line5')}</li>
+              <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.sr02.code.line6')}</li>
+              <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.sr02.code.line7')}</li>
+              <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.sr02.code.line8')}</li>
+            </ol>
+          </div>
         </div>
-      </div>
-
-      <div className="module-status-block">
-        <p className="module-status-line">
-          {t('module.s01.moduleLabel')}: {currentModule?.id ?? '-'} | {t('playback.step')}: {currentStep}/
-          {Math.max(steps.length - 1, 0)} | {t('playback.status')}: {getStatusLabel(status, t)}
-        </p>
-        <p className="module-status-line">{getStepDescription(currentSnapshot, t)}</p>
-        <p className="module-status-line">{t('module.sr02.meta.foundIndex')}: {currentSnapshot?.foundIndex ?? -1}</p>
-      </div>
-
-      <p className="array-preview">
-        {t('module.sr02.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
-      </p>
-      <p className="array-preview">
-        {t('module.l01.lengthCapacity')}: {(currentSnapshot?.arrayState ?? []).length}/{BINARY_SEARCH_CAPACITY}
-      </p>
-      <p>
-        {t('module.s01.highlight')}:{' '}
-        {(currentSnapshot?.highlights ?? [])
-          .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
-          .join(' | ') || t('module.s01.none')}
-      </p>
-
-      <VisualizationCanvas
-        title={t('module.sr02.title')}
-        subtitle={t('module.sr02.stage')}
-        stageClassName="viz-canvas-stage-sorting"
-      >
-        <div className="binary-search-stage-head">
-          <span className="array-preview">
-            {t('module.sr02.meta.target')}: <strong>{config.target}</strong>
-          </span>
-          <span className="array-preview">
-            {t('module.sr02.meta.foundIndex')}: <strong>{currentSnapshot?.foundIndex ?? -1}</strong>
-          </span>
-        </div>
+      }
+      stageContent={
         <div className="array-bars" aria-label="binary-search-bars">
           {(currentSnapshot?.arrayState ?? []).map((value, index) => {
             const highlight = highlightMap.get(index) ?? 'default';
@@ -274,46 +348,64 @@ export function BinarySearchPage() {
             );
           })}
         </div>
-      </VisualizationCanvas>
-
-      <div className="legend-row">
-        <span className="legend-item legend-visiting">{t('module.sr02.legend.window')}</span>
-        <span className="legend-item legend-comparing">{t('module.s01.legend.comparing')}</span>
-        <span className="legend-item legend-matched">{t('module.sr02.legend.found')}</span>
-        <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-      </div>
-
-      <div className="playback-actions">
-        <button type="button" onClick={play} disabled={status === 'playing' || !hasValidConfig || steps.length === 0}>
-          {t('playback.play')}
-        </button>
-        <button type="button" onClick={pause} disabled={status !== 'playing'}>
-          {t('playback.pause')}
-        </button>
-        <button type="button" onClick={prev} disabled={!hasValidConfig || steps.length === 0}>
-          {t('playback.prev')}
-        </button>
-        <button type="button" onClick={next} disabled={!hasValidConfig || steps.length === 0}>
-          {t('playback.next')}
-        </button>
-        <button type="button" onClick={reset} disabled={!hasValidConfig || steps.length === 0}>
-          {t('playback.reset')}
-        </button>
-      </div>
-
-      <div className="pseudocode-block">
-        <h3>{t('module.s01.pseudocode')}</h3>
-        <ol>
-          <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.sr02.code.line1')}</li>
-          <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.sr02.code.line2')}</li>
-          <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.sr02.code.line3')}</li>
-          <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.sr02.code.line4')}</li>
-          <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.sr02.code.line5')}</li>
-          <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.sr02.code.line6')}</li>
-          <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.sr02.code.line7')}</li>
-          <li className={currentSnapshot?.codeLines.includes(8) ? 'code-active' : ''}>{t('module.sr02.code.line8')}</li>
-        </ol>
-      </div>
-    </section>
+      }
+      transportLeft={
+        <>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn"
+            onClick={prev}
+            disabled={!hasValidConfig || steps.length === 0 || currentStep <= 0}
+          >
+            {t('playback.prev')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+            onClick={status === 'playing' ? pause : play}
+            disabled={!hasValidConfig || steps.length === 0 || (status !== 'playing' && isAtLastFrame)}
+          >
+            {status === 'playing' ? t('playback.pause') : t('playback.play')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn"
+            onClick={next}
+            disabled={!hasValidConfig || isAtLastFrame}
+          >
+            {t('playback.next')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn"
+            onClick={reset}
+            disabled={!hasValidConfig || steps.length === 0}
+          >
+            {t('playback.reset')}
+          </button>
+          <div className="tree-workspace-transport-progress" aria-hidden="true">
+            <span
+              className="tree-workspace-transport-progress-fill"
+              style={{
+                width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <span className="tree-workspace-transport-step">
+            {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+        </>
+      }
+      transportRight={
+        <>
+          <span className="tree-workspace-transport-chip">L:{currentSnapshot?.low ?? '-'}</span>
+          <span className="tree-workspace-transport-chip">M:{currentSnapshot?.mid ?? '-'}</span>
+          <span className="tree-workspace-transport-chip">H:{currentSnapshot?.high ?? '-'}</span>
+          <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
+            {currentSnapshot?.foundIndex ?? -1}
+          </span>
+        </>
+      }
+    />
   );
 }

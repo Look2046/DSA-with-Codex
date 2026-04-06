@@ -5,9 +5,9 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `docs/p9-workspace-shell-plan` (P9 planning baseline completed locally)
-- Current phase: P9 planned; `P9-M1` workspace-shell foundation is next
-- Last local quality gate: `./scripts/check-doc-links.sh` (passed, 2026-04-06)
+- Active branch (expected): `feat/p9-m1-workspace-shell-pilots`
+- Current phase: `P9-M1` workspace-shell foundation completed locally; `P9-M2` rollout is next
+- Last local quality gate: `npm run check` (passed locally, 2026-04-06)
 
 ## 2) What Is Already Done
 
@@ -41,6 +41,11 @@ Use this file as the first thing to read in a new chat/session.
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
 - P8 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P8.md`
 - P9 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P9.md`
+- P9-M1 workspace-shell foundation + pilot migrations completed locally:
+  - added shared `WorkspaceShell` component for the validated stage-first shell contract
+  - migrated `S-01 Bubble Sort`, `L-01 Array`, and `SR-02 Binary Search`
+  - moved pilot-page legend/pseudocode/runtime detail into the right `Step` panel where appropriate
+  - refreshed local Playwright smoke artifacts under `output/playwright/p9m1-*`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -114,12 +119,12 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start P9-M1 workspace-shell foundation + pilot migrations:
+- Start P9-M2 rollout across remaining implemented non-tree modules:
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - switch to a dedicated `feat/*` branch before implementation starts
-  - extract only the minimum reusable shell contract needed from `T-01` / `T-02`
-  - pilot the unified shell on `S-01`, `L-01`, and `SR-02` before rolling out by family batch
-  - treat `T-01` as the interaction reference, but do not force pixel-identical copies on all pages
+  - preserve `WorkspaceShell` as the shared interaction contract instead of copying page-specific markup again
+  - migrate the remaining implemented non-tree pages by family batch (`sorting`, `linear`, `search`)
+  - keep tree pages behaviorally unchanged unless a compatibility fix is required
+  - finish with a consistency sweep before `P9-M3` acceptance refresh
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails

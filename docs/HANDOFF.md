@@ -2,6 +2,50 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (P9-M1 workspace-shell pilot completion)
+
+### Today Done
+- Completed the `P9-M1` shared workspace-shell foundation locally on the dedicated feature branch.
+- Added reusable `WorkspaceShell` and shared stage-first shell styling:
+  - pinned `Controls` / `Step` edge entrypoints
+  - draggable side panels
+  - in-stage transport
+  - empty-stage click collapse
+  - optional focus-aware panel auto-avoid through `focusPoint`
+- Migrated the three planned pilot pages:
+  - `S-01` `/modules/bubble-sort`
+  - `L-01` `/modules/array`
+  - `SR-02` `/modules/binary-search`
+- Preserved the accepted tree pages as the interaction reference without forcing pixel-identical layout cloning.
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Captured local Playwright smoke evidence for `/modules`, `T-01`, `T-02`, `S-01`, `L-01`, and `SR-02`:
+  - `output/playwright/p9m1-modules-shell.png`
+  - `output/playwright/p9m1-t01-shell.png`
+  - `output/playwright/p9m1-t02-shell.png`
+  - `output/playwright/p9m1-s01-shell.png`
+  - `output/playwright/p9m1-l01-shell.png`
+  - `output/playwright/p9m1-sr02-shell.png`
+  - `output/playwright/p9m1-smoke.txt`
+- Cleaned temporary local smoke helpers from the working tree:
+  - `output/playwright/p9m1-smoke.mjs`
+  - accidental root file `{`
+
+### Current State
+- Branch: `feat/p9-m1-workspace-shell-pilots`
+- Milestone state: `P9-M1` completed locally; docs synced; quality gate + smoke re-verified; ready for focused commit.
+- Scope landed in this milestone:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/index.css`
+  - `src/pages/modules/BubbleSortPage.tsx`
+  - `src/pages/modules/ArrayPage.tsx`
+  - `src/pages/modules/BinarySearchPage.tsx`
+- Existing unrelated dirty items are still present in the repo (`scripts/*`, design artifacts, launcher helper). Keep them out of the `P9-M1` commit.
+
+### Next Step
+- Create a focused `P9-M1` commit with only the shared shell, pilot-page migrations, docs sync, and `p9m1` smoke evidence.
+- Then start `P9-M2` on a fresh `feat/*` branch (or after merge) for the remaining implemented non-tree modules only.
+
 ## 2026-04-06 (manual savepoint after P9 planning baseline)
 
 ### Today Done
