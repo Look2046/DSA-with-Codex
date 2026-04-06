@@ -150,7 +150,7 @@ export function BinarySearchPage() {
 
   return (
     <WorkspaceShell
-      pageClassName="array-page"
+      pageClassName="array-page tree-page"
       stageAriaLabel={t('module.sr02.title')}
       title={t('module.sr02.title')}
       description={t('module.sr02.body')}

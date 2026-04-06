@@ -6,8 +6,8 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p9-m2-sorting-shell-rollout`
-- Current phase: `P9-M2` non-tree workspace-shell rollout completed locally; `P9-M3` acceptance refresh is next
-- Last local quality gate: `npm run check` (passed locally, 2026-04-06)
+- Current phase: `P9` workspace-shell unification is completed locally; `P10` planning baseline is next
+- Last local quality gate: `npm run check` (passed locally, 2026-04-07)
 
 ## 2) What Is Already Done
 
@@ -59,6 +59,14 @@ Use this file as the first thing to read in a new chat/session.
   - aligned these routes to the same pinned-button / movable-panel / stage-first interaction contract and added shared-shell compatibility styling for linked/linear stages
   - fixed `L-04` stack auto-sync timing so visible push/pop intermediate steps are no longer skipped before completion
   - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths across `SR-01` / `L-02` / `L-03` / `L-04` / `L-05`, circular queue mode switching, resize playback progression, linked-list step progression, and stack `Next` progression after the timing fix
+- P9-M3 cross-module consistency + acceptance closure completed locally:
+  - refreshed Playwright acceptance artifacts/report for `/modules` + all 15 implemented routes under `output/playwright/p9m3-*`
+  - fixed the final pilot breakout drift so `L-01` and `SR-02` now also use the wide `tree-page` workspace pattern
+  - local Playwright acceptance at `1440x1100` confirmed:
+    - `/modules`: `19` cards, `15` ready badges, `15` open links
+    - all `15` implemented routes open without route-level runtime errors and advance on default `Next`
+    - all non-tree routes keep `1416px` page / shell / stage widths
+    - representative pinned-button + draggable-panel + stage-click-collapse checks pass on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -132,13 +140,14 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start `P9-M3` cross-module consistency + acceptance closure:
+- Start `P10` planning baseline before new implementation work:
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - preserve `WorkspaceShell` as the shared interaction contract and verify the pilot/sorting/search/linear/tree routes still read as one cohesive product
-  - refresh Playwright acceptance artifacts/report for `/modules` + all implemented routes under `output/playwright/p9m3-*`
-  - keep tree pages behaviorally unchanged unless a final consistency fix is required
-  - close the milestone only after docs/artifact references are internally consistent
-- Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
+  - choose the next post-shell milestone sequence before coding more product changes
+  - sync `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` around the same next-phase boundary
+  - keep `P9` acceptance artifacts/report as the local closure evidence unless a new regression forces a refresh
+- Keep quality gates unchanged:
+  - meaningful code changes: `npm run check`
+  - docs-only changes: `./scripts/check-doc-links.sh`
 
 ## 4) Guardrails
 

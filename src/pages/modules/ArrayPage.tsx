@@ -195,7 +195,7 @@ export function ArrayPage() {
 
   return (
     <WorkspaceShell
-      pageClassName="array-page"
+      pageClassName="array-page tree-page"
       stageAriaLabel={t('module.l01.title')}
       title={t('module.l01.title')}
       description={t('module.l01.body')}

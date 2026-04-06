@@ -1,0 +1,55 @@
+# P9-M3 Acceptance Report
+
+Date: 2026-04-07
+Local Dev URL: http://127.0.0.1:5173
+Browser: Firefox (repo-local `./scripts/playwright-cli.sh`)
+Viewport: 1440x1100
+
+## Discovery Consistency (/modules)
+
+- Total module cards: 19
+- Filter counts: Sorting=6, Linear=5, Search=2, Tree=6
+- Ready badges / open links: 15 / 15
+- Screenshot: `output/playwright/p9m3-modules.png`
+
+## Cross-Module Runtime Smoke (15 implemented routes)
+
+- Route-level runtime error detected: no
+- Transport buttons present on every route: yes
+- Default `Next` advanced at least one step on every route: yes
+- Non-tree routes kept full-stage shell width at 1440px viewport: yes
+
+- `S-01` `/modules/bubble-sort` -> `output/playwright/p9m3-s01-bubble-sort.png`
+- `S-02` `/modules/selection-sort` -> `output/playwright/p9m3-s02-selection-sort.png`
+- `S-03` `/modules/insertion-sort` -> `output/playwright/p9m3-s03-insertion-sort.png`
+- `S-04` `/modules/shell-sort` -> `output/playwright/p9m3-s04-shell-sort.png`
+- `S-05` `/modules/quick-sort` -> `output/playwright/p9m3-s05-quick-sort.png`
+- `S-06` `/modules/merge-sort` -> `output/playwright/p9m3-s06-merge-sort.png`
+- `SR-01` `/modules/linear-search` -> `output/playwright/p9m3-sr01-linear-search.png`
+- `SR-02` `/modules/binary-search` -> `output/playwright/p9m3-sr02-binary-search.png`
+- `L-01` `/modules/array` -> `output/playwright/p9m3-l01-array.png`
+- `L-02` `/modules/dynamic-array` -> `output/playwright/p9m3-l02-dynamic-array.png`
+- `L-03` `/modules/linked-list` -> `output/playwright/p9m3-l03-linked-list.png`
+- `L-04` `/modules/stack` -> `output/playwright/p9m3-l04-stack.png`
+- `L-05` `/modules/queue` -> `output/playwright/p9m3-l05-queue.png`
+- `T-01` `/modules/binary-tree` -> `output/playwright/p9m3-t01-binary-tree.png`
+- `T-02` `/modules/bst` -> `output/playwright/p9m3-t02-bst.png`
+
+Detailed smoke log: `output/playwright/p9m3-runtime-smoke.txt`
+
+## Shell Contract Spot Checks
+
+- Representative routes checked: 6
+- Pinned-button + draggable-panel + stage-click-collapse results:
+- `S-01`: controls button fixed=true, controls panel moved=true, step button fixed=true, step panel moved=true, stage click collapsed=true
+- `SR-01`: controls button fixed=true, controls panel moved=true, step button fixed=true, step panel moved=true, stage click collapsed=true
+- `L-03`: controls button fixed=true, controls panel moved=true, step button fixed=true, step panel moved=true, stage click collapsed=true
+- `L-05`: controls button fixed=true, controls panel moved=true, step button fixed=true, step panel moved=true, stage click collapsed=true
+- `T-01`: controls button fixed=true, controls panel moved=true, step button fixed=true, step panel moved=true, stage click collapsed=true
+- `T-02`: controls button fixed=true, controls panel moved=true, step button fixed=true, step panel moved=true, stage click collapsed=true
+
+## Conclusion
+
+- All 15 implemented modules are reachable from `/modules` and were refreshed under `output/playwright/p9m3-*`.
+- Shared-shell routes now have one locally re-verified acceptance pack covering runtime smoke plus representative panel-contract checks.
+- P9-M3 acceptance evidence is complete locally.

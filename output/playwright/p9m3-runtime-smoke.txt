@@ -1,0 +1,382 @@
+[Discovery] /modules
+### Result
+{
+  "url": "http://127.0.0.1:5173/modules",
+  "totalCards": 19,
+  "filterCounts": {
+    "sort": 6,
+    "linear": 5,
+    "search": 2,
+    "tree": 6
+  },
+  "readyBadges": 15,
+  "openLinks": 15,
+  "screenshot": "output/playwright/p9m3-modules.png"
+}
+---
+[S-01] /modules/bubble-sort
+### Result
+{
+  "id": "S-01",
+  "path": "/modules/bubble-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/72",
+  "stepAfter": "1/72",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-s01-bubble-sort.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[S-02] /modules/selection-sort
+### Result
+{
+  "id": "S-02",
+  "path": "/modules/selection-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/88",
+  "stepAfter": "1/88",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-s02-selection-sort.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[S-03] /modules/insertion-sort
+### Result
+{
+  "id": "S-03",
+  "path": "/modules/insertion-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/87",
+  "stepAfter": "1/87",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-s03-insertion-sort.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[S-04] /modules/shell-sort
+### Result
+{
+  "id": "S-04",
+  "path": "/modules/shell-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/106",
+  "stepAfter": "1/106",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-s04-shell-sort.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[S-05] /modules/quick-sort
+### Result
+{
+  "id": "S-05",
+  "path": "/modules/quick-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/68",
+  "stepAfter": "1/68",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-s05-quick-sort.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[S-06] /modules/merge-sort
+### Result
+{
+  "id": "S-06",
+  "path": "/modules/merge-sort",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/82",
+  "stepAfter": "1/82",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-s06-merge-sort.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[SR-01] /modules/linear-search
+### Result
+{
+  "id": "SR-01",
+  "path": "/modules/linear-search",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/7",
+  "stepAfter": "1/7",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-sr01-linear-search.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[SR-02] /modules/binary-search
+### Result
+{
+  "id": "SR-02",
+  "path": "/modules/binary-search",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/7",
+  "stepAfter": "1/7",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-sr02-binary-search.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[L-01] /modules/array
+### Result
+{
+  "id": "L-01",
+  "path": "/modules/array",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/4",
+  "stepAfter": "1/4",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-l01-array.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[L-02] /modules/dynamic-array
+### Result
+{
+  "id": "L-02",
+  "path": "/modules/dynamic-array",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/6",
+  "stepAfter": "1/6",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-l02-dynamic-array.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[L-03] /modules/linked-list
+### Result
+{
+  "id": "L-03",
+  "path": "/modules/linked-list",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/4",
+  "stepAfter": "1/4",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-l03-linked-list.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[L-04] /modules/stack
+### Result
+{
+  "id": "L-04",
+  "path": "/modules/stack",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/2",
+  "stepAfter": "1/2",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-l04-stack.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[L-05] /modules/queue
+### Result
+{
+  "id": "L-05",
+  "path": "/modules/queue",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/2",
+  "stepAfter": "1/2",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-l05-queue.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[T-01] /modules/binary-tree
+### Result
+{
+  "id": "T-01",
+  "path": "/modules/binary-tree",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/31",
+  "stepAfter": "1/31",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-t01-binary-tree.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[T-02] /modules/bst
+### Result
+{
+  "id": "T-02",
+  "path": "/modules/bst",
+  "hasRuntimeError": false,
+  "hasHeading": true,
+  "transportButtons": 4,
+  "nextDisabledBefore": false,
+  "stepBefore": "0/2",
+  "stepAfter": "1/2",
+  "stepChanged": true,
+  "screenshot": "output/playwright/p9m3-t02-bst.png",
+  "pageWidth": 1416,
+  "shellWidth": 1416,
+  "stageWidth": 1416
+}
+---
+[S-01 panels] /modules/bubble-sort
+### Result
+{
+  "id": "S-01",
+  "path": "/modules/bubble-sort",
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "stageClickPoint": {
+    "x": 724,
+    "y": 239
+  }
+}
+---
+[SR-01 panels] /modules/linear-search
+### Result
+{
+  "id": "SR-01",
+  "path": "/modules/linear-search",
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "stageClickPoint": {
+    "x": 724,
+    "y": 239
+  }
+}
+---
+[L-03 panels] /modules/linked-list
+### Result
+{
+  "id": "L-03",
+  "path": "/modules/linked-list",
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "stageClickPoint": {
+    "x": 724,
+    "y": 239
+  }
+}
+---
+[L-05 panels] /modules/queue
+### Result
+{
+  "id": "L-05",
+  "path": "/modules/queue",
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "stageClickPoint": {
+    "x": 724,
+    "y": 234
+  }
+}
+---
+[T-01 panels] /modules/binary-tree
+### Result
+{
+  "id": "T-01",
+  "path": "/modules/binary-tree",
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "stageClickPoint": {
+    "x": 724,
+    "y": 261.6000061035156
+  }
+}
+---
+[T-02 panels] /modules/bst
+### Result
+{
+  "id": "T-02",
+  "path": "/modules/bst",
+  "controlsButtonFixed": true,
+  "controlsPanelMoved": true,
+  "stepButtonFixed": true,
+  "stepPanelMoved": true,
+  "stageClickCollapsedPanels": true,
+  "stageClickPoint": {
+    "x": 724,
+    "y": 261.6000061035156
+  }
+}
+---

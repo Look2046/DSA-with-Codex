@@ -2,6 +2,53 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P9-M3 acceptance closure)
+
+### Today Done
+- Closed `P9` locally with a full Playwright acceptance refresh for `/modules` + all 15 implemented routes.
+- Refreshed local acceptance evidence under `output/playwright/p9m3-*`:
+  - screenshots for `/modules` + all implemented routes
+  - `output/playwright/p9m3-runtime-smoke.txt`
+  - `output/playwright/p9m3-acceptance-report.txt`
+- Fixed the final pilot breakout drift that acceptance exposed:
+  - `L-01` `/modules/array`
+  - `SR-02` `/modules/binary-search`
+  - both pages now use `pageClassName="array-page tree-page"` so they match the same full-stage breakout as the other shared-shell pages
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified in Playwright at `1440x1100`:
+  - `/modules`: `19` cards, `15` ready badges, `15` open links
+  - all `15` implemented routes open without route-level runtime errors
+  - default `Next` advances at least one step on all `15` implemented routes
+  - all non-tree routes now keep `1416px` page / shell / stage widths
+  - representative shell-contract checks pass on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`:
+    - pinned `Controls` / `Step` buttons stay fixed
+    - opened panels drag independently
+    - clicking the stage collapses both panels
+- Updated project guidance so new sessions read the active work branch from `docs/SESSION_BRIEF.md` instead of a stale hardcoded branch in `AGENTS.md`
+
+### Current State
+- Branch: `feat/p9-m2-sorting-shell-rollout`
+- Validated scope in this closure batch:
+  - `src/pages/modules/ArrayPage.tsx`
+  - `src/pages/modules/BinarySearchPage.tsx`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/IMPLEMENTATION_PLAN_P9.md`
+  - `TODO.md`
+  - `output/playwright/p9m3-*`
+- Milestone state:
+  - `P9` workspace-shell unification is now completed locally
+  - next priority is a post-`P9` planning baseline before new implementation work
+
+### Next Step
+- Create one focused commit for the validated `P9-M3` closure:
+  - final breakout follow-up on `L-01` / `SR-02`
+  - `p9m3` acceptance evidence
+  - docs sync
+- Keep unrelated dirty items out of the closure commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- If the user wants remote backup / CI visibility next, push after the closure commit.
+
 ## 2026-04-06 (P9-M2 search + linear shell rollout)
 
 ### Today Done

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P9
 
-Status: `P9-M1` completed locally; `P9-M2` next
+Status: `P9` completed locally; post-`P9` planning baseline is next
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: unify all implemented module pages around the stage-first workspace shell validated on `T-01` / `T-02`, while preserving family-specific teaching visuals and interaction needs
 
@@ -114,6 +114,15 @@ DoD
 Acceptance
 - `npm run check` passes
 - Playwright artifacts/report updated under `output/playwright/`
+
+Done (2026-04-07)
+- refreshed Playwright acceptance artifacts/report for `/modules` + all 15 implemented routes under `output/playwright/p9m3-*`
+- re-verified at `1440x1100`:
+  - `/modules` shows `19` cards, `15` ready badges, and `15` open links
+  - all `15` implemented routes open without route-level runtime errors and advance on default `Next`
+  - all non-tree routes keep `1416px` page / shell / stage widths
+  - representative pinned-button + draggable-panel + stage-click-collapse checks pass on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
+- fixed final pilot breakout drift so `L-01` and `SR-02` now also use the wide `tree-page` workspace breakout
 
 ## Suggested Task Breakdown
 

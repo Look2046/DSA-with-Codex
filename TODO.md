@@ -229,7 +229,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - re-verified `T-01` / `T-02` pinned-button + movable-panel + stage-click-collapse + auto-avoid behavior in browser automation
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-## P9 (In Progress)
+## P9 (Closed)
 - [x] P9 planning baseline
   - DoD: define next milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -256,9 +256,19 @@ Track actionable tasks here. Keep tasks small and testable.
     - added shared-shell compatibility styling for linked/linear stages and fixed `L-04` stack auto-sync timing so intermediate steps remain visible until completion
     - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths across `SR-01` / `L-02` / `L-03` / `L-04` / `L-05`, plus working queue circular mode, resize playback, linked-list step progression, and stack `Next` progression
 
-- [ ] P9-M3 Cross-module consistency + acceptance closure after shell unification
+- [x] P9-M3 Cross-module consistency + acceptance closure after shell unification
   - DoD: align all 15 implemented modules to one recognizable shell contract, refresh Playwright acceptance artifacts/report, and sync closure docs.
   - Acceptance: `npm run check` passes and `output/playwright/p9m3-*` evidence is complete locally.
+  - Done (2026-04-07):
+    - refreshed Playwright acceptance artifacts/report for `/modules` + all 15 implemented routes under `output/playwright/p9m3-*`
+    - fixed final pilot breakout drift on `L-01` / `SR-02` so all non-tree routes now keep the same `1416px` page / shell / stage widths at `1440x1100`
+    - re-verified representative pinned-button + draggable-panel + stage-click-collapse behavior on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/IMPLEMENTATION_PLAN_P9.md`, and `TODO.md`
+
+## P10 (Next)
+- [ ] P10 planning baseline
+  - DoD: define the next post-`P9` milestone scope/order and acceptance criteria in docs before new implementation starts.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
