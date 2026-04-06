@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P8
 
-Status: in progress (`P8-M1` and `P8-M2` completed; `P8-M3` next)
+Status: closed (`P8-M1` + `P8-M2` + `P8-M3` completed)
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: start tree-track delivery with the same timeline-engine, deterministic testing, and acceptance discipline used in P5~P7
 
@@ -78,7 +78,7 @@ Acceptance
 - `npm run check` passes
 - local smoke evidence: `/modules -> T-02 -> replay/reset`
 
-### P8-M3 Tree consistency + acceptance refresh
+### P8-M3 Tree consistency + acceptance refresh (Completed 2026-04-06)
 
 Deliverables
 - tree-module consistency pass (`T-01`/`T-02`)

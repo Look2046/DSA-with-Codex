@@ -229,10 +229,23 @@ Track actionable tasks here. Keep tasks small and testable.
     - re-verified `T-01` / `T-02` pinned-button + movable-panel + stage-click-collapse + auto-avoid behavior in browser automation
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-## P9 (Next)
-- [ ] P9 planning baseline
+## P9 (Planned)
+- [x] P9 planning baseline
   - DoD: define next milestone scope/order and acceptance criteria in docs.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done: added `docs/IMPLEMENTATION_PLAN_P9.md`, closed `P8` planning state in `docs/IMPLEMENTATION_PLAN_P8.md`, and synced the next-phase boundary docs.
+
+- [ ] P9-M1 Workspace shell foundation + pilot migrations
+  - DoD: define the shared shell contract in code and migrate `S-01`, `L-01`, and `SR-02` as pilot pages.
+  - Acceptance: `npm run check` passes and Playwright confirms stable pilot flows with the unified shell.
+
+- [ ] P9-M2 Roll unified workspace shell across remaining implemented non-tree modules
+  - DoD: migrate all remaining implemented sorting/search/linear pages without regressing route/runtime behavior.
+  - Acceptance: `npm run check` passes and targeted Playwright sweeps remain stable across migrated routes.
+
+- [ ] P9-M3 Cross-module consistency + acceptance closure after shell unification
+  - DoD: align all 15 implemented modules to one recognizable shell contract, refresh Playwright acceptance artifacts/report, and sync closure docs.
+  - Acceptance: `npm run check` passes and `output/playwright/p9m3-*` evidence is complete locally.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

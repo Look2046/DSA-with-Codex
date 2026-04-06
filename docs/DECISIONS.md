@@ -455,3 +455,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: move buttons and panels together; keep panels fixed with no avoidance; fall back to non-draggable sidebars.
 - Consequences: the entry buttons remain stable and discoverable while the animation area can still reclaim space through drag + auto-avoid; future tree pages should follow the same shell contract for consistency.
 - Owner: haoyu + codex
+
+## DEC-20260406-50
+- Date: 2026-04-06
+- Status: accepted
+- Context: After closing `P8`, the next obvious choices were continuing new algorithm delivery (`AVL`, `Heap`, etc.) or first unifying the already-implemented module pages around the accepted `T-01` / `T-02` workspace model. Delaying the shell unification would increase future migration cost and make cross-module UX drift harder to control.
+- Decision: Use `P9` to unify all implemented modules around the `T-01` / `T-02` stage-first workspace shell before starting the next new algorithm track. Treat `T-01` as the interaction reference, but unify the shell contract rather than requiring a pixel-identical copy on every page.
+- Alternatives considered: continue tree-track expansion first; do ad-hoc page polish without a milestone; force an exact `T-01` UI clone on every module.
+- Consequences: `P9` focuses on UX/platform consistency instead of new algorithm count, but lowers future migration cost and creates a clearer shared baseline for later modules such as `AVL` and `Heap`.
+- Owner: haoyu + codex

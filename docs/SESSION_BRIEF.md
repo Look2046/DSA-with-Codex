@@ -5,9 +5,9 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p8-m3-route-rules-spike` (P8 closed locally; next-phase planning pending)
-- Current phase: P8 complete locally (tree-track closure synced)
-- Last local quality gate: `npm run check` (passed, 2026-04-06)
+- Active branch (expected): `docs/p9-workspace-shell-plan` (P9 planning baseline completed locally)
+- Current phase: P9 planned; `P9-M1` workspace-shell foundation is next
+- Last local quality gate: `./scripts/check-doc-links.sh` (passed, 2026-04-06)
 
 ## 2) What Is Already Done
 
@@ -40,6 +40,7 @@ Use this file as the first thing to read in a new chat/session.
 - P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
 - P8 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P8.md`
+- P9 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P9.md`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -52,7 +53,7 @@ Use this file as the first thing to read in a new chat/session.
   - added deterministic tests (`bst.test.ts`, `bstTimelineReplay.test.ts`)
   - marked `T-02` as implemented in module registry
   - captured local Playwright smoke artifacts (`output/playwright/p8m2-modules-tree-filter.png`, `output/playwright/p8m2-t02-bst-smoke.png`)
-- P8-M3 tree-track polish (in progress):
+- P8-M3 tree-track polish (completed):
   - `T-01` production route now uses the new single-stage shell (edge drawer + stage-first animation area + floating algorithm window)
   - `T-01` wide complete-tree spacing was rebalanced so large datasets keep distinct outer null hints and avoid near-vertical outer leaf-to-null edges
   - `T-01` added traversal output sequence panel and node value display toggle (`number`/`letter`)
@@ -113,11 +114,12 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start post-P8 planning baseline:
+- Start P9-M1 workspace-shell foundation + pilot migrations:
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - define the next milestone boundary before new code lands
-  - decide whether the next phase should continue tree-track expansion or open the next category
-  - keep the same milestone workflow (`plan -> implementation -> npm run check -> Playwright acceptance refresh -> docs sync`)
+  - switch to a dedicated `feat/*` branch before implementation starts
+  - extract only the minimum reusable shell contract needed from `T-01` / `T-02`
+  - pilot the unified shell on `S-01`, `L-01`, and `SR-02` before rolling out by family batch
+  - treat `T-01` as the interaction reference, but do not force pixel-identical copies on all pages
 - Keep quality gates and acceptance workflow unchanged (`npm run check` + milestone-level Playwright refresh).
 
 ## 4) Guardrails

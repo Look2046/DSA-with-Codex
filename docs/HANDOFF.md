@@ -2,6 +2,41 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-06 (P9 workspace-shell planning baseline)
+
+### Today Done
+- Chose the next phase after `P8`: prioritize cross-module workspace-shell unification before adding new algorithm modules.
+- Added `docs/IMPLEMENTATION_PLAN_P9.md`.
+- Defined the `P9` shell contract around the validated `T-01` / `T-02` interaction model:
+  - stage-first layout
+  - pinned `Controls` / `Step` entries
+  - in-stage transport
+  - empty-stage click collapse
+  - draggable side panels
+  - optional algorithm window instead of mandatory pixel-perfect `T-01` cloning
+- Structured `P9` into three milestones:
+  - `P9-M1` foundation + pilot migrations (`S-01`, `L-01`, `SR-02`)
+  - `P9-M2` remaining non-tree rollout
+  - `P9-M3` full consistency + acceptance closure
+- Re-ran the docs quality gate successfully:
+  - `./scripts/check-doc-links.sh`
+- Synced planning state docs:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+  - `docs/IMPLEMENTATION_PLAN_P8.md`
+
+### Current State
+- Branch: `docs/p9-workspace-shell-plan`
+- Current milestone boundary: `P9` planning baseline completed locally; implementation has not started yet.
+- `P8` is closed locally on the prior feature line; this branch is docs-only planning sync.
+- Existing unrelated dirty items are still present in the repo (`scripts/*`, design artifacts, launcher helper). Keep them out of the planning commit.
+
+### Next Step
+- Commit the `P9` planning baseline on this docs branch.
+- Then start `P9-M1` on a fresh `feat/*` branch with the pilot-module rollout only.
+
 ## 2026-04-06 (P8-M3 acceptance closure)
 
 ### Today Done
