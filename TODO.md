@@ -319,9 +319,16 @@ Track actionable tasks here. Keep tasks small and testable.
     - selected graph-track foundation over immediately continuing with `Trie` / `B-Tree / B+ Tree`
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-- [ ] P11-M1 Add `G-01 Graph Representation`
+- [x] P11-M1 Add `G-01 Graph Representation`
   - DoD: add graph category discovery wiring plus a graph-representation teaching module with synchronized canvas/list/matrix views, route/page/tests/i18n, and shared shell parity.
   - Acceptance: `npm run check` passes, deterministic replay confirms view synchronization, and targeted Playwright smoke on `/modules/graph-representation` is stable.
+  - Done (2026-04-07):
+    - added graph category support in discovery / registry / route / zh-en i18n
+    - landed deterministic graph model + page + route + timeline adapter + replay tests
+    - targeted Playwright smoke confirmed `/modules`: `21` cards, `18` ready badges, `18` open links
+    - graph filter now shows `2` cards and `1` live open link
+    - `/modules/graph-representation` opens cleanly, default `Next` advances `0/20 -> 1/20`, and console errors remain `0`
+    - captured `output/playwright/p11m1-*.png` and `output/playwright/p11m1-smoke-report.txt`
 
 - [ ] P11-M2 Add `G-02 DFS`
   - DoD: implement a DFS teaching module with deterministic traversal playback, visit/backtrack semantics, route/page/tests/i18n, and shared shell parity.

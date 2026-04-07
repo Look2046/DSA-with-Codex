@@ -518,3 +518,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: continue tree track immediately with `Trie` + `B-Tree / B+ Tree`; start weighted graph algorithms before a graph baseline; do another broad cross-module polish phase before new category work.
 - Consequences: the project opens a new module family with lower immediate complexity than `B-Tree / B+ Tree`, validates the shared workspace shell against graph-style stages, and defers the remaining specialized tree structures to a later focused phase.
 - Owner: haoyu + codex
+
+## DEC-20260407-57
+- Date: 2026-04-07
+- Status: accepted
+- Context: `G-01` needed to teach graph structure through three simultaneous representations (canvas, adjacency list, adjacency matrix). Modeling those as separate mutable views would create drift risk immediately and make replay verification harder before DFS reuses the same baseline.
+- Decision: Build `G-01` around one deterministic graph snapshot model, derive adjacency list and adjacency matrix directly from that model, and drive the teaching timeline row by row (`vertex -> relation -> row complete`) while reusing the shared workspace shell instead of introducing a graph-specific page frame.
+- Alternatives considered: maintain separate view-specific states; start with a static graph page and add playback later; design a new graph-only shell before validating the current shared shell on graph content.
+- Consequences: `G-01` stays deterministic and easy to test, future graph modules can reuse the same preset/snapshot foundation, and shell drift remains controlled; richer graph behaviors such as DFS/BFS can now layer traversal state on top of the same shared baseline.
+- Owner: haoyu + codex

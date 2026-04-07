@@ -1,0 +1,22 @@
+P11-M1 Graph Representation targeted smoke (2026-04-07)
+
+- /modules snapshot:
+  - cards: 21
+  - ready badges: 18
+  - open links: 18
+  - graph filter visible: yes
+- /modules?category=graph snapshot:
+  - cards: 2
+  - open links: 1
+  - ready module: G-01 Graph Representation
+- /modules/graph-representation smoke:
+  - route opened without runtime errors
+  - Controls + Step panels opened successfully
+  - clicking the stage collapsed both panels back to the pinned buttons
+  - default Next advanced 0/20 -> 1/20
+  - browser console errors: 0
+- Artifacts:
+  - output/playwright/p11m1-modules-smoke.png
+  - output/playwright/p11m1-modules-graph-filter.png
+  - output/playwright/p11m1-graph-representation-panels.png
+  - output/playwright/p11m1-graph-representation-smoke.png

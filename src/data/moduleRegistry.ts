@@ -153,6 +153,22 @@ export const moduleRegistry: ModuleMetadata[] = [
     difficulty: 2,
     implemented: false,
   },
+  {
+    id: 'G-01',
+    name: 'Graph Representation',
+    route: '/modules/graph-representation',
+    category: 'graph',
+    difficulty: 1,
+    implemented: true,
+  },
+  {
+    id: 'G-02',
+    name: 'Depth-First Search (DFS)',
+    route: '/modules/dfs',
+    category: 'graph',
+    difficulty: 1,
+    implemented: false,
+  },
 ];
 
 export function getModuleByRoute(route: string): ModuleMetadata | null {

@@ -2,6 +2,76 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P11-M1 graph representation)
+
+### Today Done
+- Created the implementation branch for the first graph milestone:
+  - `feat/p11-m1-graph-representation`
+- Implemented `P11-M1` `G-01 Graph Representation` on top of the accepted shared workspace shell:
+  - added graph category support in `/modules`, module registry, route wiring, and zh/en i18n
+  - added one deterministic graph preset model that simultaneously drives:
+    - graph canvas
+    - adjacency list
+    - adjacency matrix
+  - structured the teaching timeline as `initial -> selectVertex -> inspectEdge -> completeRow -> completed`
+- Added deterministic graph coverage:
+  - `src/modules/graph/graphRepresentation.test.ts`
+  - `src/modules/graph/graphRepresentationTimelineReplay.test.ts`
+- Added the new route/page/styling:
+  - `src/pages/modules/GraphRepresentationPage.tsx`
+  - `src/app/router.tsx`
+  - `src/index.css`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified targeted browser smoke with the pinned Playwright wrapper:
+  - `/modules`: `21` cards, `18` ready badges, `18` open links
+  - graph filter shows `2` cards and `1` live open link
+  - `/modules/graph-representation` opens without route-level runtime errors
+  - `Controls` + `Step` panels open correctly, and clicking the stage collapses them back to the pinned buttons
+  - default `Next` advances from `0/20` to `1/20`
+  - console errors returned `0`
+- Captured local smoke artifacts:
+  - `output/playwright/p11m1-modules-smoke.png`
+  - `output/playwright/p11m1-modules-graph-filter.png`
+  - `output/playwright/p11m1-graph-representation-panels.png`
+  - `output/playwright/p11m1-graph-representation-smoke.png`
+  - `output/playwright/p11m1-smoke-report.txt`
+
+### Current State
+- Branch: `feat/p11-m1-graph-representation`
+- Validated scope in this milestone:
+  - `src/modules/graph/graphRepresentation.ts`
+  - `src/modules/graph/graphRepresentationTimelineAdapter.ts`
+  - `src/modules/graph/graphRepresentation.test.ts`
+  - `src/modules/graph/graphRepresentationTimelineReplay.test.ts`
+  - `src/pages/modules/GraphRepresentationPage.tsx`
+  - `src/types/module.ts`
+  - `src/pages/ModulesPage.tsx`
+  - `src/pages/modulesPageUtils.test.ts`
+  - `src/data/moduleRegistry.ts`
+  - `src/app/router.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/IMPLEMENTATION_PLAN_P11.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+  - `output/playwright/p11m1-*`
+- Milestone state:
+  - `P11-M1` `G-01 Graph Representation` is now completed locally
+  - next priority is `P11-M2` `G-02 DFS`
+
+### Next Step
+- Create one focused commit for the validated graph-representation milestone:
+  - graph module logic / replay tests / page / route / registry / i18n / styling
+  - `p11m1` smoke artifacts and docs sync
+- Keep unrelated dirty items out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- Then start `P11-M2` on a fresh branch:
+  - recommended branch: `feat/p11-m2-dfs`
+  - reuse the same deterministic graph preset foundation and shared shell
+  - keep the first DFS iteration focused on visited progression, stack/backtrack semantics, and traversal order
+
 ## 2026-04-07 (P11 planning baseline)
 
 ### Today Done

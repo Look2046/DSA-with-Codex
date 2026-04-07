@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `docs/post-p10-plan`
-- Current phase: `P11` planning baseline is completed locally; `P11-M1` graph representation is next
+- Active branch (expected): `feat/p11-m1-graph-representation`
+- Current phase: `P11-M1` graph representation is completed locally; `P11-M2` DFS is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -95,6 +95,20 @@ Use this file as the first thing to read in a new chat/session.
   - added `docs/IMPLEMENTATION_PLAN_P11.md`
   - chose the next phase sequence as `Graph Representation -> DFS -> graph-track acceptance closure`
   - selected graph-track foundation over immediately continuing with `Trie` / `B-Tree / B+ Tree`
+- P11-M1 `G-01 Graph Representation` completed locally:
+  - added graph category support in discovery / registry / route / zh-en i18n
+  - implemented `G-01` with one deterministic graph model driving graph canvas + adjacency list + adjacency matrix under the shared `WorkspaceShell`
+  - added deterministic graph coverage (`graphRepresentation.test.ts`, `graphRepresentationTimelineReplay.test.ts`)
+  - targeted Playwright smoke confirmed:
+    - `/modules`: `21` cards, `18` ready badges, `18` open links
+    - graph filter shows `2` cards and `1` open link
+    - `/modules/graph-representation` opens cleanly, default `Next` advances `0/20 -> 1/20`, and stage-click collapse works after opening `Controls` + `Step`
+  - captured local smoke artifacts:
+    - `output/playwright/p11m1-modules-smoke.png`
+    - `output/playwright/p11m1-modules-graph-filter.png`
+    - `output/playwright/p11m1-graph-representation-panels.png`
+    - `output/playwright/p11m1-graph-representation-smoke.png`
+    - `output/playwright/p11m1-smoke-report.txt`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -168,14 +182,13 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Close the validated planning baseline with one focused commit on:
-  - current branch: `docs/post-p10-plan`
+- Create one focused commit for the validated `P11-M1` milestone on:
+  - current branch: `feat/p11-m1-graph-representation`
   - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
-- Then start `P11-M1` on a fresh feature branch:
-  - recommended branch: `feat/p11-m1-graph-representation`
-  - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - add graph category discovery wiring plus `G-01 Graph Representation`
-  - reuse the accepted shared workspace shell and avoid reopening broad shell redesign unless graph rendering exposes a concrete gap
+- Then start `P11-M2` on a fresh feature branch:
+  - recommended branch: `feat/p11-m2-dfs`
+  - reuse the same deterministic graph preset/snapshot foundation from `G-01`
+  - teach visited progression, stack/backtrack semantics, and traversal order without reopening broad shell redesign
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P11
 
-Status: `P11` planning baseline completed locally; `P11-M1` next
+Status: `P11-M1` completed locally; `P11-M2` next
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: start the graph track on top of the accepted shared workspace shell by adding graph discovery/category wiring plus the first two graph modules, then close with a focused graph-baseline acceptance sweep
 
@@ -46,6 +46,24 @@ Acceptance
 - deterministic fixed-input replay confirms list/matrix state stays synchronized
 - targeted Playwright smoke confirms `/modules/graph-representation` opens and basic playback is stable
 
+Done (2026-04-07)
+- added graph category discovery wiring in `/modules`, registry, route list, and zh/en i18n
+- implemented `G-01` on the shared `WorkspaceShell` with one deterministic graph model driving graph canvas + adjacency list + adjacency matrix
+- landed deterministic tests plus replay coverage:
+  - `src/modules/graph/graphRepresentation.test.ts`
+  - `src/modules/graph/graphRepresentationTimelineReplay.test.ts`
+- local `npm run check` passed
+- targeted Playwright smoke confirmed:
+  - `/modules`: `21` cards, `18` ready badges, `18` open links
+  - graph filter shows `2` cards and `1` live open link
+  - `/modules/graph-representation` opens cleanly, default `Next` advances `0/20 -> 1/20`, panels open/collapse correctly, and console errors = `0`
+- artifacts captured:
+  - `output/playwright/p11m1-modules-smoke.png`
+  - `output/playwright/p11m1-modules-graph-filter.png`
+  - `output/playwright/p11m1-graph-representation-panels.png`
+  - `output/playwright/p11m1-graph-representation-smoke.png`
+  - `output/playwright/p11m1-smoke-report.txt`
+
 ### P11-M2 Add `G-02 DFS`
 
 Deliverables
@@ -81,9 +99,8 @@ Acceptance
 
 ## Suggested Task Breakdown
 
-1. Land graph category wiring + `G-01 Graph Representation`
-2. Land `G-02 DFS`
-3. Refresh graph-baseline acceptance evidence and close the phase
+1. Land `G-02 DFS`
+2. Refresh graph-baseline acceptance evidence and close the phase
 
 ## Required Quality Gates
 

@@ -22,6 +22,7 @@ import { BinaryTreeTraversalPage } from '../pages/modules/BinaryTreeTraversalPag
 import { BstPage } from '../pages/modules/BstPage';
 import { AvlTreePage } from '../pages/modules/AvlTreePage';
 import { HeapPage } from '../pages/modules/HeapPage';
+import { GraphRepresentationPage } from '../pages/modules/GraphRepresentationPage';
 import { BinaryTreeCanvasPlaygroundPage } from '../pages/modules/BinaryTreeCanvasPlaygroundPage';
 
 export const router = createBrowserRouter([
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
       { path: 'modules/bst', element: <BstPage /> },
       { path: 'modules/avl-tree', element: <AvlTreePage /> },
       { path: 'modules/heap', element: <HeapPage /> },
+      { path: 'modules/graph-representation', element: <GraphRepresentationPage /> },
       { path: 'playground/binary-tree-canvas', element: <BinaryTreeCanvasPlaygroundPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },

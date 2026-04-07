@@ -10,7 +10,9 @@ export function ModulesPage() {
 
   const filter = (searchParams.get('category') as ModuleFilter | null) ?? 'all';
   const activeFilter: ModuleFilter =
-    filter === 'linear' || filter === 'sort' || filter === 'search' || filter === 'tree' ? filter : 'all';
+    filter === 'linear' || filter === 'sort' || filter === 'search' || filter === 'tree' || filter === 'graph'
+      ? filter
+      : 'all';
   const visibleModules = useMemo(() => filterModules(moduleRegistry, activeFilter), [activeFilter]);
 
   const filterOptions: Array<{ value: ModuleFilter; label: string }> = [
@@ -19,6 +21,7 @@ export function ModulesPage() {
     { value: 'sort', label: t('modules.filter.sort') },
     { value: 'search', label: t('modules.filter.search') },
     { value: 'tree', label: t('modules.filter.tree') },
+    { value: 'graph', label: t('modules.filter.graph') },
   ];
 
   const getCategoryLabel = (category: ModuleFilter): string => {
@@ -33,6 +36,9 @@ export function ModulesPage() {
     }
     if (category === 'tree') {
       return t('modules.filter.tree');
+    }
+    if (category === 'graph') {
+      return t('modules.filter.graph');
     }
     return t('modules.filter.all');
   };
