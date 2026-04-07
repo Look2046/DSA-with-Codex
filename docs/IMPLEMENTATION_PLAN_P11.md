@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P11
 
-Status: `P11-M2` completed locally; `P11-M3` next
+Status: `P11` completed locally
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: start the graph track on top of the accepted shared workspace shell by adding graph discovery/category wiring plus the first two graph modules, then close with a focused graph-baseline acceptance sweep
 
@@ -117,9 +117,30 @@ Acceptance
 - `npm run check` passes
 - Playwright artifacts/report updated under `output/playwright/`
 
+Done (2026-04-07)
+- refreshed graph-track Playwright acceptance artifacts/report for:
+  - `/modules`
+  - `/modules?category=graph`
+  - `/modules/graph-representation`
+  - `/modules/dfs`
+- local `npm run check` passed
+- re-verified:
+  - `/modules`: `21` cards, `19` ready badges, `19` open links
+  - graph filter: `2` cards, `2` ready badges, `2` open links
+  - `G-01`: default `Next` advances `0/20 -> 1/20`, `Controls` + `Step` panels open/collapse correctly, and console errors = `0`
+  - `G-02`: default `Next` advances `0/28 -> 1/28`, `Controls` + `Step` panels open/collapse correctly, and console errors = `0`
+- artifacts captured:
+  - `output/playwright/p11m3-modules-smoke.png`
+  - `output/playwright/p11m3-modules-graph-filter.png`
+  - `output/playwright/p11m3-graph-representation-panels.png`
+  - `output/playwright/p11m3-graph-representation-smoke.png`
+  - `output/playwright/p11m3-dfs-panels.png`
+  - `output/playwright/p11m3-dfs-smoke.png`
+  - `output/playwright/p11m3-acceptance-report.txt`
+
 ## Suggested Task Breakdown
 
-1. Refresh graph-baseline acceptance evidence and close the phase
+1. `P11` is closed locally; next work should begin on a post-`P11` planning branch outside this document
 
 ## Required Quality Gates
 

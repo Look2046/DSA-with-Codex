@@ -1,0 +1,31 @@
+P11-M3 graph-track acceptance report
+Date: 2026-04-07
+Branch: feat/p11-m3-graph-closure
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules: 21 cards, 19 ready badges, 19 open links
+- /modules?category=graph: 2 cards, 2 ready badges, 2 open links
+
+Route checks
+- G-01 Graph Representation:
+  - route opens cleanly
+  - Controls and Step panels both open correctly
+  - clicking the stage collapses the open panels back to the pinned buttons
+  - default Next advances 0/20 -> 1/20
+  - console errors: 0
+- G-02 Depth-First Search:
+  - route opens cleanly
+  - Controls and Step panels both open correctly
+  - clicking the stage collapses the open panels back to the pinned buttons
+  - default Next advances 0/28 -> 1/28
+  - console errors: 0
+
+Artifacts
+- output/playwright/p11m3-modules-smoke.png
+- output/playwright/p11m3-modules-graph-filter.png
+- output/playwright/p11m3-graph-representation-panels.png
+- output/playwright/p11m3-graph-representation-smoke.png
+- output/playwright/p11m3-dfs-panels.png
+- output/playwright/p11m3-dfs-smoke.png

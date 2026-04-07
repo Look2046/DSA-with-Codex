@@ -2,6 +2,56 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P11-M3 graph-track acceptance closure)
+
+### Today Done
+- Continued on the graph-track closure branch:
+  - `feat/p11-m3-graph-closure`
+- Closed `P11-M3` locally with a focused graph-track Playwright acceptance refresh for:
+  - `/modules`
+  - `/modules?category=graph`
+  - `/modules/graph-representation`
+  - `/modules/dfs`
+- Refreshed local graph-track acceptance evidence under `output/playwright/p11m3-*`:
+  - discovery screenshots for `/modules` and graph filter state
+  - route screenshots for `G-01` and `G-02`
+  - panel-behavior screenshots for `G-01` and `G-02`
+  - `output/playwright/p11m3-acceptance-report.txt`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified locally:
+  - `/modules`: `21` cards, `19` ready badges, `19` open links
+  - graph filter: `2` cards, `2` ready badges, `2` open links
+  - `G-01`: `Controls` / `Step` entrypoints present; opening both panels then clicking the stage collapses them from `2 -> 0`; default `Next` advances `0/20 -> 1/20`
+  - `G-02`: `Controls` / `Step` entrypoints present; opening both panels then clicking the stage collapses them from `2 -> 0`; default `Next` advances `0/28 -> 1/28`
+  - both graph routes returned `0` console errors in the targeted smoke
+- Re-synced milestone state docs:
+  - `docs/IMPLEMENTATION_PLAN_P11.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `TODO.md`
+
+### Current State
+- Branch: `feat/p11-m3-graph-closure`
+- Validated scope in this closure batch:
+  - `docs/IMPLEMENTATION_PLAN_P11.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `TODO.md`
+  - `output/playwright/p11m3-*`
+- Milestone state:
+  - `P11` graph-track expansion is now completed locally
+  - next priority is a post-`P11` planning baseline before new implementation work
+
+### Next Step
+- Create one focused commit for the validated `P11-M3` closure:
+  - `p11m3` acceptance evidence
+  - closure docs sync
+- Keep unrelated dirty items out of the closure commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- Then define the next phase on a docs planning branch:
+  - recommended branch: `docs/post-p11-plan`
+  - decide the next phase sequence and sync planning-state docs
+
 ## 2026-04-07 (P11-M2 dfs)
 
 ### Today Done

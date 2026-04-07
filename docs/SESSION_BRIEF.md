@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p11-m2-dfs`
-- Current phase: `P11-M2` DFS is completed locally; `P11-M3` graph-track acceptance closure is next
+- Active branch (expected): `feat/p11-m3-graph-closure`
+- Current phase: `P11` graph-track expansion is completed locally; post-`P11` planning baseline is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -125,6 +125,22 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p11m2-dfs-panels.png`
     - `output/playwright/p11m2-dfs-smoke.png`
     - `output/playwright/p11m2-smoke-report.txt`
+- P11-M3 graph-track acceptance closure completed locally:
+  - refreshed graph-track Playwright evidence for `/modules`, graph filter, `G-01`, and `G-02` under `output/playwright/p11m3-*`
+  - re-verified graph discovery and route consistency on the accepted shared shell contract
+  - targeted Playwright acceptance at `1440x1100` confirmed:
+    - `/modules`: `21` cards, `19` ready badges, `19` open links
+    - graph filter: `2` cards, `2` ready badges, `2` open links
+    - `G-01`: opens cleanly, `Controls` + `Step` panels collapse on stage click, default `Next` advances `0/20 -> 1/20`, and console errors = `0`
+    - `G-02`: opens cleanly, `Controls` + `Step` panels collapse on stage click, default `Next` advances `0/28 -> 1/28`, and console errors = `0`
+  - captured local acceptance artifacts:
+    - `output/playwright/p11m3-modules-smoke.png`
+    - `output/playwright/p11m3-modules-graph-filter.png`
+    - `output/playwright/p11m3-graph-representation-panels.png`
+    - `output/playwright/p11m3-graph-representation-smoke.png`
+    - `output/playwright/p11m3-dfs-panels.png`
+    - `output/playwright/p11m3-dfs-smoke.png`
+    - `output/playwright/p11m3-acceptance-report.txt`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -198,13 +214,11 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Create one focused commit for the validated `P11-M2` milestone on:
-  - current branch: `feat/p11-m2-dfs`
-  - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
-- Then start `P11-M3` on a fresh feature branch:
-  - recommended branch: `feat/p11-m3-graph-closure`
-  - refresh `/modules` + graph-filter + `G-01` / `G-02` acceptance evidence under `output/playwright/p11m3-*`
-  - keep the closure focused on graph-track consistency and docs/artifact sync instead of reopening module behavior
+- Create a post-`P11` docs planning branch:
+  - recommended branch: `docs/post-p11-plan`
+- Then define the next phase baseline before new implementation work:
+  - pick the next focused milestone sequence and acceptance boundary
+  - sync `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

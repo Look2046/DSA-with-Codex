@@ -309,7 +309,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - confirmed `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
     - synced `docs/IMPLEMENTATION_PLAN_P10.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
 
-## P11 (In Progress)
+## P11 (Closed)
 - [x] P11 planning baseline
   - DoD: define the post-`P10` milestone scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/IMPLEMENTATION_PLAN_P11.md`, `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -341,9 +341,19 @@ Track actionable tasks here. Keep tasks small and testable.
     - `/modules/dfs` opens cleanly, default `Next` advances `0/28 -> 1/28`, panels open/collapse correctly, and console errors remain `0`
     - captured `output/playwright/p11m2-*.png` and `output/playwright/p11m2-smoke-report.txt`
 
-- [ ] P11-M3 Graph-track acceptance closure
+- [x] P11-M3 Graph-track acceptance closure
   - DoD: refresh Playwright acceptance artifacts/report after `G-01` / `G-02` and sync closure docs.
   - Acceptance: `npm run check` passes and refreshed `output/playwright/p11m3-*` evidence is complete locally.
+  - Done (2026-04-07):
+    - refreshed graph-track Playwright artifacts/report for `/modules`, graph filter, `G-01`, and `G-02`
+    - re-verified `/modules`: `21` cards, `19` ready badges, `19` open links, graph filter = `2` cards
+    - targeted smoke confirmed `G-01` / `G-02` open cleanly, both default `Next` buttons advance, both pages collapse `Controls` + `Step` on stage click, and no console errors were reported
+    - synced `docs/IMPLEMENTATION_PLAN_P11.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
+
+## P12 (Planned)
+- [ ] P12 planning baseline
+  - DoD: define the post-`P11` phase scope/order and acceptance criteria in docs before new implementation starts.
+  - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
