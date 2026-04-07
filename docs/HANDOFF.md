@@ -2,6 +2,56 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P10-M3 tree-track acceptance closure)
+
+### Today Done
+- Closed `P10-M3` locally with a focused tree-track Playwright acceptance refresh for:
+  - `/modules`
+  - `/modules/binary-tree`
+  - `/modules/bst`
+  - `/modules/avl-tree`
+  - `/modules/heap`
+- Refreshed local tree-track acceptance evidence under `output/playwright/p10m3-*`:
+  - discovery screenshots for `/modules` and tree filter state
+  - route screenshots for `T-01` ~ `T-04`
+  - `output/playwright/p10m3-runtime-smoke.txt`
+  - `output/playwright/p10m3-acceptance-report.txt`
+- Re-verified locally:
+  - `/modules`: `19` cards, `17` ready badges, `17` open links, tree filter = `6` cards
+  - `T-01`: `Controls` / `Step` / `Algorithm` entrypoints present; default `Next` advances `0/31 -> 1/31`
+  - `T-02`: `Controls` / `Step` entrypoints present; default `Next` advances `0/2 -> 1/2`
+  - `T-03`: `Controls` / `Step` entrypoints present; default `Next` advances `0/11 -> 1/11`; opening both panels then clicking the stage collapses them from `2 -> 0`
+  - `T-04`: `Controls` / `Step` entrypoints present; default `Next` advances `0/11 -> 1/11`; opening both panels then clicking the stage collapses them from `2 -> 0`
+  - all four tree routes returned `0` console errors in the targeted smoke
+- Re-synced milestone state docs:
+  - `docs/IMPLEMENTATION_PLAN_P10.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `TODO.md`
+- Re-ran the required docs-only gate successfully:
+  - `./scripts/check-doc-links.sh`
+
+### Current State
+- Branch: `feat/p10-m3-tree-closure`
+- Validated scope in this closure batch:
+  - `docs/IMPLEMENTATION_PLAN_P10.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `TODO.md`
+  - `output/playwright/p10m3-*`
+- Milestone state:
+  - `P10` tree-track expansion is now completed locally
+  - next priority is a post-`P10` planning baseline before new implementation work
+
+### Next Step
+- Create one focused commit for the validated `P10-M3` closure:
+  - `p10m3` acceptance evidence
+  - closure docs sync
+- Keep unrelated dirty items out of the closure commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- Then define the next phase on a docs planning branch:
+  - recommended branch: `docs/post-p10-plan`
+- Remote push is still blocked in this environment until SSH auth is fixed.
+
 ## 2026-04-07 (P10-M2 heap)
 
 ### Today Done

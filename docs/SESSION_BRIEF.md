@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p10-m2-heap`
-- Current phase: `P10-M2` heap is completed locally; `P10-M3` tree-track acceptance closure is next
+- Active branch (expected): `feat/p10-m3-tree-closure`
+- Current phase: `P10` is completed locally; post-`P10` planning baseline is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -86,6 +86,11 @@ Use this file as the first thing to read in a new chat/session.
   - marked `T-04` as implemented in module registry and localized zh/en UI copy
   - targeted Playwright smoke confirmed `/modules` shows `T-04` as `Ready`, `/modules/heap` opens cleanly, and default `Next` advances from `0/11` to `1/11`
   - captured local smoke artifacts (`output/playwright/p10m2-modules-smoke.png`, `output/playwright/p10m2-heap-smoke.png`)
+- P10-M3 tree-track acceptance closure completed locally:
+  - refreshed Playwright tree-track evidence under `output/playwright/p10m3-*`
+  - `/modules` now verifies `19` cards, `17` ready badges, `17` open links, and `6` tree-filter cards
+  - targeted smoke confirms `T-01` / `T-02` / `T-03` / `T-04` all open without console errors and default `Next` advances on all four routes
+  - targeted shell checks confirm `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -159,15 +164,14 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Close the validated heap milestone with one focused commit on:
-  - current branch: `feat/p10-m2-heap`
+- Close the validated `P10` acceptance milestone with one focused commit on:
+  - current branch: `feat/p10-m3-tree-closure`
   - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
-- Then start `P10-M3` on a fresh feature branch:
-  - recommended branch: `feat/p10-m3-tree-closure`
+- Then define the next phase on a docs planning branch:
+  - recommended branch: `docs/post-p10-plan`
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - refresh `/modules` and `T-01`~`T-04` acceptance evidence after AVL + Heap
-  - keep the shared shell contract stable and focus on consistency / runtime verification rather than new interaction redesign
-  - close the phase only after `npm run check` plus refreshed Playwright evidence under `output/playwright/p10m3-*`
+  - decide the post-tree-track scope before new implementation starts
+  - keep milestones branch-scoped and continue the same local quality-gate discipline
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

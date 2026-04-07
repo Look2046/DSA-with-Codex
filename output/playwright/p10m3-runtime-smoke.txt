@@ -1,0 +1,105 @@
+# P10-M3 Runtime Smoke
+
+Date: 2026-04-07
+Local Preview URL: http://127.0.0.1:4173
+Browser: Firefox (repo-local `./scripts/playwright-cli.sh`)
+
+## Discovery Counts
+
+{
+  "cards": 19,
+  "ready": 17,
+  "openLinks": 17
+}
+{
+  "treeCards": 6
+}
+
+## T-01 Binary Tree Traversal
+Route: /modules/binary-tree
+Initial:
+{
+  "heading": "T-01 Binary Tree Traversal",
+  "hasControls": true,
+  "hasStep": true,
+  "hasAlgorithm": true,
+  "stepText": "0/31"
+}
+After Next:
+{
+  "stepText": "1/31"
+}
+Console:
+Returning 0 messages for level "error"
+Shell Open Check:
+n/a
+Shell Collapse Check:
+n/a
+
+## T-02 BST
+Route: /modules/bst
+Initial:
+{
+  "heading": "T-02 Binary Search Tree (BST)",
+  "hasControls": true,
+  "hasStep": true,
+  "stepText": "0/2"
+}
+After Next:
+{
+  "stepText": "1/2"
+}
+Console:
+Returning 0 messages for level "error"
+Shell Open Check:
+n/a
+Shell Collapse Check:
+n/a
+
+## T-03 AVL Tree
+Route: /modules/avl-tree
+Initial:
+{
+  "heading": "T-03 AVL Tree",
+  "hasControls": true,
+  "hasStep": true,
+  "stepText": "0/11"
+}
+After Next:
+{
+  "stepText": "1/11"
+}
+Console:
+Returning 0 messages for level "error"
+Shell Open Check:
+{
+  "openPanels": 2
+}
+Shell Collapse Check:
+{
+  "openPanelsAfterCollapse": 0
+}
+
+## T-04 Heap
+Route: /modules/heap
+Initial:
+{
+  "heading": "T-04 Heap",
+  "hasControls": true,
+  "hasStep": true,
+  "stepText": "0/11"
+}
+After Next:
+{
+  "stepText": "1/11"
+}
+Console:
+Returning 0 messages for level "error"
+Shell Open Check:
+{
+  "openPanels": 2
+}
+Shell Collapse Check:
+{
+  "openPanelsAfterCollapse": 0
+}

@@ -265,7 +265,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - re-verified representative pinned-button + draggable-panel + stage-click-collapse behavior on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/IMPLEMENTATION_PLAN_P9.md`, and `TODO.md`
 
-## P10 (In Progress)
+## P10 (Closed)
 - [x] P10 planning baseline
   - DoD: define the next post-`P9` milestone scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -299,9 +299,15 @@ Track actionable tasks here. Keep tasks small and testable.
     - targeted Playwright smoke confirmed `/modules` shows `T-04` as `Ready`, `/modules/heap` opens cleanly, and default `Next` advances from `0/11` to `1/11`
     - captured `output/playwright/p10m2-modules-smoke.png` and `output/playwright/p10m2-heap-smoke.png`
 
-- [ ] P10-M3 Tree-track acceptance closure
+- [x] P10-M3 Tree-track acceptance closure
   - DoD: refresh Playwright acceptance artifacts/report after `T-03` / `T-04` and sync closure docs.
   - Acceptance: `npm run check` passes and refreshed `output/playwright/p10m3-*` evidence is complete locally.
+  - Done (2026-04-07):
+    - refreshed tree-track Playwright artifacts/report for `/modules` + `T-01`~`T-04` under `output/playwright/p10m3-*`
+    - re-verified `/modules`: `19` cards, `17` ready badges, `17` open links, tree filter = `6`
+    - targeted smoke confirmed `T-01` / `T-02` / `T-03` / `T-04` open cleanly, all default `Next` buttons advance, and no console errors were reported
+    - confirmed `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
+    - synced `docs/IMPLEMENTATION_PLAN_P10.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P10
 
-Status: `P10` planning baseline completed locally; `P10-M1` next
+Status: `P10` completed locally; post-`P10` planning baseline next
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: resume new algorithm delivery on top of the accepted shared workspace shell by expanding the tree track with `AVL Tree` and `Heap`, then close with a refreshed tree-focused acceptance sweep
 
