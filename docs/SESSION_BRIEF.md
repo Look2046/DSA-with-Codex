@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p10-m3-tree-closure`
-- Current phase: `P10` is completed locally; post-`P10` planning baseline is next
+- Active branch (expected): `docs/post-p10-plan`
+- Current phase: `P11` planning baseline is completed locally; `P11-M1` graph representation is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -91,6 +91,10 @@ Use this file as the first thing to read in a new chat/session.
   - `/modules` now verifies `19` cards, `17` ready badges, `17` open links, and `6` tree-filter cards
   - targeted smoke confirms `T-01` / `T-02` / `T-03` / `T-04` all open without console errors and default `Next` advances on all four routes
   - targeted shell checks confirm `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
+- P11 planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P11.md`
+  - chose the next phase sequence as `Graph Representation -> DFS -> graph-track acceptance closure`
+  - selected graph-track foundation over immediately continuing with `Trie` / `B-Tree / B+ Tree`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -164,14 +168,14 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Close the validated `P10` acceptance milestone with one focused commit on:
-  - current branch: `feat/p10-m3-tree-closure`
+- Close the validated planning baseline with one focused commit on:
+  - current branch: `docs/post-p10-plan`
   - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
-- Then define the next phase on a docs planning branch:
-  - recommended branch: `docs/post-p10-plan`
+- Then start `P11-M1` on a fresh feature branch:
+  - recommended branch: `feat/p11-m1-graph-representation`
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - decide the post-tree-track scope before new implementation starts
-  - keep milestones branch-scoped and continue the same local quality-gate discipline
+  - add graph category discovery wiring plus `G-01 Graph Representation`
+  - reuse the accepted shared workspace shell and avoid reopening broad shell redesign unless graph rendering exposes a concrete gap
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

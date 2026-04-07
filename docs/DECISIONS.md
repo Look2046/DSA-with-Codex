@@ -509,3 +509,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: ship tree-only heap visuals first; model tree nodes and array cells as separate mutable states; defer `build` or `extractRoot` until a later milestone.
 - Consequences: tree and array views now stay synchronized by construction, the first heap delivery teaches the core operations without extra model drift, and future enhancements can stay on the same array-first foundation.
 - Owner: haoyu + codex
+
+## DEC-20260407-56
+- Date: 2026-04-07
+- Status: accepted
+- Context: After closing `P10`, the next major choice was whether to continue immediately with the remaining specialized tree modules (`Trie`, `B-Tree / B+ Tree`) or open a new module category. `Trie` is still reasonable, but `B-Tree / B+ Tree` is conceptually heavier and would keep the project in one category longer without broadening the baseline.
+- Decision: Define `P11` as a graph-track foundation phase with three milestones: `P11-M1` `G-01 Graph Representation` (plus graph discovery wiring), `P11-M2` `G-02 DFS`, and `P11-M3` graph-track acceptance closure.
+- Alternatives considered: continue tree track immediately with `Trie` + `B-Tree / B+ Tree`; start weighted graph algorithms before a graph baseline; do another broad cross-module polish phase before new category work.
+- Consequences: the project opens a new module family with lower immediate complexity than `B-Tree / B+ Tree`, validates the shared workspace shell against graph-style stages, and defers the remaining specialized tree structures to a later focused phase.
+- Owner: haoyu + codex

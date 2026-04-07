@@ -309,6 +309,28 @@ Track actionable tasks here. Keep tasks small and testable.
     - confirmed `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
     - synced `docs/IMPLEMENTATION_PLAN_P10.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
 
+## P11 (Planned)
+- [x] P11 planning baseline
+  - DoD: define the post-`P10` milestone scope/order and acceptance criteria in docs before new implementation starts.
+  - Acceptance: `docs/IMPLEMENTATION_PLAN_P11.md`, `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done (2026-04-07):
+    - added `docs/IMPLEMENTATION_PLAN_P11.md`
+    - chose the next phase sequence as `Graph Representation -> DFS -> graph-track acceptance closure`
+    - selected graph-track foundation over immediately continuing with `Trie` / `B-Tree / B+ Tree`
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
+
+- [ ] P11-M1 Add `G-01 Graph Representation`
+  - DoD: add graph category discovery wiring plus a graph-representation teaching module with synchronized canvas/list/matrix views, route/page/tests/i18n, and shared shell parity.
+  - Acceptance: `npm run check` passes, deterministic replay confirms view synchronization, and targeted Playwright smoke on `/modules/graph-representation` is stable.
+
+- [ ] P11-M2 Add `G-02 DFS`
+  - DoD: implement a DFS teaching module with deterministic traversal playback, visit/backtrack semantics, route/page/tests/i18n, and shared shell parity.
+  - Acceptance: `npm run check` passes, deterministic replay confirms the expected DFS order, and targeted Playwright smoke on `/modules/dfs` is stable.
+
+- [ ] P11-M3 Graph-track acceptance closure
+  - DoD: refresh Playwright acceptance artifacts/report after `G-01` / `G-02` and sync closure docs.
+  - Acceptance: `npm run check` passes and refreshed `output/playwright/p11m3-*` evidence is complete locally.
+
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
 - [x] Establish daily handoff/decision/todo documentation workflow (2026-03-03)

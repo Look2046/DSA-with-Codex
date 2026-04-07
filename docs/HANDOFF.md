@@ -2,6 +2,45 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P11 planning baseline)
+
+### Today Done
+- Created the post-`P10` docs planning branch:
+  - `docs/post-p10-plan`
+- Defined the next execution order and added `docs/IMPLEMENTATION_PLAN_P11.md`.
+- Chose a graph-foundation phase that broadens the product baseline without jumping straight into the heavier remaining tree backlog:
+  - `P11-M1`: `G-01 Graph Representation` + graph category wiring
+  - `P11-M2`: `G-02 DFS`
+  - `P11-M3`: graph-track acceptance closure
+- Synced planning-state docs:
+  - `docs/IMPLEMENTATION_PLAN_P11.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Re-ran the required docs-only gate successfully:
+  - `./scripts/check-doc-links.sh`
+
+### Current State
+- Branch: `docs/post-p10-plan`
+- Validated scope in this planning batch:
+  - `docs/IMPLEMENTATION_PLAN_P11.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Milestone state:
+  - `P11` planning baseline is now completed locally
+  - next priority is `P11-M1` `G-01 Graph Representation`
+
+### Next Step
+- Create a fresh implementation branch from this planning baseline:
+  - recommended branch: `feat/p11-m1-graph-representation`
+- Then implement `G-01 Graph Representation` with:
+  - graph category discovery wiring
+  - one deterministic graph model driving canvas + adjacency views
+  - deterministic tests and targeted Playwright smoke
+
 ## 2026-04-07 (P10-M3 tree-track acceptance closure)
 
 ### Today Done
