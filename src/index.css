@@ -2370,6 +2370,10 @@ body {
   inset: 0 0 116px 0;
 }
 
+.heap-edge-layer {
+  inset: 0 0 116px 0;
+}
+
 .heap-node {
   width: 70px;
   height: 70px;

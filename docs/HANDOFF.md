@@ -15,6 +15,7 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - switched heap tree nodes and array cells to stable-key CSS position transitions so swaps now move the actual items instead of shrinking into number-only artifacts
   - `src/index.css`
     - added heap-specific transition rules for node/cell movement and absolute array-cell positioning
+    - aligned the heap edge layer to the same tree-region inset as the heap node layer so tree edges no longer drift away from node centers
   - `src/modules/tree/heap.test.ts`
     - added regression coverage for unfocused build initial state and stable `itemIds` swap replay
 - Re-verified locally:
@@ -24,6 +25,7 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - `Build`: initial frame shows no misleading active root/path, completion reaches `11/11`, and `Next` is disabled
     - `Insert`: append + sift-up flow completes at `6/6`, root becomes `55`, and `Next` is disabled
     - `Extract root`: completion reaches `7/7`, extracted value is `50`, and `Next` is disabled
+    - tree-edge alignment: the heap edge layer now shares the same bottom inset as the heap node layer, so the edges and node centers line up again on the main tree stage
     - console errors: `0`
   - full quality gate: `npm run check`
 

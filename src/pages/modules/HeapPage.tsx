@@ -627,7 +627,7 @@ export function HeapPage() {
           {currentArray.length > 0 ? (
             <>
               <span className="heap-stage-label heap-stage-label-tree">{t('module.t04.view.tree')}</span>
-              <svg className="tree-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <svg className="tree-edge-layer heap-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
                 {edges.map((edge) => {
                   const from = positionMap.get(edge.from);
                   const to = positionMap.get(edge.to);
