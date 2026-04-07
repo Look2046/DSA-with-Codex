@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260407-59
+- Date: 2026-04-07
+- Status: accepted
+- Context: The first heap alignment follow-up only adjusted shared inset values, but user feedback and browser checks showed `T-04 Heap` still used a compressed custom tree layout with center-to-center connectors, so nodes and edges continued to feel visibly offset from the accepted `T-01` tree-stage geometry.
+- Decision: Render the heap tree inside one dedicated measured tree region, place heap nodes with the same level-based left/right slot logic used by `T-01`-style tree layouts, and clip heap edge endpoints to the node radius instead of drawing center-to-center lines.
+- Alternatives considered: keep iterating on inset-only CSS tweaks; keep the compressed custom layout and accept larger empty space under the tree; continue drawing connectors to node centers and rely on the node circle to hide the overlap.
+- Consequences: `T-04` now uses the available tree stage much more like the accepted tree pages and keeps nodes/edges in one coordinate system, at the cost of a small `ResizeObserver`-based layout helper in the page.
+- Owner: haoyu + codex
+
 ## DEC-20260407-24
 - Date: 2026-04-07
 - Status: accepted

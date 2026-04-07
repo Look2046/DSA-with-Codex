@@ -18,6 +18,14 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - aligned the heap edge layer to the same tree-region inset as the heap node layer so tree edges no longer drift away from node centers
   - `src/modules/tree/heap.test.ts`
     - added regression coverage for unfocused build initial state and stable `itemIds` swap replay
+- Returned to the heap tree-geometry bug after user feedback that the prior fix was still too superficial:
+  - `src/pages/modules/HeapPage.tsx`
+    - replaced the old compressed index-based tree layout with a measured tree-region layout that spreads heap levels across the full available tree stage
+    - moved heap nodes and edges into one dedicated `heap-tree-region` so both layers definitely share the same coordinate space
+    - clipped edge endpoints to the node radius instead of drawing center-to-center lines, so connectors visually land on the node boundary like `T-01`
+  - `src/index.css`
+    - added `.heap-tree-region` and switched heap edge/node layers to fill that wrapper directly
+    - kept the tree/array labels and array strip above the stage content while the tree region expands vertically
 - Re-verified locally:
   - targeted tests: `npm test -- src/modules/tree/heap.test.ts src/modules/tree/heapTimelineReplay.test.ts`
   - targeted lint: `npm run lint -- src/pages/modules/HeapPage.tsx src/modules/tree/heap.ts src/modules/tree/heap.test.ts`
@@ -27,15 +35,16 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - `Extract root`: completion reaches `7/7`, extracted value is `50`, and `Next` is disabled
     - tree-edge alignment: the heap edge layer now shares the same bottom inset as the heap node layer, so the edges and node centers line up again on the main tree stage
     - console errors: `0`
+  - follow-up browser regression on `/modules/heap` at `1440x1100` after the geometry rewrite:
+    - default `Build` frame now uses the full heap tree region instead of compressing all nodes into the upper half
+    - stepped `Build` frames keep node centers and line endpoints visually aligned after swaps
+    - console errors remain `0`
   - full quality gate: `npm run check`
 
 ### Current State
 - Branch: `feat/t04-heap-animation-stabilization`
-- Local commit created for the validated fix:
-  - `bb51b72 fix: stabilize heap animation replay`
-- Heap animation/runtime fix is validated locally.
-- Push attempt to `origin/feat/t04-heap-animation-stabilization` failed due SSH auth:
-  - `git@github.com: Permission denied (publickey).`
+- Heap animation/runtime fix plus the follow-up tree-geometry fix are validated locally on the branch.
+- Prior push/auth root cause was confirmed as Windows git/ssh not seeing the WSL SSH keys; WSL-native git push is the working path for this repo.
 - Keep unrelated dirty items out of this change set:
   - `scripts/check-doc-links.sh`
   - `scripts/playwright-cli.sh`
@@ -46,7 +55,7 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `start-project-wsl.bat`
 
 ### Next Step
-- Restore SSH auth (or use the preferred repo auth path), then push:
+- Create one focused commit for the validated heap geometry fix, then push from WSL:
   - `feat/t04-heap-animation-stabilization`
 - After push, decide whether to merge this focused heap fix before resuming post-`P11` planning or additional tree-track work.
 

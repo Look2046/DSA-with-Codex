@@ -2366,12 +2366,20 @@ body {
   padding: 18px 20px 122px;
 }
 
+.heap-tree-region {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 40px;
+  bottom: 126px;
+}
+
 .heap-node-layer {
-  inset: 0 0 116px 0;
+  inset: 0;
 }
 
 .heap-edge-layer {
-  inset: 0 0 116px 0;
+  inset: 0;
 }
 
 .heap-node {
@@ -2404,6 +2412,7 @@ body {
 .heap-stage-label {
   position: absolute;
   left: 20px;
+  z-index: 6;
   font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -2425,6 +2434,7 @@ body {
   right: 20px;
   bottom: 18px;
   height: 84px;
+  z-index: 6;
 }
 
 .heap-array-cell {

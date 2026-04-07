@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
@@ -16,6 +16,10 @@ const DEFAULT_TARGET = 55;
 const DEFAULT_OPERATION: HeapOperation = 'build';
 const MIN_SIZE = 5;
 const MAX_SIZE = 10;
+const HEAP_NODE_DIAMETER_PX = 70;
+const HEAP_NODE_RADIUS_PX = HEAP_NODE_DIAMETER_PX / 2;
+const HEAP_TREE_TOP_PERCENT = 14;
+const HEAP_TREE_BOTTOM_PERCENT = 12;
 const BUILD_CODE_LINE_KEYS = [
   'module.t04.code.build.line1',
   'module.t04.code.build.line2',
@@ -44,6 +48,14 @@ type TranslateFn = ReturnType<typeof useI18n>['t'];
 type HeapConfig = {
   operation: HeapOperation;
   target: number | null;
+};
+type HeapPoint = {
+  x: number;
+  y: number;
+};
+type HeapTreeRegionSize = {
+  width: number;
+  height: number;
 };
 
 function createRandomUniqueDataset(size: number): number[] {
@@ -195,6 +207,85 @@ function getParentIndex(index: number): number | null {
   return Math.floor((index - 1) / 2);
 }
 
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getHeapNodeLevel(index: number): number {
+  return Math.floor(Math.log2(index + 1));
+}
+
+function getHeapTreeHorizontalInset(regionWidth: number, maxDisplayLevel: number): number {
+  const safeRegionWidth = Math.max(regionWidth, 1);
+  const unitX = 100 / safeRegionWidth;
+  const baseInset = clampNumber((HEAP_NODE_RADIUS_PX + 12) * unitX, 3.5, 7.5);
+  const deepestSlotCount = 2 ** Math.max(maxDisplayLevel, 1);
+  const minDeepestGapPercent = ((HEAP_NODE_DIAMETER_PX + 20) * deepestSlotCount * unitX) / 2;
+  const maxInsetForDeepestGap = Math.max((100 - minDeepestGapPercent) / 2, 1.2);
+  return clampNumber(Math.min(baseInset, maxInsetForDeepestGap), 1.2, 7.5);
+}
+
+function getHeapTreePointByIndex(index: number, top: number, yStep: number, xInset: number): HeapPoint {
+  const level = getHeapNodeLevel(index);
+  const firstIndexOfLevel = 2 ** level - 1;
+  const positionInLevel = index - firstIndexOfLevel;
+  const nodesInLevel = 2 ** level;
+  const ratio = (positionInLevel + 0.5) / nodesInLevel;
+  const usableWidth = Math.max(100 - xInset * 2, 1);
+  return {
+    x: clampNumber(xInset + ratio * usableWidth, 2, 98),
+    y: clampNumber(top + level * yStep, 6, 94),
+  };
+}
+
+function getHeapEdgeSegment(from: HeapPoint, to: HeapPoint, regionSize: HeapTreeRegionSize) {
+  const safeWidth = Math.max(regionSize.width, 1);
+  const safeHeight = Math.max(regionSize.height, 1);
+  const fromPx = { x: (from.x / 100) * safeWidth, y: (from.y / 100) * safeHeight };
+  const toPx = { x: (to.x / 100) * safeWidth, y: (to.y / 100) * safeHeight };
+  const dx = toPx.x - fromPx.x;
+  const dy = toPx.y - fromPx.y;
+  const length = Math.hypot(dx, dy);
+
+  if (length < 0.001) {
+    return {
+      x1: from.x,
+      y1: from.y,
+      x2: to.x,
+      y2: to.y,
+    };
+  }
+
+  const unitX = dx / length;
+  const unitY = dy / length;
+  const clipDistance = Math.min(HEAP_NODE_RADIUS_PX - 2, Math.max(length / 2 - 1, 0));
+
+  if (clipDistance <= 0) {
+    return {
+      x1: from.x,
+      y1: from.y,
+      x2: to.x,
+      y2: to.y,
+    };
+  }
+
+  const start = {
+    x: fromPx.x + unitX * clipDistance,
+    y: fromPx.y + unitY * clipDistance,
+  };
+  const end = {
+    x: toPx.x - unitX * clipDistance,
+    y: toPx.y - unitY * clipDistance,
+  };
+
+  return {
+    x1: clampNumber((start.x / safeWidth) * 100, 0, 100),
+    y1: clampNumber((start.y / safeHeight) * 100, 0, 100),
+    x2: clampNumber((end.x / safeWidth) * 100, 0, 100),
+    y2: clampNumber((end.y / safeHeight) * 100, 0, 100),
+  };
+}
+
 function getHeapVisualPriority(
   highlightType: HighlightType | undefined,
   isPath: boolean,
@@ -217,11 +308,16 @@ function getHeapVisualPriority(
 
 export function HeapPage() {
   const { t } = useI18n();
+  const treeRegionRef = useRef<HTMLDivElement | null>(null);
   const [datasetSize, setDatasetSize] = useState(DEFAULT_DATASET.length);
   const [seedData, setSeedData] = useState<number[]>(DEFAULT_DATASET);
   const [operationInput, setOperationInput] = useState<HeapOperation>(DEFAULT_OPERATION);
   const [targetInput, setTargetInput] = useState(String(DEFAULT_TARGET));
   const [error, setError] = useState('');
+  const [treeRegionSize, setTreeRegionSize] = useState<HeapTreeRegionSize>({
+    width: 0,
+    height: 0,
+  });
   const [activeConfig, setActiveConfig] = useState<HeapConfig>({
     operation: DEFAULT_OPERATION,
     target: null,
@@ -248,6 +344,40 @@ export function HeapPage() {
     reset();
   }, [reset, setTotalFrames, steps.length]);
 
+  useEffect(() => {
+    const element = treeRegionRef.current;
+    if (!element) {
+      return;
+    }
+
+    const syncSize = (width: number, height: number) => {
+      setTreeRegionSize((current) => {
+        if (Math.abs(current.width - width) < 0.5 && Math.abs(current.height - height) < 0.5) {
+          return current;
+        }
+        return { width, height };
+      });
+    };
+
+    const rect = element.getBoundingClientRect();
+    syncSize(rect.width, rect.height);
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      syncSize(entry.contentRect.width, entry.contentRect.height);
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   const heapPreview = useMemo(() => buildMaxHeapArray(seedData), [seedData]);
   const currentArray = useMemo(() => currentSnapshot?.arrayState ?? [], [currentSnapshot?.arrayState]);
   const currentItemIds = useMemo(
@@ -271,27 +401,59 @@ export function HeapPage() {
     return Math.min(14, Math.max(8.2, 84 / currentArray.length));
   }, [currentArray.length]);
 
-  const positionMap = useMemo(() => {
-    const positions = new Map<number, { x: number; y: number }>();
+  const { positionMap, edgeSegments } = useMemo(() => {
+    const positions = new Map<number, HeapPoint>();
+    const segments: Array<{ key: string; x1: number; y1: number; x2: number; y2: number }> = [];
 
     if (currentArray.length === 0) {
-      return positions;
+      return {
+        positionMap: positions,
+        edgeSegments: segments,
+      };
     }
 
-    const maxDepth = Math.floor(Math.log2(currentArray.length));
+    const maxDisplayLevel = getHeapNodeLevel(currentArray.length - 1);
+    const effectiveRegionSize = {
+      width: treeRegionSize.width > 0 ? treeRegionSize.width : 1180,
+      height: treeRegionSize.height > 0 ? treeRegionSize.height : 420,
+    };
+    const xInset = getHeapTreeHorizontalInset(effectiveRegionSize.width, maxDisplayLevel);
+    const top = maxDisplayLevel === 0 ? 50 : HEAP_TREE_TOP_PERCENT;
+    const yStep = maxDisplayLevel === 0 ? 0 : (100 - HEAP_TREE_TOP_PERCENT - HEAP_TREE_BOTTOM_PERCENT) / maxDisplayLevel;
 
     currentArray.forEach((_, index) => {
-      const depth = Math.floor(Math.log2(index + 1));
-      const levelStart = 2 ** depth - 1;
-      const positionInLevel = index - levelStart;
-      const nodesOnLevel = 2 ** depth;
-      const x = 6 + ((positionInLevel + 1) * 88) / (nodesOnLevel + 1);
-      const y = 16 + (maxDepth === 0 ? 18 : (depth / maxDepth) * 40);
-      positions.set(index, { x, y });
+      positions.set(index, getHeapTreePointByIndex(index, top, yStep, xInset));
     });
 
-    return positions;
-  }, [currentArray]);
+    currentArray.forEach((_, index) => {
+      const from = positions.get(index);
+      if (!from) {
+        return;
+      }
+
+      [index * 2 + 1, index * 2 + 2].forEach((childIndex) => {
+        if (childIndex >= currentArray.length) {
+          return;
+        }
+
+        const to = positions.get(childIndex);
+        if (!to) {
+          return;
+        }
+
+        const segment = getHeapEdgeSegment(from, to, effectiveRegionSize);
+        segments.push({
+          key: `${index}-${childIndex}`,
+          ...segment,
+        });
+      });
+    });
+
+    return {
+      positionMap: positions,
+      edgeSegments: segments,
+    };
+  }, [currentArray, treeRegionSize.height, treeRegionSize.width]);
   const arrayPositionMap = useMemo(() => {
     const positions = new Map<number, number>();
 
@@ -309,25 +471,6 @@ export function HeapPage() {
 
     return positions;
   }, [arrayCellWidthPercent, currentArray]);
-
-  const edges = useMemo(() => {
-    const nextEdges: Array<{ from: number; to: number }> = [];
-
-    currentArray.forEach((_, index) => {
-      const leftIndex = index * 2 + 1;
-      const rightIndex = index * 2 + 2;
-
-      if (leftIndex < currentArray.length) {
-        nextEdges.push({ from: index, to: leftIndex });
-      }
-
-      if (rightIndex < currentArray.length) {
-        nextEdges.push({ from: index, to: rightIndex });
-      }
-    });
-
-    return nextEdges;
-  }, [currentArray]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -627,59 +770,57 @@ export function HeapPage() {
           {currentArray.length > 0 ? (
             <>
               <span className="heap-stage-label heap-stage-label-tree">{t('module.t04.view.tree')}</span>
-              <svg className="tree-edge-layer heap-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {edges.map((edge) => {
-                  const from = positionMap.get(edge.from);
-                  const to = positionMap.get(edge.to);
-                  return (
+              <div ref={treeRegionRef} className="heap-tree-region">
+                <svg className="tree-edge-layer heap-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  {edgeSegments.map((edge) => (
                     <line
-                      key={`${edge.from}-${edge.to}`}
+                      key={edge.key}
                       className="tree-edge"
-                      x1={from?.x ?? 0}
-                      y1={from?.y ?? 0}
-                      x2={to?.x ?? 0}
-                      y2={to?.y ?? 0}
+                      x1={edge.x1}
+                      y1={edge.y1}
+                      x2={edge.x2}
+                      y2={edge.y2}
                     />
-                  );
-                })}
-              </svg>
+                  ))}
+                </svg>
 
-              <div className="tree-node-layer heap-node-layer">
-                {currentItems.map(({ id, index, value }) => {
-                  const highlightType = highlightMap.get(index);
-                  const isPath = pathSet.has(index);
-                  const isSelected = currentSnapshot?.selectedIndex === index;
-                  const stateClass =
-                    highlightType === 'matched'
-                      ? ' bar-matched'
-                      : highlightType === 'new-node'
-                        ? ' bar-new-node'
-                        : highlightType === 'swapping'
-                          ? ' bar-swapping'
-                          : highlightType === 'comparing' || highlightType === 'visiting'
-                            ? ' bar-visiting'
-                            : '';
-                  const pathClass = isPath ? ' bst-node-path' : '';
-                  const selectedClass = isSelected ? ' heap-focus-selected' : '';
-                  const parent = getParentIndex(index);
-                  const position = positionMap.get(index);
+                <div className="tree-node-layer heap-node-layer">
+                  {currentItems.map(({ id, index, value }) => {
+                    const highlightType = highlightMap.get(index);
+                    const isPath = pathSet.has(index);
+                    const isSelected = currentSnapshot?.selectedIndex === index;
+                    const stateClass =
+                      highlightType === 'matched'
+                        ? ' bar-matched'
+                        : highlightType === 'new-node'
+                          ? ' bar-new-node'
+                          : highlightType === 'swapping'
+                            ? ' bar-swapping'
+                            : highlightType === 'comparing' || highlightType === 'visiting'
+                              ? ' bar-visiting'
+                              : '';
+                    const pathClass = isPath ? ' bst-node-path' : '';
+                    const selectedClass = isSelected ? ' heap-focus-selected' : '';
+                    const parent = getParentIndex(index);
+                    const position = positionMap.get(index);
 
-                  return (
-                    <div
-                      key={id}
-                      className={`tree-node heap-node${stateClass}${pathClass}${selectedClass}`}
-                      style={{
-                        left: `${position?.x ?? 0}%`,
-                        top: `${position?.y ?? 0}%`,
-                        zIndex: getHeapVisualPriority(highlightType, isPath, isSelected),
-                      }}
-                    >
-                      <span className="tree-node-tag">i{index}</span>
-                      <span className="tree-node-value">{value}</span>
-                      <span className="tree-node-index">{parent === null ? 'root' : `p${parent}`}</span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div
+                        key={id}
+                        className={`tree-node heap-node${stateClass}${pathClass}${selectedClass}`}
+                        style={{
+                          left: `${position?.x ?? 0}%`,
+                          top: `${position?.y ?? 0}%`,
+                          zIndex: getHeapVisualPriority(highlightType, isPath, isSelected),
+                        }}
+                      >
+                        <span className="tree-node-tag">i{index}</span>
+                        <span className="tree-node-value">{value}</span>
+                        <span className="tree-node-index">{parent === null ? 'root' : `p${parent}`}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <span className="heap-stage-label heap-stage-label-array">{t('module.t04.view.array')}</span>
