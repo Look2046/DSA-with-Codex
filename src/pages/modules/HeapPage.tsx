@@ -40,7 +40,6 @@ const EXTRACT_CODE_LINE_KEYS = [
   'module.t04.code.extract.line6',
   'module.t04.code.extract.line7',
 ] as const;
-
 type TranslateFn = ReturnType<typeof useI18n>['t'];
 type HeapConfig = {
   operation: HeapOperation;
@@ -196,6 +195,26 @@ function getParentIndex(index: number): number | null {
   return Math.floor((index - 1) / 2);
 }
 
+function getHeapVisualPriority(
+  highlightType: HighlightType | undefined,
+  isPath: boolean,
+  isSelected: boolean,
+): number {
+  if (highlightType === 'swapping') {
+    return 5;
+  }
+  if (isSelected) {
+    return 4;
+  }
+  if (highlightType === 'matched' || highlightType === 'new-node') {
+    return 3;
+  }
+  if (highlightType === 'comparing' || highlightType === 'visiting' || isPath) {
+    return 2;
+  }
+  return 1;
+}
+
 export function HeapPage() {
   const { t } = useI18n();
   const [datasetSize, setDatasetSize] = useState(DEFAULT_DATASET.length);
@@ -231,6 +250,26 @@ export function HeapPage() {
 
   const heapPreview = useMemo(() => buildMaxHeapArray(seedData), [seedData]);
   const currentArray = useMemo(() => currentSnapshot?.arrayState ?? [], [currentSnapshot?.arrayState]);
+  const currentItemIds = useMemo(
+    () => currentSnapshot?.itemIds ?? currentArray.map((_, index) => `slot-${index}`),
+    [currentArray, currentSnapshot?.itemIds],
+  );
+  const currentItems = useMemo(
+    () =>
+      currentArray.map((value, index) => ({
+        id: currentItemIds[index] ?? `slot-${index}`,
+        index,
+        value,
+      })),
+    [currentArray, currentItemIds],
+  );
+  const arrayCellWidthPercent = useMemo(() => {
+    if (currentArray.length === 0) {
+      return 0;
+    }
+
+    return Math.min(14, Math.max(8.2, 84 / currentArray.length));
+  }, [currentArray.length]);
 
   const positionMap = useMemo(() => {
     const positions = new Map<number, { x: number; y: number }>();
@@ -253,6 +292,23 @@ export function HeapPage() {
 
     return positions;
   }, [currentArray]);
+  const arrayPositionMap = useMemo(() => {
+    const positions = new Map<number, number>();
+
+    if (currentArray.length === 0) {
+      return positions;
+    }
+
+    const minCenter = arrayCellWidthPercent / 2 + 1;
+    const maxCenter = 100 - minCenter;
+    const gap = currentArray.length === 1 ? 0 : (maxCenter - minCenter) / (currentArray.length - 1);
+
+    currentArray.forEach((_, index) => {
+      positions.set(index, currentArray.length === 1 ? 50 : minCenter + gap * index);
+    });
+
+    return positions;
+  }, [arrayCellWidthPercent, currentArray]);
 
   const edges = useMemo(() => {
     const nextEdges: Array<{ from: number; to: number }> = [];
@@ -589,9 +645,10 @@ export function HeapPage() {
               </svg>
 
               <div className="tree-node-layer heap-node-layer">
-                {currentArray.map((value, index) => {
+                {currentItems.map(({ id, index, value }) => {
                   const highlightType = highlightMap.get(index);
                   const isPath = pathSet.has(index);
+                  const isSelected = currentSnapshot?.selectedIndex === index;
                   const stateClass =
                     highlightType === 'matched'
                       ? ' bar-matched'
@@ -603,16 +660,18 @@ export function HeapPage() {
                             ? ' bar-visiting'
                             : '';
                   const pathClass = isPath ? ' bst-node-path' : '';
-                  const selectedClass = currentSnapshot?.selectedIndex === index ? ' heap-focus-selected' : '';
+                  const selectedClass = isSelected ? ' heap-focus-selected' : '';
                   const parent = getParentIndex(index);
+                  const position = positionMap.get(index);
 
                   return (
                     <div
-                      key={`${index}-${value}`}
+                      key={id}
                       className={`tree-node heap-node${stateClass}${pathClass}${selectedClass}`}
                       style={{
-                        left: `${positionMap.get(index)?.x ?? 0}%`,
-                        top: `${positionMap.get(index)?.y ?? 0}%`,
+                        left: `${position?.x ?? 0}%`,
+                        top: `${position?.y ?? 0}%`,
+                        zIndex: getHeapVisualPriority(highlightType, isPath, isSelected),
                       }}
                     >
                       <span className="tree-node-tag">i{index}</span>
@@ -625,9 +684,10 @@ export function HeapPage() {
 
               <span className="heap-stage-label heap-stage-label-array">{t('module.t04.view.array')}</span>
               <div className="heap-array-strip">
-                {currentArray.map((value, index) => {
+                {currentItems.map(({ id, index, value }) => {
                   const highlightType = highlightMap.get(index);
                   const isPath = pathSet.has(index);
+                  const isSelected = currentSnapshot?.selectedIndex === index;
                   const stateClass =
                     highlightType === 'matched'
                       ? ' bar-matched'
@@ -639,10 +699,19 @@ export function HeapPage() {
                             ? ' bar-visiting'
                             : '';
                   const pathClass = isPath ? ' heap-array-cell-path' : '';
-                  const selectedClass = currentSnapshot?.selectedIndex === index ? ' heap-focus-selected' : '';
+                  const selectedClass = isSelected ? ' heap-focus-selected' : '';
+                  const cellLeft = arrayPositionMap.get(index) ?? 50;
 
                   return (
-                    <div key={`${index}-${value}-array`} className={`heap-array-cell${stateClass}${pathClass}${selectedClass}`}>
+                    <div
+                      key={`${id}-array`}
+                      className={`heap-array-cell${stateClass}${pathClass}${selectedClass}`}
+                      style={{
+                        left: `${cellLeft}%`,
+                        width: `min(${arrayCellWidthPercent}%, 118px)`,
+                        zIndex: getHeapVisualPriority(highlightType, isPath, isSelected),
+                      }}
+                    >
                       <span className="heap-array-cell-label">i{index}</span>
                       <strong className="heap-array-cell-value">{value}</strong>
                     </div>

@@ -2,6 +2,52 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (T-04 heap animation stabilization)
+
+### Today Done
+- Investigated the reported `T-04 Heap` regression on `feat/p11-m3-graph-closure`.
+- Kept the good heap timeline-model fixes and stabilized the page runtime:
+  - `src/modules/tree/heap.ts`
+    - added stable `itemIds` to each heap step so tree nodes and array cells keep the same identity across swaps
+    - kept `build` initial frame unfocused so the default page no longer looks like a broken heap before heapify starts
+  - `src/pages/modules/HeapPage.tsx`
+    - removed the broken `motion/react` integration that caused the React invalid-hook runtime on `/modules/heap`
+    - switched heap tree nodes and array cells to stable-key CSS position transitions so swaps now move the actual items instead of shrinking into number-only artifacts
+  - `src/index.css`
+    - added heap-specific transition rules for node/cell movement and absolute array-cell positioning
+  - `src/modules/tree/heap.test.ts`
+    - added regression coverage for unfocused build initial state and stable `itemIds` swap replay
+- Re-verified locally:
+  - targeted tests: `npm test -- src/modules/tree/heap.test.ts src/modules/tree/heapTimelineReplay.test.ts`
+  - targeted lint: `npm run lint -- src/pages/modules/HeapPage.tsx src/modules/tree/heap.ts src/modules/tree/heap.test.ts`
+  - browser regression on `/modules/heap` with the pinned Playwright wrapper:
+    - `Build`: initial frame shows no misleading active root/path, completion reaches `11/11`, and `Next` is disabled
+    - `Insert`: append + sift-up flow completes at `6/6`, root becomes `55`, and `Next` is disabled
+    - `Extract root`: completion reaches `7/7`, extracted value is `50`, and `Next` is disabled
+    - console errors: `0`
+  - full quality gate: `npm run check`
+
+### Current State
+- Heap animation/runtime fix is validated locally.
+- Keep unrelated dirty items out of this change set:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+
+### Next Step
+- Create one focused heap-fix branch/commit that includes only:
+  - `src/index.css`
+  - `src/modules/tree/heap.ts`
+  - `src/modules/tree/heap.test.ts`
+  - `src/pages/modules/HeapPage.tsx`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md` if the animation-implementation choice is recorded
+- Push if remote backup / CI visibility is desired; otherwise keep it as a clean local commit first.
+
 ## 2026-04-07 (P11-M3 graph-track acceptance closure)
 
 ### Today Done

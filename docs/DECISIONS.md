@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260407-24
+- Date: 2026-04-07
+- Status: accepted
+- Context: `T-04 Heap` needed real swap motion across both tree and array views, but the attempted `motion/react` integration caused a React invalid-hook runtime on `/modules/heap`.
+- Decision: Keep stable per-item heap identities (`itemIds`) in the heap timeline model and animate `HeapPage` with stable-key CSS position transitions instead of `motion/react`.
+- Alternatives considered: keep index-keyed rendering with instant swaps; continue debugging the `motion/react` runtime in the production page.
+- Consequences: heap swaps now stay semantically aligned across both views with lower runtime risk, at the cost of using page-specific CSS motion rather than a shared animation library abstraction.
+- Owner: haoyu + codex
+
 ## DEC-20260303-01
 - Date: 2026-03-03
 - Status: accepted

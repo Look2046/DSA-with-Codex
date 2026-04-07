@@ -33,6 +33,14 @@ describe('heap step generation', () => {
     expect(isMaxHeap(finalStep(first)?.arrayState ?? [])).toBe(true);
   });
 
+  it('starts the build flow without pre-highlighting the root', () => {
+    const [initialStep] = generateHeapSteps([30, 10, 50, 20, 40, 35], 'build');
+
+    expect(initialStep?.activeIndex).toBeNull();
+    expect(initialStep?.pathIndices).toEqual([]);
+    expect(initialStep?.highlights).toEqual([]);
+  });
+
   it('keeps silent heap building deterministic for page previews', () => {
     expect(buildMaxHeapArray([30, 10, 50, 20, 40, 35])).toEqual([50, 40, 35, 20, 10, 30]);
   });
@@ -45,6 +53,14 @@ describe('heap step generation', () => {
     expect(finalStep(steps)?.arrayState).toEqual([50, 25, 40, 10, 15, 35]);
     expect(finalStep(steps)?.outcome).toBe('inserted');
     expect(isMaxHeap(finalStep(steps)?.arrayState ?? [])).toBe(true);
+  });
+
+  it('keeps stable item identities aligned with swap steps for animation replay', () => {
+    const steps = generateHeapSteps([30, 10, 50, 20, 40, 35], 'build');
+    const firstSwap = steps.find((step) => step.action === 'swap');
+
+    expect(firstSwap?.arrayState).toEqual([30, 40, 50, 20, 10, 35]);
+    expect(firstSwap?.itemIds).toEqual(['seed-0', 'seed-4', 'seed-2', 'seed-3', 'seed-1', 'seed-5']);
   });
 
   it('extracts the root and restores the max-heap with sift-down', () => {

@@ -2374,6 +2374,13 @@ body {
   width: 70px;
   height: 70px;
   gap: 4px;
+  transition:
+    left 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    top 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+  will-change: left, top;
 }
 
 .heap-node.bar-swapping {
@@ -2413,22 +2420,30 @@ body {
   left: 20px;
   right: 20px;
   bottom: 18px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-  gap: 10px;
+  height: 84px;
 }
 
 .heap-array-cell {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
   border-radius: 14px;
   border: 1px solid #bfd5ea;
   background: #edf5fd;
   box-shadow: 0 6px 12px rgba(31, 96, 163, 0.08);
   padding: 10px 8px;
+  box-sizing: border-box;
   display: grid;
   gap: 6px;
   justify-items: center;
   color: #1b456f;
   min-height: 72px;
+  transition:
+    left 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+  will-change: left;
 }
 
 .heap-array-cell-label {

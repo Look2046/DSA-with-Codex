@@ -5,6 +5,7 @@ export type HeapOutcome = 'ongoing' | 'heapBuilt' | 'inserted' | 'extracted';
 
 export type HeapStep = AnimationStep & {
   arrayState: number[];
+  itemIds: string[];
   action: 'initial' | 'heapify' | 'append' | 'extractRoot' | 'compare' | 'swap' | 'removeLast' | 'completed';
   operation: HeapOperation;
   activeIndex: number | null;
@@ -18,6 +19,10 @@ export type HeapStep = AnimationStep & {
 
 function cloneArray(values: number[]): number[] {
   return [...values];
+}
+
+function cloneItemIds(itemIds: string[]): string[] {
+  return [...itemIds];
 }
 
 function cloneHighlights(highlights: HighlightEntry[]): HighlightEntry[] {
@@ -84,6 +89,7 @@ function createPathHighlights(
 
 function createStep(
   arrayState: number[],
+  itemIds: string[],
   operation: HeapOperation,
   action: HeapStep['action'],
   codeLines: number[],
@@ -101,6 +107,7 @@ function createStep(
     codeLines,
     highlights: cloneHighlights(highlights),
     arrayState: cloneArray(arrayState),
+    itemIds: cloneItemIds(itemIds),
     action,
     operation,
     activeIndex,
@@ -113,8 +120,13 @@ function createStep(
   };
 }
 
-function swapValues(arrayState: number[], leftIndex: number, rightIndex: number): void {
-  [arrayState[leftIndex], arrayState[rightIndex]] = [arrayState[rightIndex], arrayState[leftIndex]];
+function swapEntries<T>(entries: T[], leftIndex: number, rightIndex: number): void {
+  [entries[leftIndex], entries[rightIndex]] = [entries[rightIndex], entries[leftIndex]];
+}
+
+function swapValues(arrayState: number[], itemIds: string[], leftIndex: number, rightIndex: number): void {
+  swapEntries(arrayState, leftIndex, rightIndex);
+  swapEntries(itemIds, leftIndex, rightIndex);
 }
 
 function siftDownSilent(arrayState: number[], startIndex: number): void {
@@ -134,7 +146,7 @@ function siftDownSilent(arrayState: number[], startIndex: number): void {
       return;
     }
 
-    swapValues(arrayState, currentIndex, nextIndex);
+    swapEntries(arrayState, currentIndex, nextIndex);
     currentIndex = nextIndex;
   }
 }
@@ -149,12 +161,13 @@ export function buildMaxHeapArray(values: number[]): number[] {
   return heap;
 }
 
-function runBuildOperation(steps: HeapStep[], arrayState: number[]): void {
+function runBuildOperation(steps: HeapStep[], arrayState: number[], itemIds: string[]): void {
   for (let startIndex = Math.floor(arrayState.length / 2) - 1; startIndex >= 0; startIndex -= 1) {
     const heapifyPath = pathToIndex(startIndex);
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'build',
         'heapify',
         [2],
@@ -185,6 +198,7 @@ function runBuildOperation(steps: HeapStep[], arrayState: number[]): void {
       steps.push(
         createStep(
           arrayState,
+          itemIds,
           'build',
           'compare',
           [3, 4],
@@ -203,12 +217,13 @@ function runBuildOperation(steps: HeapStep[], arrayState: number[]): void {
         break;
       }
 
-      swapValues(arrayState, currentIndex, largerChildIndex);
+      swapValues(arrayState, itemIds, currentIndex, largerChildIndex);
       const swappedPath = pathToIndex(largerChildIndex);
 
       steps.push(
         createStep(
           arrayState,
+          itemIds,
           'build',
           'swap',
           [5],
@@ -233,6 +248,7 @@ function runBuildOperation(steps: HeapStep[], arrayState: number[]): void {
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'build',
       'completed',
       [6],
@@ -248,13 +264,15 @@ function runBuildOperation(steps: HeapStep[], arrayState: number[]): void {
   );
 }
 
-function runInsertOperation(steps: HeapStep[], arrayState: number[], target: number): void {
+function runInsertOperation(steps: HeapStep[], arrayState: number[], itemIds: string[], target: number): void {
   arrayState.push(target);
+  itemIds.push(`insert-${itemIds.length}`);
   let currentIndex = arrayState.length - 1;
 
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'insert',
       'append',
       [2],
@@ -280,6 +298,7 @@ function runInsertOperation(steps: HeapStep[], arrayState: number[], target: num
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'insert',
         'compare',
         [3],
@@ -298,12 +317,13 @@ function runInsertOperation(steps: HeapStep[], arrayState: number[], target: num
       break;
     }
 
-    swapValues(arrayState, currentIndex, currentParentIndex);
+    swapValues(arrayState, itemIds, currentIndex, currentParentIndex);
     const swappedPath = pathToIndex(currentParentIndex);
 
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'insert',
         'swap',
         [4],
@@ -327,6 +347,7 @@ function runInsertOperation(steps: HeapStep[], arrayState: number[], target: num
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'insert',
       'completed',
       [5],
@@ -342,10 +363,24 @@ function runInsertOperation(steps: HeapStep[], arrayState: number[], target: num
   );
 }
 
-function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void {
+function runExtractRootOperation(steps: HeapStep[], arrayState: number[], itemIds: string[]): void {
   if (arrayState.length === 0) {
     steps.push(
-      createStep(arrayState, 'extractRoot', 'completed', [7], [], null, null, null, [], null, null, 'extracted'),
+      createStep(
+        arrayState,
+        itemIds,
+        'extractRoot',
+        'completed',
+        [7],
+        [],
+        null,
+        null,
+        null,
+        [],
+        null,
+        null,
+        'extracted',
+      ),
     );
     return;
   }
@@ -355,6 +390,7 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'extractRoot',
       'extractRoot',
       [2],
@@ -371,9 +407,11 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
 
   if (arrayState.length === 1) {
     arrayState.pop();
+    itemIds.pop();
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'extractRoot',
         'removeLast',
         [4],
@@ -390,6 +428,7 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'extractRoot',
         'completed',
         [7],
@@ -407,11 +446,12 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
   }
 
   const lastIndex = arrayState.length - 1;
-  swapValues(arrayState, 0, lastIndex);
+  swapValues(arrayState, itemIds, 0, lastIndex);
 
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'extractRoot',
       'swap',
       [3],
@@ -430,10 +470,12 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
   );
 
   arrayState.pop();
+  itemIds.pop();
 
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'extractRoot',
       'removeLast',
       [4],
@@ -464,6 +506,7 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'extractRoot',
         'compare',
         [5],
@@ -482,12 +525,13 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
       break;
     }
 
-    swapValues(arrayState, currentIndex, largerChildIndex);
+    swapValues(arrayState, itemIds, currentIndex, largerChildIndex);
     const swappedPath = pathToIndex(largerChildIndex);
 
     steps.push(
       createStep(
         arrayState,
+        itemIds,
         'extractRoot',
         'swap',
         [6],
@@ -511,6 +555,7 @@ function runExtractRootOperation(steps: HeapStep[], arrayState: number[]): void 
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       'extractRoot',
       'completed',
       [7],
@@ -533,18 +578,21 @@ export function generateHeapSteps(
 ): HeapStep[] {
   const steps: HeapStep[] = [];
   const arrayState = operation === 'build' ? cloneArray(inputData) : buildMaxHeapArray(inputData);
+  const itemIds = arrayState.map((_, index) => `seed-${index}`);
+  const initialHasFocus = operation !== 'build' && arrayState.length > 0;
 
   steps.push(
     createStep(
       arrayState,
+      itemIds,
       operation,
       'initial',
       [1],
-      arrayState.length > 0 ? [{ index: 0, type: 'visiting' }] : [],
-      arrayState.length > 0 ? 0 : null,
+      initialHasFocus ? [{ index: 0, type: 'visiting' }] : [],
+      initialHasFocus ? 0 : null,
       null,
       null,
-      arrayState.length > 0 ? [0] : [],
+      initialHasFocus ? [0] : [],
       target,
       null,
       'ongoing',
@@ -552,15 +600,15 @@ export function generateHeapSteps(
   );
 
   if (operation === 'build') {
-    runBuildOperation(steps, arrayState);
+    runBuildOperation(steps, arrayState, itemIds);
     return steps;
   }
 
   if (operation === 'insert') {
-    runInsertOperation(steps, arrayState, target ?? 0);
+    runInsertOperation(steps, arrayState, itemIds, target ?? 0);
     return steps;
   }
 
-  runExtractRootOperation(steps, arrayState);
+  runExtractRootOperation(steps, arrayState, itemIds);
   return steps;
 }
