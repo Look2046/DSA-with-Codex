@@ -500,3 +500,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: include AVL delete in the first iteration; create an AVL-specific page shell; seed the page from an arbitrary BST snapshot and tolerate non-AVL starting states.
 - Consequences: `P10-M1` stays reviewable and deterministic while still teaching the core AVL mental model (balance factors + LL/LR/RR/RL rotations); AVL delete remains available as a future milestone instead of complicating the first delivery.
 - Owner: haoyu + codex
+
+## DEC-20260407-55
+- Date: 2026-04-07
+- Status: accepted
+- Context: The first heap milestone needed to teach both the complete-tree mental model and the backing-array representation, but splitting those into separate demos or separate state models would increase drift risk and make Playwright/runtime verification harder.
+- Decision: Implement `T-04 Heap` around one deterministic array-based heap snapshot model, derive the tree view directly from array indices on the page, and scope the first iteration to `build`, `insert`, and `extractRoot` with explicit `sift-up` / `sift-down` playback states.
+- Alternatives considered: ship tree-only heap visuals first; model tree nodes and array cells as separate mutable states; defer `build` or `extractRoot` until a later milestone.
+- Consequences: tree and array views now stay synchronized by construction, the first heap delivery teaches the core operations without extra model drift, and future enhancements can stay on the same array-first foundation.
+- Owner: haoyu + codex

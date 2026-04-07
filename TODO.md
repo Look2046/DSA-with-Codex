@@ -287,9 +287,17 @@ Track actionable tasks here. Keep tasks small and testable.
     - targeted Playwright smoke confirmed `/modules` shows `T-03` as `Ready`, `/modules/avl-tree` opens cleanly, and default `Next` advances from `0/11` to `1/11`
     - captured `output/playwright/p10m1-modules-smoke.png` and `output/playwright/p10m1-avl-tree-smoke.png`
 
-- [ ] P10-M2 Add `T-04 Heap`
+- [x] P10-M2 Add `T-04 Heap`
   - DoD: implement a max-heap fundamentals module with tree/array dual representation, route/page/tests/i18n, and shared shell parity.
   - Acceptance: `npm run check` passes, deterministic replay covers build / insert / extract-root behavior, and targeted Playwright smoke on `/modules/heap` is stable.
+  - Done (2026-04-07):
+    - added `src/modules/tree/heap.ts` + `src/modules/tree/heapTimelineAdapter.ts` + `src/pages/modules/HeapPage.tsx`
+    - wired route `/modules/heap` and marked `T-04` as implemented in `src/data/moduleRegistry.ts`
+    - added deterministic heap coverage (`src/modules/tree/heap.test.ts`, `src/modules/tree/heapTimelineReplay.test.ts`)
+    - added zh/en heap copy in `src/i18n/translations.ts` and dual-view styling in `src/index.css`
+    - re-verified local quality gate with `npm run check`
+    - targeted Playwright smoke confirmed `/modules` shows `T-04` as `Ready`, `/modules/heap` opens cleanly, and default `Next` advances from `0/11` to `1/11`
+    - captured `output/playwright/p10m2-modules-smoke.png` and `output/playwright/p10m2-heap-smoke.png`
 
 - [ ] P10-M3 Tree-track acceptance closure
   - DoD: refresh Playwright acceptance artifacts/report after `T-03` / `T-04` and sync closure docs.

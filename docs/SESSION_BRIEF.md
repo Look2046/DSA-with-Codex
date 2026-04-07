@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p10-m1-avl-tree`
-- Current phase: `P10-M1` AVL tree is completed locally; `P10-M2` heap is next
+- Active branch (expected): `feat/p10-m2-heap`
+- Current phase: `P10-M2` heap is completed locally; `P10-M3` tree-track acceptance closure is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -80,6 +80,12 @@ Use this file as the first thing to read in a new chat/session.
   - marked `T-03` as implemented in module registry and localized zh/en UI copy
   - targeted Playwright smoke confirmed `/modules` shows `T-03` as `Ready`, `/modules/avl-tree` opens cleanly, and default `Next` advances from `0/11` to `1/11`
   - captured local smoke artifacts (`output/playwright/p10m1-modules-smoke.png`, `output/playwright/p10m1-avl-tree-smoke.png`)
+- P10-M2 `T-04 Heap` completed locally:
+  - added heap build / insert / extract-root generator + timeline adapter + page / route
+  - kept tree view and array view synchronized from one deterministic heap snapshot model
+  - marked `T-04` as implemented in module registry and localized zh/en UI copy
+  - targeted Playwright smoke confirmed `/modules` shows `T-04` as `Ready`, `/modules/heap` opens cleanly, and default `Next` advances from `0/11` to `1/11`
+  - captured local smoke artifacts (`output/playwright/p10m2-modules-smoke.png`, `output/playwright/p10m2-heap-smoke.png`)
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -153,15 +159,15 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Close the validated AVL milestone with one focused commit on:
-  - current branch: `feat/p10-m1-avl-tree`
+- Close the validated heap milestone with one focused commit on:
+  - current branch: `feat/p10-m2-heap`
   - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
-- Then start `P10-M2` on a fresh feature branch:
-  - recommended branch: `feat/p10-m2-heap`
+- Then start `P10-M3` on a fresh feature branch:
+  - recommended branch: `feat/p10-m3-tree-closure`
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - implement `T-04 Heap` as a max-heap fundamentals module on top of the accepted tree workspace shell
-  - reuse the `T-01` / `T-02` / `T-03` shell contract and avoid re-opening broad shell redesign unless heap exposes a concrete gap
-  - close the milestone only after `npm run check` plus targeted Playwright smoke on `/modules/heap`
+  - refresh `/modules` and `T-01`~`T-04` acceptance evidence after AVL + Heap
+  - keep the shared shell contract stable and focus on consistency / runtime verification rather than new interaction redesign
+  - close the phase only after `npm run check` plus refreshed Playwright evidence under `output/playwright/p10m3-*`
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

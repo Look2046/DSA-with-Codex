@@ -135,7 +135,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/heap',
     category: 'tree',
     difficulty: 3,
-    implemented: false,
+    implemented: true,
   },
   {
     id: 'T-05',

@@ -2,6 +2,58 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P10-M2 heap)
+
+### Today Done
+- Implemented `P10-M2` `T-04 Heap` on the accepted shared tree workspace shell:
+  - added heap step generator / timeline adapter / page / route / registry wiring
+  - covered `build` / `insert` / `extractRoot` on one shared tree+array stage
+  - kept the first iteration focused on `sift-up` / `sift-down` teaching states
+- Added deterministic heap coverage:
+  - `src/modules/tree/heap.test.ts`
+  - `src/modules/tree/heapTimelineReplay.test.ts`
+- Added localized heap copy and shared-shell styling support:
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-ran the required local quality gate successfully after implementation and warning cleanup:
+  - `npm run check`
+- Re-verified targeted browser smoke with the pinned Playwright wrapper:
+  - `/modules` shows `T-04` as `Ready`
+  - `/modules/heap` opens without route-level runtime errors
+  - default `Next` advances from `0/11` to `1/11`
+  - console error log returned `0` errors
+- Captured local smoke artifacts:
+  - `output/playwright/p10m2-modules-smoke.png`
+  - `output/playwright/p10m2-heap-smoke.png`
+- Attempted to push the prior AVL milestone branch, but remote SSH auth is still blocked in this environment:
+  - `git@github.com: Permission denied (publickey).`
+
+### Current State
+- Branch: `feat/p10-m2-heap`
+- Validated scope in this milestone:
+  - `src/modules/tree/heap.ts`
+  - `src/modules/tree/heapTimelineAdapter.ts`
+  - `src/modules/tree/heap.test.ts`
+  - `src/modules/tree/heapTimelineReplay.test.ts`
+  - `src/pages/modules/HeapPage.tsx`
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `output/playwright/p10m2-*.png`
+- Milestone state:
+  - `P10-M2` `T-04 Heap` is now completed locally
+  - next priority is `P10-M3` tree-track acceptance closure
+
+### Next Step
+- Create one focused commit for the validated heap milestone:
+  - heap generator / replay tests / page / route / registry / i18n / styling
+  - `p10m2` smoke artifacts
+  - docs sync
+- Keep unrelated dirty items out of the heap commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- Then start `P10-M3` on a fresh branch:
+  - recommended branch: `feat/p10-m3-tree-closure`
+
 ## 2026-04-07 (P10-M1 AVL tree)
 
 ### Today Done
