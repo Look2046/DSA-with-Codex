@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P11
 
-Status: `P11-M1` completed locally; `P11-M2` next
+Status: `P11-M2` completed locally; `P11-M3` next
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: start the graph track on top of the accepted shared workspace shell by adding graph discovery/category wiring plus the first two graph modules, then close with a focused graph-baseline acceptance sweep
 
@@ -81,6 +81,26 @@ Acceptance
 - deterministic replay confirms the expected DFS order
 - targeted Playwright smoke confirms `/modules/dfs` opens and basic playback is stable
 
+Done (2026-04-07)
+- added deterministic DFS step generation, timeline adapter, route, page, and replay coverage:
+  - `src/modules/graph/dfs.ts`
+  - `src/modules/graph/dfsTimelineAdapter.ts`
+  - `src/modules/graph/dfs.test.ts`
+  - `src/modules/graph/dfsTimelineReplay.test.ts`
+- implemented `G-02` on the shared `WorkspaceShell` with explicit stack progression, neighbor inspection, visit order, and backtrack state on the shared graph stage
+- marked `G-02` as implemented in the registry and added zh/en UI copy plus graph-track styling support
+- local `npm run check` passed
+- targeted Playwright smoke confirmed:
+  - `/modules`: `21` cards, `19` ready badges, `19` open links
+  - graph filter shows `2` cards, `2` ready badges, and `2` live open links
+  - `/modules/dfs` opens cleanly from the graph filter, default `Next` advances `0/28 -> 1/28`, panels open/collapse correctly, and console errors = `0`
+- artifacts captured:
+  - `output/playwright/p11m2-modules-smoke.png`
+  - `output/playwright/p11m2-modules-graph-filter.png`
+  - `output/playwright/p11m2-dfs-panels.png`
+  - `output/playwright/p11m2-dfs-smoke.png`
+  - `output/playwright/p11m2-smoke-report.txt`
+
 ### P11-M3 Graph-Track Acceptance Closure
 
 Deliverables
@@ -99,8 +119,7 @@ Acceptance
 
 ## Suggested Task Breakdown
 
-1. Land `G-02 DFS`
-2. Refresh graph-baseline acceptance evidence and close the phase
+1. Refresh graph-baseline acceptance evidence and close the phase
 
 ## Required Quality Gates
 

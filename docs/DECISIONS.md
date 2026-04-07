@@ -527,3 +527,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: maintain separate view-specific states; start with a static graph page and add playback later; design a new graph-only shell before validating the current shared shell on graph content.
 - Consequences: `G-01` stays deterministic and easy to test, future graph modules can reuse the same preset/snapshot foundation, and shell drift remains controlled; richer graph behaviors such as DFS/BFS can now layer traversal state on top of the same shared baseline.
 - Owner: haoyu + codex
+
+## DEC-20260407-58
+- Date: 2026-04-07
+- Status: accepted
+- Context: The first DFS milestone needed to teach visit order, active neighbor scanning, and backtracking explicitly on the new graph baseline. Hiding traversal inside recursive calls would make the stack harder to explain on the page and less deterministic to replay in tests.
+- Decision: Implement `G-02 DFS` as an explicit stack-driven traversal over the deterministic adjacency-list order derived from the shared graph preset model, and record visit order plus completed/backtracked nodes directly in the timeline snapshots instead of inferring them from hidden recursion state.
+- Alternatives considered: model DFS recursively and reconstruct stack state for the UI; use edge declaration order directly without a normalized adjacency-list traversal contract; introduce a separate graph-page shell tailored to recursion visuals.
+- Consequences: the DFS page can teach stack depth and backtracking with no hidden state, replay tests stay deterministic across speeds/seeks, and future graph traversals such as BFS can reuse the same normalized graph preset foundation without shell drift.
+- Owner: haoyu + codex

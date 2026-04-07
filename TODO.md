@@ -309,7 +309,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - confirmed `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
     - synced `docs/IMPLEMENTATION_PLAN_P10.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
 
-## P11 (Planned)
+## P11 (In Progress)
 - [x] P11 planning baseline
   - DoD: define the post-`P10` milestone scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/IMPLEMENTATION_PLAN_P11.md`, `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -330,9 +330,16 @@ Track actionable tasks here. Keep tasks small and testable.
     - `/modules/graph-representation` opens cleanly, default `Next` advances `0/20 -> 1/20`, and console errors remain `0`
     - captured `output/playwright/p11m1-*.png` and `output/playwright/p11m1-smoke-report.txt`
 
-- [ ] P11-M2 Add `G-02 DFS`
+- [x] P11-M2 Add `G-02 DFS`
   - DoD: implement a DFS teaching module with deterministic traversal playback, visit/backtrack semantics, route/page/tests/i18n, and shared shell parity.
   - Acceptance: `npm run check` passes, deterministic replay confirms the expected DFS order, and targeted Playwright smoke on `/modules/dfs` is stable.
+  - Done (2026-04-07):
+    - added deterministic DFS logic, timeline adapter, page, route wiring, and replay tests
+    - marked `G-02` as implemented in the module registry and added zh/en UI copy plus graph-track styling
+    - targeted Playwright smoke confirmed `/modules`: `21` cards, `19` ready badges, `19` open links
+    - graph filter now shows `2` cards, `2` ready badges, and `2` live open links
+    - `/modules/dfs` opens cleanly, default `Next` advances `0/28 -> 1/28`, panels open/collapse correctly, and console errors remain `0`
+    - captured `output/playwright/p11m2-*.png` and `output/playwright/p11m2-smoke-report.txt`
 
 - [ ] P11-M3 Graph-track acceptance closure
   - DoD: refresh Playwright acceptance artifacts/report after `G-01` / `G-02` and sync closure docs.

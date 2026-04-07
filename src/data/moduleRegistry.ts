@@ -167,7 +167,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/dfs',
     category: 'graph',
     difficulty: 1,
-    implemented: false,
+    implemented: true,
   },
 ];
 

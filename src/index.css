@@ -2744,6 +2744,103 @@ body {
   color: #235b90;
 }
 
+.graph-dfs-stage-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 72px 20px 96px;
+  display: grid;
+  grid-template-rows: minmax(146px, 0.88fr) minmax(208px, 1.12fr);
+  gap: 14px;
+}
+
+.graph-node-visited {
+  border-color: #76aa84;
+  background: #eefaf2;
+  box-shadow:
+    0 0 0 2px rgba(118, 170, 132, 0.16),
+    0 10px 16px rgba(63, 145, 86, 0.12);
+}
+
+.graph-node-completed-final {
+  border-color: #58a16e;
+  background: #dff3e6;
+  box-shadow: 0 10px 18px rgba(52, 125, 73, 0.16);
+}
+
+.graph-node-badge-visited {
+  background: #e6f1ff;
+  color: #295d91;
+}
+
+.graph-list-row-visited {
+  border-color: #cfe1d4;
+  background: #f6fbf8;
+}
+
+.graph-dfs-state-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.98fr);
+  gap: 12px;
+  padding: 14px 16px 16px;
+}
+
+.graph-dfs-state-block {
+  min-height: 0;
+  border-radius: 14px;
+  border: 1px solid #dbe8f5;
+  background: #f8fbff;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.graph-dfs-block-title {
+  color: #28527b;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.graph-dfs-stack-list {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.graph-dfs-stack-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 12px;
+  border: 1px solid #d5e4f1;
+  background: #fff;
+  padding: 8px 10px;
+  color: #274a70;
+}
+
+.graph-dfs-stack-item-active {
+  border-color: #efc57a;
+  background: #fff9ef;
+  box-shadow: 0 0 0 1px rgba(239, 197, 122, 0.18);
+}
+
+.graph-dfs-stack-depth {
+  font-size: 0.72rem;
+  color: #64809b;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+.graph-dfs-stack-empty {
+  color: #788da2;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .heap-array-cell.bar-new-node {
   border-color: #5e96d5;
   background: #e6f1ff;

@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p11-m1-graph-representation`
-- Current phase: `P11-M1` graph representation is completed locally; `P11-M2` DFS is next
+- Active branch (expected): `feat/p11-m2-dfs`
+- Current phase: `P11-M2` DFS is completed locally; `P11-M3` graph-track acceptance closure is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -109,6 +109,22 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p11m1-graph-representation-panels.png`
     - `output/playwright/p11m1-graph-representation-smoke.png`
     - `output/playwright/p11m1-smoke-report.txt`
+- P11-M2 `G-02 DFS` completed locally:
+  - added deterministic DFS traversal generation, timeline adapter, page, route wiring, and replay coverage
+  - implemented explicit visit / inspect-neighbor / descend / skip-visited / backtrack teaching states on top of the shared graph preset foundation
+  - marked `G-02` as implemented in the module registry and added zh/en UI copy plus graph-track styling support
+  - targeted Playwright smoke confirmed:
+    - `/modules`: `21` cards, `19` ready badges, `19` open links
+    - graph filter shows `2` cards, `2` ready badges, and `2` live open links
+    - `/modules/dfs` opens cleanly from the graph filter, `Controls` + `Step` panels open, and clicking the stage collapses them back to the pinned buttons
+    - default `Next` advances `0/28 -> 1/28`
+    - console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p11m2-modules-smoke.png`
+    - `output/playwright/p11m2-modules-graph-filter.png`
+    - `output/playwright/p11m2-dfs-panels.png`
+    - `output/playwright/p11m2-dfs-smoke.png`
+    - `output/playwright/p11m2-smoke-report.txt`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -182,13 +198,13 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Create one focused commit for the validated `P11-M1` milestone on:
-  - current branch: `feat/p11-m1-graph-representation`
+- Create one focused commit for the validated `P11-M2` milestone on:
+  - current branch: `feat/p11-m2-dfs`
   - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
-- Then start `P11-M2` on a fresh feature branch:
-  - recommended branch: `feat/p11-m2-dfs`
-  - reuse the same deterministic graph preset/snapshot foundation from `G-01`
-  - teach visited progression, stack/backtrack semantics, and traversal order without reopening broad shell redesign
+- Then start `P11-M3` on a fresh feature branch:
+  - recommended branch: `feat/p11-m3-graph-closure`
+  - refresh `/modules` + graph-filter + `G-01` / `G-02` acceptance evidence under `output/playwright/p11m3-*`
+  - keep the closure focused on graph-track consistency and docs/artifact sync instead of reopening module behavior
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

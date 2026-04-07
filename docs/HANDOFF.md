@@ -2,6 +2,74 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P11-M2 dfs)
+
+### Today Done
+- Continued on the validated graph-track foundation branch:
+  - `feat/p11-m2-dfs`
+- Implemented `P11-M2` `G-02 DFS` on top of the accepted shared workspace shell:
+  - added deterministic DFS traversal generation with explicit `initial -> pushStart -> visit -> inspectNeighbor -> descend/skipVisited -> backtrack -> completed` states
+  - kept traversal order tied to the same deterministic graph preset / adjacency-list foundation introduced in `G-01`
+  - exposed visit order, call stack, active relation, and backtrack progression directly in the page UI
+- Added deterministic DFS coverage:
+  - `src/modules/graph/dfs.ts`
+  - `src/modules/graph/dfsTimelineAdapter.ts`
+  - `src/modules/graph/dfs.test.ts`
+  - `src/modules/graph/dfsTimelineReplay.test.ts`
+- Added the new route/page/styling and discovery wiring:
+  - `src/pages/modules/DfsPage.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/app/router.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified targeted browser smoke with the pinned Playwright wrapper:
+  - `/modules`: `21` cards, `19` ready badges, `19` open links
+  - graph filter shows `2` cards, `2` ready badges, and `2` live open links
+  - `/modules/dfs` opens cleanly from the graph filter without route-level runtime errors
+  - `Controls` + `Step` panels open correctly, and clicking the stage collapses them back to the pinned buttons
+  - default `Next` advances from `0/28` to `1/28`
+  - console errors returned `0`
+- Captured local smoke artifacts:
+  - `output/playwright/p11m2-modules-smoke.png`
+  - `output/playwright/p11m2-modules-graph-filter.png`
+  - `output/playwright/p11m2-dfs-panels.png`
+  - `output/playwright/p11m2-dfs-smoke.png`
+  - `output/playwright/p11m2-smoke-report.txt`
+
+### Current State
+- Branch: `feat/p11-m2-dfs`
+- Validated scope in this milestone:
+  - `src/modules/graph/dfs.ts`
+  - `src/modules/graph/dfsTimelineAdapter.ts`
+  - `src/modules/graph/dfs.test.ts`
+  - `src/modules/graph/dfsTimelineReplay.test.ts`
+  - `src/pages/modules/DfsPage.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/app/router.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/IMPLEMENTATION_PLAN_P11.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+  - `output/playwright/p11m2-*`
+- Milestone state:
+  - `P11-M2` `G-02 DFS` is now completed locally
+  - next priority is `P11-M3` graph-track acceptance closure
+
+### Next Step
+- Create one focused commit for the validated DFS milestone:
+  - DFS logic / replay tests / page / route / registry / i18n / styling
+  - `p11m2` smoke artifacts and docs sync
+- Keep unrelated dirty items out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- Then start `P11-M3` on a fresh branch:
+  - recommended branch: `feat/p11-m3-graph-closure`
+  - refresh `/modules`, graph filter, `G-01`, and `G-02` acceptance evidence together
+  - sync closure docs once the graph-track acceptance pass lands
+
 ## 2026-04-07 (P11-M1 graph representation)
 
 ### Today Done
