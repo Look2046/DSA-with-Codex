@@ -265,7 +265,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - re-verified representative pinned-button + draggable-panel + stage-click-collapse behavior on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/IMPLEMENTATION_PLAN_P9.md`, and `TODO.md`
 
-## P10 (Planned)
+## P10 (In Progress)
 - [x] P10 planning baseline
   - DoD: define the next post-`P9` milestone scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -275,9 +275,17 @@ Track actionable tasks here. Keep tasks small and testable.
     - pushed the validated `P9` closure branch to `origin/feat/p9-m2-sorting-shell-rollout`
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-- [ ] P10-M1 Add `T-03 AVL Tree`
+- [x] P10-M1 Add `T-03 AVL Tree`
   - DoD: implement an AVL insert + rebalance teaching module with rotation visualization, route/page/tests/i18n, and shared shell parity.
   - Acceptance: `npm run check` passes, deterministic replay covers representative rotation cases, and targeted Playwright smoke on `/modules/avl-tree` is stable.
+  - Done (2026-04-07):
+    - added `src/modules/tree/avl.ts` + `src/modules/tree/avlTimelineAdapter.ts` + `src/pages/modules/AvlTreePage.tsx`
+    - wired route `/modules/avl-tree` and marked `T-03` as implemented in `src/data/moduleRegistry.ts`
+    - added deterministic AVL coverage (`src/modules/tree/avl.test.ts`, `src/modules/tree/avlTimelineReplay.test.ts`)
+    - added zh/en AVL copy in `src/i18n/translations.ts` and shared-shell styling support in `src/index.css`
+    - re-verified local quality gate with `npm run check`
+    - targeted Playwright smoke confirmed `/modules` shows `T-03` as `Ready`, `/modules/avl-tree` opens cleanly, and default `Next` advances from `0/11` to `1/11`
+    - captured `output/playwright/p10m1-modules-smoke.png` and `output/playwright/p10m1-avl-tree-smoke.png`
 
 - [ ] P10-M2 Add `T-04 Heap`
   - DoD: implement a max-heap fundamentals module with tree/array dual representation, route/page/tests/i18n, and shared shell parity.

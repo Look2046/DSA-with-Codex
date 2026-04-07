@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `docs/p10-post-shell-plan`
-- Current phase: `P10` planning baseline is completed locally; `P10-M1` AVL tree work is next
+- Active branch (expected): `feat/p10-m1-avl-tree`
+- Current phase: `P10-M1` AVL tree is completed locally; `P10-M2` heap is next
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
@@ -74,6 +74,12 @@ Use this file as the first thing to read in a new chat/session.
   - added `docs/IMPLEMENTATION_PLAN_P10.md`
   - chose the next phase sequence as `AVL Tree -> Heap -> tree-track acceptance closure`
   - pushed the validated `P9` closure branch to `origin/feat/p9-m2-sorting-shell-rollout`
+- P10-M1 `T-03 AVL Tree` completed locally:
+  - added AVL insert + rebalance generator / timeline adapter / page / route
+  - covered explicit `LL` / `LR` / `RR` / `RL` rotation teaching states with deterministic tests
+  - marked `T-03` as implemented in module registry and localized zh/en UI copy
+  - targeted Playwright smoke confirmed `/modules` shows `T-03` as `Ready`, `/modules/avl-tree` opens cleanly, and default `Next` advances from `0/11` to `1/11`
+  - captured local smoke artifacts (`output/playwright/p10m1-modules-smoke.png`, `output/playwright/p10m1-avl-tree-smoke.png`)
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -147,12 +153,15 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start `P10-M1` on a fresh feature branch:
-  - recommended branch: `feat/p10-m1-avl-tree`
+- Close the validated AVL milestone with one focused commit on:
+  - current branch: `feat/p10-m1-avl-tree`
+  - keep unrelated dirty files out of the commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper)
+- Then start `P10-M2` on a fresh feature branch:
+  - recommended branch: `feat/p10-m2-heap`
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - implement `T-03 AVL Tree` as an insert + rebalance focused module on top of the accepted tree workspace shell
-  - reuse the `T-01` / `T-02` shell contract and avoid re-opening broad shell redesign unless AVL exposes a concrete gap
-  - close the milestone only after `npm run check` plus targeted Playwright smoke on `/modules/avl-tree`
+  - implement `T-04 Heap` as a max-heap fundamentals module on top of the accepted tree workspace shell
+  - reuse the `T-01` / `T-02` / `T-03` shell contract and avoid re-opening broad shell redesign unless heap exposes a concrete gap
+  - close the milestone only after `npm run check` plus targeted Playwright smoke on `/modules/heap`
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

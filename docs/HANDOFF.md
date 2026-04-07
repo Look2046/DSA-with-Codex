@@ -2,6 +2,56 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P10-M1 AVL tree)
+
+### Today Done
+- Implemented `P10-M1` `T-03 AVL Tree` on the accepted shared tree workspace shell:
+  - added AVL step generator / timeline adapter / page / route / registry wiring
+  - focused the first iteration on insert + rebalance teaching flow
+  - covered explicit `LL` / `LR` / `RR` / `RL` rotation cases
+- Added deterministic AVL coverage:
+  - `src/modules/tree/avl.test.ts`
+  - `src/modules/tree/avlTimelineReplay.test.ts`
+- Added localized AVL copy and shell styling support:
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-ran the required local quality gate successfully:
+  - `npm run check`
+- Re-verified targeted browser smoke with the pinned Playwright wrapper:
+  - `/modules` shows `T-03` as `Ready`
+  - `/modules/avl-tree` opens without route-level runtime errors
+  - default `Next` advances from `0/11` to `1/11`
+  - console error log returned `0` errors
+- Captured local smoke artifacts:
+  - `output/playwright/p10m1-modules-smoke.png`
+  - `output/playwright/p10m1-avl-tree-smoke.png`
+
+### Current State
+- Branch: `feat/p10-m1-avl-tree`
+- Validated scope in this milestone:
+  - `src/modules/tree/avl.ts`
+  - `src/modules/tree/avlTimelineAdapter.ts`
+  - `src/modules/tree/avl.test.ts`
+  - `src/modules/tree/avlTimelineReplay.test.ts`
+  - `src/pages/modules/AvlTreePage.tsx`
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `output/playwright/p10m1-*.png`
+- Milestone state:
+  - `P10-M1` `T-03 AVL Tree` is now completed locally
+  - next priority is `P10-M2` `T-04 Heap`
+
+### Next Step
+- Create one focused commit for the validated AVL milestone:
+  - AVL generator / replay tests / page / route / registry / i18n / styling
+  - `p10m1` smoke artifacts
+  - docs sync
+- Keep unrelated dirty items out of the AVL commit (`scripts/*`, design artifacts, legacy screenshots, launcher helper).
+- If continuing immediately after the AVL commit, start `P10-M2` on a fresh branch:
+  - recommended branch: `feat/p10-m2-heap`
+
 ## 2026-04-07 (P10 planning baseline)
 
 ### Today Done

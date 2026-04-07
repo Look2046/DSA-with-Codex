@@ -491,3 +491,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: jump directly to `B-Tree / B+ Tree`; start `Trie` before AVL/Heap; do another broad cross-module polish phase before shipping new modules.
 - Consequences: the next phase builds on the freshest validated shell and BST context, keeps scope controlled around two concrete modules, and defers the more conceptually different `B-Tree` / `Trie` work to a later milestone.
 - Owner: haoyu + codex
+
+## DEC-20260407-54
+- Date: 2026-04-07
+- Status: accepted
+- Context: The first AVL milestone could easily sprawl into delete/search behaviors or a page-specific shell redesign, which would dilute the teaching goal and increase regression risk right after the shared workspace-shell rollout.
+- Decision: Implement `T-03 AVL Tree` as an insert-only AVL teaching module on top of the accepted tree workspace shell, build the initial seed tree through silent AVL inserts so the starting state is always AVL-valid, and expose explicit timeline states for visit, imbalance detection, rotation, and rebalance completion.
+- Alternatives considered: include AVL delete in the first iteration; create an AVL-specific page shell; seed the page from an arbitrary BST snapshot and tolerate non-AVL starting states.
+- Consequences: `P10-M1` stays reviewable and deterministic while still teaching the core AVL mental model (balance factors + LL/LR/RR/RL rotations); AVL delete remains available as a future milestone instead of complicating the first delivery.
+- Owner: haoyu + codex

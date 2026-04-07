@@ -127,7 +127,7 @@ export const moduleRegistry: ModuleMetadata[] = [
     route: '/modules/avl-tree',
     category: 'tree',
     difficulty: 3,
-    implemented: false,
+    implemented: true,
   },
   {
     id: 'T-04',

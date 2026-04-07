@@ -1638,6 +1638,10 @@ body {
   align-items: flex-start;
 }
 
+.workspace-stage-body-tree {
+  padding: 18px 10px 58px;
+}
+
 .workspace-stage-body-linked {
   display: flex;
   align-items: stretch;
@@ -2316,6 +2320,40 @@ body {
 
 .tree-node-index {
   font-size: 0.66rem;
+  color: #5f7894;
+  line-height: 1;
+}
+
+.avl-stage-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.avl-node {
+  width: 72px;
+  height: 72px;
+  gap: 1px;
+}
+
+.avl-node-balance-badge {
+  background: #ebf2ff;
+  color: #285a94;
+}
+
+.avl-node-balance-badge-negative {
+  background: #fff1dd;
+  color: #9a5c14;
+}
+
+.avl-node-balance-badge-imbalanced {
+  background: #ffe2e2;
+  color: #a92d2d;
+}
+
+.avl-node-metrics {
+  font-size: 0.58rem;
   color: #5f7894;
   line-height: 1;
 }
