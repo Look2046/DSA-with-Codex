@@ -28,7 +28,12 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - full quality gate: `npm run check`
 
 ### Current State
+- Branch: `feat/t04-heap-animation-stabilization`
+- Local commit created for the validated fix:
+  - `bb51b72 fix: stabilize heap animation replay`
 - Heap animation/runtime fix is validated locally.
+- Push attempt to `origin/feat/t04-heap-animation-stabilization` failed due SSH auth:
+  - `git@github.com: Permission denied (publickey).`
 - Keep unrelated dirty items out of this change set:
   - `scripts/check-doc-links.sh`
   - `scripts/playwright-cli.sh`
@@ -39,14 +44,9 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `start-project-wsl.bat`
 
 ### Next Step
-- Create one focused heap-fix branch/commit that includes only:
-  - `src/index.css`
-  - `src/modules/tree/heap.ts`
-  - `src/modules/tree/heap.test.ts`
-  - `src/pages/modules/HeapPage.tsx`
-  - `docs/HANDOFF.md`
-  - `docs/DECISIONS.md` if the animation-implementation choice is recorded
-- Push if remote backup / CI visibility is desired; otherwise keep it as a clean local commit first.
+- Restore SSH auth (or use the preferred repo auth path), then push:
+  - `feat/t04-heap-animation-stabilization`
+- After push, decide whether to merge this focused heap fix before resuming post-`P11` planning or additional tree-track work.
 
 ## 2026-04-07 (P11-M3 graph-track acceptance closure)
 

@@ -5,8 +5,8 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p11-m3-graph-closure`
-- Current phase: `P11` graph-track expansion is completed locally; post-`P11` planning baseline is next
+- Active branch (expected): `feat/t04-heap-animation-stabilization`
+- Current phase: `T-04 Heap` animation stabilization is validated locally on a focused fix branch; next is restoring git push/auth or merging this fix before resuming post-`P11` planning
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-07)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
