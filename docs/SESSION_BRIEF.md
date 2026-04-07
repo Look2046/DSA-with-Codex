@@ -5,9 +5,11 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p9-m2-sorting-shell-rollout`
-- Current phase: `P9` workspace-shell unification is completed locally; `P10` planning baseline is next
-- Last local quality gate: `npm run check` (passed locally, 2026-04-07)
+- Active branch (expected): `docs/p10-post-shell-plan`
+- Current phase: `P10` planning baseline is completed locally; `P10-M1` AVL tree work is next
+- Last local quality gates:
+  - `npm run check` (passed locally, 2026-04-07)
+  - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
 
 ## 2) What Is Already Done
 
@@ -41,6 +43,7 @@ Use this file as the first thing to read in a new chat/session.
 - P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
 - P8 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P8.md`
 - P9 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P9.md`
+- P10 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P10.md`
 - P9-M1 workspace-shell foundation + pilot migrations completed locally:
   - added shared `WorkspaceShell` component for the validated stage-first shell contract
   - migrated `S-01 Bubble Sort`, `L-01 Array`, and `SR-02 Binary Search`
@@ -67,6 +70,10 @@ Use this file as the first thing to read in a new chat/session.
     - all `15` implemented routes open without route-level runtime errors and advance on default `Next`
     - all non-tree routes keep `1416px` page / shell / stage widths
     - representative pinned-button + draggable-panel + stage-click-collapse checks pass on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
+- P10 planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P10.md`
+  - chose the next phase sequence as `AVL Tree -> Heap -> tree-track acceptance closure`
+  - pushed the validated `P9` closure branch to `origin/feat/p9-m2-sorting-shell-rollout`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -140,11 +147,12 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start `P10` planning baseline before new implementation work:
+- Start `P10-M1` on a fresh feature branch:
+  - recommended branch: `feat/p10-m1-avl-tree`
   - keep the WSL repo as the active source of truth; do not resume the older Windows copy unless a session explicitly wants read-only comparison
-  - choose the next post-shell milestone sequence before coding more product changes
-  - sync `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` around the same next-phase boundary
-  - keep `P9` acceptance artifacts/report as the local closure evidence unless a new regression forces a refresh
+  - implement `T-03 AVL Tree` as an insert + rebalance focused module on top of the accepted tree workspace shell
+  - reuse the `T-01` / `T-02` shell contract and avoid re-opening broad shell redesign unless AVL exposes a concrete gap
+  - close the milestone only after `npm run check` plus targeted Playwright smoke on `/modules/avl-tree`
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

@@ -2,6 +2,47 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-07 (P10 planning baseline)
+
+### Today Done
+- Pushed the validated `P9` closure branch to remote:
+  - `origin/feat/p9-m2-sorting-shell-rollout`
+  - latest validated closure commit: `d84d9ca feat(p9): close workspace shell acceptance`
+- Created the docs planning branch for the next phase:
+  - `docs/p10-post-shell-plan`
+- Defined the post-`P9` execution order and added `docs/IMPLEMENTATION_PLAN_P10.md`.
+- Chose a tree-track expansion sequence that keeps strong continuity with `T-01` / `T-02`:
+  - `P10-M1`: `T-03 AVL Tree` (insert + rebalance focus)
+  - `P10-M2`: `T-04 Heap` (max-heap fundamentals)
+  - `P10-M3`: tree-track acceptance closure
+- Synced planning-state docs:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Re-ran the required docs-only gate successfully:
+  - `./scripts/check-doc-links.sh`
+
+### Current State
+- Branch: `docs/p10-post-shell-plan`
+- Validated scope in this planning batch:
+  - `docs/IMPLEMENTATION_PLAN_P10.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Milestone state:
+  - `P10` planning baseline is now completed locally
+  - next priority is `P10-M1` `T-03 AVL Tree`
+
+### Next Step
+- Create a fresh implementation branch from this planning baseline:
+  - recommended branch: `feat/p10-m1-avl-tree`
+- Then implement `T-03 AVL Tree` with:
+  - insert-driven balancing
+  - LL / LR / RR / RL rotation teaching states
+  - deterministic tests and targeted Playwright smoke
+
 ## 2026-04-07 (P9-M3 acceptance closure)
 
 ### Today Done

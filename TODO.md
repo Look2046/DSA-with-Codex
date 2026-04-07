@@ -265,10 +265,27 @@ Track actionable tasks here. Keep tasks small and testable.
     - re-verified representative pinned-button + draggable-panel + stage-click-collapse behavior on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/IMPLEMENTATION_PLAN_P9.md`, and `TODO.md`
 
-## P10 (Next)
-- [ ] P10 planning baseline
+## P10 (Planned)
+- [x] P10 planning baseline
   - DoD: define the next post-`P9` milestone scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done (2026-04-07):
+    - added `docs/IMPLEMENTATION_PLAN_P10.md`
+    - chose the next phase sequence as `AVL Tree -> Heap -> tree-track acceptance closure`
+    - pushed the validated `P9` closure branch to `origin/feat/p9-m2-sorting-shell-rollout`
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
+
+- [ ] P10-M1 Add `T-03 AVL Tree`
+  - DoD: implement an AVL insert + rebalance teaching module with rotation visualization, route/page/tests/i18n, and shared shell parity.
+  - Acceptance: `npm run check` passes, deterministic replay covers representative rotation cases, and targeted Playwright smoke on `/modules/avl-tree` is stable.
+
+- [ ] P10-M2 Add `T-04 Heap`
+  - DoD: implement a max-heap fundamentals module with tree/array dual representation, route/page/tests/i18n, and shared shell parity.
+  - Acceptance: `npm run check` passes, deterministic replay covers build / insert / extract-root behavior, and targeted Playwright smoke on `/modules/heap` is stable.
+
+- [ ] P10-M3 Tree-track acceptance closure
+  - DoD: refresh Playwright acceptance artifacts/report after `T-03` / `T-04` and sync closure docs.
+  - Acceptance: `npm run check` passes and refreshed `output/playwright/p10m3-*` evidence is complete locally.
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

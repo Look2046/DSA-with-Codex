@@ -482,3 +482,12 @@ Record architecture or workflow decisions here.
 - Alternatives considered: keep sorting pages on narrow page wrappers and only tune inner stage width; keep module-specific shell classes for each sorting page; treat `T-01` wide breakout as tree-only behavior.
 - Consequences: sorting modules now read as true full-stage workspace pages instead of narrow content cards, and future `P9-M2` sorting/search/linear migrations have an explicit page-level contract to follow rather than rediscovering the same width issue route by route.
 - Owner: haoyu + codex
+
+## DEC-20260407-53
+- Date: 2026-04-07
+- Status: accepted
+- Context: After closing `P9`, the project had two competing next steps: continue broad UX/platform work or resume new algorithm delivery. The accepted shell unification now makes new module work cheaper, and the strongest continuity sits on the tree track because `T-01` / `T-02` already define the interaction baseline for future tree pages.
+- Decision: Define `P10` as a tree-track expansion phase with three milestones: `P10-M1` `T-03 AVL Tree` (insert + rebalance focus), `P10-M2` `T-04 Heap` (max-heap fundamentals), and `P10-M3` tree-track acceptance closure.
+- Alternatives considered: jump directly to `B-Tree / B+ Tree`; start `Trie` before AVL/Heap; do another broad cross-module polish phase before shipping new modules.
+- Consequences: the next phase builds on the freshest validated shell and BST context, keeps scope controlled around two concrete modules, and defers the more conceptually different `B-Tree` / `Trie` work to a later milestone.
+- Owner: haoyu + codex
