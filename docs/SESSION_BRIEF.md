@@ -5,11 +5,11 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/t04-heap-animation-stabilization`
-- Current phase: `T-04 Heap` animation stabilization is validated locally on a focused fix branch; next is restoring git push/auth or merging this fix before resuming post-`P11` planning
+- Active branch (expected): `docs/post-p11-plan`
+- Current phase: `P12` planning baseline is now defined locally; next is turning the near-term module wave into implementation branches starting with the hash-table foundation
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-07)
-  - `./scripts/check-doc-links.sh` (passed locally, 2026-04-07)
+  - `npm run check` (passed locally, 2026-04-15, student standalone export branch)
+  - `./scripts/check-doc-links.sh` (passed locally, 2026-04-18, `P12` planning sync)
 
 ## 2) What Is Already Done
 
@@ -141,6 +141,25 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p11m3-dfs-panels.png`
     - `output/playwright/p11m3-dfs-smoke.png`
     - `output/playwright/p11m3-acceptance-report.txt`
+- `P12` planning baseline drafted locally:
+  - added `docs/IMPLEMENTATION_PLAN_P12.md`
+  - chose the near-term wave as:
+    - `H-01 Hash Table - Chaining`
+    - `H-02 Hash Table - Open Addressing`
+    - `G-03 BFS`
+    - `G-04 Dijkstra`
+    - `G-05 Bellman-Ford`
+    - `G-06 Floyd-Warshall`
+    - `G-07 Kruskal`
+    - `G-08 Prim`
+    - `S-07 Heap Sort`
+    - `ST-01 KMP`
+  - moved the remaining blueprint items into the explicit long-term backlog:
+    - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
+- Student standalone `T-01 Binary Tree Traversal` export completed locally on a separate focused branch:
+  - added offline student entry/build flow
+  - output lives under `student-dist/binary-tree`
+  - local `npm run check` passed on 2026-04-15 after the offline single-file export hardening
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -214,11 +233,16 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Create a post-`P11` docs planning branch:
-  - recommended branch: `docs/post-p11-plan`
-- Then define the next phase baseline before new implementation work:
-  - pick the next focused milestone sequence and acceptance boundary
-  - sync `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
+- Start the near-term `P12` implementation wave from the new planning baseline:
+  - recommended first implementation branch: `feat/p12-m1-hash-foundations`
+  - first scope: `H-01 Hash Table - Chaining` + `H-02 Hash Table - Open Addressing`
+- Then continue in the documented order:
+  - `G-03 BFS`
+  - `G-04`~`G-06` weighted shortest-path modules
+  - `G-07`~`G-08` MST modules
+  - `S-07 Heap Sort` + `ST-01 KMP`
+- Keep the remaining blueprint items in the long-term backlog:
+  - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

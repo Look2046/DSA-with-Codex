@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260418-60
+- Date: 2026-04-18
+- Status: accepted
+- Context: After confirming that the original 42-module blueprint was larger than the current 21-item runtime registry, the project needed an explicit post-`P11` execution boundary so the near-term roadmap would not drift between specialized tree work, graph expansion, sorting expansion, and unstarted categories.
+- Decision: Define the near-term `P12` wave as `H-01` / `H-02` hash foundations, `G-03`~`G-08` graph expansion, `S-07 Heap Sort`, and `ST-01 KMP`; keep `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, and `P-01`~`P-05` in the explicit long-term backlog after `P12`.
+- Alternatives considered: continue immediately with `Trie` / `B-Tree`; keep all remaining blueprint modules at the same priority level; expand only graph modules and postpone new categories again.
+- Consequences: the next execution wave broadens the product into hash and string algorithms while deepening the graph track from its new foundation, but specialized tree modules and classic-paradigm pages remain intentionally deferred and must stay visible in planning docs to avoid silent scope shrinkage.
+- Owner: haoyu + codex
+
 ## DEC-20260407-59
 - Date: 2026-04-07
 - Status: accepted

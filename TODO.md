@@ -351,9 +351,57 @@ Track actionable tasks here. Keep tasks small and testable.
     - synced `docs/IMPLEMENTATION_PLAN_P11.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
 
 ## P12 (Planned)
-- [ ] P12 planning baseline
+- [x] P12 planning baseline
   - DoD: define the post-`P11` phase scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
+  - Done (2026-04-18):
+    - added `docs/IMPLEMENTATION_PLAN_P12.md`
+    - chose the near-term module wave as:
+      - `H-01` / `H-02`
+      - `G-03`~`G-08`
+      - `S-07`
+      - `ST-01`
+    - moved `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, and `P-01`~`P-05` into the explicit long-term backlog
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
+
+- [ ] P12-M1 Add `H-01` / `H-02`
+  - DoD: add `hash` category discovery wiring plus two contrasting hash-table teaching modules for chaining and open addressing.
+  - Acceptance: `npm run check` passes, deterministic collision-path replay is stable, and targeted Playwright smoke on both hash routes is green.
+
+- [ ] P12-M2 Add `G-03 BFS`
+  - DoD: implement a BFS teaching module with deterministic queue/level playback on top of the accepted graph foundation.
+  - Acceptance: `npm run check` passes, deterministic replay confirms BFS order, and targeted Playwright smoke on `/modules/bfs` is stable.
+
+- [ ] P12-M3 Add `G-04`~`G-06`
+  - DoD: implement the weighted shortest-path batch (`Dijkstra`, `Bellman-Ford`, `Floyd-Warshall`) with explicit distance/relaxation teaching states.
+  - Acceptance: `npm run check` passes, deterministic replay confirms expected distance updates, and targeted Playwright smoke across the three routes is stable.
+
+- [ ] P12-M4 Add `G-07` / `G-08`
+  - DoD: implement the MST batch (`Kruskal`, `Prim`) with deterministic chosen-edge / rejected-edge progression.
+  - Acceptance: `npm run check` passes, deterministic replay confirms MST edge selection, and targeted Playwright smoke on both routes is stable.
+
+- [ ] P12-M5 Add `S-07` / `ST-01`
+  - DoD: implement `Heap Sort` and `KMP`, opening the string category while extending sorting from the existing heap foundation.
+  - Acceptance: `npm run check` passes, deterministic replay is stable for both modules, and targeted Playwright smoke on both routes is green.
+
+- [ ] P12-M6 Near-term wave acceptance closure
+  - DoD: refresh discovery/acceptance artifacts after the near-term wave and sync closure docs.
+  - Acceptance: `npm run check` passes and refreshed `output/playwright/` evidence is complete locally.
+
+## Long-Term (Post-P12 Backlog)
+- [ ] `T-05` B-Tree / B+ Tree
+- [ ] `T-06` Trie
+- [ ] `G-09` Topological Sort
+- [ ] `S-08` Counting Sort
+- [ ] `S-09` Radix Sort
+- [ ] `S-10` Bucket Sort
+- [ ] `S-11` Sorting Race
+- [ ] `ST-02` Rabin-Karp
+- [ ] `P-01` Divide & Conquer
+- [ ] `P-02` Dynamic Programming
+- [ ] `P-03` Greedy
+- [ ] `P-04` Backtracking
+- [ ] `P-05` Union-Find
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
