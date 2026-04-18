@@ -2870,6 +2870,263 @@ body {
   line-height: 1.5;
 }
 
+.hash-stage {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(101, 161, 216, 0.12), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(90, 157, 123, 0.1), transparent 30%),
+    #f8fbff;
+}
+
+.hash-stage-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 72px 20px 96px;
+  display: grid;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 14px;
+  align-content: start;
+}
+
+.hash-stage-card {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border: 1px solid #d7e8f8;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 249, 255, 0.96)),
+    #f8fbff;
+  box-shadow: 0 8px 18px rgba(57, 96, 139, 0.08);
+  overflow: hidden;
+}
+
+.hash-stage-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid #e1edf8;
+}
+
+.hash-stage-card-head strong {
+  color: #244c74;
+  font-size: 0.94rem;
+}
+
+.hash-stage-card-head span {
+  color: #5f7894;
+  font-size: 0.74rem;
+  text-align: right;
+}
+
+.hash-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 16px 0;
+}
+
+.hash-summary-tile {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #dae7f4;
+  background: #f8fbff;
+}
+
+.hash-summary-tile span {
+  color: #61809e;
+  font-size: 0.74rem;
+}
+
+.hash-summary-tile strong {
+  color: #214e78;
+  font-size: 1.05rem;
+}
+
+.hash-formula-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 16px 16px;
+}
+
+.hash-formula-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #d8e7f6;
+  background: rgba(255, 255, 255, 0.88);
+  color: #244261;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+.hash-bucket-grid {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.hash-bucket-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #dae8f5;
+  background: #f8fbff;
+}
+
+.hash-bucket-row-active {
+  border-color: #efc57a;
+  background: #fffaf1;
+  box-shadow: 0 0 0 1px rgba(239, 197, 122, 0.18);
+}
+
+.hash-bucket-label {
+  color: #29547e;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.hash-bucket-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 38px;
+  align-items: center;
+}
+
+.hash-chain-chip,
+.hash-empty-chip,
+.hash-probe-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #d4e3f1;
+  background: #fff;
+  color: #244261;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hash-chain-chip-scanned {
+  border-color: #a8c8eb;
+  background: #eef5ff;
+  color: #235b90;
+}
+
+.hash-chain-chip-active,
+.hash-probe-chip-active,
+.hash-array-cell-active {
+  border-color: #efc57a;
+  background: #fff4de;
+  box-shadow: 0 0 0 1px rgba(239, 197, 122, 0.18);
+}
+
+.hash-empty-chip {
+  border-style: dashed;
+  background: #f7fbff;
+  color: #7288a0;
+  font-weight: 600;
+}
+
+.hash-array-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+  gap: 10px;
+  padding: 14px 16px 0;
+}
+
+.hash-array-cell {
+  min-height: 94px;
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid #dae8f5;
+  background: #f8fbff;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.hash-array-cell-home {
+  border-color: #9bc1e7;
+  background: #eef5ff;
+}
+
+.hash-array-cell-probed {
+  box-shadow: inset 0 0 0 1px rgba(92, 141, 194, 0.18);
+}
+
+.hash-array-cell-active {
+  transform: translateY(-2px);
+}
+
+.hash-array-cell-tombstone {
+  border-style: dashed;
+  border-color: #d6a2a2;
+  background: #fff4f4;
+}
+
+.hash-array-cell-index {
+  color: #5b728d;
+  font-size: 0.72rem;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+
+.hash-array-cell-value {
+  color: #214e78;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.hash-array-cell-tombstone .hash-array-cell-value {
+  color: #9a4747;
+}
+
+.hash-probe-strip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 14px 16px 16px;
+  border-top: 1px solid #e1edf8;
+  background: rgba(250, 252, 255, 0.76);
+}
+
+.hash-probe-label {
+  color: #28527b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding-top: 8px;
+}
+
+.hash-probe-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .heap-array-cell.bar-new-node {
   border-color: #5e96d5;
   background: #e6f1ff;
@@ -4190,5 +4447,30 @@ body {
   .tree-recursion-point {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .hash-stage-scene {
+    padding: 72px 14px 84px;
+    grid-template-columns: 1fr;
+  }
+
+  .hash-stage-card-head {
+    align-items: flex-start;
+  }
+
+  .hash-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hash-bucket-row {
+    grid-template-columns: 1fr;
+  }
+
+  .hash-array-grid {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  }
+
+  .hash-probe-strip {
+    grid-template-columns: 1fr;
   }
 }

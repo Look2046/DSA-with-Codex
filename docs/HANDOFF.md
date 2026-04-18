@@ -2,6 +2,80 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-19 (P12-M1 hash foundations checkpoint)
+
+### Today Done
+- Continued on the first `P12` implementation branch:
+  - `feat/p12-m1-hash-foundations`
+- Implemented the `hash` category foundation plus two new teaching modules:
+  - `H-01 Hash Table - Chaining`
+  - `H-02 Hash Table - Open Addressing`
+- Added the hash runtime/model/test/page wiring:
+  - `src/modules/hash/hashChaining.ts`
+  - `src/modules/hash/hashChainingTimelineAdapter.ts`
+  - `src/modules/hash/hashChaining.test.ts`
+  - `src/modules/hash/hashChainingTimelineReplay.test.ts`
+  - `src/modules/hash/hashOpenAddressing.ts`
+  - `src/modules/hash/hashOpenAddressingTimelineAdapter.ts`
+  - `src/modules/hash/hashOpenAddressing.test.ts`
+  - `src/modules/hash/hashOpenAddressingTimelineReplay.test.ts`
+  - `src/pages/modules/HashChainingPage.tsx`
+  - `src/pages/modules/HashOpenAddressingPage.tsx`
+- Extended shared discovery/runtime wiring for the new category/modules:
+  - `src/types/module.ts`
+  - `src/pages/ModulesPage.tsx`
+  - `src/pages/modulesPageUtils.test.ts`
+  - `src/data/moduleRegistry.ts`
+  - `src/app/router.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-verified locally:
+  - targeted hash tests:
+    - `npm test -- src/modules/hash/hashChaining.test.ts src/modules/hash/hashChainingTimelineReplay.test.ts src/modules/hash/hashOpenAddressing.test.ts src/modules/hash/hashOpenAddressingTimelineReplay.test.ts src/pages/modulesPageUtils.test.ts`
+  - targeted lint:
+    - `npm run lint -- src/pages/modules/HashChainingPage.tsx src/pages/modules/HashOpenAddressingPage.tsx src/modules/hash`
+  - full local gate:
+    - `npm run check`
+- Created the thread heartbeat automation for continued night work:
+  - automation name: `P12 夜间自动驾驶`
+  - cadence: every 5 minutes
+  - stop rule is written into the automation prompt:
+    - stop once near-term `P12` work is complete
+    - or once local time passes `2026-04-20 08:00 Asia/Shanghai`
+
+### Current State
+- Branch:
+  - `feat/p12-m1-hash-foundations`
+- `H-01` / `H-02` code, tests, i18n, route wiring, registry wiring, and styling are now landed locally.
+- Local quality gates are green:
+  - `npm run check` passed on `2026-04-19`
+- Targeted Playwright smoke for the hash routes is still pending closure:
+  - attempted with the pinned `./scripts/playwright-cli.sh`
+  - external sites open normally in the CLI browser, but local hash smoke is currently blocked by environment/network behavior:
+    - Firefox in the Playwright CLI refused local loopback targets (`NS_ERROR_CONNECTION_REFUSED`)
+    - fallback attempts through a temporary `localhost.run` tunnel produced unstable reset/empty responses instead of stable app pages
+- Keep unrelated dirty items out of the hash commit:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Close the remaining `P12-M1` browser-acceptance gap:
+  - get the pinned Playwright wrapper onto a reachable app URL for:
+    - `/modules?category=hash`
+    - `/modules/hash-chaining`
+    - `/modules/hash-open-addressing`
+- Once the hash smoke is green:
+  - sync milestone docs if needed
+  - create one focused `P12-M1` commit on `feat/p12-m1-hash-foundations`
+- After `P12-M1` acceptance, continue to:
+  - `P12-M2` `G-03 BFS`
+
 ## 2026-04-18 (P12 near-term roadmap split)
 
 ### Today Done

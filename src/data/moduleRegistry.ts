@@ -169,6 +169,22 @@ export const moduleRegistry: ModuleMetadata[] = [
     difficulty: 1,
     implemented: true,
   },
+  {
+    id: 'H-01',
+    name: 'Hash Table - Chaining',
+    route: '/modules/hash-chaining',
+    category: 'hash',
+    difficulty: 1,
+    implemented: true,
+  },
+  {
+    id: 'H-02',
+    name: 'Hash Table - Open Addressing',
+    route: '/modules/hash-open-addressing',
+    category: 'hash',
+    difficulty: 2,
+    implemented: true,
+  },
 ];
 
 export function getModuleByRoute(route: string): ModuleMetadata | null {

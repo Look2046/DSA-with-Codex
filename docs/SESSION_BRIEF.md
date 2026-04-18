@@ -5,11 +5,11 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `docs/post-p11-plan`
-- Current phase: `P12` planning baseline is now defined locally; next is turning the near-term module wave into implementation branches starting with the hash-table foundation
+- Active branch (expected): `feat/p12-m1-hash-foundations`
+- Current phase: `P12-M1` hash foundations are implemented locally; the remaining acceptance gap is the targeted Playwright smoke closure for the two new hash routes
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-15, student standalone export branch)
-  - `./scripts/check-doc-links.sh` (passed locally, 2026-04-18, `P12` planning sync)
+  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m1-hash-foundations`)
+  - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
 
 ## 2) What Is Already Done
 
@@ -156,6 +156,13 @@ Use this file as the first thing to read in a new chat/session.
     - `ST-01 KMP`
   - moved the remaining blueprint items into the explicit long-term backlog:
     - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
+- `P12-M1` hash foundations are implemented locally on `feat/p12-m1-hash-foundations`:
+  - added `hash` category support in discovery/filtering/registry/routing
+  - landed `H-01 Hash Table - Chaining` with deterministic bucket-chain playback and replay coverage
+  - landed `H-02 Hash Table - Open Addressing` with deterministic linear-probing/tombstone playback and replay coverage
+  - added zh/en copy plus shared hash-stage styling for both pages
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke was attempted with the pinned wrapper, but local browser acceptance remains pending because the CLI Firefox session could not reach stable local hash preview URLs from this environment
 - Student standalone `T-01 Binary Tree Traversal` export completed locally on a separate focused branch:
   - added offline student entry/build flow
   - output lives under `student-dist/binary-tree`
@@ -233,10 +240,13 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start the near-term `P12` implementation wave from the new planning baseline:
-  - recommended first implementation branch: `feat/p12-m1-hash-foundations`
-  - first scope: `H-01 Hash Table - Chaining` + `H-02 Hash Table - Open Addressing`
-- Then continue in the documented order:
+- First close the remaining `P12-M1` acceptance gap:
+  - re-run targeted Playwright smoke for:
+    - `/modules?category=hash`
+    - `/modules/hash-chaining`
+    - `/modules/hash-open-addressing`
+  - then create one focused `P12-M1` commit on `feat/p12-m1-hash-foundations`
+- Then continue in the documented `P12` order:
   - `G-03 BFS`
   - `G-04`~`G-06` weighted shortest-path modules
   - `G-07`~`G-08` MST modules
