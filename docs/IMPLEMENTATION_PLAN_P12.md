@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P12
 
-Status: `P12-M4` accepted locally; next execution target is `P12-M5` `S-07 Heap Sort` + `ST-01 KMP`
+Status: `P12-M6` accepted locally; next execution target is the post-`P12` planning baseline for the remaining backlog
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: expand the product from the current 19 implemented modules toward the original 42-module blueprint by prioritizing hash-table foundations, deeper graph coverage, one heap-derived sorting extension, and the first string-algorithm module
 
@@ -168,6 +168,13 @@ Acceptance
 - deterministic replay confirms expected sort / pattern-match progression
 - targeted Playwright smoke confirms both routes open and basic playback is stable
 
+Accepted locally (2026-04-19)
+- `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+- `/modules/heap-sort`: opens cleanly, default `Next` advances `0/51 -> 1/51`, console errors = `0`
+- `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+- `/modules/kmp`: opens cleanly, default `Next` advances `0/68 -> 1/68`, console errors = `0`
+- evidence saved under `output/playwright/p12m5-*`
+
 ### P12-M6 Near-Term Wave Acceptance Closure
 
 Deliverables
@@ -183,6 +190,17 @@ DoD
 Acceptance
 - `npm run check` passes
 - Playwright artifacts/report updated under `output/playwright/`
+
+Accepted locally (2026-04-19)
+- `/modules`: `31` cards, `29` ready badges, `29` open links
+- `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+- `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
+- `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+- `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+- route smoke remains green for the newly added pages:
+  - `/modules/heap-sort`: `0/51 -> 1/51`, console errors = `0`
+  - `/modules/kmp`: `0/68 -> 1/68`, console errors = `0`
+- evidence saved under `output/playwright/p12m6-*` plus `output/playwright/p12m5-*`
 
 ## Long-Term Backlog After P12
 
@@ -200,12 +218,11 @@ Acceptance
 - `P-04 Backtracking`
 - `P-05 Union-Find`
 
-## Suggested Task Breakdown
+## Suggested Next Task Breakdown
 
-1. land docs planning sync for `P12`
-2. start `H-01` / `H-02` on a fresh implementation branch
-3. continue the graph wave from `BFS` into shortest-path modules, then MST modules
-4. close the near-term wave with `S-07`, `ST-01`, and one focused acceptance refresh
+1. create one focused commit for the validated `P12-M5` / `P12-M6` closure
+2. define the post-`P12` planning baseline from the remaining backlog
+3. start the next execution wave on a fresh `docs/*` -> `feat/*` sequence
 
 ## Required Quality Gates
 

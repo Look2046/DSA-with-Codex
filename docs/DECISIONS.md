@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260419-62
+- Date: 2026-04-19
+- Status: accepted
+- Context: A separate historical student standalone/offline export branch was only a one-off demo, but it kept resurfacing in active work summaries and risked polluting the mainline roadmap and night-drive task queue.
+- Decision: Keep standalone/offline export work out of the active mainline planning docs, backlog, and automation scope unless the user explicitly reopens that work in a future request.
+- Alternatives considered: continue listing the export alongside the mainline module roadmap; delete all historical references to the export work.
+- Consequences: session briefs and TODOs stay focused on the actual module roadmap, while the historical export branch remains available as reference without being mistaken for current priority.
+- Owner: haoyu + codex
+
 ## DEC-20260419-61
 - Date: 2026-04-19
 - Status: accepted

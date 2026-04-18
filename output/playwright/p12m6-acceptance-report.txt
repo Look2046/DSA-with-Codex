@@ -1,0 +1,26 @@
+P12-M6 acceptance refresh (2026-04-19)
+
+Local quality gate
+- npm run check: PASS
+
+Discovery checks
+- /modules: 31 cards, 29 ready badges, 29 open links
+- /modules?category=graph: 8 cards, 8 ready badges, 8 open links
+- /modules?category=hash: 2 cards, 2 ready badges, 2 open links
+- /modules?category=sort: 7 cards, 7 ready badges, 7 open links
+- /modules?category=string: 1 card, 1 ready badge, 1 open link
+
+New route smoke
+- /modules/heap-sort: 0/51 -> 1/51, console errors = 0
+- /modules/kmp: 0/68 -> 1/68, console errors = 0
+
+Artifacts
+- output/playwright/p12m5-modules-sort-filter.png
+- output/playwright/p12m5-heap-sort-smoke.png
+- output/playwright/p12m5-modules-string-filter.png
+- output/playwright/p12m5-kmp-smoke.png
+- output/playwright/p12m6-modules-smoke.png
+- output/playwright/p12m6-modules-graph-filter.png
+- output/playwright/p12m6-modules-hash-filter.png
+- output/playwright/p12m6-modules-sort-filter.png
+- output/playwright/p12m6-modules-string-filter.png

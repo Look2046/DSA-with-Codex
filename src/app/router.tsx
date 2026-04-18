@@ -14,6 +14,7 @@ import { InsertionSortPage } from '../pages/modules/InsertionSortPage';
 import { ShellSortPage } from '../pages/modules/ShellSortPage';
 import { QuickSortPage } from '../pages/modules/QuickSortPage';
 import { MergeSortPage } from '../pages/modules/MergeSortPage';
+import { HeapSortPage } from '../pages/modules/HeapSortPage';
 import { BinarySearchPage } from '../pages/modules/BinarySearchPage';
 import { LinearSearchPage } from '../pages/modules/LinearSearchPage';
 import { StackPage } from '../pages/modules/StackPage';
@@ -32,6 +33,7 @@ import { KruskalPage } from '../pages/modules/KruskalPage';
 import { PrimPage } from '../pages/modules/PrimPage';
 import { HashChainingPage } from '../pages/modules/HashChainingPage';
 import { HashOpenAddressingPage } from '../pages/modules/HashOpenAddressingPage';
+import { KmpPage } from '../pages/modules/KmpPage';
 import { BinaryTreeCanvasPlaygroundPage } from '../pages/modules/BinaryTreeCanvasPlaygroundPage';
 
 export const router = createBrowserRouter([
@@ -48,6 +50,7 @@ export const router = createBrowserRouter([
       { path: 'modules/shell-sort', element: <ShellSortPage /> },
       { path: 'modules/quick-sort', element: <QuickSortPage /> },
       { path: 'modules/merge-sort', element: <MergeSortPage /> },
+      { path: 'modules/heap-sort', element: <HeapSortPage /> },
       { path: 'modules/linear-search', element: <LinearSearchPage /> },
       { path: 'modules/binary-search', element: <BinarySearchPage /> },
       { path: 'modules/array', element: <ArrayPage /> },
@@ -69,6 +72,7 @@ export const router = createBrowserRouter([
       { path: 'modules/prim', element: <PrimPage /> },
       { path: 'modules/hash-chaining', element: <HashChainingPage /> },
       { path: 'modules/hash-open-addressing', element: <HashOpenAddressingPage /> },
+      { path: 'modules/kmp', element: <KmpPage /> },
       { path: 'playground/binary-tree-canvas', element: <BinaryTreeCanvasPlaygroundPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },

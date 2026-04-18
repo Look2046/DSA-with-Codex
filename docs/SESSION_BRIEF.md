@@ -6,11 +6,11 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p12-m5-heap-sort-kmp`
-- Current phase: `P12-M4` MST batch is accepted locally; the next implementation target is `P12-M5` `S-07 Heap Sort` + `ST-01 KMP`
+- Current phase: `P12-M6` near-term wave is accepted locally; the next priority is the post-`P12` planning baseline for the remaining backlog
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m4-mst`)
+  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m5-heap-sort-kmp`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke (passed locally, 2026-04-19, `feat/p12-m4-mst`)
+  - targeted Playwright smoke + acceptance refresh (passed locally, 2026-04-19, `feat/p12-m5-heap-sort-kmp`)
 
 ## 2) What Is Already Done
 
@@ -222,10 +222,31 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p12m4-prim-smoke.png`
     - `output/playwright/p12m4-g07-smoke-report.txt`
     - `output/playwright/p12m4-g08-smoke-report.txt`
-- Student standalone `T-01 Binary Tree Traversal` export completed locally on a separate focused branch:
-  - added offline student entry/build flow
-  - output lives under `student-dist/binary-tree`
-  - local `npm run check` passed on 2026-04-15 after the offline single-file export hardening
+- `P12-M5` `S-07 Heap Sort` + `ST-01 KMP` are accepted locally on `feat/p12-m5-heap-sort-kmp`:
+  - landed `S-07 Heap Sort` with deterministic heap-build / extract-max playback, timeline adapter, page, route, and replay coverage
+  - landed `ST-01 KMP` with deterministic prefix-table / fallback / alignment playback, timeline adapter, page, route, and replay coverage
+  - opened the `string` category in discovery / registry / filters / zh-en i18n
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+    - `/modules/heap-sort`: opens cleanly, default `Next` advances `0/51 -> 1/51`, console errors = `0`
+    - `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+    - `/modules/kmp`: opens cleanly, default `Next` advances `0/68 -> 1/68`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m5-modules-sort-filter.png`
+    - `output/playwright/p12m5-heap-sort-smoke.png`
+    - `output/playwright/p12m5-modules-string-filter.png`
+    - `output/playwright/p12m5-kmp-smoke.png`
+- `P12-M6` near-term wave acceptance closure completed locally:
+  - refreshed discovery evidence for `/modules` plus graph / hash / sort / string filters
+  - `/modules` now verifies `31` cards, `29` ready badges, and `29` open links
+  - captured local acceptance artifacts:
+    - `output/playwright/p12m6-modules-smoke.png`
+    - `output/playwright/p12m6-modules-graph-filter.png`
+    - `output/playwright/p12m6-modules-hash-filter.png`
+    - `output/playwright/p12m6-modules-sort-filter.png`
+    - `output/playwright/p12m6-modules-string-filter.png`
+    - `output/playwright/p12m6-acceptance-report.txt`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -299,11 +320,10 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue in the documented `P12` order from the accepted MST baseline:
-  - `S-07 Heap Sort`
-  - `ST-01 KMP`
-  - `P12-M6` near-term wave acceptance closure
-- Keep the remaining blueprint items in the long-term backlog:
+- Start the post-`P12` planning baseline before new implementation starts:
+  - choose the next execution wave from the remaining backlog
+  - keep one-off standalone/offline export work out of the mainline roadmap unless the user explicitly reopens it
+- Keep the remaining blueprint items in the explicit backlog:
   - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
@@ -317,6 +337,7 @@ Use this file as the first thing to read in a new chat/session.
   - `TODO.md`
 - Do not skip branch workflow (`docs/*`, `feat/*`)
 - Avoid editing unrelated files in the same branch
+- Keep historical standalone/offline export work outside the active mainline backlog unless explicitly requested
 
 ## 5) Quick Start Commands
 

@@ -2,6 +2,92 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-19 (P12-M5 sort + string acceptance, P12-M6 closure)
+
+### Today Done
+- Continued on the cross-category implementation branch:
+  - `feat/p12-m5-heap-sort-kmp`
+- Implemented `S-07 Heap Sort` end to end:
+  - `src/modules/sorting/heapSort.ts`
+  - `src/modules/sorting/heapTimelineAdapter.ts`
+  - `src/modules/sorting/heapSort.test.ts`
+  - `src/modules/sorting/heapTimelineReplay.test.ts`
+  - `src/pages/modules/HeapSortPage.tsx`
+- Implemented `ST-01 KMP` end to end:
+  - `src/modules/string/kmp.ts`
+  - `src/modules/string/kmpTimelineAdapter.ts`
+  - `src/modules/string/kmp.test.ts`
+  - `src/modules/string/kmpTimelineReplay.test.ts`
+  - `src/pages/modules/KmpPage.tsx`
+- Opened the first string-algorithm track in the shared discovery/runtime layer:
+  - `src/types/module.ts`
+  - `src/pages/ModulesPage.tsx`
+  - `src/pages/modulesPageUtils.test.ts`
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-verified locally for `P12-M5` / `P12-M6`:
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+    - `/modules/heap-sort`: `0/51 -> 1/51`, console errors = `0`
+    - `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+    - `/modules/kmp`: `0/68 -> 1/68`, console errors = `0`
+  - near-term wave discovery refresh:
+    - `/modules`: `31` cards, `29` ready badges, `29` open links
+    - `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+    - `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
+    - `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+    - `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+  - artifacts:
+    - `output/playwright/p12m5-modules-sort-filter.png`
+    - `output/playwright/p12m5-heap-sort-smoke.png`
+    - `output/playwright/p12m5-modules-string-filter.png`
+    - `output/playwright/p12m5-kmp-smoke.png`
+    - `output/playwright/p12m6-modules-smoke.png`
+    - `output/playwright/p12m6-modules-graph-filter.png`
+    - `output/playwright/p12m6-modules-hash-filter.png`
+    - `output/playwright/p12m6-modules-sort-filter.png`
+    - `output/playwright/p12m6-modules-string-filter.png`
+    - `output/playwright/p12m6-acceptance-report.txt`
+- Synced planning-state docs for the accepted `P12` closure:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `docs/IMPLEMENTATION_PLAN_P12.md`
+  - `TODO.md`
+- Reconfirmed the workflow guardrail:
+  - standalone/offline export work stays out of the active mainline backlog unless the user explicitly reopens it
+
+### Current State
+- Branch:
+  - `feat/p12-m5-heap-sort-kmp`
+- `P12-M5` and `P12-M6` are accepted locally:
+  - `S-07 Heap Sort`
+  - `ST-01 KMP`
+  - near-term wave discovery/acceptance refresh
+- Local quality gate is green:
+  - `npm run check` passed on `2026-04-19`
+- Discovery surface after `P12` now verifies:
+  - `/modules`: `31` cards, `29` ready badges, `29` open links
+- Keep unrelated dirty items out of the `P12-M5` / `P12-M6` commit:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Create one focused commit for the validated `P12-M5` / `P12-M6` change set
+- Start the post-`P12` planning baseline on the next docs-focused branch:
+  - choose the next execution wave from `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, and `P-01`~`P-05`
+  - keep standalone/offline export work excluded unless the user explicitly asks for it again
+
 ## 2026-04-19 (P12-M4 MST acceptance)
 
 ### Today Done

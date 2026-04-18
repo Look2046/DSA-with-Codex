@@ -350,7 +350,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - targeted smoke confirmed `G-01` / `G-02` open cleanly, both default `Next` buttons advance, both pages collapse `Controls` + `Step` on stage click, and no console errors were reported
     - synced `docs/IMPLEMENTATION_PLAN_P11.md`, `docs/SESSION_BRIEF.md`, and `docs/HANDOFF.md`
 
-## P12 (Planned)
+## P12 (Closed Locally)
 - [x] P12 planning baseline
   - DoD: define the post-`P11` phase scope/order and acceptance criteria in docs before new implementation starts.
   - Acceptance: `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree on the same next-phase boundary.
@@ -439,13 +439,44 @@ Track actionable tasks here. Keep tasks small and testable.
       - `output/playwright/p12m4-g07-smoke-report.txt`
       - `output/playwright/p12m4-g08-smoke-report.txt`
 
-- [ ] P12-M5 Add `S-07` / `ST-01`
+- [x] P12-M5 Add `S-07` / `ST-01`
   - DoD: implement `Heap Sort` and `KMP`, opening the string category while extending sorting from the existing heap foundation.
   - Acceptance: `npm run check` passes, deterministic replay is stable for both modules, and targeted Playwright smoke on both routes is green.
+  - Done (2026-04-19):
+    - added `S-07 Heap Sort` logic/timeline/page/route/tests plus zh/en copy and sorting-stage styling
+    - added `ST-01 KMP` logic/timeline/page/route/tests plus zh/en copy and string-stage styling
+    - added `string` category support in discovery/filtering/registry/routing
+    - local `npm run check` passes on `feat/p12-m5-heap-sort-kmp`
+    - targeted Playwright smoke is green:
+      - `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+      - `/modules/heap-sort`: default `Next` advances `0/51 -> 1/51`, console errors = `0`
+      - `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+      - `/modules/kmp`: default `Next` advances `0/68 -> 1/68`, console errors = `0`
+    - smoke artifacts:
+      - `output/playwright/p12m5-modules-sort-filter.png`
+      - `output/playwright/p12m5-heap-sort-smoke.png`
+      - `output/playwright/p12m5-modules-string-filter.png`
+      - `output/playwright/p12m5-kmp-smoke.png`
 
-- [ ] P12-M6 Near-term wave acceptance closure
+- [x] P12-M6 Near-term wave acceptance closure
   - DoD: refresh discovery/acceptance artifacts after the near-term wave and sync closure docs.
   - Acceptance: `npm run check` passes and refreshed `output/playwright/` evidence is complete locally.
+  - Done (2026-04-19):
+    - refreshed `/modules` discovery evidence for the full near-term wave plus graph/hash/sort/string filters
+    - `/modules` now verifies `31` cards, `29` ready badges, and `29` open links
+    - local `npm run check` remains green on `feat/p12-m5-heap-sort-kmp`
+    - refreshed acceptance artifacts:
+      - `output/playwright/p12m6-modules-smoke.png`
+      - `output/playwright/p12m6-modules-graph-filter.png`
+      - `output/playwright/p12m6-modules-hash-filter.png`
+      - `output/playwright/p12m6-modules-sort-filter.png`
+      - `output/playwright/p12m6-modules-string-filter.png`
+      - `output/playwright/p12m6-acceptance-report.txt`
+
+## Post-P12 (Next)
+- [ ] Define the post-`P12` planning baseline
+  - DoD: choose the next execution wave from the remaining backlog and sync `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`.
+  - Acceptance: all planning docs agree on the same post-`P12` boundary, and standalone/offline export work stays out of the active mainline backlog unless explicitly requested.
 
 ## Long-Term (Post-P12 Backlog)
 - [ ] `T-05` B-Tree / B+ Tree

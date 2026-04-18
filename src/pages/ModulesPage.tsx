@@ -15,7 +15,8 @@ export function ModulesPage() {
     filter === 'search' ||
     filter === 'tree' ||
     filter === 'graph' ||
-    filter === 'hash'
+    filter === 'hash' ||
+    filter === 'string'
       ? filter
       : 'all';
   const visibleModules = useMemo(() => filterModules(moduleRegistry, activeFilter), [activeFilter]);
@@ -28,6 +29,7 @@ export function ModulesPage() {
     { value: 'tree', label: t('modules.filter.tree') },
     { value: 'graph', label: t('modules.filter.graph') },
     { value: 'hash', label: t('modules.filter.hash') },
+    { value: 'string', label: t('modules.filter.string') },
   ];
 
   const getCategoryLabel = (category: ModuleFilter): string => {
@@ -48,6 +50,9 @@ export function ModulesPage() {
     }
     if (category === 'hash') {
       return t('modules.filter.hash');
+    }
+    if (category === 'string') {
+      return t('modules.filter.string');
     }
     return t('modules.filter.all');
   };
