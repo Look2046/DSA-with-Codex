@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P12
 
-Status: `P12-M3` in progress; `G-04 Dijkstra` and `G-05 Bellman-Ford` are accepted locally and `G-06` remains
+Status: `P12-M3` accepted locally; next execution target is `P12-M4` MST modules
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: expand the product from the current 19 implemented modules toward the original 42-module blueprint by prioritizing hash-table foundations, deeper graph coverage, one heap-derived sorting extension, and the first string-algorithm module
 
@@ -113,14 +113,16 @@ Acceptance
 - deterministic replay confirms expected distance-table progression on fixed datasets
 - targeted Playwright smoke confirms all three routes open and advance on default `Next`
 
-Progress (2026-04-19)
+Accepted locally (2026-04-19)
 - `G-04 Dijkstra` is accepted locally
 - `G-05 Bellman-Ford` is accepted locally
-- `/modules?category=graph`: `5` cards, `5` ready badges, `5` open links
+- `G-06 Floyd-Warshall` is accepted locally
+- `/modules?category=graph`: `6` cards, `6` ready badges, `6` open links
 - `/modules/dijkstra`: opens cleanly, default `Next` advances `0/34 -> 1/34`, console errors = `0`
 - `/modules/bellman-ford`: opens cleanly, default `Next` advances `0/75 -> 1/75`, console errors = `0`
+- `/modules/floyd-warshall`: opens cleanly, default `Next` advances `0/138 -> 1/138`, console errors = `0`
 - evidence saved under `output/playwright/p12m3-*`
-- remaining in this batch: `G-06 Floyd-Warshall`
+- next phase: `P12-M4` `G-07 Kruskal` + `G-08 Prim`
 
 ### P12-M4 Add MST Modules
 

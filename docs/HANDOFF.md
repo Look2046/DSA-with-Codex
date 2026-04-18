@@ -119,6 +119,30 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - `output/playwright/p12m3-modules-graph-filter.png`
     - `output/playwright/p12m3-bellman-ford-smoke.png`
     - `output/playwright/p12m3-g05-smoke-report.txt`
+- Implemented `G-06 Floyd-Warshall`:
+  - extended weighted-graph foundation with the all-pairs teaching preset:
+    - `src/modules/graph/weightedGraph.ts`
+  - added Floyd-Warshall runtime/model/test/page wiring:
+    - `src/modules/graph/floydWarshall.ts`
+    - `src/modules/graph/floydWarshallTimelineAdapter.ts`
+    - `src/modules/graph/floydWarshall.test.ts`
+    - `src/modules/graph/floydWarshallTimelineReplay.test.ts`
+    - `src/pages/modules/FloydWarshallPage.tsx`
+  - updated shared discovery/runtime wiring:
+    - `src/data/moduleRegistry.ts`
+    - `src/app/router.tsx`
+    - `src/i18n/translations.ts`
+    - `src/index.css`
+- Re-verified locally for `G-06`:
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules?category=graph`: `6` cards, `6` ready badges, `6` open links
+    - `/modules/floyd-warshall`: `0/138 -> 1/138`, console errors = `0`
+  - artifacts:
+    - `output/playwright/p12m3-modules-graph-filter.png`
+    - `output/playwright/p12m3-floyd-warshall-smoke.png`
+    - `output/playwright/p12m3-g06-smoke-report.txt`
 
 ### Current State
 - Branch:
@@ -128,20 +152,23 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `79c315b` `docs: close p12-m1 hash acceptance`
 - `P12-M2` accepted baseline is committed on the parent branch history:
   - `896df29` `feat: add bfs teaching module`
-- `P12-M3` is in progress, with `G-04 Dijkstra` and `G-05 Bellman-Ford` accepted locally:
-  - shortest-path weighted-graph foundation plus `G-04` / `G-05` code/tests/i18n/route wiring/styling are landed
+- `P12-M3` weighted shortest-path batch is accepted locally:
+  - shortest-path weighted-graph foundation plus `G-04` / `G-05` / `G-06` code/tests/i18n/route wiring/styling are landed
   - local quality gates are green:
     - `npm run check` passed on `2026-04-19`
   - targeted Playwright smoke is green:
-    - `/modules?category=graph`: `5` cards, `5` ready badges, `5` open links
+    - `/modules?category=graph`: `6` cards, `6` ready badges, `6` open links
     - `/modules/dijkstra`: `0/34 -> 1/34`, console errors = `0`
     - `/modules/bellman-ford`: `0/75 -> 1/75`, console errors = `0`
+    - `/modules/floyd-warshall`: `0/138 -> 1/138`, console errors = `0`
   - smoke artifacts:
     - `output/playwright/p12m3-modules-graph-filter.png`
     - `output/playwright/p12m3-dijkstra-smoke.png`
     - `output/playwright/p12m3-bellman-ford-smoke.png`
+    - `output/playwright/p12m3-floyd-warshall-smoke.png`
     - `output/playwright/p12m3-g04-smoke-report.txt`
     - `output/playwright/p12m3-g05-smoke-report.txt`
+    - `output/playwright/p12m3-g06-smoke-report.txt`
 - Keep unrelated dirty items out of the hash commit:
   - `scripts/check-doc-links.sh`
   - `scripts/playwright-cli.sh`
@@ -153,10 +180,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `student-dist/`
 
 ### Next Step
-- Continue to `P12-M3` weighted shortest-path modules:
-  - implement `G-06 Floyd-Warshall`
-  - rerun `npm run check` and targeted Playwright smoke across `Dijkstra` / `Bellman-Ford` / `Floyd-Warshall`
-  - create one focused commit for the validated `G-05` sub-milestone before expanding to `G-06`
+- Create one focused commit for the validated `G-06` sub-milestone to close `P12-M3`
+- Start `P12-M4` MST modules on the next `feat/*` branch:
+  - implement `G-07 Kruskal`
+  - implement `G-08 Prim`
+  - rerun `npm run check` and targeted Playwright smoke across both MST routes
 
 ## 2026-04-18 (P12 near-term roadmap split)
 

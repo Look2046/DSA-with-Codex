@@ -397,26 +397,28 @@ Track actionable tasks here. Keep tasks small and testable.
       - `output/playwright/p12m2-bfs-smoke.png`
       - `output/playwright/p12m2-smoke-report.txt`
 
-- [ ] P12-M3 Add `G-04`~`G-06`
+- [x] P12-M3 Add `G-04`~`G-06`
   - DoD: implement the weighted shortest-path batch (`Dijkstra`, `Bellman-Ford`, `Floyd-Warshall`) with explicit distance/relaxation teaching states.
   - Acceptance: `npm run check` passes, deterministic replay confirms expected distance updates, and targeted Playwright smoke across the three routes is stable.
-  - Progress (2026-04-19):
+  - Done (2026-04-19):
     - added weighted-graph preset foundation for the shortest-path track
     - landed `G-04 Dijkstra` logic/timeline/page/route/tests plus zh/en copy and weighted-edge stage styling
     - landed `G-05 Bellman-Ford` logic/timeline/page/route/tests plus zh/en copy and negative-edge preset support
+    - landed `G-06 Floyd-Warshall` logic/timeline/page/route/tests plus zh/en copy and all-pairs matrix styling
     - local `npm run check` passes on `feat/p12-m3-shortest-paths`
-    - targeted Playwright smoke is green for `G-04` / `G-05`:
-      - `/modules?category=graph`: `5` cards, `5` ready badges, `5` open links
+    - targeted Playwright smoke is green for `G-04` / `G-05` / `G-06`:
+      - `/modules?category=graph`: `6` cards, `6` ready badges, `6` open links
       - `/modules/dijkstra`: default `Next` advances `0/34 -> 1/34`, console errors = `0`
       - `/modules/bellman-ford`: default `Next` advances `0/75 -> 1/75`, console errors = `0`
+      - `/modules/floyd-warshall`: default `Next` advances `0/138 -> 1/138`, console errors = `0`
     - smoke artifacts:
       - `output/playwright/p12m3-modules-graph-filter.png`
       - `output/playwright/p12m3-dijkstra-smoke.png`
       - `output/playwright/p12m3-bellman-ford-smoke.png`
+      - `output/playwright/p12m3-floyd-warshall-smoke.png`
       - `output/playwright/p12m3-g04-smoke-report.txt`
       - `output/playwright/p12m3-g05-smoke-report.txt`
-    - remaining in this batch:
-      - `G-06 Floyd-Warshall`
+      - `output/playwright/p12m3-g06-smoke-report.txt`
 
 - [ ] P12-M4 Add `G-07` / `G-08`
   - DoD: implement the MST batch (`Kruskal`, `Prim`) with deterministic chosen-edge / rejected-edge progression.

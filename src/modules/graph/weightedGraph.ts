@@ -1,7 +1,7 @@
 import type { GraphNode } from './graphRepresentation';
 
-export type WeightedGraphPresetId = 'positiveDirected' | 'negativeDirected';
-export type WeightedGraphPresetGroup = 'all' | 'nonNegative' | 'bellmanFord';
+export type WeightedGraphPresetId = 'positiveDirected' | 'negativeDirected' | 'floydDirected';
+export type WeightedGraphPresetGroup = 'all' | 'nonNegative' | 'bellmanFord' | 'floydWarshall';
 
 export type WeightedGraphEdge = {
   from: number;
@@ -63,6 +63,24 @@ const WEIGHTED_GRAPH_PRESETS: Record<WeightedGraphPresetId, WeightedGraphDefinit
       { from: 1, to: 2, weight: -2 },
     ],
   },
+  floydDirected: {
+    presetId: 'floydDirected',
+    topology: 'directed',
+    nodes: [
+      { id: 'A', x: 16, y: 34 },
+      { id: 'B', x: 38, y: 16 },
+      { id: 'C', x: 40, y: 56 },
+      { id: 'D', x: 72, y: 34 },
+    ],
+    edges: [
+      { from: 0, to: 1, weight: 5 },
+      { from: 0, to: 3, weight: 12 },
+      { from: 1, to: 2, weight: 3 },
+      { from: 1, to: 3, weight: 9 },
+      { from: 2, to: 3, weight: 1 },
+      { from: 3, to: 0, weight: 7 },
+    ],
+  },
 };
 
 export function getWeightedGraphPresetIds(group: WeightedGraphPresetGroup = 'all'): WeightedGraphPresetId[] {
@@ -71,6 +89,9 @@ export function getWeightedGraphPresetIds(group: WeightedGraphPresetGroup = 'all
   }
   if (group === 'bellmanFord') {
     return ['negativeDirected'];
+  }
+  if (group === 'floydWarshall') {
+    return ['floydDirected'];
   }
   return Object.keys(WEIGHTED_GRAPH_PRESETS) as WeightedGraphPresetId[];
 }

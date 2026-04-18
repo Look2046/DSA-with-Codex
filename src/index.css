@@ -2621,6 +2621,14 @@ body {
     0 10px 16px rgba(49, 99, 160, 0.12);
 }
 
+.graph-node-via {
+  border-color: #7d8fd6;
+  background: #f0f1ff;
+  box-shadow:
+    0 0 0 2px rgba(125, 143, 214, 0.18),
+    0 10px 16px rgba(69, 83, 173, 0.12);
+}
+
 .graph-stage-views {
   min-height: 0;
   display: grid;
@@ -2760,6 +2768,10 @@ body {
   font-weight: 700;
 }
 
+.graph-matrix-header-via {
+  color: #6f59aa;
+}
+
 .graph-matrix td {
   border: 1px solid #d5e4f1;
   background: #f9fbfe;
@@ -2774,6 +2786,10 @@ body {
   color: #34724c;
 }
 
+.graph-matrix-row-via th {
+  color: #6f59aa;
+}
+
 .graph-matrix-cell-active {
   border-color: #d97c7c;
   background: #fff1f1;
@@ -2785,6 +2801,18 @@ body {
   border-color: #a8c8eb;
   background: #eef5ff;
   color: #235b90;
+}
+
+.graph-matrix-cell-via {
+  border-color: #b9c4f2;
+  background: #f3f4ff;
+  color: #52439a;
+}
+
+.graph-matrix-cell-improved {
+  border-color: #c6e1cf;
+  background: #f3fbf6;
+  color: #2d6a41;
 }
 
 .graph-dfs-stage-scene,
@@ -2944,6 +2972,22 @@ body {
 .graph-distance-row-relaxed {
   border-color: #c6e1cf;
   background: #f3fbf6;
+}
+
+.graph-floyd-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.graph-floyd-chip {
+  border-radius: 999px;
+  border: 1px solid #cddcf4;
+  background: #f3f7fd;
+  color: #355a7d;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .hash-stage {

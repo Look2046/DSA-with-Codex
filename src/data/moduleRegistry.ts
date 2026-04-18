@@ -194,6 +194,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'G-06',
+    name: 'Floyd-Warshall',
+    route: '/modules/floyd-warshall',
+    category: 'graph',
+    difficulty: 3,
+    implemented: true,
+  },
+  {
     id: 'H-01',
     name: 'Hash Table - Chaining',
     route: '/modules/hash-chaining',
