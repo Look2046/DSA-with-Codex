@@ -2826,6 +2826,14 @@ body {
     0 10px 16px rgba(67, 111, 173, 0.12);
 }
 
+.graph-node-relaxed {
+  border-color: #69ad79;
+  background: #edf8f0;
+  box-shadow:
+    0 0 0 2px rgba(105, 173, 121, 0.16),
+    0 10px 16px rgba(53, 120, 72, 0.12);
+}
+
 .graph-list-row-visited {
   border-color: #cfe1d4;
   background: #f6fbf8;
@@ -2929,6 +2937,11 @@ body {
 }
 
 .graph-distance-row-settled {
+  border-color: #c6e1cf;
+  background: #f3fbf6;
+}
+
+.graph-distance-row-relaxed {
   border-color: #c6e1cf;
   background: #f3fbf6;
 }

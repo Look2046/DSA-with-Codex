@@ -403,16 +403,19 @@ Track actionable tasks here. Keep tasks small and testable.
   - Progress (2026-04-19):
     - added weighted-graph preset foundation for the shortest-path track
     - landed `G-04 Dijkstra` logic/timeline/page/route/tests plus zh/en copy and weighted-edge stage styling
+    - landed `G-05 Bellman-Ford` logic/timeline/page/route/tests plus zh/en copy and negative-edge preset support
     - local `npm run check` passes on `feat/p12-m3-shortest-paths`
-    - targeted Playwright smoke is green for `G-04`:
-      - `/modules?category=graph`: `4` cards, `4` ready badges, `4` open links
+    - targeted Playwright smoke is green for `G-04` / `G-05`:
+      - `/modules?category=graph`: `5` cards, `5` ready badges, `5` open links
       - `/modules/dijkstra`: default `Next` advances `0/34 -> 1/34`, console errors = `0`
+      - `/modules/bellman-ford`: default `Next` advances `0/75 -> 1/75`, console errors = `0`
     - smoke artifacts:
       - `output/playwright/p12m3-modules-graph-filter.png`
       - `output/playwright/p12m3-dijkstra-smoke.png`
+      - `output/playwright/p12m3-bellman-ford-smoke.png`
       - `output/playwright/p12m3-g04-smoke-report.txt`
+      - `output/playwright/p12m3-g05-smoke-report.txt`
     - remaining in this batch:
-      - `G-05 Bellman-Ford`
       - `G-06 Floyd-Warshall`
 
 - [ ] P12-M4 Add `G-07` / `G-08`

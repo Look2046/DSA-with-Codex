@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p12-m3-shortest-paths`
-- Current phase: `P12-M3` weighted shortest-path batch is in progress; `G-04 Dijkstra` is accepted locally and the next implementation target is `G-05 Bellman-Ford`
+- Current phase: `P12-M3` weighted shortest-path batch is in progress; `G-04 Dijkstra` and `G-05 Bellman-Ford` are accepted locally and the next implementation target is `G-06 Floyd-Warshall`
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-19, `feat/p12-m3-shortest-paths`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
@@ -184,18 +184,23 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p12m2-modules-graph-filter.png`
     - `output/playwright/p12m2-bfs-smoke.png`
     - `output/playwright/p12m2-smoke-report.txt`
-- `P12-M3` shortest-path batch is in progress on `feat/p12-m3-shortest-paths`, and `G-04 Dijkstra` is accepted locally:
+- `P12-M3` shortest-path batch is in progress on `feat/p12-m3-shortest-paths`, and `G-04 Dijkstra` plus `G-05 Bellman-Ford` are accepted locally:
   - added reusable weighted-graph preset helpers for the shortest-path track
   - landed `G-04 Dijkstra` with deterministic distance relaxation playback, timeline adapter, page, route, and replay coverage
-  - marked `G-04` as implemented in the module registry and added zh/en UI copy plus weighted-graph stage styling
+  - landed `G-05 Bellman-Ford` with deterministic pass-by-pass edge relaxation playback, negative-edge preset support, timeline adapter, page, route, and replay coverage
+  - refined weighted-graph preset groups so Dijkstra stays on non-negative datasets while Bellman-Ford uses the negative-edge teaching preset
+  - marked `G-04` and `G-05` as implemented in the module registry and added zh/en UI copy plus weighted-graph stage styling
   - local `npm run check` passed on `2026-04-19`
   - targeted Playwright smoke confirmed:
-    - `/modules?category=graph`: `4` cards, `4` ready badges, `4` open links
+    - `/modules?category=graph`: `5` cards, `5` ready badges, `5` open links
     - `/modules/dijkstra`: opens cleanly, default `Next` advances `0/34 -> 1/34`, console errors = `0`
+    - `/modules/bellman-ford`: opens cleanly, default `Next` advances `0/75 -> 1/75`, console errors = `0`
   - captured local smoke artifacts:
     - `output/playwright/p12m3-modules-graph-filter.png`
     - `output/playwright/p12m3-dijkstra-smoke.png`
+    - `output/playwright/p12m3-bellman-ford-smoke.png`
     - `output/playwright/p12m3-g04-smoke-report.txt`
+    - `output/playwright/p12m3-g05-smoke-report.txt`
 - Student standalone `T-01 Binary Tree Traversal` export completed locally on a separate focused branch:
   - added offline student entry/build flow
   - output lives under `student-dist/binary-tree`
@@ -273,8 +278,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue in the documented `P12` order from the accepted Dijkstra baseline:
-  - `G-05 Bellman-Ford`
+- Continue in the documented `P12` order from the accepted weighted-shortest-path baseline:
   - `G-06 Floyd-Warshall`
   - `G-07`~`G-08` MST modules
   - `S-07 Heap Sort` + `ST-01 KMP`

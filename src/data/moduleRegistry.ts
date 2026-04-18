@@ -186,6 +186,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'G-05',
+    name: 'Bellman-Ford',
+    route: '/modules/bellman-ford',
+    category: 'graph',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'H-01',
     name: 'Hash Table - Chaining',
     route: '/modules/hash-chaining',

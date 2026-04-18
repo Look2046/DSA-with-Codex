@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
-import { buildDijkstraTimelineFromPreset } from '../../modules/graph/dijkstraTimelineAdapter';
-import type { DijkstraStep } from '../../modules/graph/dijkstra';
+import { buildBellmanFordTimelineFromPreset } from '../../modules/graph/bellmanFordTimelineAdapter';
+import type { BellmanFordStep } from '../../modules/graph/bellmanFord';
 import {
   getWeightedGraphEdgeKey,
   getWeightedGraphPresetIds,
@@ -12,16 +12,16 @@ import {
 } from '../../modules/graph/weightedGraph';
 import type { PlaybackStatus } from '../../types/animation';
 
-const DEFAULT_PRESET: WeightedGraphPresetId = 'positiveDirected';
+const DEFAULT_PRESET: WeightedGraphPresetId = 'negativeDirected';
 const CODE_LINE_KEYS = [
-  'module.g04.code.line1',
-  'module.g04.code.line2',
-  'module.g04.code.line3',
-  'module.g04.code.line4',
-  'module.g04.code.line5',
-  'module.g04.code.line6',
-  'module.g04.code.line7',
-  'module.g04.code.line8',
+  'module.g05.code.line1',
+  'module.g05.code.line2',
+  'module.g05.code.line3',
+  'module.g05.code.line4',
+  'module.g05.code.line5',
+  'module.g05.code.line6',
+  'module.g05.code.line7',
+  'module.g05.code.line8',
 ] as const;
 const SPEED_OPTIONS = [
   { key: 'module.s01.speed.slow', value: 1200 },
@@ -47,7 +47,7 @@ function getStatusLabel(status: PlaybackStatus, t: TranslateFn): string {
 }
 
 function getPresetLabel(presetId: WeightedGraphPresetId, t: TranslateFn): string {
-  return presetId === 'positiveDirected' ? t('module.g04.preset.positiveDirected') : presetId;
+  return presetId === 'negativeDirected' ? t('module.g05.preset.negativeDirected') : presetId;
 }
 
 function formatDistance(distance: number | null): string {
@@ -70,47 +70,49 @@ function formatEdgeList(graph: WeightedGraphDefinition): string {
     .join(', ');
 }
 
-function getStepDescription(step: DijkstraStep | undefined, t: TranslateFn): string {
+function getStepDescription(step: BellmanFordStep | undefined, t: TranslateFn): string {
   if (!step) {
     return '-';
   }
 
   switch (step.action) {
     case 'initial':
-      return t('module.g04.step.initial');
+      return t('module.g05.step.initial');
     case 'seedStart':
-      return t('module.g04.step.seedStart');
-    case 'selectCandidate':
-      return t('module.g04.step.selectCandidate');
+      return t('module.g05.step.seedStart');
+    case 'beginPass':
+      return t('module.g05.step.beginPass');
     case 'inspectEdge':
-      return t('module.g04.step.inspectEdge');
+      return t('module.g05.step.inspectEdge');
     case 'updateDistance':
-      return t('module.g04.step.updateDistance');
+      return t('module.g05.step.updateDistance');
     case 'keepDistance':
-      return t('module.g04.step.keepDistance');
-    case 'finalizeNode':
-      return t('module.g04.step.finalizeNode');
+      return t('module.g05.step.keepDistance');
+    case 'completePass':
+      return t('module.g05.step.completePass');
+    case 'earlyStop':
+      return t('module.g05.step.earlyStop');
     case 'completed':
-      return t('module.g04.step.completed');
+      return t('module.g05.step.completed');
     default:
       return '-';
   }
 }
 
-export function DijkstraPage() {
+export function BellmanFordPage() {
   const { t } = useI18n();
   const [presetId, setPresetId] = useState<WeightedGraphPresetId>(DEFAULT_PRESET);
   const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } =
     useTimelinePlayer(0);
 
-  const timelineFrames = useMemo(() => buildDijkstraTimelineFromPreset(presetId), [presetId]);
+  const timelineFrames = useMemo(() => buildBellmanFordTimelineFromPreset(presetId), [presetId]);
   const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
   const currentStep = currentFrame;
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const graph = currentSnapshot?.graph ?? null;
   const adjacencyList = currentSnapshot?.adjacencyList ?? [];
   const codeLines = useMemo(() => CODE_LINE_KEYS.map((key) => t(key)), [t]);
-  const presetOptions = useMemo(() => getWeightedGraphPresetIds('nonNegative'), []);
+  const presetOptions = useMemo(() => getWeightedGraphPresetIds('bellmanFord'), []);
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -130,24 +132,17 @@ export function DijkstraPage() {
     return { x: node.x, y: node.y };
   }, [currentSnapshot, graph]);
 
-  const settledNodeSet = useMemo(
-    () => new Set(currentSnapshot?.settledNodeIndices ?? []),
-    [currentSnapshot?.settledNodeIndices],
-  );
   const inspectedEdgeSet = useMemo(
     () => new Set(currentSnapshot?.inspectedEdgeKeys ?? []),
     [currentSnapshot?.inspectedEdgeKeys],
   );
-  const frontierNodeSet = useMemo(
-    () => new Set(currentSnapshot?.frontierNodeIndices ?? []),
-    [currentSnapshot?.frontierNodeIndices],
+  const reachableNodeSet = useMemo(
+    () => new Set(currentSnapshot?.reachableNodeIndices ?? []),
+    [currentSnapshot?.reachableNodeIndices],
   );
-  const outputOrderIndexMap = useMemo(
-    () =>
-      new Map(
-        (currentSnapshot?.outputOrder ?? []).map((nodeIndex, index) => [nodeIndex, index + 1] as const),
-      ),
-    [currentSnapshot?.outputOrder],
+  const changedNodeSet = useMemo(
+    () => new Set(currentSnapshot?.changedNodeIndices ?? []),
+    [currentSnapshot?.changedNodeIndices],
   );
 
   const activeEdgeKey =
@@ -171,47 +166,41 @@ export function DijkstraPage() {
           })`
         : getRelationLabel(graph, currentSnapshot.activeNodeIndex, currentSnapshot.activeNeighborIndex)
       : '-';
-  const activeDistance =
-    currentSnapshot?.activeNodeIndex !== null && currentSnapshot?.activeNodeIndex !== undefined
-      ? currentSnapshot.distances[currentSnapshot.activeNodeIndex] ?? null
-      : null;
-  const frontierSize = currentSnapshot?.frontierNodeIndices.length ?? 0;
-  const settledCount = currentSnapshot?.settledNodeIndices.length ?? 0;
   const currentRowText =
     graph && currentSnapshot?.activeNodeIndex !== null && currentSnapshot?.activeNodeIndex !== undefined
       ? adjacencyList[currentSnapshot.activeNodeIndex]
           ?.map((edge) => `${graph.nodes[edge.to]?.id ?? '?'} (${edge.weight})`)
           .join(', ') || '∅'
       : '-';
-  const frontierText =
-    graph && (currentSnapshot?.frontierNodeIndices.length ?? 0) > 0
-      ? currentSnapshot?.frontierNodeIndices
-          .map((index) => `${graph.nodes[index]?.id ?? '?'}:${formatDistance(currentSnapshot.distances[index] ?? null)}`)
-          .join(' -> ') ?? '-'
-      : '-';
+  const activePassLabel =
+    currentSnapshot?.activePassIndex === null || currentSnapshot?.activePassIndex === undefined
+      ? '-'
+      : `P${currentSnapshot.activePassIndex}/${currentSnapshot.totalPasses}`;
+  const changedCount = currentSnapshot?.changedNodeIndices.length ?? 0;
+  const reachableCount = currentSnapshot?.reachableNodeIndices.length ?? 0;
+  const completedPassCount = currentSnapshot?.completedPassCount ?? 0;
+  const totalPasses = currentSnapshot?.totalPasses ?? 0;
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
 
   const detailParts = [
-    `${t('module.g04.meta.frontierSize')}: ${frontierSize}`,
-    `${t('module.g04.meta.settledCount')}: ${settledCount}/${graph?.nodes.length ?? 0}`,
+    `${t('module.g05.meta.pass')}: ${activePassLabel}`,
+    `${t('module.g05.meta.updatedInPass')}: ${currentSnapshot?.updatedInPassCount ?? 0}`,
+    `${t('module.g05.meta.reachableCount')}: ${reachableCount}/${graph?.nodes.length ?? 0}`,
   ];
 
-  if (activeDistance !== null) {
-    detailParts.push(`${t('module.g04.meta.currentDistance')}: ${formatDistance(activeDistance)}`);
+  if (activeRelationLabel !== '-') {
+    detailParts.push(`${t('module.g05.meta.activeRelation')}: ${activeRelationLabel}`);
   }
   if (currentSnapshot?.proposedDistance !== null) {
-    detailParts.push(`${t('module.g04.meta.proposedDistance')}: ${formatDistance(currentSnapshot.proposedDistance)}`);
-  }
-  if (activeRelationLabel !== '-') {
-    detailParts.push(`${t('module.g04.meta.activeRelation')}: ${activeRelationLabel}`);
+    detailParts.push(`${t('module.g05.meta.proposedDistance')}: ${formatDistance(currentSnapshot.proposedDistance)}`);
   }
 
   return (
     <WorkspaceShell
       pageClassName="array-page tree-page bst-page"
-      title={t('module.g04.title')}
-      description={t('module.g04.body')}
-      stageAriaLabel={t('module.g04.stage')}
+      title={t('module.g05.title')}
+      description={t('module.g05.body')}
+      stageAriaLabel={t('module.g05.stage')}
       stageClassName="bst-stage graph-stage"
       stageBodyClassName="workspace-stage-body-tree"
       controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
@@ -225,13 +214,13 @@ export function DijkstraPage() {
             {t('playback.status')}: {getStatusLabel(status, t)}
           </span>
           <span className="tree-workspace-pill">
-            {t('module.g04.meta.preset')}: {graph ? getPresetLabel(graph.presetId, t) : '-'}
+            {t('module.g05.meta.preset')}: {graph ? getPresetLabel(graph.presetId, t) : '-'}
           </span>
           <span className="tree-workspace-pill">
-            {t('module.g04.meta.current')}: {activeNodeLabel}
+            {t('module.g05.meta.pass')}: {activePassLabel}
           </span>
           <span className="tree-workspace-pill">
-            {t('module.g04.meta.frontierSize')}: {frontierSize}
+            {t('module.g05.meta.updatedInPass')}: {currentSnapshot?.updatedInPassCount ?? 0}
           </span>
           <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
         </>
@@ -239,7 +228,7 @@ export function DijkstraPage() {
       controlsContent={
         <>
           <div className="tree-workspace-field">
-            <span>{t('module.g04.input.preset')}</span>
+            <span>{t('module.g05.input.preset')}</span>
             <div className="tree-workspace-toggle-row">
               {presetOptions.map((option) => (
                 <button
@@ -288,7 +277,7 @@ export function DijkstraPage() {
               <div className="tree-workspace-sample-block">
                 <span>{t('module.g01.sample.summary')}</span>
                 <code>
-                  {t('module.g04.meta.start')}: {startNodeLabel} · {t('module.g04.sample.goal')}
+                  {t('module.g05.meta.start')}: {startNodeLabel} · {t('module.g05.sample.goal')}
                 </code>
               </div>
             </>
@@ -308,59 +297,65 @@ export function DijkstraPage() {
               <dd>{getStatusLabel(status, t)}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.preset')}</dt>
+              <dt>{t('module.g05.meta.preset')}</dt>
               <dd>{graph ? getPresetLabel(graph.presetId, t) : '-'}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.start')}</dt>
+              <dt>{t('module.g05.meta.start')}</dt>
               <dd>{startNodeLabel}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.current')}</dt>
+              <dt>{t('module.g05.meta.pass')}</dt>
+              <dd>{activePassLabel}</dd>
+            </div>
+            <div>
+              <dt>{t('module.g05.meta.current')}</dt>
               <dd>{activeNodeLabel}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.neighbor')}</dt>
+              <dt>{t('module.g05.meta.neighbor')}</dt>
               <dd>{activeNeighborLabel}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.activeRelation')}</dt>
+              <dt>{t('module.g05.meta.activeRelation')}</dt>
               <dd>{activeRelationLabel}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.currentDistance')}</dt>
-              <dd>{formatDistance(activeDistance)}</dd>
-            </div>
-            <div>
-              <dt>{t('module.g04.meta.proposedDistance')}</dt>
+              <dt>{t('module.g05.meta.proposedDistance')}</dt>
               <dd>{formatDistance(currentSnapshot?.proposedDistance ?? null)}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.previousDistance')}</dt>
+              <dt>{t('module.g05.meta.previousDistance')}</dt>
               <dd>{formatDistance(currentSnapshot?.currentDistance ?? null)}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.frontier')}</dt>
-              <dd>{frontierText}</dd>
-            </div>
-            <div>
-              <dt>{t('module.g04.meta.currentRow')}</dt>
+              <dt>{t('module.g05.meta.currentRow')}</dt>
               <dd>{currentRowText}</dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.settledCount')}</dt>
+              <dt>{t('module.g05.meta.updatedInPass')}</dt>
+              <dd>{currentSnapshot?.updatedInPassCount ?? 0}</dd>
+            </div>
+            <div>
+              <dt>{t('module.g05.meta.changedCount')}</dt>
+              <dd>{changedCount}</dd>
+            </div>
+            <div>
+              <dt>{t('module.g05.meta.reachableCount')}</dt>
               <dd>
-                {settledCount}/{graph?.nodes.length ?? 0}
+                {reachableCount}/{graph?.nodes.length ?? 0}
               </dd>
             </div>
             <div>
-              <dt>{t('module.g04.meta.frontierSize')}</dt>
-              <dd>{frontierSize}</dd>
+              <dt>{t('module.g05.meta.completedPasses')}</dt>
+              <dd>
+                {completedPassCount}/{totalPasses}
+              </dd>
             </div>
           </dl>
 
           <div className="tree-workspace-code-block">
-            <span className="tree-workspace-code-title">{t('module.g04.code.title')}</span>
+            <span className="tree-workspace-code-title">{t('module.g05.code.title')}</span>
             <ol className="tree-workspace-code-list">
               {codeLines.map((line, index) => {
                 const lineNumber = index + 1;
@@ -384,7 +379,7 @@ export function DijkstraPage() {
               <svg className="graph-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <defs>
                   <marker
-                    id="graph-dijkstra-edge-arrow"
+                    id="graph-bellman-ford-edge-arrow"
                     markerWidth="8"
                     markerHeight="8"
                     refX="7"
@@ -395,7 +390,7 @@ export function DijkstraPage() {
                     <path d="M0,0 L8,4 L0,8 z" className="graph-edge-arrow" />
                   </marker>
                   <marker
-                    id="graph-dijkstra-edge-arrow-active"
+                    id="graph-bellman-ford-edge-arrow-active"
                     markerWidth="8"
                     markerHeight="8"
                     refX="7"
@@ -426,7 +421,9 @@ export function DijkstraPage() {
                         y1={from?.y ?? 0}
                         x2={to?.x ?? 0}
                         y2={to?.y ?? 0}
-                        markerEnd={isActive ? 'url(#graph-dijkstra-edge-arrow-active)' : 'url(#graph-dijkstra-edge-arrow)'}
+                        markerEnd={
+                          isActive ? 'url(#graph-bellman-ford-edge-arrow-active)' : 'url(#graph-bellman-ford-edge-arrow)'
+                        }
                       />
                       <text
                         x={midX}
@@ -442,34 +439,35 @@ export function DijkstraPage() {
 
               <div className="tree-node-layer graph-node-layer">
                 {graph.nodes.map((node, index) => {
-                  const isSettled = settledNodeSet.has(index);
+                  const isReachable = reachableNodeSet.has(index);
+                  const isChanged = changedNodeSet.has(index);
                   const isActive = currentSnapshot?.activeNodeIndex === index;
                   const isNeighbor = currentSnapshot?.activeNeighborIndex === index;
-                  const isFrontier = frontierNodeSet.has(index);
-                  const orderIndex = outputOrderIndexMap.get(index);
 
                   return (
                     <div
                       key={node.id}
-                      className={`tree-node graph-node${isSettled ? ' graph-node-completed-final' : ''}${
-                        isActive ? ' graph-node-active' : ''
-                      }${isNeighbor ? ' graph-node-neighbor' : ''}${isFrontier ? ' graph-node-frontier' : ''}`}
+                      className={`tree-node graph-node${isReachable ? ' graph-node-frontier' : ''}${
+                        isChanged ? ' graph-node-relaxed' : ''
+                      }${isActive ? ' graph-node-active' : ''}${isNeighbor ? ' graph-node-neighbor' : ''}`}
                       style={{
                         left: `${node.x}%`,
                         top: `${node.y}%`,
                       }}
                     >
                       <span className="tree-node-tag">{formatDistance(currentSnapshot?.distances[index] ?? null)}</span>
-                      {orderIndex ? <span className="tree-node-badge graph-node-badge-visited">{orderIndex}</span> : null}
+                      {isChanged && currentSnapshot?.activePassIndex ? (
+                        <span className="tree-node-badge graph-node-badge-visited">{`P${currentSnapshot.activePassIndex}`}</span>
+                      ) : null}
                       <span className="tree-node-value">{node.id}</span>
                       <span className="tree-node-index">
-                        {isSettled
-                          ? t('module.g04.node.settled')
-                          : isActive
-                            ? t('module.g04.node.current')
-                            : isFrontier
-                              ? t('module.g04.node.frontier')
-                              : t('module.g04.node.idle')}
+                        {isActive
+                          ? t('module.g05.node.current')
+                          : isChanged
+                            ? t('module.g05.node.relaxed')
+                            : isReachable
+                              ? t('module.g05.node.reachable')
+                              : t('module.g05.node.idle')}
                       </span>
                     </div>
                   );
@@ -480,21 +478,21 @@ export function DijkstraPage() {
             <div className="graph-stage-views">
               <section className="graph-stage-view-card">
                 <div className="graph-stage-view-head">
-                  <strong>{t('module.g04.view.adjacency')}</strong>
-                  <span>{t('module.g04.view.adjacencyHint')}</span>
+                  <strong>{t('module.g05.view.adjacency')}</strong>
+                  <span>{t('module.g05.view.adjacencyHint')}</span>
                 </div>
 
                 <div className="graph-list-rows">
                   {adjacencyList.map((edges, rowIndex) => {
                     const isActiveRow = currentSnapshot?.activeNodeIndex === rowIndex;
-                    const isSettledRow = settledNodeSet.has(rowIndex);
-                    const isFrontierRow = frontierNodeSet.has(rowIndex);
+                    const isReachableRow = reachableNodeSet.has(rowIndex);
+                    const isChangedRow = changedNodeSet.has(rowIndex);
 
                     return (
                       <div
                         key={graph.nodes[rowIndex]?.id ?? rowIndex}
                         className={`graph-list-row${isActiveRow ? ' graph-list-row-active' : ''}${
-                          isSettledRow ? ' graph-list-row-completed' : isFrontierRow ? ' graph-list-row-visited' : ''
+                          isChangedRow ? ' graph-list-row-completed' : isReachableRow ? ' graph-list-row-visited' : ''
                         }`}
                       >
                         <span className="graph-list-row-label">{graph.nodes[rowIndex]?.id ?? '?'}</span>
@@ -511,7 +509,7 @@ export function DijkstraPage() {
                                 <span
                                   key={`${rowIndex}-${edge.to}`}
                                   className={`graph-list-chip${isActiveNeighbor ? ' graph-list-chip-active' : ''}${
-                                    settledNodeSet.has(edge.to) ? ' graph-list-chip-completed' : ''
+                                    changedNodeSet.has(edge.to) ? ' graph-list-chip-completed' : ''
                                   }`}
                                 >
                                   {graph.nodes[edge.to]?.id ?? '?'} ({edge.weight})
@@ -528,26 +526,28 @@ export function DijkstraPage() {
 
               <section className="graph-stage-view-card">
                 <div className="graph-stage-view-head">
-                  <strong>{t('module.g04.view.distances')}</strong>
-                  <span>{t('module.g04.view.distancesHint')}</span>
+                  <strong>{t('module.g05.view.distances')}</strong>
+                  <span>{t('module.g05.view.distancesHint')}</span>
                 </div>
 
                 <div className="graph-distance-rows">
                   {graph.nodes.map((node, index) => {
                     const isActive = currentSnapshot?.activeNodeIndex === index;
-                    const isSettled = settledNodeSet.has(index);
+                    const isChanged = changedNodeSet.has(index);
                     const previousIndex = currentSnapshot?.previousNodeIndices[index] ?? null;
 
                     return (
                       <div
                         key={node.id}
                         className={`graph-distance-row${isActive ? ' graph-distance-row-active' : ''}${
-                          isSettled ? ' graph-distance-row-settled' : ''
+                          isChanged ? ' graph-distance-row-relaxed' : ''
                         }`}
                       >
                         <strong>{node.id}</strong>
-                        <span>{`${t('module.g04.meta.currentDistance')}: ${formatDistance(currentSnapshot?.distances[index] ?? null)}`}</span>
-                        <span>{`${t('module.g04.meta.previous')}: ${
+                        <span>{`${t('module.g05.meta.currentDistance')}: ${formatDistance(
+                          currentSnapshot?.distances[index] ?? null,
+                        )}`}</span>
+                        <span>{`${t('module.g05.meta.previous')}: ${
                           previousIndex === null ? '-' : (graph.nodes[previousIndex]?.id ?? '?')
                         }`}</span>
                       </div>
@@ -594,16 +594,16 @@ export function DijkstraPage() {
       transportRight={
         <>
           <span className="tree-workspace-transport-chip">
-            {t('module.g04.meta.settledCount')}: {settledCount}/{graph?.nodes.length ?? 0}
+            {t('module.g05.meta.pass')}: {activePassLabel}
           </span>
           <span className="tree-workspace-transport-chip">
-            {t('module.g04.meta.frontierSize')}: {frontierSize}
+            {t('module.g05.meta.updatedInPass')}: {currentSnapshot?.updatedInPassCount ?? 0}
           </span>
           <span className="tree-workspace-transport-chip">
-            {t('module.g04.meta.currentDistance')}: {formatDistance(activeDistance)}
+            {t('module.g05.meta.reachableCount')}: {reachableCount}/{graph?.nodes.length ?? 0}
           </span>
           <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
-            {t('module.g04.meta.proposedDistance')}: {formatDistance(currentSnapshot?.proposedDistance ?? null)}
+            {t('module.g05.meta.completedPasses')}: {completedPassCount}/{totalPasses}
           </span>
         </>
       }
