@@ -46,14 +46,19 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 ### Current State
 - Branch:
   - `feat/p12-m1-hash-foundations`
-- `H-01` / `H-02` code, tests, i18n, route wiring, registry wiring, and styling are now landed locally.
-- Local quality gates are green:
-  - `npm run check` passed on `2026-04-19`
-- Targeted Playwright smoke for the hash routes is still pending closure:
-  - attempted with the pinned `./scripts/playwright-cli.sh`
-  - external sites open normally in the CLI browser, but local hash smoke is currently blocked by environment/network behavior:
-    - Firefox in the Playwright CLI refused local loopback targets (`NS_ERROR_CONNECTION_REFUSED`)
-    - fallback attempts through a temporary `localhost.run` tunnel produced unstable reset/empty responses instead of stable app pages
+- `P12-M1` is now accepted locally:
+  - `H-01` / `H-02` code, tests, i18n, route wiring, registry wiring, and styling are landed
+  - local quality gates are green:
+    - `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke is now green with the long-lived local dev-server pattern:
+    - `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
+    - `/modules/hash-chaining`: `0/11 -> 1/11`, console errors = `0`
+    - `/modules/hash-open-addressing`: `0/21 -> 1/21`, console errors = `0`
+  - acceptance artifacts:
+    - `output/playwright/p12m1-modules-hash-filter.png`
+    - `output/playwright/p12m1-hash-chaining-smoke.png`
+    - `output/playwright/p12m1-hash-open-addressing-smoke.png`
+    - `output/playwright/p12m1-acceptance-report.txt`
 - Keep unrelated dirty items out of the hash commit:
   - `scripts/check-doc-links.sh`
   - `scripts/playwright-cli.sh`
@@ -65,16 +70,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `student-dist/`
 
 ### Next Step
-- Close the remaining `P12-M1` browser-acceptance gap:
-  - get the pinned Playwright wrapper onto a reachable app URL for:
-    - `/modules?category=hash`
-    - `/modules/hash-chaining`
-    - `/modules/hash-open-addressing`
-- Once the hash smoke is green:
-  - sync milestone docs if needed
-  - create one focused `P12-M1` commit on `feat/p12-m1-hash-foundations`
-- After `P12-M1` acceptance, continue to:
-  - `P12-M2` `G-03 BFS`
+- Create the focused `P12-M1` acceptance/docs commit on `feat/p12-m1-hash-foundations`.
+- Continue to `P12-M2` `G-03 BFS`:
+  - cut the next `feat/*` branch from the accepted hash baseline
+  - land BFS code/tests/i18n/route wiring
+  - rerun `npm run check` and targeted Playwright smoke on `/modules/bfs`
 
 ## 2026-04-18 (P12 near-term roadmap split)
 

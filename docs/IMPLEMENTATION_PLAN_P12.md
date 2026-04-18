@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P12
 
-Status: `P12` planning baseline defined locally
+Status: `P12-M1` accepted locally; next in sequence is `P12-M2` `G-03 BFS`
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: expand the product from the current 19 implemented modules toward the original 42-module blueprint by prioritizing hash-table foundations, deeper graph coverage, one heap-derived sorting extension, and the first string-algorithm module
 
@@ -66,6 +66,12 @@ Acceptance
 - `npm run check` passes
 - deterministic replay confirms the same fixed input produces the same collision path
 - targeted Playwright smoke confirms both hash routes open and basic playback is stable
+
+Accepted locally (2026-04-19)
+- `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
+- `/modules/hash-chaining`: opens cleanly, default `Next` advances `0/11 -> 1/11`, console errors = `0`
+- `/modules/hash-open-addressing`: opens cleanly, default `Next` advances `0/21 -> 1/21`, console errors = `0`
+- evidence saved under `output/playwright/p12m1-*`
 
 ### P12-M2 Add `G-03 BFS`
 

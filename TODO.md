@@ -364,15 +364,23 @@ Track actionable tasks here. Keep tasks small and testable.
     - moved `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, and `P-01`~`P-05` into the explicit long-term backlog
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-- [ ] P12-M1 Add `H-01` / `H-02`
+- [x] P12-M1 Add `H-01` / `H-02`
   - DoD: add `hash` category discovery wiring plus two contrasting hash-table teaching modules for chaining and open addressing.
   - Acceptance: `npm run check` passes, deterministic collision-path replay is stable, and targeted Playwright smoke on both hash routes is green.
-  - Progress (2026-04-19):
+  - Done (2026-04-19):
     - added `hash` category support in discovery/filtering/registry/routing
     - added `H-01` chaining logic/timeline/page/route/tests plus zh/en copy and shared stage styling
     - added `H-02` open-addressing logic/timeline/page/route/tests plus zh/en copy and shared stage styling
     - local `npm run check` passes on `feat/p12-m1-hash-foundations`
-    - targeted Playwright smoke was attempted with the pinned wrapper, but browser verification is still pending because the current CLI Firefox environment could not reach a stable local preview URL for the hash routes
+    - targeted Playwright smoke is green:
+      - `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
+      - `/modules/hash-chaining`: default `Next` advances `0/11 -> 1/11`, console errors = `0`
+      - `/modules/hash-open-addressing`: default `Next` advances `0/21 -> 1/21`, console errors = `0`
+    - acceptance artifacts:
+      - `output/playwright/p12m1-modules-hash-filter.png`
+      - `output/playwright/p12m1-hash-chaining-smoke.png`
+      - `output/playwright/p12m1-hash-open-addressing-smoke.png`
+      - `output/playwright/p12m1-acceptance-report.txt`
 
 - [ ] P12-M2 Add `G-03 BFS`
   - DoD: implement a BFS teaching module with deterministic queue/level playback on top of the accepted graph foundation.

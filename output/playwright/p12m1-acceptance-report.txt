@@ -1,0 +1,23 @@
+P12-M1 hash-track acceptance report
+Date: 2026-04-19
+Branch: feat/p12-m1-hash-foundations
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules?category=hash: 2 cards, 2 ready badges, 2 open links
+
+Route checks
+- H-01 Hash Table - Chaining:
+  - route opens cleanly
+  - default Next advances 0/11 -> 1/11
+  - console errors: 0
+- H-02 Hash Table - Open Addressing:
+  - route opens cleanly
+  - default Next advances 0/21 -> 1/21
+  - console errors: 0
+
+Artifacts
+- output/playwright/p12m1-modules-hash-filter.png
+- output/playwright/p12m1-hash-chaining-smoke.png
+- output/playwright/p12m1-hash-open-addressing-smoke.png
