@@ -202,6 +202,22 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'G-07',
+    name: 'Kruskal',
+    route: '/modules/kruskal',
+    category: 'graph',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
+    id: 'G-08',
+    name: 'Prim',
+    route: '/modules/prim',
+    category: 'graph',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'H-01',
     name: 'Hash Table - Chaining',
     route: '/modules/hash-chaining',

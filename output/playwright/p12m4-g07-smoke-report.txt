@@ -1,0 +1,17 @@
+P12-M4 G-07 Kruskal smoke report
+Date: 2026-04-19
+Branch: feat/p12-m4-mst
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules?category=graph: 8 cards, 8 ready badges, 8 open links
+
+Route and interaction checks
+- /modules/kruskal opens cleanly
+- Default Next advances 0/12 -> 1/12
+- Console errors: 0
+
+Artifacts
+- output/playwright/p12m4-modules-graph-filter.png
+- output/playwright/p12m4-kruskal-smoke.png

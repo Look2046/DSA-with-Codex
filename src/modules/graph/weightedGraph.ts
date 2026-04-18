@@ -1,7 +1,11 @@
 import type { GraphNode } from './graphRepresentation';
 
-export type WeightedGraphPresetId = 'positiveDirected' | 'negativeDirected' | 'floydDirected';
-export type WeightedGraphPresetGroup = 'all' | 'nonNegative' | 'bellmanFord' | 'floydWarshall';
+export type WeightedGraphPresetId =
+  | 'positiveDirected'
+  | 'negativeDirected'
+  | 'floydDirected'
+  | 'mstUndirected';
+export type WeightedGraphPresetGroup = 'all' | 'nonNegative' | 'bellmanFord' | 'floydWarshall' | 'mst';
 
 export type WeightedGraphEdge = {
   from: number;
@@ -11,7 +15,7 @@ export type WeightedGraphEdge = {
 
 export type WeightedGraphDefinition = {
   presetId: WeightedGraphPresetId;
-  topology: 'directed';
+  topology: 'directed' | 'undirected';
   nodes: GraphNode[];
   edges: WeightedGraphEdge[];
 };
@@ -81,6 +85,27 @@ const WEIGHTED_GRAPH_PRESETS: Record<WeightedGraphPresetId, WeightedGraphDefinit
       { from: 3, to: 0, weight: 7 },
     ],
   },
+  mstUndirected: {
+    presetId: 'mstUndirected',
+    topology: 'undirected',
+    nodes: [
+      { id: 'A', x: 15, y: 34 },
+      { id: 'B', x: 34, y: 16 },
+      { id: 'C', x: 34, y: 54 },
+      { id: 'D', x: 60, y: 22 },
+      { id: 'E', x: 64, y: 56 },
+    ],
+    edges: [
+      { from: 0, to: 1, weight: 4 },
+      { from: 0, to: 2, weight: 2 },
+      { from: 1, to: 2, weight: 1 },
+      { from: 1, to: 3, weight: 5 },
+      { from: 1, to: 4, weight: 7 },
+      { from: 2, to: 3, weight: 8 },
+      { from: 2, to: 4, weight: 10 },
+      { from: 3, to: 4, weight: 2 },
+    ],
+  },
 };
 
 export function getWeightedGraphPresetIds(group: WeightedGraphPresetGroup = 'all'): WeightedGraphPresetId[] {
@@ -92,6 +117,9 @@ export function getWeightedGraphPresetIds(group: WeightedGraphPresetGroup = 'all
   }
   if (group === 'floydWarshall') {
     return ['floydDirected'];
+  }
+  if (group === 'mst') {
+    return ['mstUndirected'];
   }
   return Object.keys(WEIGHTED_GRAPH_PRESETS) as WeightedGraphPresetId[];
 }
@@ -115,6 +143,9 @@ export function createWeightedAdjacencyList(graph: WeightedGraphDefinition): Wei
 
   graph.edges.forEach((edge) => {
     rows[edge.from]?.push({ ...edge });
+    if (graph.topology === 'undirected') {
+      rows[edge.to]?.push({ from: edge.to, to: edge.from, weight: edge.weight });
+    }
   });
 
   return rows.map((row) => [...row].sort((left, right) => left.to - right.to || left.weight - right.weight));

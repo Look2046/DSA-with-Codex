@@ -28,6 +28,8 @@ import { BfsPage } from '../pages/modules/BfsPage';
 import { DijkstraPage } from '../pages/modules/DijkstraPage';
 import { BellmanFordPage } from '../pages/modules/BellmanFordPage';
 import { FloydWarshallPage } from '../pages/modules/FloydWarshallPage';
+import { KruskalPage } from '../pages/modules/KruskalPage';
+import { PrimPage } from '../pages/modules/PrimPage';
 import { HashChainingPage } from '../pages/modules/HashChainingPage';
 import { HashOpenAddressingPage } from '../pages/modules/HashOpenAddressingPage';
 import { BinaryTreeCanvasPlaygroundPage } from '../pages/modules/BinaryTreeCanvasPlaygroundPage';
@@ -63,6 +65,8 @@ export const router = createBrowserRouter([
       { path: 'modules/dijkstra', element: <DijkstraPage /> },
       { path: 'modules/bellman-ford', element: <BellmanFordPage /> },
       { path: 'modules/floyd-warshall', element: <FloydWarshallPage /> },
+      { path: 'modules/kruskal', element: <KruskalPage /> },
+      { path: 'modules/prim', element: <PrimPage /> },
       { path: 'modules/hash-chaining', element: <HashChainingPage /> },
       { path: 'modules/hash-open-addressing', element: <HashOpenAddressingPage /> },
       { path: 'playground/binary-tree-canvas', element: <BinaryTreeCanvasPlaygroundPage /> },

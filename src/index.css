@@ -2556,6 +2556,26 @@ body {
   stroke: #689acb;
 }
 
+.graph-edge-selected {
+  stroke: #59a06f;
+  stroke-width: 0.78;
+  opacity: 1;
+}
+
+.graph-edge-frontier {
+  stroke: #7ea6d6;
+  stroke-width: 0.72;
+  stroke-dasharray: 1.6 1.2;
+  opacity: 0.95;
+}
+
+.graph-edge-rejected {
+  stroke: #c89898;
+  stroke-width: 0.66;
+  stroke-dasharray: 1.4 1.2;
+  opacity: 0.82;
+}
+
 .graph-edge-active {
   stroke: #d85e5e;
   stroke-width: 0.82;
@@ -2583,6 +2603,18 @@ body {
 
 .graph-edge-weight-active {
   fill: #b24646;
+}
+
+.graph-edge-weight-selected {
+  fill: #2f7b46;
+}
+
+.graph-edge-weight-frontier {
+  fill: #2e5f94;
+}
+
+.graph-edge-weight-rejected {
+  fill: #9b6666;
 }
 
 .graph-node-layer {
@@ -2974,6 +3006,16 @@ body {
   background: #f3fbf6;
 }
 
+.graph-distance-row-frontier {
+  border-color: #d3e4f7;
+  background: #f4f9ff;
+}
+
+.graph-distance-row-rejected {
+  border-color: #ecd6d6;
+  background: #fff5f5;
+}
+
 .graph-floyd-chip-row {
   display: flex;
   flex-wrap: wrap;
@@ -2988,6 +3030,12 @@ body {
   padding: 4px 10px;
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.graph-stage-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .hash-stage {

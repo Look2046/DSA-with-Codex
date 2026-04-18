@@ -420,9 +420,24 @@ Track actionable tasks here. Keep tasks small and testable.
       - `output/playwright/p12m3-g05-smoke-report.txt`
       - `output/playwright/p12m3-g06-smoke-report.txt`
 
-- [ ] P12-M4 Add `G-07` / `G-08`
+- [x] P12-M4 Add `G-07` / `G-08`
   - DoD: implement the MST batch (`Kruskal`, `Prim`) with deterministic chosen-edge / rejected-edge progression.
   - Acceptance: `npm run check` passes, deterministic replay confirms MST edge selection, and targeted Playwright smoke on both routes is stable.
+  - Done (2026-04-19):
+    - extended the shared weighted-graph foundation with the undirected `mstUndirected` preset for the MST track
+    - added `G-07 Kruskal` logic/timeline/page/route/tests plus zh/en copy and component-merge / cycle-skip views
+    - added `G-08 Prim` logic/timeline/page/route/tests plus zh/en copy and frontier-queue / stale-edge views
+    - local `npm run check` passes on `feat/p12-m4-mst`
+    - targeted Playwright smoke is green for both routes:
+      - `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+      - `/modules/kruskal`: default `Next` advances `0/12 -> 1/12`, console errors = `0`
+      - `/modules/prim`: default `Next` advances `0/12 -> 1/12`, console errors = `0`
+    - smoke artifacts:
+      - `output/playwright/p12m4-modules-graph-filter.png`
+      - `output/playwright/p12m4-kruskal-smoke.png`
+      - `output/playwright/p12m4-prim-smoke.png`
+      - `output/playwright/p12m4-g07-smoke-report.txt`
+      - `output/playwright/p12m4-g08-smoke-report.txt`
 
 - [ ] P12-M5 Add `S-07` / `ST-01`
   - DoD: implement `Heap Sort` and `KMP`, opening the string category while extending sorting from the existing heap foundation.

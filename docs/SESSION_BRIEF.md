@@ -5,12 +5,12 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p12-m3-shortest-paths`
-- Current phase: `P12-M3` weighted shortest-path batch is accepted locally; the next implementation target is `P12-M4` `G-07 Kruskal`
+- Active branch (expected): `feat/p12-m5-heap-sort-kmp`
+- Current phase: `P12-M4` MST batch is accepted locally; the next implementation target is `P12-M5` `S-07 Heap Sort` + `ST-01 KMP`
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m3-shortest-paths`)
+  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m4-mst`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke (passed locally, 2026-04-19, `feat/p12-m3-shortest-paths`)
+  - targeted Playwright smoke (passed locally, 2026-04-19, `feat/p12-m4-mst`)
 
 ## 2) What Is Already Done
 
@@ -205,6 +205,23 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p12m3-g04-smoke-report.txt`
     - `output/playwright/p12m3-g05-smoke-report.txt`
     - `output/playwright/p12m3-g06-smoke-report.txt`
+- `P12-M4` MST batch is accepted locally on `feat/p12-m4-mst`:
+  - extended the shared weighted-graph foundation to support the undirected MST teaching preset across both MST pages
+  - landed `G-07 Kruskal` with deterministic sorted-edge inspection, component merge / cycle-skip playback, timeline adapter, page, route, and replay coverage
+  - landed `G-08 Prim` with deterministic frontier-queue growth, stale-edge skip playback, timeline adapter, page, route, and replay coverage
+  - refined shared weighted-graph / graph-stage styling so accepted, frontier, and rejected MST edges remain visually distinct
+  - marked `G-07` / `G-08` as implemented in the module registry and extended zh/en UI copy plus MST-stage summary views
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+    - `/modules/kruskal`: opens cleanly, default `Next` advances `0/12 -> 1/12`, console errors = `0`
+    - `/modules/prim`: opens cleanly, default `Next` advances `0/12 -> 1/12`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m4-modules-graph-filter.png`
+    - `output/playwright/p12m4-kruskal-smoke.png`
+    - `output/playwright/p12m4-prim-smoke.png`
+    - `output/playwright/p12m4-g07-smoke-report.txt`
+    - `output/playwright/p12m4-g08-smoke-report.txt`
 - Student standalone `T-01 Binary Tree Traversal` export completed locally on a separate focused branch:
   - added offline student entry/build flow
   - output lives under `student-dist/binary-tree`
@@ -282,9 +299,10 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue in the documented `P12` order from the accepted weighted-shortest-path baseline:
-  - `G-07`~`G-08` MST modules
-  - `S-07 Heap Sort` + `ST-01 KMP`
+- Continue in the documented `P12` order from the accepted MST baseline:
+  - `S-07 Heap Sort`
+  - `ST-01 KMP`
+  - `P12-M6` near-term wave acceptance closure
 - Keep the remaining blueprint items in the long-term backlog:
   - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
 - Keep quality gates unchanged:

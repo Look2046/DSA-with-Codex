@@ -2,6 +2,86 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-19 (P12-M4 MST acceptance)
+
+### Today Done
+- Continued on the MST implementation branch:
+  - `feat/p12-m4-mst`
+- Kept the shared weighted-graph foundation aligned for the MST track:
+  - reused `mstUndirected` as the common teaching preset for both MST pages
+  - kept undirected adjacency generation inside `src/modules/graph/weightedGraph.ts`
+  - added shared graph-stage edge styling for selected / frontier / rejected MST states in `src/index.css`
+- Implemented `G-07 Kruskal` end to end:
+  - `src/modules/graph/kruskal.ts`
+  - `src/modules/graph/kruskalTimelineAdapter.ts`
+  - `src/modules/graph/kruskal.test.ts`
+  - `src/modules/graph/kruskalTimelineReplay.test.ts`
+  - `src/pages/modules/KruskalPage.tsx`
+- Implemented `G-08 Prim` end to end:
+  - `src/modules/graph/prim.ts`
+  - `src/modules/graph/primTimelineAdapter.ts`
+  - `src/modules/graph/prim.test.ts`
+  - `src/modules/graph/primTimelineReplay.test.ts`
+  - `src/pages/modules/PrimPage.tsx`
+- Updated shared discovery/runtime wiring for the new MST route:
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-verified locally for `P12-M4`:
+  - targeted MST tests:
+    - `npm test -- src/modules/graph/kruskal.test.ts src/modules/graph/kruskalTimelineReplay.test.ts`
+    - `npm test -- src/modules/graph/prim.test.ts src/modules/graph/primTimelineReplay.test.ts`
+  - targeted lint:
+    - `npm run lint -- src/modules/graph/prim.ts src/modules/graph/primTimelineAdapter.ts src/modules/graph/prim.test.ts src/modules/graph/primTimelineReplay.test.ts src/pages/modules/PrimPage.tsx`
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+    - `/modules/kruskal`: `0/12 -> 1/12`, console errors = `0`
+    - `/modules/prim`: `0/12 -> 1/12`, console errors = `0`
+  - artifacts:
+    - `output/playwright/p12m4-modules-graph-filter.png`
+    - `output/playwright/p12m4-kruskal-smoke.png`
+    - `output/playwright/p12m4-prim-smoke.png`
+    - `output/playwright/p12m4-g07-smoke-report.txt`
+    - `output/playwright/p12m4-g08-smoke-report.txt`
+- Updated the thread heartbeat automation and kept it active:
+  - automation id: `p12`
+  - cadence: every 5 minutes
+  - stop rule remains:
+    - stop once near-term `P12` work is complete
+    - or once local time passes `2026-04-20 08:00 Asia/Shanghai`
+
+### Current State
+- Branch:
+  - `feat/p12-m4-mst`
+- `P12-M4` MST batch is accepted locally:
+  - `G-07 Kruskal`
+  - `G-08 Prim`
+- Local quality gates are green:
+  - `npm run check` passed on `2026-04-19`
+- Targeted Playwright smoke is green:
+  - `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+  - `/modules/kruskal`: `0/12 -> 1/12`, console errors = `0`
+  - `/modules/prim`: `0/12 -> 1/12`, console errors = `0`
+- Keep unrelated dirty items out of the MST commit:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Create one focused commit for the validated `P12-M4` MST milestone
+- Start `P12-M5` on the next `feat/*` branch:
+  - implement `S-07 Heap Sort`
+  - implement `ST-01 KMP`
+  - rerun `npm run check` and targeted Playwright smoke across both routes
+
 ## 2026-04-19 (P12 hash + graph checkpoint)
 
 ### Today Done

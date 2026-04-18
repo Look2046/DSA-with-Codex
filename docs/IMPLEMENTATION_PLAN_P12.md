@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P12
 
-Status: `P12-M3` accepted locally; next execution target is `P12-M4` MST modules
+Status: `P12-M4` accepted locally; next execution target is `P12-M5` `S-07 Heap Sort` + `ST-01 KMP`
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: expand the product from the current 19 implemented modules toward the original 42-module blueprint by prioritizing hash-table foundations, deeper graph coverage, one heap-derived sorting extension, and the first string-algorithm module
 
@@ -140,6 +140,15 @@ Acceptance
 - `npm run check` passes
 - deterministic replay confirms expected MST edge selection
 - targeted Playwright smoke confirms both routes open and basic playback is stable
+
+Accepted locally (2026-04-19)
+- `G-07 Kruskal` is accepted locally
+- `G-08 Prim` is accepted locally
+- `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+- `/modules/kruskal`: opens cleanly, default `Next` advances `0/12 -> 1/12`, console errors = `0`
+- `/modules/prim`: opens cleanly, default `Next` advances `0/12 -> 1/12`, console errors = `0`
+- evidence saved under `output/playwright/p12m4-*`
+- next phase: `P12-M5` `S-07 Heap Sort` + `ST-01 KMP`
 
 ### P12-M5 Add `S-07 Heap Sort` and `ST-01 KMP`
 

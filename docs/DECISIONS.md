@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260419-61
+- Date: 2026-04-19
+- Status: accepted
+- Context: After the weighted shortest-path batch, the MST track needed to teach two different greedy ideas (`Kruskal` component merging and `Prim` frontier growth) without forking the weighted-graph foundation into separate route-specific datasets or incompatible edge semantics.
+- Decision: Extend the shared weighted-graph foundation to support one undirected `mstUndirected` teaching preset and reuse it across both MST modules, while modeling `Kruskal` around globally sorted edge inspection and `Prim` around a deterministic frontier queue with explicit stale-edge skips.
+- Alternatives considered: create separate hardcoded MST datasets per page; teach `Prim` with a recomputed crossing-edge set and no stale-edge semantics; keep MST rendering logic page-specific instead of extending shared weighted-graph styling/state vocabulary.
+- Consequences: both MST pages now compare against the same graph and total MST weight, shared graph-stage styling can represent selected/frontier/rejected weighted edges consistently, and future MST-related modules can build on one weighted-graph contract instead of drifting between page-specific models.
+- Owner: haoyu + codex
+
 ## DEC-20260418-60
 - Date: 2026-04-18
 - Status: accepted
