@@ -400,6 +400,20 @@ Track actionable tasks here. Keep tasks small and testable.
 - [ ] P12-M3 Add `G-04`~`G-06`
   - DoD: implement the weighted shortest-path batch (`Dijkstra`, `Bellman-Ford`, `Floyd-Warshall`) with explicit distance/relaxation teaching states.
   - Acceptance: `npm run check` passes, deterministic replay confirms expected distance updates, and targeted Playwright smoke across the three routes is stable.
+  - Progress (2026-04-19):
+    - added weighted-graph preset foundation for the shortest-path track
+    - landed `G-04 Dijkstra` logic/timeline/page/route/tests plus zh/en copy and weighted-edge stage styling
+    - local `npm run check` passes on `feat/p12-m3-shortest-paths`
+    - targeted Playwright smoke is green for `G-04`:
+      - `/modules?category=graph`: `4` cards, `4` ready badges, `4` open links
+      - `/modules/dijkstra`: default `Next` advances `0/34 -> 1/34`, console errors = `0`
+    - smoke artifacts:
+      - `output/playwright/p12m3-modules-graph-filter.png`
+      - `output/playwright/p12m3-dijkstra-smoke.png`
+      - `output/playwright/p12m3-g04-smoke-report.txt`
+    - remaining in this batch:
+      - `G-05 Bellman-Ford`
+      - `G-06 Floyd-Warshall`
 
 - [ ] P12-M4 Add `G-07` / `G-08`
   - DoD: implement the MST batch (`Kruskal`, `Prim`) with deterministic chosen-edge / rejected-edge progression.

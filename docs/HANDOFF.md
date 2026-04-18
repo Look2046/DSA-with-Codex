@@ -68,24 +68,52 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - `output/playwright/p12m2-modules-graph-filter.png`
     - `output/playwright/p12m2-bfs-smoke.png`
     - `output/playwright/p12m2-smoke-report.txt`
+- Continued on the shortest-path batch branch:
+  - `feat/p12-m3-shortest-paths`
+- Implemented `G-04 Dijkstra`:
+  - added weighted-graph foundation:
+    - `src/modules/graph/weightedGraph.ts`
+  - added Dijkstra runtime/model/test/page wiring:
+    - `src/modules/graph/dijkstra.ts`
+    - `src/modules/graph/dijkstraTimelineAdapter.ts`
+    - `src/modules/graph/dijkstra.test.ts`
+    - `src/modules/graph/dijkstraTimelineReplay.test.ts`
+    - `src/pages/modules/DijkstraPage.tsx`
+  - updated shared discovery/runtime wiring:
+    - `src/data/moduleRegistry.ts`
+    - `src/app/router.tsx`
+    - `src/i18n/translations.ts`
+    - `src/index.css`
+- Re-verified locally for `G-04`:
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules?category=graph`: `4` cards, `4` ready badges, `4` open links
+    - `/modules/dijkstra`: `0/34 -> 1/34`, console errors = `0`
+  - artifacts:
+    - `output/playwright/p12m3-modules-graph-filter.png`
+    - `output/playwright/p12m3-dijkstra-smoke.png`
+    - `output/playwright/p12m3-g04-smoke-report.txt`
 
 ### Current State
 - Branch:
-  - `feat/p12-m2-bfs`
+  - `feat/p12-m3-shortest-paths`
 - `P12-M1` accepted baseline is committed on the parent branch history:
   - `59fe92e` `feat: add hash table foundation modules`
   - `79c315b` `docs: close p12-m1 hash acceptance`
-- `P12-M2` is now accepted locally:
-  - `G-03 BFS` code/tests/i18n/route wiring/styling are landed
+- `P12-M2` accepted baseline is committed on the parent branch history:
+  - `896df29` `feat: add bfs teaching module`
+- `P12-M3` is in progress, with `G-04 Dijkstra` accepted locally:
+  - shortest-path weighted-graph foundation plus `G-04` code/tests/i18n/route wiring/styling are landed
   - local quality gates are green:
     - `npm run check` passed on `2026-04-19`
   - targeted Playwright smoke is green:
-    - `/modules?category=graph`: `3` cards, `3` ready badges, `3` open links
-    - `/modules/bfs`: `0/34 -> 1/34`, console errors = `0`
-  - acceptance artifacts:
-    - `output/playwright/p12m2-modules-graph-filter.png`
-    - `output/playwright/p12m2-bfs-smoke.png`
-    - `output/playwright/p12m2-smoke-report.txt`
+    - `/modules?category=graph`: `4` cards, `4` ready badges, `4` open links
+    - `/modules/dijkstra`: `0/34 -> 1/34`, console errors = `0`
+  - smoke artifacts:
+    - `output/playwright/p12m3-modules-graph-filter.png`
+    - `output/playwright/p12m3-dijkstra-smoke.png`
+    - `output/playwright/p12m3-g04-smoke-report.txt`
 - Keep unrelated dirty items out of the hash commit:
   - `scripts/check-doc-links.sh`
   - `scripts/playwright-cli.sh`
@@ -98,10 +126,9 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
 
 ### Next Step
 - Continue to `P12-M3` weighted shortest-path modules:
-  - implement `G-04 Dijkstra`
   - implement `G-05 Bellman-Ford`
   - implement `G-06 Floyd-Warshall`
-  - rerun `npm run check` and targeted Playwright smoke across the three routes
+  - rerun `npm run check` and targeted Playwright smoke across `Dijkstra` / `Bellman-Ford` / `Floyd-Warshall`
 
 ## 2026-04-18 (P12 near-term roadmap split)
 

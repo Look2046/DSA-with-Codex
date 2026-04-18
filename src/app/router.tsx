@@ -25,6 +25,7 @@ import { HeapPage } from '../pages/modules/HeapPage';
 import { GraphRepresentationPage } from '../pages/modules/GraphRepresentationPage';
 import { DfsPage } from '../pages/modules/DfsPage';
 import { BfsPage } from '../pages/modules/BfsPage';
+import { DijkstraPage } from '../pages/modules/DijkstraPage';
 import { HashChainingPage } from '../pages/modules/HashChainingPage';
 import { HashOpenAddressingPage } from '../pages/modules/HashOpenAddressingPage';
 import { BinaryTreeCanvasPlaygroundPage } from '../pages/modules/BinaryTreeCanvasPlaygroundPage';
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
       { path: 'modules/graph-representation', element: <GraphRepresentationPage /> },
       { path: 'modules/dfs', element: <DfsPage /> },
       { path: 'modules/bfs', element: <BfsPage /> },
+      { path: 'modules/dijkstra', element: <DijkstraPage /> },
       { path: 'modules/hash-chaining', element: <HashChainingPage /> },
       { path: 'modules/hash-open-addressing', element: <HashOpenAddressingPage /> },
       { path: 'playground/binary-tree-canvas', element: <BinaryTreeCanvasPlaygroundPage /> },

@@ -2571,6 +2571,20 @@ body {
   fill: #d85e5e;
 }
 
+.graph-edge-weight {
+  fill: #2e557f;
+  font-size: 3.6px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1px;
+  text-anchor: middle;
+}
+
+.graph-edge-weight-active {
+  fill: #b24646;
+}
+
 .graph-node-layer {
   inset: 0;
 }
@@ -2877,6 +2891,46 @@ body {
   color: #788da2;
   font-size: 0.82rem;
   line-height: 1.5;
+}
+
+.graph-distance-rows {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 16px 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.graph-distance-row {
+  display: grid;
+  gap: 4px;
+  border-radius: 12px;
+  border: 1px solid #d5e4f1;
+  background: #fff;
+  padding: 10px 12px;
+  color: #264b73;
+}
+
+.graph-distance-row strong {
+  color: #1d4f80;
+  font-size: 0.9rem;
+}
+
+.graph-distance-row span {
+  font-size: 0.8rem;
+  color: #5a7591;
+}
+
+.graph-distance-row-active {
+  border-color: #efc57a;
+  background: #fff9ef;
+  box-shadow: 0 0 0 1px rgba(239, 197, 122, 0.18);
+}
+
+.graph-distance-row-settled {
+  border-color: #c6e1cf;
+  background: #f3fbf6;
 }
 
 .hash-stage {

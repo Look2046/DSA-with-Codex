@@ -178,6 +178,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'G-04',
+    name: 'Dijkstra',
+    route: '/modules/dijkstra',
+    category: 'graph',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'H-01',
     name: 'Hash Table - Chaining',
     route: '/modules/hash-chaining',

@@ -5,12 +5,12 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p12-m2-bfs`
-- Current phase: `P12-M2` `G-03 BFS` is accepted locally; the next implementation target is `P12-M3` weighted shortest-path modules
+- Active branch (expected): `feat/p12-m3-shortest-paths`
+- Current phase: `P12-M3` weighted shortest-path batch is in progress; `G-04 Dijkstra` is accepted locally and the next implementation target is `G-05 Bellman-Ford`
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m2-bfs`)
+  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m3-shortest-paths`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke (passed locally, 2026-04-19, `feat/p12-m2-bfs`)
+  - targeted Playwright smoke (passed locally, 2026-04-19, `feat/p12-m3-shortest-paths`)
 
 ## 2) What Is Already Done
 
@@ -184,6 +184,18 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p12m2-modules-graph-filter.png`
     - `output/playwright/p12m2-bfs-smoke.png`
     - `output/playwright/p12m2-smoke-report.txt`
+- `P12-M3` shortest-path batch is in progress on `feat/p12-m3-shortest-paths`, and `G-04 Dijkstra` is accepted locally:
+  - added reusable weighted-graph preset helpers for the shortest-path track
+  - landed `G-04 Dijkstra` with deterministic distance relaxation playback, timeline adapter, page, route, and replay coverage
+  - marked `G-04` as implemented in the module registry and added zh/en UI copy plus weighted-graph stage styling
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `4` cards, `4` ready badges, `4` open links
+    - `/modules/dijkstra`: opens cleanly, default `Next` advances `0/34 -> 1/34`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m3-modules-graph-filter.png`
+    - `output/playwright/p12m3-dijkstra-smoke.png`
+    - `output/playwright/p12m3-g04-smoke-report.txt`
 - Student standalone `T-01 Binary Tree Traversal` export completed locally on a separate focused branch:
   - added offline student entry/build flow
   - output lives under `student-dist/binary-tree`
@@ -261,8 +273,9 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue in the documented `P12` order from the accepted BFS baseline:
-  - `G-04`~`G-06` weighted shortest-path modules
+- Continue in the documented `P12` order from the accepted Dijkstra baseline:
+  - `G-05 Bellman-Ford`
+  - `G-06 Floyd-Warshall`
   - `G-07`~`G-08` MST modules
   - `S-07 Heap Sort` + `ST-01 KMP`
 - Keep the remaining blueprint items in the long-term backlog:

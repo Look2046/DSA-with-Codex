@@ -1,0 +1,17 @@
+P12-M3 G-04 Dijkstra smoke report
+Date: 2026-04-19
+Branch: feat/p12-m3-shortest-paths
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules?category=graph: 4 cards, 4 ready badges, 4 open links
+
+Route and interaction checks
+- /modules/dijkstra opens cleanly
+- Default Next advances 0/34 -> 1/34
+- Console errors: 0
+
+Artifacts
+- output/playwright/p12m3-modules-graph-filter.png
+- output/playwright/p12m3-dijkstra-smoke.png
