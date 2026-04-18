@@ -2773,7 +2773,8 @@ body {
   color: #235b90;
 }
 
-.graph-dfs-stage-scene {
+.graph-dfs-stage-scene,
+.graph-bfs-stage-scene {
   position: relative;
   width: 100%;
   height: 100%;
@@ -2801,6 +2802,14 @@ body {
 .graph-node-badge-visited {
   background: #e6f1ff;
   color: #295d91;
+}
+
+.graph-node-frontier {
+  border-color: #7da6d6;
+  background: #edf4ff;
+  box-shadow:
+    0 0 0 2px rgba(125, 166, 214, 0.16),
+    0 10px 16px rgba(67, 111, 173, 0.12);
 }
 
 .graph-list-row-visited {

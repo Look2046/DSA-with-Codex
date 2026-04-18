@@ -382,9 +382,20 @@ Track actionable tasks here. Keep tasks small and testable.
       - `output/playwright/p12m1-hash-open-addressing-smoke.png`
       - `output/playwright/p12m1-acceptance-report.txt`
 
-- [ ] P12-M2 Add `G-03 BFS`
+- [x] P12-M2 Add `G-03 BFS`
   - DoD: implement a BFS teaching module with deterministic queue/level playback on top of the accepted graph foundation.
   - Acceptance: `npm run check` passes, deterministic replay confirms BFS order, and targeted Playwright smoke on `/modules/bfs` is stable.
+  - Done (2026-04-19):
+    - added deterministic BFS logic, timeline adapter, page, route wiring, and replay tests
+    - marked `G-03` as implemented in the module registry and added zh/en UI copy plus graph-stage frontier styling
+    - local `npm run check` passes on `feat/p12-m2-bfs`
+    - targeted Playwright smoke is green:
+      - `/modules?category=graph`: `3` cards, `3` ready badges, `3` open links
+      - `/modules/bfs`: default `Next` advances `0/34 -> 1/34`, console errors = `0`
+    - smoke artifacts:
+      - `output/playwright/p12m2-modules-graph-filter.png`
+      - `output/playwright/p12m2-bfs-smoke.png`
+      - `output/playwright/p12m2-smoke-report.txt`
 
 - [ ] P12-M3 Add `G-04`~`G-06`
   - DoD: implement the weighted shortest-path batch (`Dijkstra`, `Bellman-Ford`, `Floyd-Warshall`) with explicit distance/relaxation teaching states.

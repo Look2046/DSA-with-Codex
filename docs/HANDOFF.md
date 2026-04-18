@@ -2,7 +2,7 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
-## 2026-04-19 (P12-M1 hash foundations checkpoint)
+## 2026-04-19 (P12 hash closure + BFS checkpoint)
 
 ### Today Done
 - Continued on the first `P12` implementation branch:
@@ -42,23 +42,50 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - stop rule is written into the automation prompt:
     - stop once near-term `P12` work is complete
     - or once local time passes `2026-04-20 08:00 Asia/Shanghai`
+- Closed the `P12-M1` acceptance/documentation follow-up and committed:
+  - `docs: close p12-m1 hash acceptance` (`79c315b`)
+- Continued on the next implementation branch:
+  - `feat/p12-m2-bfs`
+- Implemented `G-03 Breadth-First Search (BFS)`:
+  - added graph runtime/model/test/page wiring:
+    - `src/modules/graph/bfs.ts`
+    - `src/modules/graph/bfsTimelineAdapter.ts`
+    - `src/modules/graph/bfs.test.ts`
+    - `src/modules/graph/bfsTimelineReplay.test.ts`
+    - `src/pages/modules/BfsPage.tsx`
+  - updated shared discovery/runtime wiring:
+    - `src/data/moduleRegistry.ts`
+    - `src/app/router.tsx`
+    - `src/i18n/translations.ts`
+    - `src/index.css`
+- Re-verified locally for `P12-M2`:
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules?category=graph`: `3` cards, `3` ready badges, `3` open links
+    - `/modules/bfs`: `0/34 -> 1/34`, console errors = `0`
+  - artifacts:
+    - `output/playwright/p12m2-modules-graph-filter.png`
+    - `output/playwright/p12m2-bfs-smoke.png`
+    - `output/playwright/p12m2-smoke-report.txt`
 
 ### Current State
 - Branch:
-  - `feat/p12-m1-hash-foundations`
-- `P12-M1` is now accepted locally:
-  - `H-01` / `H-02` code, tests, i18n, route wiring, registry wiring, and styling are landed
+  - `feat/p12-m2-bfs`
+- `P12-M1` accepted baseline is committed on the parent branch history:
+  - `59fe92e` `feat: add hash table foundation modules`
+  - `79c315b` `docs: close p12-m1 hash acceptance`
+- `P12-M2` is now accepted locally:
+  - `G-03 BFS` code/tests/i18n/route wiring/styling are landed
   - local quality gates are green:
     - `npm run check` passed on `2026-04-19`
-  - targeted Playwright smoke is now green with the long-lived local dev-server pattern:
-    - `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
-    - `/modules/hash-chaining`: `0/11 -> 1/11`, console errors = `0`
-    - `/modules/hash-open-addressing`: `0/21 -> 1/21`, console errors = `0`
+  - targeted Playwright smoke is green:
+    - `/modules?category=graph`: `3` cards, `3` ready badges, `3` open links
+    - `/modules/bfs`: `0/34 -> 1/34`, console errors = `0`
   - acceptance artifacts:
-    - `output/playwright/p12m1-modules-hash-filter.png`
-    - `output/playwright/p12m1-hash-chaining-smoke.png`
-    - `output/playwright/p12m1-hash-open-addressing-smoke.png`
-    - `output/playwright/p12m1-acceptance-report.txt`
+    - `output/playwright/p12m2-modules-graph-filter.png`
+    - `output/playwright/p12m2-bfs-smoke.png`
+    - `output/playwright/p12m2-smoke-report.txt`
 - Keep unrelated dirty items out of the hash commit:
   - `scripts/check-doc-links.sh`
   - `scripts/playwright-cli.sh`
@@ -70,11 +97,11 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - `student-dist/`
 
 ### Next Step
-- Create the focused `P12-M1` acceptance/docs commit on `feat/p12-m1-hash-foundations`.
-- Continue to `P12-M2` `G-03 BFS`:
-  - cut the next `feat/*` branch from the accepted hash baseline
-  - land BFS code/tests/i18n/route wiring
-  - rerun `npm run check` and targeted Playwright smoke on `/modules/bfs`
+- Continue to `P12-M3` weighted shortest-path modules:
+  - implement `G-04 Dijkstra`
+  - implement `G-05 Bellman-Ford`
+  - implement `G-06 Floyd-Warshall`
+  - rerun `npm run check` and targeted Playwright smoke across the three routes
 
 ## 2026-04-18 (P12 near-term roadmap split)
 

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN_P12
 
-Status: `P12-M1` accepted locally; next in sequence is `P12-M2` `G-03 BFS`
+Status: `P12-M2` accepted locally; next in sequence is `P12-M3` weighted shortest-path modules
 Branch model: `docs/*` for planning sync, `feat/*` per implementation milestone
 Primary goal: expand the product from the current 19 implemented modules toward the original 42-module blueprint by prioritizing hash-table foundations, deeper graph coverage, one heap-derived sorting extension, and the first string-algorithm module
 
@@ -89,6 +89,11 @@ Acceptance
 - `npm run check` passes
 - deterministic replay confirms the expected BFS order
 - targeted Playwright smoke confirms `/modules/bfs` opens and basic playback is stable
+
+Accepted locally (2026-04-19)
+- `/modules?category=graph`: `3` cards, `3` ready badges, `3` open links
+- `/modules/bfs`: opens cleanly, default `Next` advances `0/34 -> 1/34`, console errors = `0`
+- evidence saved under `output/playwright/p12m2-*`
 
 ### P12-M3 Add Weighted Shortest-Path Modules
 
