@@ -805,6 +805,17 @@ body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
+.string-cell-window {
+  border-color: #cddced;
+  background: #f4f8fd;
+}
+
+.string-cell-verified {
+  border-color: #b8d6ee;
+  background: #eef7ff;
+  color: #2d5b86;
+}
+
 .string-cell-active {
   border-color: #efc57a;
   background: #fff8ec;
@@ -822,6 +833,49 @@ body {
   border-color: #c6e1cf;
   background: #f3fbf6;
   color: #2d6a41;
+}
+
+.string-cell-collision {
+  border-color: #e8b8b8;
+  background: #fff2f2;
+  color: #a24a4a;
+  box-shadow: 0 0 0 1px rgba(214, 102, 102, 0.18);
+}
+
+.string-hash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.string-hash-card {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #d7e6f3;
+  background: #f8fbff;
+}
+
+.string-hash-card span {
+  color: #63809d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.string-hash-card strong {
+  color: #244c74;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.string-scan-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-content: start;
 }
 
 .string-match-row {

@@ -473,20 +473,43 @@ Track actionable tasks here. Keep tasks small and testable.
       - `output/playwright/p12m6-modules-string-filter.png`
       - `output/playwright/p12m6-acceptance-report.txt`
 
-## Post-P12 (Next)
-- [ ] Define the post-`P12` planning baseline
+## Post-P12 (Planning Baseline)
+- [x] Define the post-`P12` planning baseline
   - DoD: choose the next execution wave from the remaining backlog and sync `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`.
   - Acceptance: all planning docs agree on the same post-`P12` boundary, and standalone/offline export work stays out of the active mainline backlog unless explicitly requested.
+  - Done (2026-04-19):
+    - added `docs/IMPLEMENTATION_PLAN_P13.md`
+    - fixed execution order as `ST-02 -> G-09 -> T-06 -> T-05`
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-## Long-Term (Post-P12 Backlog)
-- [ ] `T-05` B-Tree / B+ Tree
+## P13 (In Progress)
+- [x] P13-M1 Add `ST-02 Rabin-Karp`
+  - DoD: add deterministic rolling-hash/collision-verification playback with full page/route/tests/i18n wiring.
+  - Acceptance: `npm run check` passes and targeted Playwright smoke on `/modules/rabin-karp` is stable.
+  - Done (2026-04-19):
+    - landed `rabinKarp.ts` + timeline adapter + tests + replay test + page/route/registry wiring
+    - targeted smoke confirmed `/modules?category=string`: `2` cards, `2` ready badges, `2` open links
+    - `/modules/rabin-karp`: default `Next` advances `0/46 -> 1/46`, console errors = `0`
+    - artifacts: `output/playwright/p13m1-*`
+
+- [x] P13-M2 Add `G-09 Topological Sort`
+  - DoD: implement deterministic Kahn queue + indegree teaching module with full page/route/tests/i18n wiring.
+  - Acceptance: `npm run check` passes and targeted Playwright smoke on `/modules/topological-sort` is stable.
+  - Done (2026-04-19):
+    - landed `topologicalSort.ts` + timeline adapter + tests + replay test + page/route/registry wiring
+    - targeted smoke confirmed `/modules?category=graph`: `9` cards, `9` ready badges, `9` open links
+    - `/modules/topological-sort`: default `Next` advances `0/46 -> 1/46`, console errors = `0`
+    - artifacts: `output/playwright/p13m2-*`
+
+## Next (After P13-M2)
 - [ ] `T-06` Trie
-- [ ] `G-09` Topological Sort
+- [ ] `T-05` B-Tree / B+ Tree
+
+## Long-Term (Post-P13 Backlog)
 - [ ] `S-08` Counting Sort
 - [ ] `S-09` Radix Sort
 - [ ] `S-10` Bucket Sort
 - [ ] `S-11` Sorting Race
-- [ ] `ST-02` Rabin-Karp
 - [ ] `P-01` Divide & Conquer
 - [ ] `P-02` Dynamic Programming
 - [ ] `P-03` Greedy

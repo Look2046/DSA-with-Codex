@@ -2,6 +2,76 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-19 (P13-M1 ST-02 + P13-M2 G-09 acceptance)
+
+### Today Done
+- Continued on post-`P12` implementation branch:
+  - `feat/p13-m1-rabin-karp`
+- Completed post-`P12` planning baseline:
+  - added `docs/IMPLEMENTATION_PLAN_P13.md`
+  - fixed execution order as `ST-02 -> G-09`, then tree backlog (`T-06 -> T-05`)
+  - kept standalone/offline export work out of the active mainline backlog
+- Implemented `ST-02 Rabin-Karp` end to end:
+  - `src/modules/string/rabinKarp.ts`
+  - `src/modules/string/rabinKarpTimelineAdapter.ts`
+  - `src/modules/string/rabinKarp.test.ts`
+  - `src/modules/string/rabinKarpTimelineReplay.test.ts`
+  - `src/pages/modules/RabinKarpPage.tsx`
+- Implemented `G-09 Topological Sort` end to end:
+  - `src/modules/graph/topologicalSort.ts`
+  - `src/modules/graph/topologicalSortTimelineAdapter.ts`
+  - `src/modules/graph/topologicalSort.test.ts`
+  - `src/modules/graph/topologicalSortTimelineReplay.test.ts`
+  - `src/pages/modules/TopologicalSortPage.tsx`
+- Updated shared discovery/runtime/i18n wiring for `ST-02` + `G-09`:
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/pages/modulesPageUtils.test.ts`
+  - `src/index.css`
+- Re-verified locally:
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules?category=string`: `2` cards, `2` ready badges, `2` open links
+    - `/modules/rabin-karp`: `0/46 -> 1/46`, console errors = `0`
+    - `/modules?category=graph`: `9` cards, `9` ready badges, `9` open links
+    - `/modules/topological-sort`: `0/46 -> 1/46`, console errors = `0`
+  - artifacts:
+    - `output/playwright/p13m1-modules-string-filter.png`
+    - `output/playwright/p13m1-rabin-karp-smoke.png`
+    - `output/playwright/p13m1-smoke-report.txt`
+    - `output/playwright/p13m2-modules-graph-filter.png`
+    - `output/playwright/p13m2-g09-topological-sort-smoke.png`
+    - `output/playwright/p13m2-g09-smoke-report.txt`
+
+### Current State
+- Branch:
+  - `feat/p13-m1-rabin-karp`
+- Accepted locally:
+  - `P13-M1` `ST-02 Rabin-Karp`
+  - `P13-M2` `G-09 Topological Sort`
+- Local quality gate is green:
+  - `npm run check` passed on `2026-04-19`
+- Discovery surface now verifies:
+  - `/modules`: `33` cards, `31` ready badges, `31` open links
+  - remaining pending modules in registry: `T-05`, `T-06`
+- Keep unrelated dirty items out of the next commit:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Create one focused commit for validated `P13-M1` / `P13-M2` changes
+- Continue on the next `feat/*` branch with tree backlog:
+  - `T-06 Trie`
+  - `T-05 B-Tree / B+ Tree`
+
 ## 2026-04-19 (P12-M5 sort + string acceptance, P12-M6 closure)
 
 ### Today Done

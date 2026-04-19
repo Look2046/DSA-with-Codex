@@ -1,0 +1,36 @@
+/modules?category=string counts: ### Result
+"{\"cards\":2,\"ready\":0,\"open\":0}"
+### Ran Playwright code
+```js
+await page.evaluate('() => JSON.stringify({cards:document.querySelectorAll(\'.module-card\').length,ready:document.querySelectorAll(\'.module-status-ready\').length,open:document.querySelectorAll(\'.module-link:not([disabled])\').length})');
+```
+/modules?category=string console(error):
+### Result
+- [Console](.playwright-cli/console-2026-04-19T05-15-42-946Z.log)
+/modules/rabin-karp click next: ### Result
+"clicked"
+### Ran Playwright code
+```js
+await page.evaluate('() => { const btn=[...document.querySelectorAll(\'button\')].find((b)=>/^(Next|下一步)$/.test((b.textContent||\'\').trim())); if (!btn) return \'missing\'; btn.click(); return \'clicked\'; }');
+```
+### Page
+- Page URL: http://127.0.0.1:4173/modules/rabin-karp
+- Page Title: m0-scaffold-tmp
+/modules/rabin-karp transport before: ### Result
+"0/46"
+### Ran Playwright code
+```js
+await page.evaluate('() => document.querySelector(\'.tree-workspace-transport-step\')?.textContent?.trim() ?? \'\'');
+```
+/modules/rabin-karp transport after: ### Result
+"1/46"
+### Ran Playwright code
+```js
+await page.evaluate('() => document.querySelector(\'.tree-workspace-transport-step\')?.textContent?.trim() ?? \'\'');
+```
+/modules/rabin-karp console(error):
+### Result
+- [Console](.playwright-cli/console-2026-04-19T05-16-53-051Z.log)
+artifacts:
+- output/playwright/p13m1-modules-string-filter.png
+- output/playwright/p13m1-rabin-karp-smoke.png

@@ -5,12 +5,12 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p12-m5-heap-sort-kmp`
-- Current phase: `P12-M6` near-term wave is accepted locally; the next priority is the post-`P12` planning baseline for the remaining backlog
+- Active branch (expected): `feat/p13-m1-rabin-karp`
+- Current phase: `P13-M2` is accepted locally (`ST-02` + `G-09`); the next priority is tree backlog execution (`T-06` then `T-05`)
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-19, `feat/p12-m5-heap-sort-kmp`)
+  - `npm run check` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke + acceptance refresh (passed locally, 2026-04-19, `feat/p12-m5-heap-sort-kmp`)
+  - targeted Playwright smoke for `ST-02` and `G-09` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
 
 ## 2) What Is Already Done
 
@@ -247,6 +247,30 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p12m6-modules-sort-filter.png`
     - `output/playwright/p12m6-modules-string-filter.png`
     - `output/playwright/p12m6-acceptance-report.txt`
+- Post-`P12` planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P13.md`
+  - chose immediate execution order as `ST-02` -> `G-09`, then tree backlog (`T-06` -> `T-05`)
+  - kept standalone/offline export work excluded from the mainline backlog unless explicitly requested
+- `P13-M1` `ST-02 Rabin-Karp` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed rolling-hash generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=string`: `2` cards, `2` ready badges, `2` open links
+    - `/modules/rabin-karp`: opens cleanly, default `Next` advances `0/46 -> 1/46`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m1-modules-string-filter.png`
+    - `output/playwright/p13m1-rabin-karp-smoke.png`
+    - `output/playwright/p13m1-smoke-report.txt`
+- `P13-M2` `G-09 Topological Sort` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed Kahn queue + indegree progression generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `9` cards, `9` ready badges, `9` open links
+    - `/modules/topological-sort`: opens cleanly, default `Next` advances `0/46 -> 1/46`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m2-modules-graph-filter.png`
+    - `output/playwright/p13m2-g09-topological-sort-smoke.png`
+    - `output/playwright/p13m2-g09-smoke-report.txt`
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -320,11 +344,12 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Start the post-`P12` planning baseline before new implementation starts:
-  - choose the next execution wave from the remaining backlog
-  - keep one-off standalone/offline export work out of the mainline roadmap unless the user explicitly reopens it
+- Continue `P13` after `ST-02` / `G-09` acceptance by executing the tree backlog in order:
+  - `T-06 Trie`
+  - `T-05 B-Tree / B+ Tree`
 - Keep the remaining blueprint items in the explicit backlog:
-  - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
+  - `S-08`~`S-11`, `P-01`~`P-05`
+- Keep one-off standalone/offline export work out of the mainline roadmap unless the user explicitly reopens it
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

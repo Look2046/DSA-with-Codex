@@ -1,0 +1,36 @@
+/modules?category=graph counts: ### Result
+"{\"cards\":9,\"ready\":9,\"open\":9}"
+### Ran Playwright code
+```js
+await page.evaluate('() => JSON.stringify({cards:document.querySelectorAll(\'.module-card\').length,ready:[...document.querySelectorAll(\'.module-badge\')].filter((el)=>/(Ready|已就绪)/.test(el.textContent||\'\')).length,open:[...document.querySelectorAll(\'.module-card a\')].filter((el)=>/(Open|打开)/.test(el.textContent||\'\')).length})');
+```
+/modules?category=graph console(error):
+### Result
+- [Console](.playwright-cli/console-2026-04-19T05-32-56-595Z.log)
+/modules/topological-sort click next: ### Result
+"clicked"
+### Ran Playwright code
+```js
+await page.evaluate('() => { const btn=[...document.querySelectorAll(\'button\')].find((b)=>/^(Next|下一步)$/.test((b.textContent||\'\').trim())); if (!btn) return \'missing\'; btn.click(); return \'clicked\'; }');
+```
+### Page
+- Page URL: http://127.0.0.1:4173/modules/topological-sort
+- Page Title: m0-scaffold-tmp
+/modules/topological-sort transport before: ### Result
+"0/46"
+### Ran Playwright code
+```js
+await page.evaluate('() => document.querySelector(\'.tree-workspace-transport-step\')?.textContent?.trim() ?? \'\'');
+```
+/modules/topological-sort transport after: ### Result
+"1/46"
+### Ran Playwright code
+```js
+await page.evaluate('() => document.querySelector(\'.tree-workspace-transport-step\')?.textContent?.trim() ?? \'\'');
+```
+/modules/topological-sort console(error):
+### Result
+- [Console](.playwright-cli/console-2026-04-19T05-33-05-497Z.log)
+artifacts:
+- output/playwright/p13m2-modules-graph-filter.png
+- output/playwright/p13m2-g09-topological-sort-smoke.png

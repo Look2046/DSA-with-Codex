@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260419-63
+- Date: 2026-04-19
+- Status: accepted
+- Context: After `P12` closure, the backlog still contained both category-expansion modules (`ST-02`, `G-09`) and deeper tree work (`T-06`, `T-05`), so the team needed a low-regression execution order that could keep momentum while preserving the shared shell contract.
+- Decision: Define `P13` as `ST-02 Rabin-Karp` first (reuse the new string-track scaffold), then `G-09 Topological Sort` (reuse the accepted graph-track scaffold), and only then continue tree backlog execution (`T-06` -> `T-05`).
+- Alternatives considered: start tree work immediately after `P12`; run `G-09` before `ST-02`; split `ST-02` and `G-09` into unrelated branches without one baseline.
+- Consequences: post-`P12` progression stays deterministic with two fast acceptance milestones before entering heavier tree modules; tree backlog is deferred slightly but with cleaner docs/state alignment and lower integration risk.
+- Owner: haoyu + codex
+
 ## DEC-20260419-62
 - Date: 2026-04-19
 - Status: accepted
