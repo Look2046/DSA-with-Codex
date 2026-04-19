@@ -15,6 +15,10 @@ import { ShellSortPage } from '../pages/modules/ShellSortPage';
 import { QuickSortPage } from '../pages/modules/QuickSortPage';
 import { MergeSortPage } from '../pages/modules/MergeSortPage';
 import { HeapSortPage } from '../pages/modules/HeapSortPage';
+import { CountingSortPage } from '../pages/modules/CountingSortPage';
+import { RadixSortPage } from '../pages/modules/RadixSortPage';
+import { BucketSortPage } from '../pages/modules/BucketSortPage';
+import { SortingRacePage } from '../pages/modules/SortingRacePage';
 import { BinarySearchPage } from '../pages/modules/BinarySearchPage';
 import { LinearSearchPage } from '../pages/modules/LinearSearchPage';
 import { StackPage } from '../pages/modules/StackPage';
@@ -38,6 +42,11 @@ import { HashChainingPage } from '../pages/modules/HashChainingPage';
 import { HashOpenAddressingPage } from '../pages/modules/HashOpenAddressingPage';
 import { KmpPage } from '../pages/modules/KmpPage';
 import { RabinKarpPage } from '../pages/modules/RabinKarpPage';
+import { DivideConquerPage } from '../pages/modules/DivideConquerPage';
+import { DynamicProgrammingPage } from '../pages/modules/DynamicProgrammingPage';
+import { GreedyPage } from '../pages/modules/GreedyPage';
+import { BacktrackingPage } from '../pages/modules/BacktrackingPage';
+import { UnionFindPage } from '../pages/modules/UnionFindPage';
 import { BinaryTreeCanvasPlaygroundPage } from '../pages/modules/BinaryTreeCanvasPlaygroundPage';
 
 export const router = createBrowserRouter([
@@ -55,6 +64,10 @@ export const router = createBrowserRouter([
       { path: 'modules/quick-sort', element: <QuickSortPage /> },
       { path: 'modules/merge-sort', element: <MergeSortPage /> },
       { path: 'modules/heap-sort', element: <HeapSortPage /> },
+      { path: 'modules/counting-sort', element: <CountingSortPage /> },
+      { path: 'modules/radix-sort', element: <RadixSortPage /> },
+      { path: 'modules/bucket-sort', element: <BucketSortPage /> },
+      { path: 'modules/sorting-race', element: <SortingRacePage /> },
       { path: 'modules/linear-search', element: <LinearSearchPage /> },
       { path: 'modules/binary-search', element: <BinarySearchPage /> },
       { path: 'modules/array', element: <ArrayPage /> },
@@ -81,6 +94,11 @@ export const router = createBrowserRouter([
       { path: 'modules/hash-open-addressing', element: <HashOpenAddressingPage /> },
       { path: 'modules/kmp', element: <KmpPage /> },
       { path: 'modules/rabin-karp', element: <RabinKarpPage /> },
+      { path: 'modules/divide-conquer', element: <DivideConquerPage /> },
+      { path: 'modules/dynamic-programming', element: <DynamicProgrammingPage /> },
+      { path: 'modules/greedy', element: <GreedyPage /> },
+      { path: 'modules/backtracking', element: <BacktrackingPage /> },
+      { path: 'modules/union-find', element: <UnionFindPage /> },
       { path: 'playground/binary-tree-canvas', element: <BinaryTreeCanvasPlaygroundPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: '*', element: <NotFoundPage /> },

@@ -5,12 +5,15 @@ Use this file as the first thing to read in a new chat/session.
 ## 1) Current Snapshot
 
 - Project: Data Structure Algorithm Visualizor
-- Active branch (expected): `feat/p13-m1-rabin-karp`
-- Current phase: `P13` is accepted locally; the current module registry is fully implemented (`33/33` ready), and any next step beyond this point is a new planning decision against the long-term backlog
+- Active branch (expected): `feat/p14-backlog-wave`
+- Current phase: `P14` blueprint closure is complete locally; the original `42/42` module surface is now implemented and verified on `feat/p14-backlog-wave`
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
+  - `npm run check` (passed locally, 2026-04-19, `feat/p14-backlog-wave`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke for `/modules?category=tree`, `T-06 Trie`, and `T-05 B-Tree / B+ Tree` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
+  - targeted Playwright smoke for `P14` closure (passed locally, 2026-04-19, `feat/p14-backlog-wave`):
+    - `/modules`: `42` cards, `42` ready badges, `42` open links
+    - `/modules?category=sort`: `11` cards, `11` ready badges, `11` open links
+    - `/modules?category=paradigm`: `5` cards, `5` ready badges, `5` open links
 
 ## 2) What Is Already Done
 
@@ -290,6 +293,25 @@ Use this file as the first thing to read in a new chat/session.
 - `P13-M5` current functional-module closure completed locally:
   - `/modules` now verifies `33` cards, `33` ready badges, and `33` open links
   - the shared runtime registry no longer has any pending module cards
+- `P14` planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P14.md`
+  - selected the final backlog wave as `S-08`~`S-11` plus `P-01`~`P-05`
+  - chose a new `paradigm` category for the concept/technique track so `/modules` can group `P-01`~`P-05` explicitly
+- `P14-M1` / `P14-M2` sorting backlog closure completed locally:
+  - landed `S-08 Counting Sort`, `S-09 Radix Sort`, `S-10 Bucket Sort`, and `S-11 Sorting Race`
+  - updated route/registry/style wiring for the expanded sorting track
+  - local `npm run check` passed on `2026-04-19` (`feat/p14-backlog-wave`)
+- `P14-M3` / `P14-M4` paradigm-track closure completed locally:
+  - landed `P-01 Divide & Conquer`, `P-02 Dynamic Programming`, `P-03 Greedy`, `P-04 Backtracking`, and `P-05 Union-Find`
+  - opened the `paradigm` category across discovery/filtering, routing, registry, tests, and zh/en copy
+  - localized the `Greedy` stage lane-state labels so the final paradigm batch stays zh/en-consistent
+- `P14-M5` original blueprint closure completed locally:
+  - `/modules` now verifies `42` cards, `42` ready badges, and `42` open links
+  - `/modules?category=sort` verifies `11` ready/open sorting cards
+  - `/modules?category=paradigm` verifies `5` ready/open paradigm cards
+  - all `9` newly landed `P14` module routes open cleanly, default `Next` advances, and no browser-side runtime errors were captured in the targeted Playwright smoke
+  - refreshed acceptance artifacts/report under `output/playwright/p14m5-*`
+  - the runtime registry now has no pending entries left in the original 42-module blueprint
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -363,9 +385,8 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- The current functional module registry is complete locally; do not start new implementation work until the next expansion wave is chosen explicitly from the long-term backlog
-- Keep the remaining blueprint items in the explicit backlog:
-  - `S-08`~`S-11`, `P-01`~`P-05`
+- Merge the validated `P14` closure branch once review/backup needs are satisfied.
+- Only open a new implementation phase if the user explicitly adds scope beyond the original 42-module blueprint.
 - Keep one-off standalone/offline export work out of the mainline roadmap unless the user explicitly reopens it
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`

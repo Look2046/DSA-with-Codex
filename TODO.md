@@ -529,16 +529,62 @@ Track actionable tasks here. Keep tasks small and testable.
     - the runtime module registry has no pending entries left
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-## Long-Term (Post-P13 Backlog)
-- [ ] `S-08` Counting Sort
-- [ ] `S-09` Radix Sort
-- [ ] `S-10` Bucket Sort
-- [ ] `S-11` Sorting Race
-- [ ] `P-01` Divide & Conquer
-- [ ] `P-02` Dynamic Programming
-- [ ] `P-03` Greedy
-- [ ] `P-04` Backtracking
-- [ ] `P-05` Union-Find
+## P14 (Closed Locally)
+- [x] P14 planning baseline
+  - DoD: choose the final backlog execution wave, define the new category strategy for `P-01`~`P-05`, and sync all planning docs.
+  - Acceptance: `docs/IMPLEMENTATION_PLAN_P14.md`, `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree that `P14` is the active phase and `paradigm` is the chosen category for the final concept/technique track.
+  - Done (2026-04-19):
+    - added `docs/IMPLEMENTATION_PLAN_P14.md`
+    - selected the final wave as `S-08`~`S-11` plus `P-01`~`P-05`
+    - chose the new `paradigm` category for `P-01`~`P-05`
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
+
+- [x] P14-M1 Add `S-08` / `S-09`
+  - DoD: implement `Counting Sort` and `Radix Sort` with full generator/timeline/page/test/i18n/route wiring.
+  - Acceptance: `npm run check` passes and `/modules?category=sort` shows both routes as ready/open.
+  - Done (2026-04-19):
+    - added `countingSort.ts` / `countingTimelineAdapter.ts` / `countingSort.test.ts` / `countingTimelineReplay.test.ts` / `CountingSortPage.tsx`
+    - added `radixSort.ts` / `radixTimelineAdapter.ts` / `radixSort.test.ts` / `radixTimelineReplay.test.ts` / `RadixSortPage.tsx`
+    - updated route/registry/style wiring for both sorting modules
+    - local `npm run check` passes on `feat/p14-backlog-wave`
+
+- [x] P14-M2 Add `S-10` / `S-11`
+  - DoD: implement `Bucket Sort` and `Sorting Race` with full generator/timeline/page/test/i18n/route wiring.
+  - Acceptance: `npm run check` passes and `/modules?category=sort` reaches `11` ready/open cards.
+  - Done (2026-04-19):
+    - added `bucketSort.ts` / `bucketTimelineAdapter.ts` / `bucketSort.test.ts` / `bucketTimelineReplay.test.ts` / `BucketSortPage.tsx`
+    - added `sortingRace.ts` / `sortingRaceTimelineAdapter.ts` / `sortingRace.test.ts` / `sortingRaceTimelineReplay.test.ts` / `SortingRacePage.tsx`
+    - updated route/registry/style wiring for both sorting modules
+    - local `npm run check` passes on `feat/p14-backlog-wave`
+
+- [x] P14-M3 Add `P-01` / `P-02` / `P-03`
+  - DoD: open the `paradigm` category and land `Divide & Conquer`, `Dynamic Programming`, and `Greedy` as full teaching modules.
+  - Acceptance: `npm run check` passes and `/modules?category=paradigm` shows the first 3 routes as ready/open.
+  - Done (2026-04-19):
+    - added `src/modules/paradigm/divideConquer.ts` / `divideConquerTimelineAdapter.ts` / `divideConquer.test.ts` / `divideConquerTimelineReplay.test.ts` / `DivideConquerPage.tsx`
+    - added `src/modules/paradigm/dynamicProgramming.ts` / `dynamicProgrammingTimelineAdapter.ts` / `dynamicProgramming.test.ts` / `dynamicProgrammingTimelineReplay.test.ts` / `DynamicProgrammingPage.tsx`
+    - added `src/modules/paradigm/greedy.ts` / `greedyTimelineAdapter.ts` / `greedy.test.ts` / `greedyTimelineReplay.test.ts` / `GreedyPage.tsx`
+    - opened the `paradigm` category across `src/types/module.ts`, `src/pages/ModulesPage.tsx`, `src/pages/modulesPageUtils.test.ts`, `src/data/moduleRegistry.ts`, `src/app/router.tsx`, and `src/i18n/translations.ts`
+    - `/modules?category=paradigm` now shows `5` cards, `5` ready badges, and `5` open links in the final closure pass
+
+- [x] P14-M4 Add `P-04` / `P-05`
+  - DoD: land `Backtracking` and `Union-Find` as full teaching modules on the new `paradigm` track.
+  - Acceptance: `npm run check` passes and `/modules?category=paradigm` reaches `5` ready/open cards.
+  - Done (2026-04-19):
+    - added `src/modules/paradigm/backtracking.ts` / `backtrackingTimelineAdapter.ts` / `backtracking.test.ts` / `backtrackingTimelineReplay.test.ts` / `BacktrackingPage.tsx`
+    - added `src/modules/paradigm/unionFind.ts` / `unionFindTimelineAdapter.ts` / `unionFind.test.ts` / `unionFindTimelineReplay.test.ts` / `UnionFindPage.tsx`
+    - refreshed shared page helpers/style wiring for the final paradigm batch
+    - localized the remaining `Greedy` lane-state labels so the new paradigm pages stay zh/en-consistent
+
+- [x] P14-M5 Close the original 42-module blueprint
+  - DoD: refresh discovery/acceptance evidence and sync closure docs after all 9 modules land.
+  - Acceptance: `npm run check` passes and `/modules` shows `42` cards, `42` ready badges, and `42` open links.
+  - Done (2026-04-19):
+    - `/modules` now verifies `42` cards, `42` ready badges, and `42` open links
+    - `/modules?category=sort` verifies `11` cards, `11` ready badges, and `11` open links
+    - `/modules?category=paradigm` verifies `5` cards, `5` ready badges, and `5` open links
+    - targeted Playwright smoke confirmed the 9 newly landed `P14` routes all open cleanly, default `Next` advances, and captured no runtime errors
+    - refreshed `output/playwright/p14m5-*.png` and `output/playwright/p14m5-acceptance-report.txt`
 
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)

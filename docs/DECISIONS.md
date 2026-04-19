@@ -14,6 +14,24 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260419-66
+- Date: 2026-04-19
+- Status: accepted
+- Context: The final 9 backlog items combined four classic sorting modules with five concept/technique modules labeled `P-01`~`P-05`, but the runtime discovery system only supported category families such as `sort`, `tree`, `graph`, `hash`, and `string`, so the project needed a durable way to surface the last group without pretending they belong to an unrelated category.
+- Decision: Introduce a new runtime category `paradigm` and use it for `P-01 Divide & Conquer`, `P-02 Dynamic Programming`, `P-03 Greedy`, `P-04 Backtracking`, and `P-05 Union-Find`, treating that group as an algorithmic-thinking / technique track inside `/modules`.
+- Alternatives considered: force `P-01`~`P-05` into existing categories such as `graph` or `string`; keep them ungrouped and only reachable by direct routes; split `Union-Find` into another one-off category.
+- Consequences: discovery, routing, i18n, and tests need one more category branch, but the final blueprint stays understandable and future technique-oriented modules have an explicit home instead of drifting between unrelated tracks.
+- Owner: haoyu + codex
+
+## DEC-20260419-65
+- Date: 2026-04-19
+- Status: accepted
+- Context: After `P13` closed the current 33-module registry, the repo still carried the explicit long-term backlog (`S-08`~`S-11`, `P-01`~`P-05`). The user then chose to finish all remaining items in one autonomous wave, so the project needed a new execution plan instead of leaving the final blueprint boundary ambiguous.
+- Decision: Define `P14` as the final blueprint-closure wave: finish sorting backlog first (`S-08` -> `S-09` -> `S-10` -> `S-11`), then finish the new `paradigm` track (`P-01` -> `P-02` -> `P-03` -> `P-04` -> `P-05`), and close with refreshed discovery/acceptance evidence for the full `42/42` module surface.
+- Alternatives considered: continue leaving the 9 items as a passive long-term backlog; implement the 9 items in ad-hoc order without a new phase boundary; split sorting and paradigm work into unrelated future waves.
+- Consequences: the roadmap regains a concrete final milestone and the original 42-module blueprint becomes explicitly achievable in one tracked phase, at the cost of a larger implementation wave that must stay disciplined around shared module/page templates and frequent handoff updates.
+- Owner: haoyu + codex
+
 ## DEC-20260419-64
 - Date: 2026-04-19
 - Status: accepted

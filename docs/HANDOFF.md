@@ -2,6 +2,191 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-19 (P14 closure: original 42-module blueprint complete locally)
+
+### Today Done
+- Continued on the final backlog branch:
+  - `feat/p14-backlog-wave`
+- Finished the new paradigm track end to end:
+  - implemented `P-01 Divide & Conquer`
+  - implemented `P-02 Dynamic Programming`
+  - implemented `P-03 Greedy`
+  - implemented `P-04 Backtracking`
+  - implemented `P-05 Union-Find`
+- Added paradigm-track runtime/test/page wiring:
+  - `src/modules/paradigm/divideConquer.ts`
+  - `src/modules/paradigm/divideConquerTimelineAdapter.ts`
+  - `src/modules/paradigm/divideConquer.test.ts`
+  - `src/modules/paradigm/divideConquerTimelineReplay.test.ts`
+  - `src/pages/modules/DivideConquerPage.tsx`
+  - `src/modules/paradigm/dynamicProgramming.ts`
+  - `src/modules/paradigm/dynamicProgrammingTimelineAdapter.ts`
+  - `src/modules/paradigm/dynamicProgramming.test.ts`
+  - `src/modules/paradigm/dynamicProgrammingTimelineReplay.test.ts`
+  - `src/pages/modules/DynamicProgrammingPage.tsx`
+  - `src/modules/paradigm/greedy.ts`
+  - `src/modules/paradigm/greedyTimelineAdapter.ts`
+  - `src/modules/paradigm/greedy.test.ts`
+  - `src/modules/paradigm/greedyTimelineReplay.test.ts`
+  - `src/pages/modules/GreedyPage.tsx`
+  - `src/modules/paradigm/backtracking.ts`
+  - `src/modules/paradigm/backtrackingTimelineAdapter.ts`
+  - `src/modules/paradigm/backtracking.test.ts`
+  - `src/modules/paradigm/backtrackingTimelineReplay.test.ts`
+  - `src/pages/modules/BacktrackingPage.tsx`
+  - `src/modules/paradigm/unionFind.ts`
+  - `src/modules/paradigm/unionFindTimelineAdapter.ts`
+  - `src/modules/paradigm/unionFind.test.ts`
+  - `src/modules/paradigm/unionFindTimelineReplay.test.ts`
+  - `src/pages/modules/UnionFindPage.tsx`
+- Closed the original 42-module blueprint in the shared runtime layer:
+  - `src/types/module.ts`
+  - `src/pages/ModulesPage.tsx`
+  - `src/pages/modulesPageUtils.test.ts`
+  - `src/data/moduleRegistry.ts`
+  - `src/app/router.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `src/pages/modules/modulePageHelpers.ts`
+- Applied one final polish fix before handoff:
+  - localized the `Greedy` stage lane-state text (`picked / seen / queued`) to follow zh/en switching
+- Refreshed targeted Playwright acceptance evidence for the final closure surface:
+  - `/modules`: `42` cards, `42` ready badges, `42` open links
+  - `/modules?category=sort`: `11` cards, `11` ready badges, `11` open links
+  - `/modules?category=paradigm`: `5` cards, `5` ready badges, `5` open links
+  - `S-08` / `S-09` / `S-10` / `S-11` / `P-01` / `P-02` / `P-03` / `P-04` / `P-05` all open cleanly and default `Next` advances
+  - artifacts:
+    - `output/playwright/p14m5-modules-smoke.png`
+    - `output/playwright/p14m5-modules-sort-filter.png`
+    - `output/playwright/p14m5-modules-paradigm-filter.png`
+    - `output/playwright/p14m5-counting-sort-smoke.png`
+    - `output/playwright/p14m5-radix-sort-smoke.png`
+    - `output/playwright/p14m5-bucket-sort-smoke.png`
+    - `output/playwright/p14m5-sorting-race-smoke.png`
+    - `output/playwright/p14m5-divide-conquer-smoke.png`
+    - `output/playwright/p14m5-dynamic-programming-smoke.png`
+    - `output/playwright/p14m5-greedy-smoke.png`
+    - `output/playwright/p14m5-backtracking-smoke.png`
+    - `output/playwright/p14m5-union-find-smoke.png`
+    - `output/playwright/p14m5-acceptance-report.txt`
+- Synced closure-state docs:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `TODO.md`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Accepted locally:
+  - `P14-M1` `S-08` / `S-09`
+  - `P14-M2` `S-10` / `S-11`
+  - `P14-M3` `P-01` / `P-02` / `P-03`
+  - `P14-M4` `P-04` / `P-05`
+  - `P14-M5` original 42-module blueprint closure
+- Discovery surface now verifies:
+  - `/modules`: `42` cards, `42` ready badges, `42` open links
+  - `/modules?category=sort`: `11` cards, `11` ready badges, `11` open links
+  - `/modules?category=paradigm`: `5` cards, `5` ready badges, `5` open links
+- Local quality gate is green:
+  - `npm run check` passed on `2026-04-19`
+- Keep unrelated dirty items out of the closure commit:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Create one focused commit for the validated `P14` closure and push it from WSL git.
+- After push, the next recommended git action is merge once the 42-module closure is reviewable and rollback-safe.
+
+## 2026-04-19 (P14 planning baseline: final 9 backlog items selected)
+
+### Today Done
+- Continued from the accepted `P13` closure baseline and opened a new implementation branch:
+  - `feat/p14-backlog-wave`
+- Read and re-confirmed the active source-of-truth docs before coding:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Chose the next execution wave explicitly instead of leaving the remaining work in passive backlog:
+  - sorting backlog: `S-08 Counting Sort`, `S-09 Radix Sort`, `S-10 Bucket Sort`, `S-11 Sorting Race`
+  - concept/technique backlog: `P-01 Divide & Conquer`, `P-02 Dynamic Programming`, `P-03 Greedy`, `P-04 Backtracking`, `P-05 Union-Find`
+- Added the `P14` planning baseline and synced planning-state docs:
+  - `docs/IMPLEMENTATION_PLAN_P14.md`
+  - `docs/SESSION_BRIEF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Recorded the new runtime-category decision:
+  - `P-01`~`P-05` will use a new `paradigm` category in `/modules`
+- Closed the sorting backlog end to end:
+  - implemented `S-08 Counting Sort`
+  - implemented `S-09 Radix Sort`
+  - implemented `S-10 Bucket Sort`
+  - implemented `S-11 Sorting Race`
+- Added sorting backlog runtime/test/page wiring:
+  - `src/modules/sorting/countingSort.ts`
+  - `src/modules/sorting/countingTimelineAdapter.ts`
+  - `src/modules/sorting/countingSort.test.ts`
+  - `src/modules/sorting/countingTimelineReplay.test.ts`
+  - `src/pages/modules/CountingSortPage.tsx`
+  - `src/modules/sorting/radixSort.ts`
+  - `src/modules/sorting/radixTimelineAdapter.ts`
+  - `src/modules/sorting/radixSort.test.ts`
+  - `src/modules/sorting/radixTimelineReplay.test.ts`
+  - `src/pages/modules/RadixSortPage.tsx`
+  - `src/modules/sorting/bucketSort.ts`
+  - `src/modules/sorting/bucketTimelineAdapter.ts`
+  - `src/modules/sorting/bucketSort.test.ts`
+  - `src/modules/sorting/bucketTimelineReplay.test.ts`
+  - `src/pages/modules/BucketSortPage.tsx`
+  - `src/modules/sorting/sortingRace.ts`
+  - `src/modules/sorting/sortingRaceTimelineAdapter.ts`
+  - `src/modules/sorting/sortingRace.test.ts`
+  - `src/modules/sorting/sortingRaceTimelineReplay.test.ts`
+  - `src/pages/modules/SortingRacePage.tsx`
+- Updated shared runtime/style wiring for the sorting backlog:
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/index.css`
+  - `src/pages/modules/modulePageHelpers.ts`
+- Re-verified locally after closing the sorting backlog:
+  - full local gate:
+    - `npm run check`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Planning baseline is now explicit:
+  - `P14` is the active phase
+  - target closure surface is the original blueprint `42/42` modules
+- `P14-M1` and `P14-M2` are accepted locally:
+  - `S-08` / `S-09` / `S-10` / `S-11`
+- Remaining active work:
+  - `P-01 Divide & Conquer`
+  - `P-02 Dynamic Programming`
+  - `P-03 Greedy`
+  - `P-04 Backtracking`
+  - `P-05 Union-Find`
+- Keep unrelated dirty items out of future commits:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Expand the runtime layer with the new `paradigm` category
+- Implement the remaining `P14` modules (`P-01`~`P-05`)
+- Re-run `npm run check` and targeted Playwright smoke after the paradigm batch lands
+
 ## 2026-04-19 (P13 closure: T-06 + T-05 + full registry ready)
 
 ### Today Done
