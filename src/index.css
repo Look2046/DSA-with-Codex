@@ -2659,6 +2659,154 @@ body {
   background: #fff7e8;
 }
 
+.trie-stage-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.trie-node-layer {
+  inset: 0;
+}
+
+.trie-node {
+  min-width: 74px;
+  min-height: 74px;
+  width: auto;
+  height: auto;
+  padding: 10px 12px;
+  gap: 6px;
+}
+
+.trie-node-root {
+  background: #f0f4ff;
+}
+
+.trie-node-terminal {
+  border-color: #8bb67a;
+  background: #eef8ea;
+}
+
+.trie-node-char {
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.trie-node-word {
+  font-size: 0.62rem;
+  color: #577493;
+  line-height: 1.1;
+}
+
+.btree-compare-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 58px;
+}
+
+.btree-stage-panel {
+  position: relative;
+  min-height: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(170, 197, 221, 0.9);
+  background: linear-gradient(180deg, rgba(247, 251, 255, 0.95), rgba(240, 247, 255, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.btree-stage-panel-head {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px 0;
+}
+
+.btree-stage-panel-head strong {
+  font-size: 0.96rem;
+  color: #21466f;
+}
+
+.btree-stage-panel-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5e7a95;
+}
+
+.btree-stage-panel-canvas {
+  position: relative;
+  height: calc(100% - 48px);
+  min-height: 280px;
+}
+
+.btree-node-layer {
+  inset: 0;
+}
+
+.btree-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 16px;
+  border: 1px solid #bfd5ea;
+  background: #edf5fd;
+  box-shadow: 0 6px 12px rgba(31, 96, 163, 0.08);
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-width: 86px;
+  color: #1b456f;
+}
+
+.btree-node-leaf {
+  background: #eef7ea;
+  border-color: #bfd8b2;
+}
+
+.btree-node-keys {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.btree-node-key {
+  min-width: 24px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.btree-node-index,
+.btree-node-kind {
+  font-size: 0.62rem;
+  line-height: 1;
+  color: #5f7894;
+}
+
+.bplus-leaf-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bplus-leaf-strip-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #5e7a95;
+}
+
 .heap-array-cell.bar-swapping {
   border-color: #df8080;
   background: #fff0f0;

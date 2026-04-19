@@ -6,11 +6,11 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p13-m1-rabin-karp`
-- Current phase: `P13-M2` is accepted locally (`ST-02` + `G-09`); the next priority is tree backlog execution (`T-06` then `T-05`)
+- Current phase: `P13` is accepted locally; the current module registry is fully implemented (`33/33` ready), and any next step beyond this point is a new planning decision against the long-term backlog
 - Last local quality gates:
   - `npm run check` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke for `ST-02` and `G-09` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
+  - targeted Playwright smoke for `/modules?category=tree`, `T-06 Trie`, and `T-05 B-Tree / B+ Tree` (passed locally, 2026-04-19, `feat/p13-m1-rabin-karp`)
 
 ## 2) What Is Already Done
 
@@ -271,6 +271,25 @@ Use this file as the first thing to read in a new chat/session.
     - `output/playwright/p13m2-modules-graph-filter.png`
     - `output/playwright/p13m2-g09-topological-sort-smoke.png`
     - `output/playwright/p13m2-g09-smoke-report.txt`
+- `P13-M3` `T-06 Trie` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed trie generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=tree`: `6` cards, `6` ready badges, `6` open links
+    - `/modules/trie`: opens cleanly, default `Next` advances `0/11 -> 1/11`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m3-modules-tree-filter.png`
+    - `output/playwright/p13m3-trie-smoke.png`
+- `P13-M4` `T-05 B-Tree / B+ Tree` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed side-by-side B-Tree / B+ Tree insert generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules/btree`: opens cleanly, default `Next` advances `0/7 -> 1/7`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m3-btree-smoke.png`
+- `P13-M5` current functional-module closure completed locally:
+  - `/modules` now verifies `33` cards, `33` ready badges, and `33` open links
+  - the shared runtime registry no longer has any pending module cards
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -344,9 +363,7 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue `P13` after `ST-02` / `G-09` acceptance by executing the tree backlog in order:
-  - `T-06 Trie`
-  - `T-05 B-Tree / B+ Tree`
+- The current functional module registry is complete locally; do not start new implementation work until the next expansion wave is chosen explicitly from the long-term backlog
 - Keep the remaining blueprint items in the explicit backlog:
   - `S-08`~`S-11`, `P-01`~`P-05`
 - Keep one-off standalone/offline export work out of the mainline roadmap unless the user explicitly reopens it

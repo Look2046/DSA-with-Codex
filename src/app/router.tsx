@@ -23,6 +23,8 @@ import { BinaryTreeTraversalPage } from '../pages/modules/BinaryTreeTraversalPag
 import { BstPage } from '../pages/modules/BstPage';
 import { AvlTreePage } from '../pages/modules/AvlTreePage';
 import { HeapPage } from '../pages/modules/HeapPage';
+import { BTreePage } from '../pages/modules/BTreePage';
+import { TriePage } from '../pages/modules/TriePage';
 import { GraphRepresentationPage } from '../pages/modules/GraphRepresentationPage';
 import { DfsPage } from '../pages/modules/DfsPage';
 import { BfsPage } from '../pages/modules/BfsPage';
@@ -64,6 +66,8 @@ export const router = createBrowserRouter([
       { path: 'modules/bst', element: <BstPage /> },
       { path: 'modules/avl-tree', element: <AvlTreePage /> },
       { path: 'modules/heap', element: <HeapPage /> },
+      { path: 'modules/btree', element: <BTreePage /> },
+      { path: 'modules/trie', element: <TriePage /> },
       { path: 'modules/graph-representation', element: <GraphRepresentationPage /> },
       { path: 'modules/dfs', element: <DfsPage /> },
       { path: 'modules/bfs', element: <BfsPage /> },

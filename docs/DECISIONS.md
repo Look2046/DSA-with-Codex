@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260419-64
+- Date: 2026-04-19
+- Status: accepted
+- Context: After `T-06` and `T-05` landed, the runtime module registry no longer had any pending cards, but the original blueprint still contained additional long-term expansion items (`S-08`~`S-11`, `P-01`~`P-05`), so the project needed an explicit boundary between "current functional module set is complete" and "future roadmap expansion."
+- Decision: Treat `P13` closure as completion of the current functional module registry (`33/33` ready), keep `/modules` fully ready with no placeholder cards, and leave any further implementation to a future explicitly planned phase chosen from the long-term backlog instead of silently extending scope.
+- Alternatives considered: immediately continue into the long-term backlog without a new planning checkpoint; leave `T-05` / `T-06` implemented but keep docs describing the tree backlog as still active.
+- Consequences: the current product surface is now locally complete and easier to hand off, while future work requires an intentional planning reset rather than scope drift; docs and discovery metrics can now treat `33/33` as the validated baseline.
+- Owner: haoyu + codex
+
 ## DEC-20260419-63
 - Date: 2026-04-19
 - Status: accepted

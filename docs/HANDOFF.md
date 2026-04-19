@@ -2,6 +2,77 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-19 (P13 closure: T-06 + T-05 + full registry ready)
+
+### Today Done
+- Continued on the post-`P12` implementation branch:
+  - `feat/p13-m1-rabin-karp`
+- Implemented `T-06 Trie` end to end:
+  - `src/modules/tree/trie.ts`
+  - `src/modules/tree/trieTimelineAdapter.ts`
+  - `src/modules/tree/trie.test.ts`
+  - `src/modules/tree/trieTimelineReplay.test.ts`
+  - `src/pages/modules/TriePage.tsx`
+- Implemented `T-05 B-Tree / B+ Tree` end to end as one comparison module:
+  - `src/modules/tree/btreeComparison.ts`
+  - `src/modules/tree/btreeComparisonTimelineAdapter.ts`
+  - `src/modules/tree/btreeComparison.test.ts`
+  - `src/modules/tree/btreeComparisonTimelineReplay.test.ts`
+  - `src/pages/modules/BTreePage.tsx`
+- Updated shared discovery/runtime/i18n/style wiring for the final tree backlog closure:
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+- Re-verified locally:
+  - full local gate:
+    - `npm run check`
+  - targeted Playwright smoke:
+    - `/modules`: `33` cards, `33` ready badges, `33` open links
+    - `/modules?category=tree`: `6` cards, `6` ready badges, `6` open links
+    - `/modules/trie`: `0/11 -> 1/11`
+    - `/modules/btree`: `0/7 -> 1/7`
+  - artifacts:
+    - `output/playwright/p13m3-modules-tree-filter.png`
+    - `output/playwright/p13m3-trie-smoke.png`
+    - `output/playwright/p13m3-btree-smoke.png`
+    - `output/playwright/p13m3-acceptance-report.txt`
+- Synced closure-state docs for the completed registry baseline:
+  - `docs/SESSION_BRIEF.md`
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+
+### Current State
+- Branch:
+  - `feat/p13-m1-rabin-karp`
+- Accepted locally:
+  - `P13-M1` `ST-02 Rabin-Karp`
+  - `P13-M2` `G-09 Topological Sort`
+  - `P13-M3` `T-06 Trie`
+  - `P13-M4` `T-05 B-Tree / B+ Tree`
+  - `P13-M5` current functional module registry closure
+- Local quality gate is green:
+  - `npm run check` passed on `2026-04-19`
+- Discovery surface now verifies:
+  - `/modules`: `33` cards, `33` ready badges, `33` open links
+  - current runtime registry pending modules: `0`
+- Keep unrelated dirty items out of the next commit:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Create one focused commit for the validated `P13` closure change set
+- If work continues beyond the current functional-module baseline, start a new planning checkpoint from the long-term backlog:
+  - `S-08`~`S-11`
+  - `P-01`~`P-05`
+
 ## 2026-04-19 (P13-M1 ST-02 + P13-M2 G-09 acceptance)
 
 ### Today Done

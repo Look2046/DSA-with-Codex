@@ -482,7 +482,7 @@ Track actionable tasks here. Keep tasks small and testable.
     - fixed execution order as `ST-02 -> G-09 -> T-06 -> T-05`
     - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
-## P13 (In Progress)
+## P13 (Closed Locally)
 - [x] P13-M1 Add `ST-02 Rabin-Karp`
   - DoD: add deterministic rolling-hash/collision-verification playback with full page/route/tests/i18n wiring.
   - Acceptance: `npm run check` passes and targeted Playwright smoke on `/modules/rabin-karp` is stable.
@@ -501,9 +501,33 @@ Track actionable tasks here. Keep tasks small and testable.
     - `/modules/topological-sort`: default `Next` advances `0/46 -> 1/46`, console errors = `0`
     - artifacts: `output/playwright/p13m2-*`
 
-## Next (After P13-M2)
-- [ ] `T-06` Trie
-- [ ] `T-05` B-Tree / B+ Tree
+- [x] P13-M3 Add `T-06 Trie`
+  - DoD: add deterministic prefix-reuse / node-creation / terminal-search playback with full page/route/tests/i18n wiring.
+  - Acceptance: `npm run check` passes and targeted Playwright smoke on `/modules/trie` is stable.
+  - Done (2026-04-19):
+    - landed `trie.ts` + timeline adapter + tests + replay test + page/route/registry wiring
+    - targeted smoke confirmed `/modules?category=tree`: `6` cards, `6` ready badges, `6` open links
+    - `/modules/trie`: default `Next` advances `0/11 -> 1/11`
+    - artifacts:
+      - `output/playwright/p13m3-modules-tree-filter.png`
+      - `output/playwright/p13m3-trie-smoke.png`
+
+- [x] P13-M4 Add `T-05 B-Tree / B+ Tree`
+  - DoD: implement deterministic B-Tree / B+ Tree insert comparison playback with full page/route/tests/i18n wiring.
+  - Acceptance: `npm run check` passes and targeted Playwright smoke on `/modules/btree` is stable.
+  - Done (2026-04-19):
+    - landed `btreeComparison.ts` + timeline adapter + tests + replay test + page/route/registry wiring
+    - `/modules/btree`: default `Next` advances `0/7 -> 1/7`
+    - artifacts:
+      - `output/playwright/p13m3-btree-smoke.png`
+
+- [x] P13-M5 Close the current functional module registry
+  - DoD: all currently registered modules are implemented, `/modules` discovery is fully ready, and closure docs are synced.
+  - Acceptance: `npm run check` passes, `/modules` shows no pending cards, and closure docs agree on the new baseline.
+  - Done (2026-04-19):
+    - `/modules` now verifies `33` cards, `33` ready badges, and `33` open links
+    - the runtime module registry has no pending entries left
+    - synced `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md`
 
 ## Long-Term (Post-P13 Backlog)
 - [ ] `S-08` Counting Sort
