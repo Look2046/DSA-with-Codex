@@ -2659,10 +2659,16 @@ body {
 
 .tree-null-edge {
   fill: none;
-  stroke: #a6bfd8;
-  stroke-width: 0.38;
+  stroke: #90b7b2;
+  stroke-width: 0.28;
   stroke-linecap: round;
-  opacity: 0.92;
+  stroke-dasharray: 1 1.1;
+  opacity: 0.9;
+}
+
+.tree-null-edge-annotated {
+  stroke: #5f8f88;
+  stroke-width: 0.36;
 }
 
 .tree-null-node {
@@ -2671,19 +2677,30 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 999px;
-  border: 1px solid #97b2cf;
-  background: #eaf2fb;
-  color: #4f6984;
+  border: 1px solid #8eb7af;
+  background: #eef7f5;
+  color: #4d706a;
   display: grid;
   place-items: center;
   gap: 0;
   opacity: 0.96;
+  box-shadow: 0 4px 10px rgba(95, 143, 136, 0.12);
+}
+
+.tree-null-node.tree-null-node-annotated {
+  border-color: #5f8f88;
+  background: #dfeeea;
+  box-shadow:
+    0 0 0 2px rgba(152, 204, 194, 0.34),
+    0 8px 18px rgba(95, 143, 136, 0.16);
 }
 
 .tree-null-node.tree-null-active {
-  border-color: #5d86b3;
-  background: #dfeeff;
-  box-shadow: 0 0 0 1px rgba(93, 134, 179, 0.32);
+  border-color: #4d8078;
+  background: #d8ebe7;
+  box-shadow:
+    0 0 0 1px rgba(77, 128, 120, 0.22),
+    0 8px 16px rgba(77, 128, 120, 0.16);
 }
 
 .tree-null-value {
@@ -2696,6 +2713,58 @@ body {
   font-size: 0.48rem;
   font-weight: 700;
   line-height: 1;
+}
+
+.tree-null-annotation-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.tree-null-annotation-connector {
+  fill: none;
+  stroke: #5f8f88;
+  stroke-width: 0.34;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1.6 1;
+  opacity: 0.98;
+}
+
+.tree-null-annotation {
+  position: absolute;
+  pointer-events: none;
+  z-index: 6;
+  padding: 9px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(95, 143, 136, 0.24);
+  background: rgba(247, 252, 251, 0.97);
+  box-shadow: 0 14px 26px rgba(95, 143, 136, 0.12);
+  color: #385954;
+}
+
+.tree-null-annotation strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+
+.tree-null-annotation p {
+  margin: 0;
+  font-size: 0.66rem;
+  line-height: 1.42;
+}
+
+.tree-null-annotation-left {
+  text-align: left;
+}
+
+.tree-null-annotation-right {
+  text-align: left;
 }
 
 .tree-node-layer {

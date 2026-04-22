@@ -2,6 +2,232 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-22 (T-01 null-branch teaching cue)
+
+### Today Done
+- Kept working on:
+  - `feat/p14-backlog-wave`
+- Refined `T-01 Binary Tree Traversal` so the teaching-only null branches are easier to distinguish from the real tree once playback leaves the initial frame:
+  - changed the auto-revealed null edges and null nodes to a thinner cool auxiliary color family so they no longer read like part of the original tree structure
+  - highlighted one representative null branch with a stronger variant
+  - moved the note/callout into the blank area to the right of the playback controls, while keeping a guide line back to the representative null edge
+  - the note explains that these pale edges/nodes are teaching markers for missing children and recursive return points
+  - bound the callout visibility to the same render condition as the null edges/nodes, so the note appears when they appear and disappears again when they are removed (for example after reset / initial state)
+- Re-verified locally:
+  - `npm run check`
+  - Playwright smoke on `/modules/binary-tree` confirmed:
+    - initial state: `nullNodes = 0`, `nullEdges = 0`, `notes = 0`
+    - after starting playback: `nullNodes = 8`, `nullEdges = 8`, `notes = 1`
+    - the note box starts to the right of the playback-button group and does not overlap the right-side output pill area
+    - after reset settles: `nullNodes = 0`, `nullEdges = 0`, `notes = 0`
+  - captured local artifact:
+    - `output/playwright/t01-null-annotation-smoke.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Files intentionally touched in this pass:
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - `src/index.css`
+  - `src/i18n/translations.ts`
+  - `docs/HANDOFF.md`
+- Scope boundary for this pass:
+  - no traversal-step generation logic changed
+  - no milestone / roadmap docs changed
+  - `levelorder` behavior remains unchanged because that mode still does not render recursive null branches
+
+### Next Step
+- Review the T-01 null-branch teaching cue in browser with the user.
+- If the cue is accepted, the next polish pass should only adjust annotation placement/copy if needed; behavior is already validated locally.
+- Recommended git action after user acceptance: `commit` the validated T-01 cue update; `push` if remote backup/CI visibility is needed.
+
+## 2026-04-20 (Integrated module workbench pass)
+
+### Today Done
+- Continued on the validated closure branch:
+  - `feat/p14-backlog-wave`
+- Reworked `/modules` again so the page behaves more like one integrated directory/workbench instead of a separate homepage sitting above the catalog:
+  - removed the large launch deck layout that still felt like a first-screen landing page
+  - pulled recent access, recommended start paths, difficulty filtering, and track filtering into the same left-side workbench rail
+  - rebuilt the right side into a denser directory surface with a compact head, smaller abstract visual, and tighter card matrix
+  - kept bilingual `中文 + English` module naming and recent-route recovery, but reduced headline/button language to more tool-like labels
+- Applied a follow-up polish pass after user feedback on wording and left-rail utility:
+  - removed the ambiguous `live / 实时` wording from the directory title
+  - removed the left-rail `Path picks / 推荐起点` block entirely
+  - kept the left rail focused on search, recent access, difficulty, and track filtering only
+- Refined catalog copy to reduce homepage tone:
+  - `modules.launch.title` is now a short directory label instead of a long marketing-style sentence
+  - `Continue last module` was shortened to `Continue`
+  - `Track quick jump` / `分类快速跳转` was replaced with `Tracks` / `学习路径`
+- Re-verified locally:
+  - `npm run check`
+  - Playwright smoke on the integrated `/modules` flow after visiting `T-03` and returning to the catalog
+  - captured viewport artifact:
+    - `output/playwright/modules-workbench-live-directory-v1.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Functional scope remains unchanged:
+  - original `42/42` module blueprint is still complete
+- Current `/modules` direction is now:
+  - one integrated workbench instead of `hero + launch deck + catalog` separation
+  - left rail now carries search, recent access, difficulty filters, and path filters together
+  - right surface now starts directly with a compact directory header and denser module grid
+  - recent-route continuation remains live through `localStorage`
+- Current uncommitted files intentionally involved in this pass:
+  - `src/pages/ModulesPage.tsx`
+  - `src/index.css`
+  - `src/i18n/translations.ts`
+  - `docs/HANDOFF.md`
+- Keep unrelated dirty/untracked items out of future commits:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Review the integrated `/modules` workbench with the user in browser.
+- If the structure is accepted, the next polish pass should focus on card-level typography/spacing refinement and then align module detail pages with the same product tone.
+- Recommended git action after user acceptance: `commit` the validated workbench pass; `push` if remote backup/CI visibility is needed.
+
+## 2026-04-20 (Module catalog compact tile pass)
+
+### Today Done
+- Continued on the validated closure branch:
+  - `feat/p14-backlog-wave`
+- Reworked `/modules` again after the user rejected the previous row-based directory treatment:
+  - removed the repeated per-module thumbnail/icon treatment that felt unrelated to module content
+  - replaced the right-side long row list with a denser tile matrix so one screen can show more modules at once
+  - kept the left-side search + difficulty + path controls, but made the main browse surface feel more like a compact product catalog
+  - switched module naming on the browse cards to bilingual `中文 + English`
+  - added missing `title` translation keys for `S-08`~`S-11` and `P-01`~`P-05`, plus a runtime fallback so future missing title keys do not crash `/modules`
+- Fixed the catalog translation/type gaps that were blocking the new module page:
+  - added missing `module.s08`~`module.s11` and `module.p01`~`module.p05` body copy into `src/i18n/translations.ts`
+  - added new catalog copy keys used by the denser `/modules` layout
+- Tightened the compact tile cards again after the latest visual feedback:
+  - removed the repeated route-slug chip from every module tile footer (for example `array`, `bubble-sort`)
+  - kept route slug text only in the search index, so keyword/slug search behavior still works without exposing dev-facing duplicate text in the UI
+- Merged the old homepage responsibility back into the module workspace:
+  - `/` now redirects directly to `/modules`
+  - removed the duplicate `Home` top-nav entry so the shell now orients around product areas instead of marketing-style surfaces
+  - rebuilt the top of `/modules` into a launch/workspace deck with:
+    - recent-module recovery
+    - quick-start path cards
+    - a code-native abstract visual hero instead of stock imagery
+  - added local recent-route memory so reopening `/modules` can continue from the last visited module
+- Re-verified locally:
+  - `npm run check`
+  - Playwright visual review on `/modules` with fresh artifacts:
+    - `output/playwright/modules-console-check-v2.png`
+    - `output/playwright/modules-console-check-v2-full.png`
+    - `output/playwright/modules-console-check-v3.png`
+    - `output/playwright/modules-console-check-v3-full.png`
+    - `output/playwright/modules-console-check-v5.png`
+    - `output/playwright/modules-console-check-v5-full.png`
+    - `output/playwright/modules-home-merged-v1.png`
+    - `output/playwright/modules-home-merged-recent-v1.png`
+    - `output/playwright/modules-home-merged-recent-v1-full.png`
+    - `output/playwright/modules-home-merged-recent-v4.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Functional scope remains unchanged:
+  - original `42/42` module blueprint is still complete
+- The current `/modules` direction is now:
+  - compact launch/workspace deck instead of a separate homepage
+  - root path `/` redirects into `/modules`
+  - top navigation is now `Modules / About` plus language switch
+  - recent-module recovery is available after opening any module route
+  - compact hero area now uses code-native abstract visuals rather than stock/placeholder imagery
+  - sticky left control rail with search + difficulty + iconized path matrix
+  - dense right-side compact tile matrix instead of one-module-per-row
+  - bilingual module naming (`中文 + English`) on the browse cards
+  - card footers now keep only one concise category chip instead of repeating the route slug
+  - higher above-the-fold module density; current Playwright check sees `16` module cards entering the initial viewport
+- Current uncommitted files intentionally involved in this pass:
+  - `src/app/layout/Layout.tsx`
+  - `src/app/recentModuleVisits.ts`
+  - `src/components/CatalogHeroArt.tsx`
+  - `src/pages/HomePage.tsx`
+  - `src/pages/ModulesPage.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+- Keep unrelated dirty/untracked items out of future commits:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Review the merged module-home workspace with the user in browser.
+- If the direction is accepted, the next polish pass should align module detail pages with the same product tone and visual discipline.
+- Recommended git action after user acceptance: `commit` the validated catalog pass; `push` if remote backup/CI visibility is needed.
+
+## 2026-04-19 (Homepage + module catalog productization refresh)
+
+### Today Done
+- Continued on the validated closure branch:
+  - `feat/p14-backlog-wave`
+- Reframed the homepage from a completion/progress surface into a product-style entry page:
+  - removed the scaffold/progress tone from hero copy
+  - rebuilt the first screen around product value, quick-start lanes, and direct catalog entry
+  - added track-level catalog browsing and curated featured-module rows
+- Rebuilt `/modules` from a card wall into a searchable catalog experience:
+  - added keyword search (`name` / `id` / topic text)
+  - replaced the flat card grid with a left rail + grouped-by-category directory layout
+  - removed route-heavy/dev-facing discovery clutter from the primary scan path
+- Added shared catalog metadata for category summaries / focus copy / difficulty labels:
+  - `src/pages/moduleCatalog.ts`
+- Updated the shared product shell styling to support the new landing/catalog language:
+  - refined header/app shell presentation
+  - added a new visual system for homepage sections, directory sections, and list-style module rows
+- Re-verified locally:
+  - `npm run check`
+  - refreshed Playwright visual review artifacts:
+    - `output/playwright/modules-redesign-home-final.png`
+    - `output/playwright/modules-redesign-home-full.png`
+    - `output/playwright/modules-redesign-modules-final.png`
+    - `output/playwright/modules-redesign-modules-full.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Functional scope remains unchanged:
+  - original `42/42` module blueprint is still complete
+- New uncommitted UI/product-surface changes are present in:
+  - `src/pages/HomePage.tsx`
+  - `src/pages/ModulesPage.tsx`
+  - `src/pages/moduleCatalog.ts`
+  - `src/app/layout/Layout.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+- Keep unrelated dirty/untracked items out of future commits:
+  - `scripts/check-doc-links.sh`
+  - `scripts/playwright-cli.sh`
+  - `docs/design-prototypes/`
+  - `output/design/`
+  - legacy `output/playwright/t01-*`
+  - `output/playwright/visualgo-bst-layout.png`
+  - `start-project-wsl.bat`
+  - `student-dist/`
+
+### Next Step
+- Review the new homepage/module-catalog direction with the user.
+- If approved, create one focused commit containing only the landing/catalog redesign files and any intentionally kept visual review artifacts.
+- If more polish is requested, the most natural follow-up is aligning `/about` and the module detail pages with the same visual language.
+
 ## 2026-04-19 (P14 closure: original 42-module blueprint complete locally)
 
 ### Today Done

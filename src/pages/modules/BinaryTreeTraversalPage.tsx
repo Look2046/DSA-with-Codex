@@ -139,6 +139,14 @@ type NullEdgePath = {
   d: string;
 };
 
+type NullGuideAnnotation = {
+  key: string;
+  boxPosition: NodePoint;
+  boxWidth: number;
+  connectorPath: string;
+  connectorAlign: 'left' | 'right';
+};
+
 type ParallelGuideSegment = {
   key: string;
   d: string;
@@ -2580,6 +2588,68 @@ function buildNullHints(step: BinaryTreeTraversalStep | undefined, treeState: Bi
   return [...dedup.values()];
 }
 
+function buildNullGuideAnnotation(
+  nullHints: BinaryTreeGuideNullHint[],
+  nodePositions: NodePoint[],
+  top: number,
+  yStep: number,
+  xInset: number,
+): NullGuideAnnotation | null {
+  if (nullHints.length === 0) {
+    return null;
+  }
+
+  const annotationHint = [...nullHints].sort((left, right) => {
+    if (left.side !== right.side) {
+      return left.side === 'R' ? -1 : 1;
+    }
+
+    const levelDifference = getNodeLevel(left.parentIndex) - getNodeLevel(right.parentIndex);
+    if (levelDifference !== 0) {
+      return levelDifference;
+    }
+
+    return left.parentIndex - right.parentIndex;
+  })[0];
+
+  if (!annotationHint) {
+    return null;
+  }
+
+  const parentPoint = getNodeCenter(nodePositions, annotationHint.parentIndex);
+  if (!parentPoint) {
+    return null;
+  }
+
+  const nullPoint = getNullPoint(annotationHint.parentIndex, annotationHint.side, top, yStep, xInset);
+  const targetPoint = {
+    x: clampNumber(parentPoint.x + (nullPoint.x - parentPoint.x) * 0.64, 4, 96),
+    y: clampNumber(parentPoint.y + (nullPoint.y - parentPoint.y) * 0.64, 5, 95),
+  };
+  const boxWidth = 24;
+  const boxHeight = 14;
+  const boxX = clampNumber(targetPoint.x - boxWidth - 6, 54, 72);
+  const boxY = 66;
+  const boxCenterX = boxX + boxWidth / 2;
+  const connectFromRight = targetPoint.x >= boxCenterX;
+  const boxAnchorPoint = {
+    x: connectFromRight ? boxX + boxWidth : boxX,
+    y: boxY + boxHeight * 0.42,
+  };
+  const elbowPoint = {
+    x: connectFromRight ? boxAnchorPoint.x + 4.5 : boxAnchorPoint.x - 4.5,
+    y: boxAnchorPoint.y,
+  };
+
+  return {
+    key: `${annotationHint.parentIndex}-${annotationHint.side}`,
+    boxPosition: { x: boxX, y: boxY },
+    boxWidth,
+    connectorPath: `M ${boxAnchorPoint.x.toFixed(2)} ${boxAnchorPoint.y.toFixed(2)} L ${elbowPoint.x.toFixed(2)} ${elbowPoint.y.toFixed(2)} L ${targetPoint.x.toFixed(2)} ${targetPoint.y.toFixed(2)}`,
+    connectorAlign: connectFromRight ? 'right' : 'left',
+  };
+}
+
 function getLevelorderNewQueueNodeIndices(step: BinaryTreeTraversalStep | undefined): number[] {
   if (!step || step.mode !== 'levelorder') {
     return [];
@@ -3028,6 +3098,11 @@ export function BinaryTreeTraversalPage() {
 
     return nextEdges;
   }, [nodePositions, nullHints, treeLayout.top, treeLayout.xInset, treeLayout.yStep]);
+  const nullGuideAnnotation = useMemo(
+    () => buildNullGuideAnnotation(nullHints, nodePositions, treeLayout.top, treeLayout.yStep, treeLayout.xInset),
+    [nodePositions, nullHints, treeLayout.top, treeLayout.xInset, treeLayout.yStep],
+  );
+  const annotatedNullKey = nullGuideAnnotation?.key ?? null;
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -3611,7 +3686,11 @@ export function BinaryTreeTraversalPage() {
             <>
               <svg className="tree-null-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 {nullEdges.map((edge) => (
-                  <path key={edge.key} className="tree-null-edge" d={edge.d} />
+                  <path
+                    key={edge.key}
+                    className={`tree-null-edge${annotatedNullKey === edge.key ? ' tree-null-edge-annotated' : ''}`}
+                    d={edge.d}
+                  />
                 ))}
               </svg>
 
@@ -3625,7 +3704,9 @@ export function BinaryTreeTraversalPage() {
                   return (
                     <div
                       key={`${hint.parentIndex}-${hint.side}`}
-                      className={`tree-null-node${isActiveNull ? ' tree-null-active' : ''}`}
+                      className={`tree-null-node${annotatedNullKey === `${hint.parentIndex}-${hint.side}` ? ' tree-null-node-annotated' : ''}${
+                        isActiveNull ? ' tree-null-active' : ''
+                      }`}
                       style={{ left: `${point.x}%`, top: `${point.y}%` }}
                     >
                       <span className="tree-null-value">null</span>
@@ -3634,6 +3715,26 @@ export function BinaryTreeTraversalPage() {
                   );
                 })}
               </div>
+
+              {nullGuideAnnotation ? (
+                <>
+                  <svg className="tree-null-annotation-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <path className="tree-null-annotation-connector" d={nullGuideAnnotation.connectorPath} />
+                  </svg>
+                  <div
+                    className={`tree-null-annotation tree-null-annotation-${nullGuideAnnotation.connectorAlign}`}
+                    style={{
+                      left: `${nullGuideAnnotation.boxPosition.x}%`,
+                      top: `${nullGuideAnnotation.boxPosition.y}%`,
+                      width: `${nullGuideAnnotation.boxWidth}%`,
+                    }}
+                    role="note"
+                  >
+                    <strong>{t('module.t01.nullGuide.title')}</strong>
+                    <p>{t('module.t01.nullGuide.body')}</p>
+                  </div>
+                </>
+              ) : null}
             </>
           ) : null}
 

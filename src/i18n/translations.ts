@@ -537,6 +537,9 @@ export const translations = {
     'module.t01.legend.visited': 'Visited',
     'module.t01.legend.path': 'Traversal path',
     'module.t01.legend.null': 'Null child',
+    'module.t01.nullGuide.title': 'Auxiliary null branch',
+    'module.t01.nullGuide.body':
+      'This pale edge and null node are teaching markers: they mark a missing child, so the traversal stops here and returns to the parent.',
     'module.t01.workspace.controls': 'Controls',
     'module.t01.workspace.summary': 'Current focus',
     'module.t01.workspace.onDemand': 'show only when needed',
@@ -2237,6 +2240,8 @@ export const translations = {
     'module.t01.legend.visited': '已访问',
     'module.t01.legend.path': '遍历路径',
     'module.t01.legend.null': '空子节点',
+    'module.t01.nullGuide.title': '辅助空分支',
+    'module.t01.nullGuide.body': '这条浅色边和 null 点是教学辅助标记，表示这里缺少真实子节点，因此遍历会在这里停下并返回父节点。',
     'module.t01.workspace.controls': '控制',
     'module.t01.workspace.summary': '当前焦点',
     'module.t01.workspace.onDemand': '仅在需要时展开',
