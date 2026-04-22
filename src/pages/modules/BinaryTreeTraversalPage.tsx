@@ -2599,46 +2599,51 @@ function buildNullGuideAnnotation(
     return null;
   }
 
-  const annotationHint = [...nullHints].sort((left, right) => {
-    if (left.side !== right.side) {
-      return left.side === 'R' ? -1 : 1;
-    }
-
-    const levelDifference = getNodeLevel(left.parentIndex) - getNodeLevel(right.parentIndex);
-    if (levelDifference !== 0) {
-      return levelDifference;
-    }
-
-    return left.parentIndex - right.parentIndex;
-  })[0];
-
-  if (!annotationHint) {
-    return null;
-  }
-
-  const parentPoint = getNodeCenter(nodePositions, annotationHint.parentIndex);
-  if (!parentPoint) {
-    return null;
-  }
-
-  const nullPoint = getNullPoint(annotationHint.parentIndex, annotationHint.side, top, yStep, xInset);
-  const targetPoint = {
-    x: clampNumber(parentPoint.x + (nullPoint.x - parentPoint.x) * 0.64, 4, 96),
-    y: clampNumber(parentPoint.y + (nullPoint.y - parentPoint.y) * 0.64, 5, 95),
-  };
   const boxWidth = 24;
-  const boxHeight = 14;
-  const boxX = clampNumber(targetPoint.x - boxWidth - 6, 54, 72);
-  const boxY = 66;
+  const boxHeight = 12;
+  const boxY = 84;
+  const boxFocusPoint = {
+    x: 60,
+    y: boxY + boxHeight * 0.45,
+  };
+
+  const annotationCandidate = nullHints
+    .map((hint) => {
+      const parentPoint = getNodeCenter(nodePositions, hint.parentIndex);
+      if (!parentPoint) {
+        return null;
+      }
+
+      const nullPoint = getNullPoint(hint.parentIndex, hint.side, top, yStep, xInset);
+      const hoverPoint = {
+        x: clampNumber(parentPoint.x + (nullPoint.x - parentPoint.x) * 0.7 + (hint.side === 'R' ? 3.2 : -3.2), 4, 96),
+        y: clampNumber(parentPoint.y + (nullPoint.y - parentPoint.y) * 0.7 - 3.6, 5, 95),
+      };
+
+      return {
+        hint,
+        targetPoint: hoverPoint,
+        distance: Math.hypot(hoverPoint.x - boxFocusPoint.x, hoverPoint.y - boxFocusPoint.y),
+      };
+    })
+    .filter((candidate): candidate is { hint: BinaryTreeGuideNullHint; targetPoint: NodePoint; distance: number } => candidate !== null)
+    .sort((left, right) => left.distance - right.distance)[0];
+
+  if (!annotationCandidate) {
+    return null;
+  }
+
+  const { hint: annotationHint, targetPoint } = annotationCandidate;
+  const boxX = clampNumber(targetPoint.x - boxWidth * 0.42, 46, 60);
   const boxCenterX = boxX + boxWidth / 2;
   const connectFromRight = targetPoint.x >= boxCenterX;
   const boxAnchorPoint = {
     x: connectFromRight ? boxX + boxWidth : boxX,
-    y: boxY + boxHeight * 0.42,
+    y: boxY + boxHeight * 0.48,
   };
   const elbowPoint = {
-    x: connectFromRight ? boxAnchorPoint.x + 4.5 : boxAnchorPoint.x - 4.5,
-    y: boxAnchorPoint.y,
+    x: connectFromRight ? boxAnchorPoint.x + 3.4 : boxAnchorPoint.x - 3.4,
+    y: boxAnchorPoint.y - 0.8,
   };
 
   return {

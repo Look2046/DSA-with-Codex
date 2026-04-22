@@ -2,6 +2,43 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-04-23 (T-01 null-annotation alignment polish)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Applied a focused follow-up polish on the `T-01 Binary Tree Traversal` null-branch teaching cue after user layout feedback:
+  - moved the note box down into the same lower visual band as the playback transport instead of leaving it floating too high in the stage
+  - changed the annotation target-selection logic from a fixed early null branch to the null branch nearest the note box
+  - shortened the guide-line reach so it points toward the nearby auxiliary null branch without touching the node or edge directly
+- Re-verified locally:
+  - `npm run check`
+  - Playwright smoke on `/modules/binary-tree` still shows the note only when null nodes/edges are present
+  - Playwright smoke confirmed:
+    - initial state: `nullNodes = 0`, `nullEdges = 0`, `notes = 0`
+    - after starting playback: `nullNodes = 8`, `nullEdges = 8`, `notes = 1`
+    - the note box now sits in the lower transport band (`noteTopPct = 83.9`)
+    - the annotated null branch is the nearest visible auxiliary branch to the note box
+    - the connector endpoint does not land inside the annotated null node (`connectorEndpointInsideAnnotatedNode = false`)
+    - after reset settles: `nullNodes = 0`, `nullEdges = 0`, `notes = 0`
+  - captured local artifact:
+    - `output/playwright/t01-null-annotation-alignment.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Files intentionally touched in this follow-up:
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - `docs/HANDOFF.md`
+- Scope boundary for this follow-up:
+  - no traversal-step generation logic changed
+  - no i18n copy changed
+  - no broader layout work outside `T-01` changed
+
+### Next Step
+- Review the refreshed T-01 note placement/alignment in browser with the user.
+- If accepted, keep this as a small follow-up commit on top of the previous T-01 null-branch cue commit.
+
 ## 2026-04-22 (T-01 null-branch teaching cue)
 
 ### Today Done
