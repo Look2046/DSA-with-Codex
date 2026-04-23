@@ -11,18 +11,24 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - moved the note box down into the same lower visual band as the playback transport instead of leaving it floating too high in the stage
   - changed the annotation target-selection logic from a fixed early null branch to the null branch nearest the note box
   - shortened the guide-line reach so it points toward the nearby auxiliary null branch without touching the node or edge directly
+  - then removed the note-to-null-branch guide line entirely and pushed the note box further down so it sits on the same vertical band as the playback button container
+  - normalized the annotated null-edge stroke width so the highlighted auxiliary branch no longer looks thicker than the other null edges
+  - removed the representative null-branch highlight entirely, so the note box no longer changes one null edge/node to a different color family
 - Re-verified locally:
   - `npm run check`
   - Playwright smoke on `/modules/binary-tree` still shows the note only when null nodes/edges are present
   - Playwright smoke confirmed:
     - initial state: `nullNodes = 0`, `nullEdges = 0`, `notes = 0`
     - after starting playback: `nullNodes = 8`, `nullEdges = 8`, `notes = 1`
-    - the note box now sits in the lower transport band (`noteTopPct = 83.9`)
-    - the annotated null branch is the nearest visible auxiliary branch to the note box
-    - the connector endpoint does not land inside the annotated null node (`connectorEndpointInsideAnnotatedNode = false`)
+    - the note box now sits in the same lower transport band as the playback container (`noteTopPct = 89.3`, `sameVerticalBand = true`)
+    - no single null edge/node is visually highlighted anymore; the note now explains the auxiliary branch group without singling one out
+    - the note-to-null-branch connector is no longer rendered (`connectors = 0`)
+    - Playwright DOM check confirms there are no remaining `.tree-null-edge-annotated` / `.tree-null-node-annotated` elements
     - after reset settles: `nullNodes = 0`, `nullEdges = 0`, `notes = 0`
   - captured local artifact:
     - `output/playwright/t01-null-annotation-alignment.png`
+    - `output/playwright/t01-null-annotation-no-connector.png`
+    - `output/playwright/t01-null-annotation-unified.png`
 
 ### Current State
 - Branch:

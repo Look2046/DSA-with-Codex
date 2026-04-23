@@ -2666,11 +2666,6 @@ body {
   opacity: 0.9;
 }
 
-.tree-null-edge-annotated {
-  stroke: #5f8f88;
-  stroke-width: 0.36;
-}
-
 .tree-null-node {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -2685,14 +2680,6 @@ body {
   gap: 0;
   opacity: 0.96;
   box-shadow: 0 4px 10px rgba(95, 143, 136, 0.12);
-}
-
-.tree-null-node.tree-null-node-annotated {
-  border-color: #5f8f88;
-  background: #dfeeea;
-  box-shadow:
-    0 0 0 2px rgba(152, 204, 194, 0.34),
-    0 8px 18px rgba(95, 143, 136, 0.16);
 }
 
 .tree-null-node.tree-null-active {

@@ -140,10 +140,8 @@ type NullEdgePath = {
 };
 
 type NullGuideAnnotation = {
-  key: string;
   boxPosition: NodePoint;
   boxWidth: number;
-  connectorPath: string;
   connectorAlign: 'left' | 'right';
 };
 
@@ -2601,7 +2599,7 @@ function buildNullGuideAnnotation(
 
   const boxWidth = 24;
   const boxHeight = 12;
-  const boxY = 84;
+  const boxY = 89.4;
   const boxFocusPoint = {
     x: 60,
     y: boxY + boxHeight * 0.45,
@@ -2633,24 +2631,14 @@ function buildNullGuideAnnotation(
     return null;
   }
 
-  const { hint: annotationHint, targetPoint } = annotationCandidate;
+  const { targetPoint } = annotationCandidate;
   const boxX = clampNumber(targetPoint.x - boxWidth * 0.42, 46, 60);
   const boxCenterX = boxX + boxWidth / 2;
   const connectFromRight = targetPoint.x >= boxCenterX;
-  const boxAnchorPoint = {
-    x: connectFromRight ? boxX + boxWidth : boxX,
-    y: boxY + boxHeight * 0.48,
-  };
-  const elbowPoint = {
-    x: connectFromRight ? boxAnchorPoint.x + 3.4 : boxAnchorPoint.x - 3.4,
-    y: boxAnchorPoint.y - 0.8,
-  };
 
   return {
-    key: `${annotationHint.parentIndex}-${annotationHint.side}`,
     boxPosition: { x: boxX, y: boxY },
     boxWidth,
-    connectorPath: `M ${boxAnchorPoint.x.toFixed(2)} ${boxAnchorPoint.y.toFixed(2)} L ${elbowPoint.x.toFixed(2)} ${elbowPoint.y.toFixed(2)} L ${targetPoint.x.toFixed(2)} ${targetPoint.y.toFixed(2)}`,
     connectorAlign: connectFromRight ? 'right' : 'left',
   };
 }
@@ -3107,7 +3095,6 @@ export function BinaryTreeTraversalPage() {
     () => buildNullGuideAnnotation(nullHints, nodePositions, treeLayout.top, treeLayout.yStep, treeLayout.xInset),
     [nodePositions, nullHints, treeLayout.top, treeLayout.xInset, treeLayout.yStep],
   );
-  const annotatedNullKey = nullGuideAnnotation?.key ?? null;
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -3691,11 +3678,7 @@ export function BinaryTreeTraversalPage() {
             <>
               <svg className="tree-null-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 {nullEdges.map((edge) => (
-                  <path
-                    key={edge.key}
-                    className={`tree-null-edge${annotatedNullKey === edge.key ? ' tree-null-edge-annotated' : ''}`}
-                    d={edge.d}
-                  />
+                  <path key={edge.key} className="tree-null-edge" d={edge.d} />
                 ))}
               </svg>
 
@@ -3709,9 +3692,7 @@ export function BinaryTreeTraversalPage() {
                   return (
                     <div
                       key={`${hint.parentIndex}-${hint.side}`}
-                      className={`tree-null-node${annotatedNullKey === `${hint.parentIndex}-${hint.side}` ? ' tree-null-node-annotated' : ''}${
-                        isActiveNull ? ' tree-null-active' : ''
-                      }`}
+                      className={`tree-null-node${isActiveNull ? ' tree-null-active' : ''}`}
                       style={{ left: `${point.x}%`, top: `${point.y}%` }}
                     >
                       <span className="tree-null-value">null</span>
@@ -3722,23 +3703,18 @@ export function BinaryTreeTraversalPage() {
               </div>
 
               {nullGuideAnnotation ? (
-                <>
-                  <svg className="tree-null-annotation-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                    <path className="tree-null-annotation-connector" d={nullGuideAnnotation.connectorPath} />
-                  </svg>
-                  <div
-                    className={`tree-null-annotation tree-null-annotation-${nullGuideAnnotation.connectorAlign}`}
-                    style={{
-                      left: `${nullGuideAnnotation.boxPosition.x}%`,
-                      top: `${nullGuideAnnotation.boxPosition.y}%`,
-                      width: `${nullGuideAnnotation.boxWidth}%`,
-                    }}
-                    role="note"
-                  >
-                    <strong>{t('module.t01.nullGuide.title')}</strong>
-                    <p>{t('module.t01.nullGuide.body')}</p>
-                  </div>
-                </>
+                <div
+                  className={`tree-null-annotation tree-null-annotation-${nullGuideAnnotation.connectorAlign}`}
+                  style={{
+                    left: `${nullGuideAnnotation.boxPosition.x}%`,
+                    top: `${nullGuideAnnotation.boxPosition.y}%`,
+                    width: `${nullGuideAnnotation.boxWidth}%`,
+                  }}
+                  role="note"
+                >
+                  <strong>{t('module.t01.nullGuide.title')}</strong>
+                  <p>{t('module.t01.nullGuide.body')}</p>
+                </div>
               ) : null}
             </>
           ) : null}
