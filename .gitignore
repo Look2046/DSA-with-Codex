@@ -25,3 +25,11 @@ coverage/
 # Local automation / session artifacts
 .playwright-cli/
 AGENTS.md
+
+# Local design, scratch, and personal distribution artifacts
+docs/design-prototypes/
+output/design/
+output/playwright/scratch/
+output/playwright/dev-logs/
+student-dist/
+start-project-wsl.bat

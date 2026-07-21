@@ -586,6 +586,46 @@ Track actionable tasks here. Keep tasks small and testable.
     - targeted Playwright smoke confirmed the 9 newly landed `P14` routes all open cleanly, default `Next` advances, and captured no runtime errors
     - refreshed `output/playwright/p14m5-*.png` and `output/playwright/p14m5-acceptance-report.txt`
 
+## Post-P14 Tree Extension
+- [x] Add `T-07 Huffman Tree`
+  - DoD: implement deterministic Huffman construction playback with full generator/page/route/registry/catalog/i18n/style/test wiring.
+  - Acceptance: targeted Huffman tests pass, `/modules/huffman-tree` opens without runtime errors, and default `Next` advances.
+  - Done (2026-05-08):
+    - added deterministic Huffman forest construction and prefix-code generation where left edge = `0` and right edge = `1`
+    - added `src/modules/tree/huffman.ts`, `HuffmanTreePage.tsx`, route/registry/catalog/i18n/style wiring, and replay coverage
+    - runtime registry now reports `43` modules, `43` implemented modules, and `7/7` ready tree modules
+    - targeted tests and build passed; targeted browser smoke confirmed `Step 1/9 -> Step 2/9` with console/page errors = `0`
+
+## P15 (Active: Acceptance / Stabilization)
+- [x] P15-M0 Planning baseline + acceptance pivot
+  - DoD: define the first acceptance/stabilization wave for the current `43/43` surface and sync planning docs before new feature work resumes.
+  - Acceptance: `docs/IMPLEMENTATION_PLAN_P15.md`, `docs/SESSION_BRIEF.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md`, and `TODO.md` agree that `P15` is the active wave.
+  - Done (2026-07-21):
+    - added `docs/IMPLEMENTATION_PLAN_P15.md`
+    - recorded representative browser-audit findings
+    - paused new feature scope in favor of acceptance/stabilization
+
+- [ ] P15-M1 Acceptance inventory and representative browser audit
+  - DoD: build a reproducible acceptance matrix for `/modules` plus representative routes across the current track families.
+  - Acceptance: representative issues are consistently reproducible and documented before any fix wave starts.
+  - Progress (2026-07-21):
+    - `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` all report page title `m0-scaffold-tmp`
+    - `/modules/huffman-tree` still advances from `Step 1/9 -> Step 2/9`
+    - `/modules/heap-sort` produced `57` Firefox dev-console warnings dominated by module-load warnings from `src/app/router.tsx`
+    - local Firefox Playwright launch needed environment repair because a stale broken `~/.cache/ms-playwright/firefox-1509/firefox/lock` symlink blocked browser launch
+
+- [ ] P15-M2 Product-surface baseline fixes
+  - DoD: remove scaffold placeholder titles/meta residue and align top-level product-surface polish on representative routes.
+  - Acceptance: `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` no longer report `m0-scaffold-tmp`.
+
+- [ ] P15-M3 Router/module-load warning diagnosis and stabilization
+  - DoD: identify and fix the root cause of the Firefox warning storm observed during representative audit.
+  - Acceptance: targeted browser audit on `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` reports `0` unexpected runtime errors and warning behavior is understood.
+
+- [ ] P15-M4 Full current-surface acceptance closure
+  - DoD: run a structured acceptance sweep across the `43/43` module surface, refresh evidence, and sync closure docs.
+  - Acceptance: `npm run check` passes after meaningful code changes and the accepted route matrix is documented as stable.
+
 ## Done
 - [x] Configure GitHub SSH auth for this repo (2026-03-03)
 - [x] Establish daily handoff/decision/todo documentation workflow (2026-03-03)

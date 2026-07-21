@@ -2,6 +2,105 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-07-21 (workspace cleanup and P15 acceptance kickoff)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Performed a low-risk repository workspace cleanup pass so the branch is easier to carry into the next development phase:
+  - added `docs/REPO_WORKSPACE_POLICY.md` to define runtime source, official docs, accepted verification evidence, and local-only working material
+  - added `docs/CURRENT_WORKTREE_CHANGESET_MAP.md` to separate the current dirty tree into `T-07 Huffman Tree`, `/modules + Home` redesign, and local-only workspace noise
+  - updated `.gitignore` so `docs/design-prototypes/`, `output/design/`, `output/playwright/scratch/`, `output/playwright/dev-logs/`, `student-dist/`, and `start-project-wsl.bat` stay out of normal review commits
+  - moved scratch screenshots and local logs out of the top-level `output/playwright/` directory into ignored `scratch/` and `dev-logs/` lanes
+- Started the next milestone as an acceptance/stabilization wave instead of new feature work:
+  - added `docs/IMPLEMENTATION_PLAN_P15.md`
+  - ran a first representative Playwright audit against `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort`
+  - confirmed the current surface is not ready to treat as accepted yet:
+    - all sampled routes still report document title `m0-scaffold-tmp`
+    - `/modules/huffman-tree` still advances correctly from `Step 1/9 -> Step 2/9`
+    - `/modules/heap-sort` produced `57` Firefox dev-console warnings dominated by module-load warnings from `src/app/router.tsx`
+  - repaired the local Firefox Playwright environment outside the repo after tracing launch failure to a stale broken symlink at `/home/haoyu/.cache/ms-playwright/firefox-1509/firefox/lock`
+- Re-verified locally:
+  - `./scripts/check-doc-links.sh`
+  - `git check-ignore -v docs/design-prototypes/ output/design/ output/playwright/scratch/ output/playwright/dev-logs/ student-dist/ start-project-wsl.bat`
+  - top-level `output/playwright/` now primarily shows milestone evidence plus `t07-huffman-smoke.png`
+  - Playwright audit opened `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` successfully in Firefox after the local cache repair
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Scope boundary of this cleanup:
+  - no `src/` runtime source files were reorganized
+  - no router/build/dev script behavior was changed
+  - accepted `output/playwright/p*` milestone evidence stayed in place
+  - `output/playwright/t07-huffman-smoke.png` was intentionally kept at the top level because it belongs to the still-uncommitted `T-07` change set
+- New durable docs:
+  - `docs/REPO_WORKSPACE_POLICY.md`
+  - `docs/CURRENT_WORKTREE_CHANGESET_MAP.md`
+  - `docs/IMPLEMENTATION_PLAN_P15.md`
+- Current branch is now easier to split safely:
+  - local-only design/output noise is ignored
+  - scratch screenshots no longer dominate `git status`
+  - the remaining visible worktree mostly represents real code/doc changes
+- Active milestone is now:
+  - `P15` acceptance/stabilization kickoff
+- Current acceptance blockers observed so far:
+  - scaffold placeholder titles across sampled routes
+  - Firefox warning storm on representative routes, especially `/modules/heap-sort`
+
+### Next Step
+- Commit the workspace cleanup + `P15` planning baseline so another AI/session can resume from docs first.
+- Start `P15-M1` from the recorded findings:
+  - fix scaffold placeholder titles
+  - diagnose the router/module-load warning storm
+  - then expand the audit breadth before any new feature implementation
+
+## 2026-05-08 (T-07 Huffman Tree completion check)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Checked `T-07 Huffman Tree` after user asked whether it was complete; found it was only partially wired, then completed the module:
+  - added deterministic Huffman forest/timeline logic with minimum-root selection, merge steps, and final prefix-code output
+  - added the `/modules/huffman-tree` page on the shared `WorkspaceShell`
+  - wired route, registry, catalog body mapping, zh/en copy, and Huffman stage styling
+  - added deterministic generator coverage plus timeline replay coverage
+  - aligned the expected default codes to the implemented convention: left edge = `0`, right edge = `1`
+- Re-verified locally so far:
+  - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts`
+  - `npm run build`
+  - `npm run check` (docs links + 94 test files / 261 tests + lint + build)
+  - targeted browser smoke on `/modules/huffman-tree` using Playwright Chromium fallback because the repo wrapper's Firefox cache is missing `/home/haoyu/.cache/ms-playwright/firefox-1509/firefox/lock`
+  - smoke confirmed title `T-07 Huffman Tree`, default sample advances `Step 1/9 -> Step 2/9`, selected nodes after `Next` = `2`, console/page errors = `0`
+  - captured local artifact:
+    - `output/playwright/t07-huffman-smoke.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Runtime module surface:
+  - `43` modules, `43` implemented modules
+  - tree category is now `7/7` ready after adding `T-07`
+- Files intentionally touched for this T-07 pass:
+  - `src/modules/tree/huffman.ts`
+  - `src/modules/tree/huffman.test.ts`
+  - `src/modules/tree/huffmanTimelineReplay.test.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/app/router.tsx`
+  - `src/pages/moduleCatalog.ts`
+  - `src/data/moduleRegistry.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+  - `docs/SESSION_BRIEF.md`
+  - `TODO.md`
+  - `docs/DECISIONS.md`
+- Important boundary:
+  - leave existing unrelated dirty worktree files alone, including the catalog/homepage/T-01 polish artifacts from prior sessions
+
+### Next Step
+- If the user accepts the T-07 completion, commit this as a focused post-`P14` tree-track extension.
+
 ## 2026-04-23 (T-01 null-annotation alignment polish)
 
 ### Today Done

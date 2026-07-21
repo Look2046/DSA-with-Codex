@@ -6,14 +6,20 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p14-backlog-wave`
-- Current phase: `P14` blueprint closure is complete locally; the original `42/42` module surface is now implemented and verified on `feat/p14-backlog-wave`
+- Current phase: `P15` acceptance-and-stabilization kickoff has started locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, but the surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
 - Last local quality gates:
-  - `npm run check` (passed locally, 2026-04-19, `feat/p14-backlog-wave`)
-  - `./scripts/check-doc-links.sh` (passed locally, 2026-04-19, as part of `npm run check`)
-  - targeted Playwright smoke for `P14` closure (passed locally, 2026-04-19, `feat/p14-backlog-wave`):
-    - `/modules`: `42` cards, `42` ready badges, `42` open links
-    - `/modules?category=sort`: `11` cards, `11` ready badges, `11` open links
-    - `/modules?category=paradigm`: `5` cards, `5` ready badges, `5` open links
+  - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
+  - `npm run build` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
+  - targeted Playwright smoke for `T-07 Huffman Tree` (passed locally via Chromium fallback, 2026-05-08):
+    - `/modules/huffman-tree`: title `T-07 Huffman Tree`, default sample advances `Step 1/9 -> Step 2/9`
+    - `.huffman-node` count = `4`, selected nodes after `Next` = `2`, console/page errors = `0`
+    - artifact: `output/playwright/t07-huffman-smoke.png`
+  - `npm run check` (passed locally, 2026-05-08, `feat/p14-backlog-wave`; docs links + 94 test files / 261 tests + lint + build)
+  - `./scripts/check-doc-links.sh` (passed locally, 2026-07-21, `feat/p14-backlog-wave`)
+  - representative Playwright audit (2026-07-21, `feat/p14-backlog-wave`):
+    - `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` all still report page title `m0-scaffold-tmp`
+    - `/modules/huffman-tree` default `Next` still advances `Step 1/9 -> Step 2/9`
+    - `/modules/heap-sort` in Firefox dev audit reported `57` console warnings, dominated by module-load warnings routed through `src/app/router.tsx`
 
 ## 2) What Is Already Done
 
@@ -312,6 +318,16 @@ Use this file as the first thing to read in a new chat/session.
   - all `9` newly landed `P14` module routes open cleanly, default `Next` advances, and no browser-side runtime errors were captured in the targeted Playwright smoke
   - refreshed acceptance artifacts/report under `output/playwright/p14m5-*`
   - the runtime registry now has no pending entries left in the original 42-module blueprint
+- Post-`P14` `T-07 Huffman Tree` extension completed locally:
+  - added deterministic Huffman forest construction, minimum-root selection, merge playback, and final prefix-code generation with left edge = `0` and right edge = `1`
+  - added `/modules/huffman-tree` page/route/registry/catalog/i18n/style/test wiring
+  - runtime registry now reports `43` modules, `43` implemented modules, and `7/7` tree-track modules ready
+  - targeted tests, build, and full `npm run check` passed locally on 2026-05-08
+  - targeted browser smoke passed on `/modules/huffman-tree` with `Step 1/9 -> Step 2/9` and no console/page errors
+- 2026-07-21 workspace/acceptance kickoff completed locally:
+  - added `docs/REPO_WORKSPACE_POLICY.md` and `docs/CURRENT_WORKTREE_CHANGESET_MAP.md`
+  - ignored local-only design/output directories and moved scratch screenshots/logs out of the top-level `output/playwright/` review path
+  - completed a first representative Playwright audit and confirmed the next phase should be acceptance/stabilization rather than new feature delivery
 - P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
   - added `tree` category support in `/modules` filter + i18n labels
   - registered `T-01`~`T-06` in module registry (`T-01` implemented)
@@ -385,9 +401,12 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Merge the validated `P14` closure branch once review/backup needs are satisfied.
-- Only open a new implementation phase if the user explicitly adds scope beyond the original 42-module blueprint.
-- Keep one-off standalone/offline export work out of the mainline roadmap unless the user explicitly reopens it
+- Commit the repo-workspace cleanup and `P15` planning baseline so another AI/session can resume from docs first.
+- Run `P15-M1` acceptance inventory on `/modules` plus representative routes before starting any new feature scope.
+- Fix high-signal acceptance blockers first:
+  - scaffold placeholder titles (`m0-scaffold-tmp`)
+  - router/module-load warning storm seen in Firefox dev audit
+- Only reopen new algorithm delivery after the current `43/43` surface is accepted or the user explicitly reprioritizes.
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`
@@ -401,6 +420,7 @@ Use this file as the first thing to read in a new chat/session.
 - Do not skip branch workflow (`docs/*`, `feat/*`)
 - Avoid editing unrelated files in the same branch
 - Keep historical standalone/offline export work outside the active mainline backlog unless explicitly requested
+- Do not open new feature scope while `P15` acceptance/stabilization is the active wave unless the user explicitly overrides that priority
 
 ## 5) Quick Start Commands
 

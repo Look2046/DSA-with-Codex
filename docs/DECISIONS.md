@@ -14,6 +14,33 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260721-69
+- Date: 2026-07-21
+- Status: accepted
+- Context: The repo now exposes a `43/43` runtime surface after `T-07 Huffman Tree`, but the user has not yet accepted the surface and a first representative browser audit immediately exposed product-surface and runtime concerns (placeholder document titles plus a large Firefox warning burst on representative routes).
+- Decision: Define `P15` as an acceptance-and-stabilization wave before any new feature scope. The first responsibilities are to inventory real user-facing issues, fix the scaffold/product-surface baseline, diagnose the router/module-load warning storm, and only then consider opening new feature work.
+- Alternatives considered: continue directly into more algorithm work; treat the current `43/43` surface as accepted without a user-facing audit; fix isolated pages ad hoc without a milestone boundary.
+- Consequences: delivery of new modules pauses temporarily, but the project regains a trusted baseline and future work starts from an accepted surface rather than a partially verified one.
+- Owner: haoyu + codex
+
+## DEC-20260721-68
+- Date: 2026-07-21
+- Status: accepted
+- Context: The branch carried accepted milestone evidence, temporary design exploration, local distribution outputs, scratch screenshots, and real feature work in the same top-level review path, which made the dirty worktree hard to understand and risky to split before the next development phase.
+- Decision: Keep runtime source and milestone evidence in place, but formally separate local-only working material with a workspace policy and ignore rules: `docs/design-prototypes/`, `output/design/`, `output/playwright/scratch/`, `output/playwright/dev-logs/`, `student-dist/`, and `start-project-wsl.bat` are now treated as local-only lanes rather than normal review targets.
+- Alternatives considered: reorganize `src/` immediately together with cleanup; ignore the entire `output/` tree; keep all scratch and milestone artifacts mixed together at the top level.
+- Consequences: the branch becomes easier to review and split into real feature change sets without changing runtime behavior, but milestone evidence in `output/playwright/p*` must continue to be curated deliberately because it remains part of the repo history.
+- Owner: haoyu + codex
+
+## DEC-20260508-67
+- Date: 2026-05-08
+- Status: accepted
+- Context: The original `P14` blueprint closure already validated `42/42` modules, but `T-07 Huffman Tree` existed in the runtime surface as a partially restored tree-track item and the user asked whether it was complete.
+- Decision: Treat `T-07 Huffman Tree` as a post-`P14` tree-track extension rather than reopening the original 42-module blueprint; implement it as the 43rd ready module under the existing `tree` category.
+- Alternatives considered: leave `T-07` as an untracked registry/style remnant; remove it from discovery to preserve the historical `42/42` count; start a new full milestone for one module.
+- Consequences: `/modules` now has a `43/43` runtime surface and tree track becomes `7/7` ready, while historical docs can still describe `P14` as closing the original 42-module blueprint.
+- Owner: haoyu + codex
+
 ## DEC-20260419-66
 - Date: 2026-04-19
 - Status: accepted
