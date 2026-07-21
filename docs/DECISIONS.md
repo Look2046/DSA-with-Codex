@@ -14,6 +14,15 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260721-70
+- Date: 2026-07-21
+- Status: accepted
+- Context: The first direct `P15` user acceptance on `L-01 /modules/array` showed that the shared workspace shell was still technically functional but not product-acceptable on a common laptop viewport: the controls drawer opened mostly below the viewport, the array cells stretched excessively tall, and the JSON editor displaced the primary teaching controls.
+- Decision: Treat `L-01` as an input-first acceptance surface during `P15`: keep the first-open controls drawer inside a common `1280x720` viewport, use a compact array-stage layout for this page, and remove JSON controls from the visible primary drawer instead of preserving them at the cost of first-use usability.
+- Alternatives considered: keep JSON controls visible and only reduce cell height; keep the drawer overflow behavior and accept that users must drag/scroll immediately; apply the same UI removal to every JSON-capable linear module before validating them one by one.
+- Consequences: `L-01` becomes easier to accept in browser immediately, and future acceptance passes can decide module by module whether JSON controls still belong in the primary drawer instead of assuming one shared policy without audit.
+- Owner: haoyu + codex
+
 ## DEC-20260721-69
 - Date: 2026-07-21
 - Status: accepted

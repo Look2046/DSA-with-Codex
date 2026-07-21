@@ -4,6 +4,7 @@ import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
 import { ARRAY_CAPACITY, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
 import {
+  getArrayWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
@@ -23,6 +24,8 @@ const DEFAULT_CONFIG: InsertConfig = {
 function createRandomInsertValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
+
+const ARRAY_WORKSPACE_CONFIG = getArrayWorkspaceConfig();
 
 export function ArrayPage() {
   const { t } = useI18n();
@@ -199,12 +202,13 @@ export function ArrayPage() {
       stageAriaLabel={t('module.l01.title')}
       title={t('module.l01.title')}
       description={t('module.l01.body')}
-      stageClassName="workspace-stage-array"
-      stageBodyClassName="workspace-stage-body-array"
+      stageClassName={ARRAY_WORKSPACE_CONFIG.stageClassName}
+      stageBodyClassName={ARRAY_WORKSPACE_CONFIG.stageBodyClassName}
       controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 620 }}
-      defaultContextPanelSize={{ width: 320, height: 540 }}
+      defaultControlsPanelSize={ARRAY_WORKSPACE_CONFIG.controlsPanelSize}
+      controlsPanelOverflowMargin={ARRAY_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
+      defaultContextPanelSize={ARRAY_WORKSPACE_CONFIG.contextPanelSize}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -281,30 +285,36 @@ export function ArrayPage() {
             </div>
           </div>
 
-          <label className="tree-workspace-field" htmlFor="array-json-input">
-            <span>{t('module.l01.json.label')}</span>
-            <textarea
-              id="array-json-input"
-              value={jsonInput}
-              onChange={(event) => setJsonInput(event.target.value)}
-              rows={6}
-              placeholder={t('module.l01.json.placeholder')}
-            />
-          </label>
-
           {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
-          {jsonFeedback ? (
-            <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
-          ) : null}
+          {ARRAY_WORKSPACE_CONFIG.showJsonControls ? (
+            <>
+              <label className="tree-workspace-field" htmlFor="array-json-input">
+                <span>{t('module.l01.json.label')}</span>
+                <textarea
+                  id="array-json-input"
+                  value={jsonInput}
+                  onChange={(event) => setJsonInput(event.target.value)}
+                  rows={6}
+                  placeholder={t('module.l01.json.placeholder')}
+                />
+              </label>
 
-          <div className="tree-workspace-drawer-actions">
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
-              {t('module.l01.json.export')}
-            </button>
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
-              {t('module.l01.json.import')}
-            </button>
-          </div>
+              {jsonFeedback ? (
+                <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>
+                  {jsonFeedback}
+                </p>
+              ) : null}
+
+              <div className="tree-workspace-drawer-actions">
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
+                  {t('module.l01.json.export')}
+                </button>
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
+                  {t('module.l01.json.import')}
+                </button>
+              </div>
+            </>
+          ) : null}
         </>
       }
       stepContent={

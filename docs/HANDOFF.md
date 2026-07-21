@@ -2,7 +2,7 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
-## 2026-07-21 (workspace cleanup and P15 acceptance kickoff)
+## 2026-07-21 (workspace cleanup, P15 kickoff, and L-01 acceptance fix)
 
 ### Today Done
 - Continued on:
@@ -20,6 +20,23 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
     - `/modules/huffman-tree` still advances correctly from `Step 1/9 -> Step 2/9`
     - `/modules/heap-sort` produced `57` Firefox dev-console warnings dominated by module-load warnings from `src/app/router.tsx`
   - repaired the local Firefox Playwright environment outside the repo after tracing launch failure to a stale broken symlink at `/home/haoyu/.cache/ms-playwright/firefox-1509/firefox/lock`
+- Ran the first direct user acceptance fix on `L-01 /modules/array` after the user reported three concrete issues:
+  - controls drawer initially opened mostly below the viewport on common laptop height
+  - array cells stretched vertically and looked too tall
+  - JSON controls in the primary drawer felt unnecessary for normal acceptance/use
+- Fixed `L-01` with a narrow-scope patch:
+  - added a page-specific compact workspace config for `L-01`
+  - added a configurable controls-drawer overflow clamp in `WorkspaceShell` and set `L-01` to keep the first-open drawer inside the shell instead of allowing large off-screen overflow
+  - compacted `L-01` array stage cells and removed JSON controls from the visible primary drawer
+- Re-verified locally after the `L-01` fix:
+  - `npm test -- src/pages/modules/arrayPageUtils.test.ts`
+  - targeted Firefox Playwright recheck on `/modules/array` at `1280x720`:
+    - controls drawer bottom = `708.6` (inside viewport)
+    - first array cell height = `49`
+    - JSON label/control absent
+  - captured local artifact:
+    - `output/playwright/p15-l01-array-acceptance.png`
+  - `npm run check` (docs links + 94 test files / 262 tests + lint + build)
 - Re-verified locally:
   - `./scripts/check-doc-links.sh`
   - `git check-ignore -v docs/design-prototypes/ output/design/ output/playwright/scratch/ output/playwright/dev-logs/ student-dist/ start-project-wsl.bat`
@@ -44,16 +61,21 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - the remaining visible worktree mostly represents real code/doc changes
 - Active milestone is now:
   - `P15` acceptance/stabilization kickoff
+- First module-level `P15` fix now landed locally on:
+  - `L-01 /modules/array`
 - Current acceptance blockers observed so far:
   - scaffold placeholder titles across sampled routes
   - Firefox warning storm on representative routes, especially `/modules/heap-sort`
+- Intentional `L-01` scope boundary for this pass:
+  - did not broaden the JSON-control removal to `L-02` / `L-04` / `L-05`
+  - did not change array insert step-generation behavior
+  - did not touch broader `/modules` / homepage redesign work already present in the dirty tree
 
 ### Next Step
-- Commit the workspace cleanup + `P15` planning baseline so another AI/session can resume from docs first.
-- Start `P15-M1` from the recorded findings:
+- Continue `P15-M1` / `P15-M2` with the next high-signal acceptance blockers:
   - fix scaffold placeholder titles
-  - diagnose the router/module-load warning storm
-  - then expand the audit breadth before any new feature implementation
+  - continue route-by-route user acceptance beyond `L-01`
+  - then diagnose the router/module-load warning storm before any new feature implementation
 
 ## 2026-05-08 (T-07 Huffman Tree completion check)
 

@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p14-backlog-wave`
-- Current phase: `P15` acceptance-and-stabilization kickoff has started locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, but the surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
+- Current phase: `P15` acceptance-and-stabilization wave is active locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, `L-01 /modules/array` now has a first accepted-fix candidate landed locally, but the full surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
 - Last local quality gates:
   - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
   - `npm run build` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
@@ -14,12 +14,17 @@ Use this file as the first thing to read in a new chat/session.
     - `/modules/huffman-tree`: title `T-07 Huffman Tree`, default sample advances `Step 1/9 -> Step 2/9`
     - `.huffman-node` count = `4`, selected nodes after `Next` = `2`, console/page errors = `0`
     - artifact: `output/playwright/t07-huffman-smoke.png`
-  - `npm run check` (passed locally, 2026-05-08, `feat/p14-backlog-wave`; docs links + 94 test files / 261 tests + lint + build)
   - `./scripts/check-doc-links.sh` (passed locally, 2026-07-21, `feat/p14-backlog-wave`)
   - representative Playwright audit (2026-07-21, `feat/p14-backlog-wave`):
     - `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` all still report page title `m0-scaffold-tmp`
     - `/modules/huffman-tree` default `Next` still advances `Step 1/9 -> Step 2/9`
     - `/modules/heap-sort` in Firefox dev audit reported `57` console warnings, dominated by module-load warnings routed through `src/app/router.tsx`
+  - targeted `L-01 /modules/array` acceptance recheck (passed locally in Firefox, 2026-07-21, `feat/p14-backlog-wave`):
+    - controls drawer first-open rect now stays inside a `1280x720` viewport (`bottom = 708.6`)
+    - first array cell height reduced from the earlier reproduced `380px` stretch to `49px`
+    - JSON label/control is no longer rendered in the primary controls drawer
+    - artifact: `output/playwright/p15-l01-array-acceptance.png`
+  - `npm run check` (passed locally, 2026-07-21, `feat/p14-backlog-wave`; docs links + 94 test files / 262 tests + lint + build)
 
 ## 2) What Is Already Done
 
@@ -401,10 +406,11 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Commit the repo-workspace cleanup and `P15` planning baseline so another AI/session can resume from docs first.
-- Run `P15-M1` acceptance inventory on `/modules` plus representative routes before starting any new feature scope.
-- Fix high-signal acceptance blockers first:
+- Continue `P15-M1` acceptance inventory route by route, using the fixed `L-01 /modules/array` result as the first user-reviewed acceptance sample.
+- Continue `P15-M2` product-surface fixes on high-signal routes:
   - scaffold placeholder titles (`m0-scaffold-tmp`)
+  - other layout/usability regressions surfaced during direct page acceptance
+- Fix high-signal acceptance blockers first:
   - router/module-load warning storm seen in Firefox dev audit
 - Only reopen new algorithm delivery after the current `43/43` surface is accepted or the user explicitly reprioritizes.
 - Keep quality gates unchanged:

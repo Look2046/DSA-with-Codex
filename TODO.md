@@ -613,10 +613,20 @@ Track actionable tasks here. Keep tasks small and testable.
     - `/modules/huffman-tree` still advances from `Step 1/9 -> Step 2/9`
     - `/modules/heap-sort` produced `57` Firefox dev-console warnings dominated by module-load warnings from `src/app/router.tsx`
     - local Firefox Playwright launch needed environment repair because a stale broken `~/.cache/ms-playwright/firefox-1509/firefox/lock` symlink blocked browser launch
+    - direct user acceptance on `/modules/array` reproduced three more product-surface issues:
+      - controls drawer first-open position fell mostly below the viewport
+      - array cells stretched to roughly `380px` height on `1280x720`
+      - JSON controls in the primary drawer were judged unnecessary
 
 - [ ] P15-M2 Product-surface baseline fixes
   - DoD: remove scaffold placeholder titles/meta residue and align top-level product-surface polish on representative routes.
   - Acceptance: `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` no longer report `m0-scaffold-tmp`.
+  - Progress (2026-07-21):
+    - `L-01 /modules/array` first-open controls drawer now fits inside `1280x720` after adding a per-page drawer overflow clamp
+    - `L-01` array cells were compacted so the first cell now renders at `49px` height instead of the earlier stretched state
+    - JSON controls were removed from the visible `L-01` primary drawer
+    - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l01-array-acceptance.png`
+    - full local quality gate re-passed with `npm run check`
 
 - [ ] P15-M3 Router/module-load warning diagnosis and stabilization
   - DoD: identify and fix the root cause of the Firefox warning storm observed during representative audit.

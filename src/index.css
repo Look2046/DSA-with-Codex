@@ -2157,6 +2157,28 @@ body {
   align-self: stretch;
 }
 
+.workspace-stage-body-array-compact {
+  align-items: flex-start;
+  padding-top: 12px;
+}
+
+.workspace-stage-array-compact .array-cells {
+  height: auto;
+  align-self: flex-start;
+  padding-top: 10px;
+  padding-bottom: 0;
+}
+
+.workspace-stage-array-compact .array-cell {
+  min-height: 46px;
+  padding: 6px 8px;
+  gap: 2px;
+}
+
+.workspace-stage-array-compact .array-insert-pointer {
+  top: -12px;
+}
+
 .workspace-stage-array .dynamic-array-stage-content,
 .workspace-stage-array .queue-cells,
 .workspace-stage-array .stack-cells {

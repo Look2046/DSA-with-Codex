@@ -16,6 +16,34 @@ type JsonParseResult<T> = {
   error: string;
 };
 
+export type ArrayWorkspaceConfig = {
+  controlsPanelSize: {
+    width: number;
+    height: number;
+  };
+  controlsPanelOverflowMargin: number;
+  contextPanelSize: {
+    width: number;
+    height: number;
+  };
+  stageClassName: string;
+  stageBodyClassName: string;
+  showJsonControls: boolean;
+};
+
+const ARRAY_WORKSPACE_CONFIG: ArrayWorkspaceConfig = {
+  controlsPanelSize: { width: 332, height: 360 },
+  controlsPanelOverflowMargin: 0,
+  contextPanelSize: { width: 320, height: 540 },
+  stageClassName: 'workspace-stage-array workspace-stage-array-compact',
+  stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-compact',
+  showJsonControls: false,
+};
+
+export function getArrayWorkspaceConfig(): ArrayWorkspaceConfig {
+  return ARRAY_WORKSPACE_CONFIG;
+}
+
 export function parseNumberArray(raw: string): number[] | null {
   const parts = raw
     .split(',')

@@ -3,6 +3,7 @@ import type { TranslationKey } from '../../i18n/translations';
 import { generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
 import type { ArrayInsertStep } from '../../modules/linear/arrayInsert';
 import {
+  getArrayWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
@@ -88,6 +89,17 @@ describe('arrayPageUtils', () => {
     expect(resolveInsertConfigFromJson('{"array":[3,8,1],"index":9,"value":9}', t)).toEqual({
       config: null,
       error: 'module.l01.error.index',
+    });
+  });
+
+  it('uses the compact L-01 workspace configuration without json controls', () => {
+    expect(getArrayWorkspaceConfig()).toEqual({
+      controlsPanelSize: { width: 332, height: 360 },
+      controlsPanelOverflowMargin: 0,
+      contextPanelSize: { width: 320, height: 540 },
+      stageClassName: 'workspace-stage-array workspace-stage-array-compact',
+      stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-compact',
+      showJsonControls: false,
     });
   });
 
