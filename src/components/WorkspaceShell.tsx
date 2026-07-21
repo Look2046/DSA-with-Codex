@@ -38,6 +38,7 @@ type WorkspaceShellProps = {
   focusPoint?: StagePoint | null;
   defaultControlsTabSize?: StageSize;
   defaultControlsPanelSize?: StageSize;
+  controlsPanelAutoAvoid?: boolean;
   controlsPanelOverflowMargin?: number;
   defaultContextRailSize?: StageSize;
   defaultContextPanelSize?: StageSize;
@@ -88,6 +89,7 @@ export function WorkspaceShell({
   focusPoint = null,
   defaultControlsTabSize = DEFAULT_CONTROLS_TAB_SIZE,
   defaultControlsPanelSize = DEFAULT_CONTROLS_PANEL_SIZE,
+  controlsPanelAutoAvoid = true,
   controlsPanelOverflowMargin = 320,
   defaultContextRailSize = DEFAULT_CONTEXT_RAIL_SIZE,
   defaultContextPanelSize = DEFAULT_CONTEXT_PANEL_SIZE,
@@ -149,6 +151,7 @@ export function WorkspaceShell({
     defaultAnchorSize: defaultControlsTabSize,
     defaultPanelSize: defaultControlsPanelSize,
     collisionTarget: focusCollisionRect,
+    autoAvoid: controlsPanelAutoAvoid,
     overflowMargin: controlsPanelOverflowMargin,
     enabled: floatingPanelsEnabled,
   });

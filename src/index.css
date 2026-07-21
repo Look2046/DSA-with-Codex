@@ -2157,15 +2157,13 @@ body {
   align-self: stretch;
 }
 
-.workspace-stage-body-array-compact {
-  align-items: flex-start;
-  padding-top: 12px;
+.workspace-stage-body-array-centered {
+  align-items: center;
 }
 
 .workspace-stage-array-compact .array-cells {
   height: auto;
-  align-self: flex-start;
-  padding-top: 10px;
+  align-self: center;
   padding-bottom: 0;
 }
 
@@ -2226,6 +2224,35 @@ body {
 .workspace-drawer-scroll {
   max-height: clamp(360px, 64svh, 620px);
   overflow: auto;
+}
+
+.array-controls-drawer {
+  width: min(720px, calc(100vw - 120px));
+  max-width: min(720px, calc(100vw - 120px));
+  gap: 14px;
+}
+
+.array-controls-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 2.4fr) minmax(92px, 1fr) minmax(92px, 1fr) minmax(200px, 1.7fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.array-controls-field {
+  min-width: 0;
+}
+
+.array-controls-field-array {
+  grid-column: 1;
+}
+
+.array-controls-field-speed {
+  grid-column: 4;
+}
+
+.array-controls-feedback {
+  min-height: 20px;
 }
 
 .workspace-context-sheet-wide {

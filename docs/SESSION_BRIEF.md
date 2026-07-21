@@ -24,6 +24,11 @@ Use this file as the first thing to read in a new chat/session.
     - first array cell height reduced from the earlier reproduced `380px` stretch to `49px`
     - JSON label/control is no longer rendered in the primary controls drawer
     - artifact: `output/playwright/p15-l01-array-acceptance.png`
+  - targeted `L-01 /modules/array` acceptance recheck v2 (passed locally in Firefox, 2026-07-21, `feat/p14-backlog-wave`):
+    - array row moved into the vertical center band (`array row top = 414.1`, no longer under the stage meta)
+    - controls drawer now uses one horizontal workbench row (`field tops ~= 439.6`)
+    - controls drawer no longer shifts during repeated `Next` steps (`left = 38`, `top = 395.6` remained stable)
+    - artifact: `output/playwright/p15-l01-array-centered-controls.png`
   - `npm run check` (passed locally, 2026-07-21, `feat/p14-backlog-wave`; docs links + 94 test files / 262 tests + lint + build)
 
 ## 2) What Is Already Done

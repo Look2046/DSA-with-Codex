@@ -204,9 +204,10 @@ export function ArrayPage() {
       description={t('module.l01.body')}
       stageClassName={ARRAY_WORKSPACE_CONFIG.stageClassName}
       stageBodyClassName={ARRAY_WORKSPACE_CONFIG.stageBodyClassName}
-      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
+      controlsPanelClassName={ARRAY_WORKSPACE_CONFIG.controlsPanelClassName}
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
       defaultControlsPanelSize={ARRAY_WORKSPACE_CONFIG.controlsPanelSize}
+      controlsPanelAutoAvoid={ARRAY_WORKSPACE_CONFIG.controlsPanelAutoAvoid}
       controlsPanelOverflowMargin={ARRAY_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
       defaultContextPanelSize={ARRAY_WORKSPACE_CONFIG.contextPanelSize}
       focusPoint={focusPoint}
@@ -226,7 +227,8 @@ export function ArrayPage() {
       }
       controlsContent={
         <>
-          <label className="tree-workspace-field" htmlFor="array-input">
+          <div className="array-controls-grid">
+          <label className="tree-workspace-field array-controls-field array-controls-field-array" htmlFor="array-input">
             <span>{t('module.l01.input.array')}</span>
             <input
               id="array-input"
@@ -241,7 +243,7 @@ export function ArrayPage() {
             />
           </label>
 
-          <label className="tree-workspace-field" htmlFor="insert-index">
+          <label className="tree-workspace-field array-controls-field" htmlFor="insert-index">
             <span>{t('module.l01.input.index')}</span>
             <input
               id="insert-index"
@@ -255,7 +257,7 @@ export function ArrayPage() {
             />
           </label>
 
-          <label className="tree-workspace-field" htmlFor="insert-value">
+          <label className="tree-workspace-field array-controls-field" htmlFor="insert-value">
             <span>{t('module.l01.input.value')}</span>
             <input
               id="insert-value"
@@ -269,7 +271,7 @@ export function ArrayPage() {
             />
           </label>
 
-          <div className="tree-workspace-field">
+          <div className="tree-workspace-field array-controls-field array-controls-field-speed">
             <span>{t('module.s01.speed')}</span>
             <div className="tree-workspace-toggle-row">
               {speedOptions.map((option) => (
@@ -284,8 +286,11 @@ export function ArrayPage() {
               ))}
             </div>
           </div>
+          </div>
 
-          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
+          <p className={`workspace-inline-feedback array-controls-feedback${error ? ' form-error' : ''}`} aria-live="polite">
+            {error || ''}
+          </p>
           {ARRAY_WORKSPACE_CONFIG.showJsonControls ? (
             <>
               <label className="tree-workspace-field" htmlFor="array-json-input">

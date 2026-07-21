@@ -94,11 +94,13 @@ describe('arrayPageUtils', () => {
 
   it('uses the compact L-01 workspace configuration without json controls', () => {
     expect(getArrayWorkspaceConfig()).toEqual({
-      controlsPanelSize: { width: 332, height: 360 },
+      controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer',
+      controlsPanelSize: { width: 720, height: 240 },
+      controlsPanelAutoAvoid: false,
       controlsPanelOverflowMargin: 0,
       contextPanelSize: { width: 320, height: 540 },
       stageClassName: 'workspace-stage-array workspace-stage-array-compact',
-      stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-compact',
+      stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
       showJsonControls: false,
     });
   });

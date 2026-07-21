@@ -17,10 +17,12 @@ type JsonParseResult<T> = {
 };
 
 export type ArrayWorkspaceConfig = {
+  controlsPanelClassName: string;
   controlsPanelSize: {
     width: number;
     height: number;
   };
+  controlsPanelAutoAvoid: boolean;
   controlsPanelOverflowMargin: number;
   contextPanelSize: {
     width: number;
@@ -32,11 +34,13 @@ export type ArrayWorkspaceConfig = {
 };
 
 const ARRAY_WORKSPACE_CONFIG: ArrayWorkspaceConfig = {
-  controlsPanelSize: { width: 332, height: 360 },
+  controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer',
+  controlsPanelSize: { width: 720, height: 240 },
+  controlsPanelAutoAvoid: false,
   controlsPanelOverflowMargin: 0,
   contextPanelSize: { width: 320, height: 540 },
   stageClassName: 'workspace-stage-array workspace-stage-array-compact',
-  stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-compact',
+  stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
   showJsonControls: false,
 };
 

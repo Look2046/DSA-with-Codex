@@ -627,6 +627,8 @@ Track actionable tasks here. Keep tasks small and testable.
     - JSON controls were removed from the visible `L-01` primary drawer
     - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l01-array-acceptance.png`
     - full local quality gate re-passed with `npm run check`
+    - second `L-01` pass moved the array row into the stage center band, converted the primary drawer to a horizontal workbench row, and disabled controls-panel auto-avoid so playback no longer shifts the drawer
+    - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l01-array-centered-controls.png`
 
 - [ ] P15-M3 Router/module-load warning diagnosis and stabilization
   - DoD: identify and fix the root cause of the Firefox warning storm observed during representative audit.

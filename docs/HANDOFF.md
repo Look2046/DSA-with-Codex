@@ -37,6 +37,19 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - captured local artifact:
     - `output/playwright/p15-l01-array-acceptance.png`
   - `npm run check` (docs links + 94 test files / 262 tests + lint + build)
+- Ran a second direct `L-01 /modules/array` acceptance adjustment after the user reported that the array row was pinned under the stage meta and the controls should behave like a horizontal workbench:
+  - moved the array row into the vertical center band of the stage body instead of leaving it attached to the top/meta area
+  - kept the row left-aligned within the viewport-safe width after confirming that centering the full 20-slot capacity row horizontally would push both ends off-screen
+  - widened the controls drawer into a horizontal layout row and reserved a stable feedback line
+  - disabled controls-panel auto-avoid on `L-01`, because the drawer had been shifting during playback in response to the moving highlight focus point
+- Re-verified locally after the second `L-01` pass:
+  - targeted Firefox Playwright recheck on `/modules/array` at `1280x720`:
+    - stage meta bottom = `219.6`, array row top = `414.1`, so the row no longer sits under the status pills
+    - controls drawer stayed fixed at `left = 38`, `top = 395.6` across repeated `Next` steps
+    - all four primary control blocks share one horizontal band (`top ~= 439.6`)
+  - captured local artifact:
+    - `output/playwright/p15-l01-array-centered-controls.png`
+  - `npm run check` re-passed
 - Re-verified locally:
   - `./scripts/check-doc-links.sh`
   - `git check-ignore -v docs/design-prototypes/ output/design/ output/playwright/scratch/ output/playwright/dev-logs/ student-dist/ start-project-wsl.bat`
