@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { TranslationKey } from '../../i18n/translations';
 import { generateDynamicArraySteps, type DynamicArrayStep } from '../../modules/linear/dynamicArrayOps';
 import {
+  getDynamicArrayWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
@@ -56,6 +57,19 @@ describe('dynamicArrayPageUtils', () => {
     expect(resolveDynamicArrayConfig('3, 8, 1', '2', '9', t)).toEqual({
       config: null,
       error: 'module.l02.error.lengthExceedsCapacity',
+    });
+  });
+
+  it('uses the compact L-02 workspace configuration without json controls', () => {
+    expect(getDynamicArrayWorkspaceConfig()).toEqual({
+      controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer',
+      controlsPanelSize: { width: 760, height: 260 },
+      controlsPanelAutoAvoid: false,
+      controlsPanelOverflowMargin: 0,
+      contextPanelSize: { width: 340, height: 560 },
+      stageClassName: 'workspace-stage-array workspace-stage-array-compact workspace-stage-dynamic-array-compact',
+      stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
+      showJsonControls: false,
     });
   });
 

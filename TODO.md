@@ -629,6 +629,8 @@ Track actionable tasks here. Keep tasks small and testable.
     - full local quality gate re-passed with `npm run check`
     - second `L-01` pass moved the array row into the stage center band, converted the primary drawer to a horizontal workbench row, and disabled controls-panel auto-avoid so playback no longer shifts the drawer
     - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l01-array-centered-controls.png`
+    - `L-02 /modules/dynamic-array` now follows the same compact centered workbench pattern, keeps the first-open controls fixed, and removes JSON controls from the primary drawer
+    - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l02-dynamic-array-centered-controls.png`
 
 - [ ] P15-M3 Router/module-load warning diagnosis and stabilization
   - DoD: identify and fix the root cause of the Firefox warning storm observed during representative audit.

@@ -2,6 +2,43 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-07-30 (P15 L-02 dynamic-array acceptance alignment)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Followed the accepted `L-01 /modules/array` acceptance direction and applied the same product-surface alignment to `L-02 /modules/dynamic-array`:
+  - added a page-level compact workspace config for `L-02`
+  - switched the controls drawer to the same horizontal workbench pattern used by `L-01`
+  - disabled controls-panel auto-avoid for `L-02` so the drawer stays fixed instead of reacting to moving resize/migration highlights
+  - removed JSON controls from the visible primary drawer so the first-open control surface stays focused on array/capacity/value/speed
+  - moved the dynamic-array stage content into the centered stage band instead of leaving the main buffer row attached to the upper meta area
+- Re-verified locally after the `L-02` pass:
+  - `npm test -- src/pages/modules/dynamicArrayPageUtils.test.ts`
+  - `npm run check`
+  - targeted Firefox Playwright recheck on `/modules/dynamic-array` at `1280x720`:
+    - stage meta bottom = `197`, dynamic-array row top = `391.5`, so the buffer row now sits clearly below the status pills
+    - controls drawer stayed at `left = 38`, `top = 373`
+    - all four primary control fields share one horizontal band (`top ~= 417`)
+  - captured local artifact:
+    - `output/playwright/p15-l02-dynamic-array-centered-controls.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- `P15` route-by-route acceptance now has both:
+  - `L-01 /modules/array` aligned to the compact centered workbench layout
+  - `L-02 /modules/dynamic-array` aligned to the same first-open controls and centered-stage pattern
+- Intentional `L-02` scope boundary for this pass:
+  - did not change dynamic-array step generation or resize semantics
+  - did not broaden the JSON-control removal to other linear modules yet
+  - did not address placeholder document titles or the broader router warning storm in this pass
+
+### Next Step
+- Continue `P15-M1` / `P15-M2` on the next user-facing acceptance blocker:
+  - either keep sweeping linear modules route by route after `L-02`
+  - or switch back to the cross-cutting blockers (`m0-scaffold-tmp` titles and router/module-load warnings)
+
 ## 2026-07-21 (workspace cleanup, P15 kickoff, and L-01 acceptance fix)
 
 ### Today Done

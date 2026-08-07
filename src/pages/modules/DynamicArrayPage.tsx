@@ -4,6 +4,7 @@ import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
 import { buildDynamicArrayTimelineFromInput } from '../../modules/linear/dynamicArrayTimelineAdapter';
 import {
+  getDynamicArrayWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
@@ -23,6 +24,8 @@ const DEFAULT_CONFIG: DynamicArrayConfig = {
 function createRandomAppendValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
+
+const DYNAMIC_ARRAY_WORKSPACE_CONFIG = getDynamicArrayWorkspaceConfig();
 
 export function DynamicArrayPage() {
   const { t } = useI18n();
@@ -302,12 +305,14 @@ export function DynamicArrayPage() {
       stageAriaLabel={t('module.l02.title')}
       title={t('module.l02.title')}
       description={t('module.l02.body')}
-      stageClassName="workspace-stage-array"
-      stageBodyClassName="workspace-stage-body-array"
-      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
+      stageClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.stageClassName}
+      stageBodyClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.stageBodyClassName}
+      controlsPanelClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelClassName}
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 620 }}
-      defaultContextPanelSize={{ width: 340, height: 560 }}
+      defaultControlsPanelSize={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelSize}
+      controlsPanelAutoAvoid={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelAutoAvoid}
+      controlsPanelOverflowMargin={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
+      defaultContextPanelSize={DYNAMIC_ARRAY_WORKSPACE_CONFIG.contextPanelSize}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -326,93 +331,101 @@ export function DynamicArrayPage() {
       }
       controlsContent={
         <>
-          <label className="tree-workspace-field" htmlFor="dynamic-array-input">
-            <span>{t('module.l02.input.array')}</span>
-            <input
-              id="dynamic-array-input"
-              type="text"
-              value={arrayInput}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                reset();
-                setArrayInput(nextValue);
-                recomputeInputState(nextValue, capacityInput, valueInput);
-              }}
-              placeholder="3, 8"
-            />
-          </label>
+          <div className="array-controls-grid">
+            <label className="tree-workspace-field array-controls-field array-controls-field-array" htmlFor="dynamic-array-input">
+              <span>{t('module.l02.input.array')}</span>
+              <input
+                id="dynamic-array-input"
+                type="text"
+                value={arrayInput}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  reset();
+                  setArrayInput(nextValue);
+                  recomputeInputState(nextValue, capacityInput, valueInput);
+                }}
+                placeholder="3, 8"
+              />
+            </label>
 
-          <label className="tree-workspace-field" htmlFor="dynamic-array-capacity">
-            <span>{t('module.l02.input.capacity')}</span>
-            <input
-              id="dynamic-array-capacity"
-              type="number"
-              min={1}
-              value={capacityInput}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                reset();
-                setCapacityInput(nextValue);
-                recomputeInputState(arrayInput, nextValue, valueInput);
-              }}
-            />
-          </label>
+            <label className="tree-workspace-field array-controls-field" htmlFor="dynamic-array-capacity">
+              <span>{t('module.l02.input.capacity')}</span>
+              <input
+                id="dynamic-array-capacity"
+                type="number"
+                min={1}
+                value={capacityInput}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  reset();
+                  setCapacityInput(nextValue);
+                  recomputeInputState(arrayInput, nextValue, valueInput);
+                }}
+              />
+            </label>
 
-          <label className="tree-workspace-field" htmlFor="dynamic-array-value">
-            <span>{t('module.l02.input.value')}</span>
-            <input
-              id="dynamic-array-value"
-              type="number"
-              value={valueInput}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                reset();
-                setValueInput(nextValue);
-                recomputeInputState(arrayInput, capacityInput, nextValue);
-              }}
-            />
-          </label>
+            <label className="tree-workspace-field array-controls-field" htmlFor="dynamic-array-value">
+              <span>{t('module.l02.input.value')}</span>
+              <input
+                id="dynamic-array-value"
+                type="number"
+                value={valueInput}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  reset();
+                  setValueInput(nextValue);
+                  recomputeInputState(arrayInput, capacityInput, nextValue);
+                }}
+              />
+            </label>
 
-          <div className="tree-workspace-field">
-            <span>{t('module.s01.speed')}</span>
-            <div className="tree-workspace-toggle-row">
-              {speedOptions.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
-                  onClick={() => setSpeed(option.value)}
-                >
-                  {t(option.key)}
-                </button>
-              ))}
+            <div className="tree-workspace-field array-controls-field array-controls-field-speed">
+              <span>{t('module.s01.speed')}</span>
+              <div className="tree-workspace-toggle-row">
+                {speedOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                    onClick={() => setSpeed(option.value)}
+                  >
+                    {t(option.key)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <label className="tree-workspace-field" htmlFor="dynamic-array-json-input">
-            <span>{t('module.l02.json.label')}</span>
-            <textarea
-              id="dynamic-array-json-input"
-              value={jsonInput}
-              onChange={(event) => setJsonInput(event.target.value)}
-              rows={6}
-              placeholder={t('module.l02.json.placeholder')}
-            />
-          </label>
+          <p
+            className={`workspace-inline-feedback array-controls-feedback${error || hasJsonError ? ' form-error' : ''}`}
+            aria-live="polite"
+          >
+            {error || jsonFeedback || ''}
+          </p>
 
-          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
-          {jsonFeedback ? (
-            <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
+          {DYNAMIC_ARRAY_WORKSPACE_CONFIG.showJsonControls ? (
+            <>
+              <label className="tree-workspace-field" htmlFor="dynamic-array-json-input">
+                <span>{t('module.l02.json.label')}</span>
+                <textarea
+                  id="dynamic-array-json-input"
+                  value={jsonInput}
+                  onChange={(event) => setJsonInput(event.target.value)}
+                  rows={6}
+                  placeholder={t('module.l02.json.placeholder')}
+                />
+              </label>
+
+              <div className="tree-workspace-drawer-actions">
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
+                  {t('module.l02.json.export')}
+                </button>
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
+                  {t('module.l02.json.import')}
+                </button>
+              </div>
+            </>
           ) : null}
-
-          <div className="tree-workspace-drawer-actions">
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
-              {t('module.l02.json.export')}
-            </button>
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
-              {t('module.l02.json.import')}
-            </button>
-          </div>
         </>
       }
       stepContent={
@@ -584,3 +597,5 @@ export function DynamicArrayPage() {
     />
   );
 }
+
+

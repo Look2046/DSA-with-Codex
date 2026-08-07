@@ -29,6 +29,11 @@ Use this file as the first thing to read in a new chat/session.
     - controls drawer now uses one horizontal workbench row (`field tops ~= 439.6`)
     - controls drawer no longer shifts during repeated `Next` steps (`left = 38`, `top = 395.6` remained stable)
     - artifact: `output/playwright/p15-l01-array-centered-controls.png`
+  - targeted `L-02 /modules/dynamic-array` acceptance recheck (passed locally in Firefox, 2026-07-30, `feat/p14-backlog-wave`):
+    - dynamic-array row moved into the vertical center band (`row top = 391.5`, no longer under the stage meta)
+    - controls drawer now uses one horizontal workbench row (`field tops ~= 417`)
+    - controls drawer stayed fixed at `left = 38`, `top = 373`
+    - artifact: `output/playwright/p15-l02-dynamic-array-centered-controls.png`
   - `npm run check` (passed locally, 2026-07-21, `feat/p14-backlog-wave`; docs links + 94 test files / 262 tests + lint + build)
 
 ## 2) What Is Already Done

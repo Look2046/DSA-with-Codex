@@ -2177,6 +2177,12 @@ body {
   top: -12px;
 }
 
+.workspace-stage-dynamic-array-compact .dynamic-array-stage-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .workspace-stage-array .dynamic-array-stage-content,
 .workspace-stage-array .queue-cells,
 .workspace-stage-array .stack-cells {

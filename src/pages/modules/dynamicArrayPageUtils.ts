@@ -15,6 +15,38 @@ type JsonParseResult<T> = {
   error: string;
 };
 
+export type DynamicArrayWorkspaceConfig = {
+  controlsPanelClassName: string;
+  controlsPanelSize: {
+    width: number;
+    height: number;
+  };
+  controlsPanelAutoAvoid: boolean;
+  controlsPanelOverflowMargin: number;
+  contextPanelSize: {
+    width: number;
+    height: number;
+  };
+  stageClassName: string;
+  stageBodyClassName: string;
+  showJsonControls: boolean;
+};
+
+const DYNAMIC_ARRAY_WORKSPACE_CONFIG: DynamicArrayWorkspaceConfig = {
+  controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer',
+  controlsPanelSize: { width: 760, height: 260 },
+  controlsPanelAutoAvoid: false,
+  controlsPanelOverflowMargin: 0,
+  contextPanelSize: { width: 340, height: 560 },
+  stageClassName: 'workspace-stage-array workspace-stage-array-compact workspace-stage-dynamic-array-compact',
+  stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
+  showJsonControls: false,
+};
+
+export function getDynamicArrayWorkspaceConfig(): DynamicArrayWorkspaceConfig {
+  return DYNAMIC_ARRAY_WORKSPACE_CONFIG;
+}
+
 export function parseNumberArrayAllowEmpty(raw: string): number[] | null {
   const trimmed = raw.trim();
   if (trimmed.length === 0) {
