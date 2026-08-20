@@ -2,6 +2,313 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-08-09 (P15 L-01~L-04 two-column step panel follow-up)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Reworked the floating `Step` panel on the first four linear pages into a shared two-column layout:
+  - left column now holds step summary / status / key-value details
+  - right column holds pseudocode as its own column
+  - legend moved beside the pseudocode column so the summary column can stay within one screen height
+- Widened the linear step panel baseline from `560px` to `620px` and kept the shared fixed in-viewport floating behavior from the earlier pass.
+- Simplified the dynamic-array step panel content slightly by removing the redundant duplicated capacity/size status line and only keeping the full-capacity warning when it actually applies.
+
+### Current State
+- Re-verified locally on `2026-08-09`:
+  - `npm test -- src/pages/modules/arrayPageUtils.test.ts src/pages/modules/dynamicArrayPageUtils.test.ts src/pages/modules/linkedListPageUtils.test.ts src/pages/modules/stackPageUtils.test.ts`
+  - `npm run lint`
+  - `npm run build`
+- Browser recheck on `http://127.0.0.1:4175` at `1280x720` confirmed:
+  - `L-01` / `L-02` / `L-03` / `L-04` all now open the `Step` panel at `620 x 432`
+  - for all four pages, the two-column step content fully fits without internal scroll (`clientHeight = scrollHeight = 365`, `clientWidth = scrollWidth = 586`)
+  - the widened floating `Step` panel still stays inside the viewport on all four pages (`top = 256`, `bottom = 688`)
+- New local artifacts:
+  - `output/playwright/l01-step-two-column-1280x720.png`
+  - `output/playwright/l02-step-two-column-1280x720.png`
+  - `output/playwright/l03-step-two-column-1280x720.png`
+  - `output/playwright/l04-step-two-column-1280x720.png`
+- `npm run check` is still blocked in this Windows worktree because `check:docs` invokes `./scripts/check-doc-links.sh` directly and `pwsh/cmd` cannot execute that shell path as-is.
+
+### Next Step
+- If the user keeps sweeping the linear routes, reuse this `620px` two-column step panel as the shared baseline for `L-05+`.
+- Separately, fix the Windows docs-check invocation so `npm run check` can run green in this worktree without manual command splitting.
+
+## 2026-08-09 (P15 L-01~L-04 floating-panel re-unification follow-up)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Replaced the latest `L-03` / `L-04` docked-panel experiment with the same floating-window interaction used by `L-01` / `L-02`:
+  - removed the current `panelLayout: 'docked'` usage from `L-03 /modules/linked-list` and `L-04 /modules/stack`
+  - kept `L-01`~`L-04` on the same `linear-adaptive-viewport-lock` height template so the stage still fills the page height without bringing back the earlier bottom blank area
+- Widened the first-open floating controls pattern across the first four linear pages:
+  - `L-01` / `L-02` now use a shared `linear-controls-drawer` width
+  - `L-03` / `L-04` floating control drawers were reduced from the earlier overly wide `980px` dock-target sizing into `900px` / `920px` floating widths
+- Stabilized the floating `Step` panel so it no longer auto-avoids into off-screen positions on short desktop viewports:
+  - added shared `stepPanelAutoAvoid` + `stepPanelOverflowMargin` workspace-shell config support
+  - set those values to `false` / `0` for `L-01`~`L-04`, keeping the widened floating step panel inside the shell instead of letting it drop below `1280x720`
+
+### Current State
+- Re-verified locally on `2026-08-09`:
+  - `npm test -- src/pages/modules/arrayPageUtils.test.ts src/pages/modules/dynamicArrayPageUtils.test.ts src/pages/modules/linkedListPageUtils.test.ts src/pages/modules/stackPageUtils.test.ts`
+  - `npm run lint`
+  - `npm run build`
+- Browser recheck on `http://127.0.0.1:4175` at `1280x720` confirmed:
+  - `L-01` / `L-02` controls stay at `840px` wide and the floating `Step` panel now stays inside the viewport (`bottom = 688`)
+  - `L-03` controls open as a `900px` floating drawer instead of the previous full-width docked strip, while the floating `Step` panel also stays inside the viewport (`bottom = 688`)
+  - `L-04` controls open as a `920px` floating drawer instead of the previous full-width docked strip, and the floating `Step` panel also stays inside the viewport (`bottom = 688`)
+  - all four pages keep `clientHeight = scrollHeight = 720` and preserve the tight bottom gap (`gapBelowTransport = 19`) instead of reintroducing page scroll or large blank space
+- New local artifacts:
+  - `output/playwright/l01-floating-review-1280x720.png`
+  - `output/playwright/l02-floating-review-1280x720.png`
+  - `output/playwright/l03-floating-review-1280x720.png`
+  - `output/playwright/l04-floating-review-1280x720.png`
+- `npm run check` is still blocked in this Windows worktree because `check:docs` invokes `./scripts/check-doc-links.sh` directly and `pwsh/cmd` cannot execute that shell path as-is.
+
+### Next Step
+- If the user continues the `P15` route sweep, treat the first four linear pages as the accepted floating-panel baseline:
+  - compact viewport-locked stage
+  - widened floating controls
+  - fixed in-viewport floating `Step` panel
+- Separately, fix the Windows docs-check invocation so `npm run check` can run green in this worktree without manual command splitting.
+
+## 2026-08-09 (P15 L-03/L-04 docked-panel and bottom-blank follow-up)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Tightened the shared `WorkspaceShell` docked-mode behavior used by `L-03 /modules/linked-list` and `L-04 /modules/stack`:
+  - replaced the previous split docked behavior with one shared top tab strip: `Controls` and `Step` now behave like one tabbed surface instead of two unrelated expanders
+  - added `data-step-open` / `data-panel-layout` hooks so the active docked panel opens in one shared panel area above the stage instead of covering the canvas
+- Moved `L-03` and `L-04` from the earlier `linear-adaptive-flow` experiment back onto the viewport-locked adaptive path, then tuned the docked shell to fill the remaining page height without introducing page scroll.
+- Removed the remaining extra bottom blank space on the `L-03` / `L-04` workbench and restored full in-viewport visibility:
+  - `L-03` stage now stretches to the remaining viewport height instead of collapsing into a content-height strip
+  - `L-04` transport moved back into an in-stage overlay for docked mode, giving the comparison lanes enough height to show default `3/10` and full `10/10` sequential-stack states without page scroll or internal lane clipping
+
+### Current State
+- Re-verified locally on `2026-08-09`:
+  - `npm test -- src/pages/modules/linkedListPageUtils.test.ts src/pages/modules/stackPageUtils.test.ts src/pages/modules/StackPage.test.tsx`
+  - `npm run lint`
+  - `npm run build`
+- `npm run check` is still blocked in this Windows worktree because `check:docs` invokes `./scripts/check-doc-links.sh` directly and `cmd/pwsh` cannot execute that shell path as-is.
+- Fresh Firefox Playwright screenshots on `http://127.0.0.1:4179` confirmed:
+  - `L-03` no longer leaves a large blank area under the transport row
+  - `L-03` controls now open in the shared top panel area instead of covering the linked-list canvas
+  - `L-04` no longer leaves the earlier giant bottom blank inside the stage shell
+  - `L-04` controls now open in the shared top panel area instead of covering the sequential stack
+  - `L-04` default `3/10` and full `10/10` sequential-stack states both remain fully visible at `1280x720`, while page `scrollHeight` stays equal to viewport `clientHeight`
+- New local artifacts:
+  - `output/playwright/l03-after-fix-4179-1280x720.png`
+  - `output/playwright/l03-after-fix-controls-open-4179-1280x720.png`
+  - `output/playwright/l03-after-fix-full-4179.png`
+  - `output/playwright/l04-after-fix-4179-1280x720.png`
+  - `output/playwright/l04-after-fix-controls-open-4179-1280x720.png`
+  - `output/playwright/l04-after-fix-full-4179.png`
+
+### Next Step
+- If the user keeps sweeping route acceptance, reuse the same docked-panel strip + tightened stage-height pattern for the next linear pages that need compact first-open behavior.
+- Separately, fix the Windows docs-check invocation so `npm run check` can run green in this worktree without manual command splitting.
+
+## 2026-08-09 (P15 L-01~L-04 adaptive layout template split)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Fixed the latest `L-01`~`L-04` canvas-height regression by replacing the one-size-fits-all `linear-adaptive` rule with two reusable layout templates:
+  - `linear-adaptive-viewport-lock` for compact single-canvas pages (`L-01 /modules/array`, `L-02 /modules/dynamic-array`)
+  - `linear-adaptive-flow` for richer/taller linear pages that must keep normal document flow (`L-03 /modules/linked-list`, `L-04 /modules/stack`)
+- Moved the page-level template choice into each linear module's workspace config (`pageClassName`) so later routes can reuse the same grouping instead of hardcoding page classes in each page component.
+- Kept the stack-specific height softening under the shared flow template instead of reverting `L-04` to a one-off page patch.
+
+### Current State
+- Re-verified locally on `2026-08-09`:
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+- Browser recheck on a fresh Vite dev server (`http://127.0.0.1:4177`) at `1280x720` confirmed:
+  - `L-01` and `L-02` still keep the viewport-fit compact workbench
+  - `L-03` title, stage, controls tab, and transport are all visible again on first load
+  - `L-04` title and comparison stage are visible again on first load instead of being pulled under the site header
+- `npm run check` is still blocked in this Windows worktree because `./scripts/check-doc-links.sh` is invoked through a shell path that is not directly executable here, and WSL/bash currently trips on CRLF (`set: pipefail\r: invalid option name`).
+
+### Next Step
+- If the user keeps working on route acceptance, extend the same template approach to `L-05+` instead of adding more one-off height rules.
+- Separately, fix the Windows docs-check execution gap so `npm run check` becomes fully green again in this worktree.
+
+## 2026-08-08 (L-04 full-stack top-null pointer follow-up)
+
+### Today Done
+- Adjusted the `L-04 /modules/stack` full-stack sequential pointer again after direct user review.
+- Replaced the previous vertical `null ↑ top` marker with a dedicated overflow slot above the stack so the layout now reads as:
+  - `null` in the slot above the topmost sequential cell
+  - horizontal `← top` pointer on the right side of that `null` slot
+- Added a focused regression test for the overflow-pointer markup in `src/pages/modules/StackPage.test.tsx`.
+
+### Current State
+- Re-verified locally on `2026-08-08`:
+  - `npm test -- src/pages/modules/StackPage.test.tsx src/pages/modules/stackPageUtils.test.ts src/pages/modules/stackComparisonUtils.test.ts src/modules/linear/stackOps.test.ts`
+  - `npm run lint`
+  - `npm run build`
+- Browser recheck on `http://127.0.0.1:4175/modules/stack` confirms the full-stack sequential lane now shows `null` above index `9` and `top` stays horizontal.
+
+### Next Step
+- Continue only if the user wants more L-04 visual polish; otherwise move on to the next route-level acceptance issue in `P15`.
+
+## 2026-08-08 (P15 L-04 linked-stack density and push-animation follow-up)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Tightened the `L-04 /modules/stack` comparison page after direct user review:
+  - `Reset` now restores the page to the default teaching demo (`[3, 8, 1] + push 9`) instead of only returning the current config to frame `0`
+  - linked-stack now switches between regular / compact / dense layouts based on visible node count
+  - removed the extra per-node `next` text row and replaced it with compact between-node connectors so the linked-stack no longer needs internal scrolling in the full-stack comparison
+  - expanded linked-stack push into `s created -> s.next = top -> top = s` instead of one merged preparation step
+  - changed the pointer wording to `top / bottom`, added visible arrow direction, and moved sequential-stack `top` to the next writable slot instead of the current top element
+  - kept the sequential-stack marked `full` throughout the full-stack comparison instead of letting later frames fall back to `ok`
+- Re-verified locally on `2026-08-08`:
+  - targeted tests:
+    - `npm test -- src/pages/modules/stackPageUtils.test.ts src/pages/modules/stackComparisonUtils.test.ts src/modules/linear/stackOps.test.ts`
+    - `npm run lint`
+  - build:
+    - `npm run build`
+  - targeted Firefox Playwright CLI checks on `http://127.0.0.1:4175/modules/stack`:
+    - after changing inputs and advancing playback, `Reset` restored:
+      - stack input = `3, 8, 1`
+      - operation = `Push`
+      - push value = `9`
+      - transport/frame = `0/4`
+    - full sequential base `0..9`: linked-stack `clientHeight = 256`, `scrollHeight = 256` (`10` nodes fully visible)
+    - full sequential base `0..9`: sequential lane state is already `full`, transport shows `S:10`, and the `top` pointer sits above the top cell
+    - prepare-push step: linked-stack `clientHeight = 359`, `scrollHeight = 359`, floating incoming node present
+    - link step: floating node is labeled `s`, text shows `s.next -> top`, and the old linked-stack top pointer remains on the original top node
+    - linked-stack-after-push step: linked-stack `clientHeight = 282`, `scrollHeight = 282` with `11` visible nodes, top text includes `TOP`, bottom text includes `BOTTOM`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- `L-04 /modules/stack` now demonstrates:
+  - `10`-slot sequential stack vs linked-stack comparison
+  - explicit full-stack divergence on `push`
+  - linked-stack prepare-before-linking animation
+  - visible `TOP` / `BOTTOM` pointers on both stack variants without linked-stack internal overflow
+
+### Next Step
+- Continue the `P15` route sweep from the next user-reported module issue or switch back to cross-cutting blockers (`m0-scaffold-tmp` titles, router warning storm, Windows docs-check gap).
+
+## 2026-08-08 (P15 L-04 stack comparison acceptance pass)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Reworked `L-04 /modules/stack` from a single-stack page into a side-by-side sequential-stack vs linked-stack comparison:
+  - reduced sequential stack capacity from `20` to `10`
+  - kept the same `push / pop / peek` controls, but now drive two stack lanes at once
+  - added a comparison timeline so both lanes step together and can diverge when behavior differs
+- Added the full-stack contrast the user asked for:
+  - when sequential stack already has `10` items, `push` remains playable instead of being rejected at input-validation time
+  - the sequential stack now stays unchanged and reports full-stack state
+  - the linked stack still accepts the same pushed value and grows to `11+`
+  - divergence is surfaced in the transport/status chips as `已分叉 / Diverged`
+- Updated the `L-04` workbench surface to the same compact direction used during the recent `L-01 ~ L-03` acceptance sweep:
+  - page-level compact workspace config
+  - wide / short controls drawer
+  - hidden JSON controls in the primary drawer
+  - fixed stage padding so opening the drawer does not cover the visible stacks
+- Added pure logic coverage for the new behavior:
+  - `src/modules/linear/stackOps.test.ts`
+  - `src/pages/modules/stackPageUtils.test.ts`
+  - `src/pages/modules/stackComparisonUtils.test.ts`
+- Re-verified locally on `2026-08-08`:
+  - targeted tests:
+    - `npm test -- src/modules/linear/stackOps.test.ts src/pages/modules/stackPageUtils.test.ts src/pages/modules/stackComparisonUtils.test.ts`
+  - full code verification:
+    - `npm test`
+    - `npm run lint`
+    - `npm run build`
+  - browser verification on local preview `http://127.0.0.1:4176/modules/stack`:
+    - desktop measurement with controls open: drawer bottom = `490.6`, top visible sequential slot (`index 9`) top = `626.1`, so the drawer no longer covers the stack
+    - sequential stack lane renders all `10` slots without internal overflow: `clientHeight = 320`, `scrollHeight = 320`
+    - full-stack push comparison after filling `0..9` and pushing `42`:
+      - sequential lane stayed `[0..9]`
+      - linked lane became `[42, 9, 8, ..., 0]` in top-first render order
+      - transport chips showed `10/10` and `已分叉`
+      - inline feedback showed `顺序栈已满（容量 10），但链栈仍可继续入栈。`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- `L-04 /modules/stack` now demonstrates:
+  - normal synchronized operations on sequential + linked stacks
+  - the explicit full-stack behavioral difference on `push`
+  - compact first-open controls matching the ongoing `P15` acceptance direction
+- Intentional scope boundary of this pass:
+  - did not add a separate linked-stack route; comparison stays inside `L-04`
+  - did not refactor the generic stack timeline adapter; the comparison flow is page-local
+  - did not fix the Windows-incompatible docs gate script
+
+### Next Step
+- Continue the `P15` route sweep from the next user-reported module issue:
+  - either move on to `L-05+`
+  - or return to remaining cross-cutting blockers such as placeholder document titles, router warning noise, or the Windows docs-check gap
+
+## 2026-08-08 (P15 L-03 linked-list acceptance alignment follow-up)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Applied the same first-open workbench pattern used by `L-01 /modules/array` and `L-02 /modules/dynamic-array` to `L-03 /modules/linked-list`:
+  - added a page-level compact workspace config for `L-03`
+  - switched the linked-list controls drawer to the shared horizontal drawer surface (`array-controls-drawer`)
+  - hid JSON controls from the visible primary drawer so the first-open controls stay focused on list / operation / index / value / head-node / speed
+- Fixed the linked-list head-pointer label placement:
+  - moved `HEAD` onto the node row's vertical baseline instead of pinning it to the top of the stage
+  - nudged it slightly upward so it now sits just above the head node
+- Fixed the remaining L-03 controls-vs-stage occlusion issue after user review:
+  - widened the `L-03` controls drawer and compressed the primary controls into one lower-height horizontal row
+  - removed the need to push the linked-list row downward when opening the drawer; the chain now stays put while the drawer remains above it
+  - kept a short-height desktop fallback for `L-03` so lower-height screens still preserve a visible linked-list work area
+- Fixed insert completion follow-up behavior:
+  - `L-03` now generates the next random insert value after an insert completes, matching the already-accepted `L-02` behavior
+  - re-verified `L-01` insert flow and confirmed it already refreshes to a new random value after completion
+- Re-verified locally:
+  - `npm test -- src/pages/modules/linkedListPageUtils.test.ts`
+  - `npm run lint`
+  - `npm run build`
+  - Firefox Playwright checks on `2026-08-08`:
+    - `/modules/linked-list`: opened controls drawer uses `tree-workspace-drawer workspace-drawer-scroll array-controls-drawer`
+    - `/modules/linked-list`: `HEAD` bottom = `590`, first node top = `591`, so the label now sits just above the head node
+    - `/modules/linked-list`: insert flow changed value input from `9 -> 20` after list became `4, 9, 7, 11`
+    - `/modules/linked-list` on fresh preview build after widening the drawer:
+      - `1440x1100`: list top stayed `532 -> 532`, drawer height = `150`, overlap = `0`
+      - `1280x720`: list top stayed `608 -> 608`, drawer height = `150`, overlap = `0`
+    - `/modules/array`: insert flow changed value input from `9 -> 44` after array became `3, 8, 9, 1, 5, 6`
+  - captured local artifacts:
+    - `output/playwright/l03-layout-check.png`
+    - `output/playwright/l03-controls-open.png`
+    - `output/playwright/l03-wide-short-1440x1100.png`
+    - `output/playwright/l03-wide-short-1280x720.png`
+    - `output/playwright/l03-preview2-1440x1100.png`
+    - `output/playwright/l03-preview2-1280x720.png`
+
+### Current State
+- Branch:
+  - `feat/p14-backlog-wave`
+- Acceptance state after this pass:
+  - `L-01 /modules/array` remains aligned and re-verified for insert random-value rollover
+  - `L-02 /modules/dynamic-array` remains accepted as-is for now
+  - `L-03 /modules/linked-list` now matches the same compact control-surface direction and no longer leaves the head-pointer label floating at the top of the stage
+- Intentional scope boundary of this pass:
+  - did not touch linked-list algorithm step generation beyond post-insert input refresh
+  - did not address the global `m0-scaffold-tmp` document title issue
+  - did not address the broader router/module warning storm
+
+### Next Step
+- Continue the `P15` acceptance sweep from the next user-reported route-level issue:
+  - either keep moving through the remaining linear modules (`L-04+`) using the same compact workbench baseline
+  - or switch back to the cross-cutting blockers (`m0-scaffold-tmp` titles and router/module-load warnings)
+
 ## 2026-07-30 (P15 L-02 dynamic-array acceptance alignment)
 
 ### Today Done
@@ -3950,3 +4257,42 @@ git -C /home/haoyu/data-structure-algorithm-visualizor pull
 - Create initial scaffold for frontend app.
 - Define first visualized data structure module scope.
 - Set up lint/test scripts.
+
+## 2026-08-08 (L-04 stack layout polish)
+
+### Today Done
+- Kept the L-04 sequential-vs-linked stack comparison layout, and polished the full-stack pointer behavior.
+- Updated L-04 so the sequential stack uses `top -> null` when full, and right-side pointers render as `arrow + label`.
+- Tuned `src/index.css` for L-04 to lower the stack visuals slightly, keep the two lanes more centered, and lift the stack controls drawer a bit to reduce overlap with the stack top area.
+
+### Current State
+- Verified local tests: `npm test -- src/pages/modules/stackPageUtils.test.ts src/pages/modules/stackComparisonUtils.test.ts src/modules/linear/stackOps.test.ts`
+- Verified local checks: `npm run lint`, `npm run build`
+- `npm run check` is still blocked on Windows because `./scripts/check-doc-links.sh` is a Unix shell script in this workspace
+
+### Next Step
+- Re-open `/modules/stack` and do one more manual pass on the L-04 control-tab overlap near the left lane heading if that visual still feels too tight.
+
+## 2026-08-09 (L-01~L-04 control/step panel split follow-up)
+
+### Today Done
+- Reworked L-01 ~ L-04 so the step panel is now pseudocode-focused instead of repeating the same short status fields.
+- Moved the compact runtime summaries into the controls panel for L-01, L-02, L-03, and L-04, and widened those controls drawers to better use page width.
+- Changed the linear step panels to auto-height so they no longer reserve a large blank block below the pseudocode.
+- Split L-04 pseudocode into two side-by-side blocks: one for the sequential stack, one for the linked stack, with separate highlight mapping.
+
+### Current State
+- Verified unit tests: `npm test -- src/pages/modules/arrayPageUtils.test.ts src/pages/modules/dynamicArrayPageUtils.test.ts src/pages/modules/linkedListPageUtils.test.ts src/pages/modules/stackPageUtils.test.ts`
+- Verified local checks: `npm run lint`, `npm run build`
+- Verified browser layout at `1280x720` on:
+  - `/modules/array`
+  - `/modules/dynamic-array`
+  - `/modules/linked-list`
+  - `/modules/stack`
+- Browser check result:
+  - L-01/L-02/L-03 step panels each render one pseudocode block with `clientHeight === scrollHeight`
+  - L-04 step panel renders two pseudocode blocks with `clientHeight === scrollHeight`
+  - L-04 controls drawer no longer overflows (`height === scrollHeight`)
+
+### Next Step
+- Re-open the four linear modules once more in the real app window and do a subjective visual pass, mainly on whether the widened controls drawer still feels too dominant on smaller laptop screens.

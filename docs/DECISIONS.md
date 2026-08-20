@@ -14,6 +14,30 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260809-72
+- Date: 2026-08-09
+- Status: accepted
+- Context: The first attempt to solve `L-03` / `L-04` height and overlap issues switched those pages onto a docked `Controls` / `Step` strip, but direct user review showed that this created a second linear-page interaction model and still left floating-step placement issues on `L-01` / `L-02` because step-panel auto-avoid could push the widened panel below a `1280x720` viewport.
+- Decision: Keep `L-01`~`L-04` on one shared floating-panel interaction baseline instead of splitting them into floating (`L-01` / `L-02`) and docked (`L-03` / `L-04`) families. For this linear baseline:
+  - controls drawers stay floating and widened per page group
+  - `Step` stays floating as well
+  - step-panel auto-avoid and overflow are disabled (`stepPanelAutoAvoid = false`, `stepPanelOverflowMargin = 0`) so the default widened step window remains inside the viewport on common laptop heights
+- Alternatives considered: keep the docked strip for `L-03` / `L-04`; keep floating panels but allow step auto-avoid to reposition them below the viewport; add separate one-off CSS/position logic per linear page.
+- Consequences: the first four linear pages regain one consistent interaction contract and future `L-05+` work can reuse the same workspace-shell knobs instead of inventing another panel layout branch; the docked shell code can remain temporarily in the repo as inactive scaffolding until a later cleanup pass.
+- Owner: haoyu + codex
+
+## DEC-20260809-71
+- Date: 2026-08-09
+- Status: accepted
+- Context: A global `linear-adaptive` viewport-lock rule was applied across `L-01`~`L-04` to reduce wasted vertical space, but direct browser review showed the pages were not actually one layout family: `L-01` / `L-02` benefited from viewport-fit compression, while `L-03` / `L-04` regressed into clipped or overcrowded first-load states.
+- Decision: Treat linear-module height adaptation as a small template system instead of either one global rule or one-off per-page fixes. Introduce:
+  - `linear-adaptive-viewport-lock` for compact single-canvas pages that should fill the viewport without page scroll
+  - `linear-adaptive-flow` for richer/taller pages that must keep normal document flow and only soften fixed shell heights
+  Modules choose the template through workspace config (`pageClassName`) instead of hardcoded page-component class strings.
+- Alternatives considered: keep one shared `linear-adaptive` rule for all four pages; fully revert the new adaptive work and abandon viewport fitting; add separate ad-hoc CSS for each of `L-01`, `L-02`, `L-03`, and `L-04`.
+- Consequences: `L-01`~`L-04` now share a reusable layout vocabulary instead of another round of page-specific patches, and future `L-05+` acceptance can classify routes by template first before introducing any new layout branch.
+- Owner: haoyu + codex
+
 ## DEC-20260721-70
 - Date: 2026-07-21
 - Status: accepted

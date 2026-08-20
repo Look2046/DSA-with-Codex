@@ -8,6 +8,7 @@ import type { LinkedListOperation, LinkedListStep } from '../../modules/linear/l
 import {
   buildLogicalStepByIndex,
   getFindResultText,
+  getLinkedListWorkspaceConfig,
   resolveLinkedListConfig,
   resolveLinkedListConfigFromJson,
   serializeLinkedListConfigAsJson,
@@ -44,6 +45,7 @@ const DEFAULT_OPERATION = DEFAULT_CONFIG.operation as Extract<LinkedListOperatio
 const HEAD_NODE_ID = '__head_node__';
 const NODE_WIDTH = 126;
 const NODE_GAP = 16;
+const LINKED_LIST_WORKSPACE_CONFIG = getLinkedListWorkspaceConfig();
 
 function createRandomLinkedValue(): number {
   return Math.floor(Math.random() * 90) + 10;
@@ -422,12 +424,23 @@ export function LinkedListPage() {
       currentSnapshot.action === 'completed' &&
       (currentSnapshot.operation === 'insertAt' || currentSnapshot.operation === 'deleteAt')
     ) {
+      if (normalizeListText(listInput) === normalizeListText(completedListText)) {
+        return;
+      }
+
       const timer = window.setTimeout(() => {
+        if (currentSnapshot.operation === 'insertAt') {
+          const nextValueInput = String(createRandomLinkedValue());
+          setValueInput(nextValueInput);
+          syncInputToCompletedList(nextValueInput);
+          return;
+        }
+
         syncInputToCompletedList();
       }, 260);
       return () => window.clearTimeout(timer);
     }
-  }, [status, currentSnapshot, next, syncInputToCompletedList]);
+  }, [completedListText, currentSnapshot, listInput, next, status, syncInputToCompletedList]);
 
   useEffect(() => {
     if (currentSnapshot?.action !== 'movePointerRoot') {
@@ -633,6 +646,7 @@ export function LinkedListPage() {
       : activeOperationType === 'insertAt'
         ? t('module.l03.operation.insertAt')
         : t('module.l03.operation.deleteAt');
+  const stepDescription = getStepDescription(currentSnapshot, t);
 
   const setNodeWrapRef = useCallback((id: string) => {
     return (el: HTMLDivElement | null) => {
@@ -827,16 +841,23 @@ export function LinkedListPage() {
 
   return (
     <WorkspaceShell
-      pageClassName="linked-list-page tree-page"
+      pageClassName={LINKED_LIST_WORKSPACE_CONFIG.pageClassName}
+      panelLayout={LINKED_LIST_WORKSPACE_CONFIG.panelLayout}
       stageAriaLabel={t('module.l03.title')}
       title={t('module.l03.title')}
       description={t('module.l03.body')}
-      stageClassName="workspace-stage-linked viz-canvas-stage-linked"
-      stageBodyClassName="workspace-stage-body-linked"
-      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
-      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 344, height: 640 }}
-      defaultContextPanelSize={{ width: 344, height: 580 }}
+      shellClassName={LINKED_LIST_WORKSPACE_CONFIG.shellClassName}
+      stageClassName={LINKED_LIST_WORKSPACE_CONFIG.stageClassName}
+      stageBodyClassName={LINKED_LIST_WORKSPACE_CONFIG.stageBodyClassName}
+      controlsPanelClassName={LINKED_LIST_WORKSPACE_CONFIG.controlsPanelClassName}
+      stepPanelClassName="workspace-context-sheet-linear"
+      defaultControlsPanelSize={LINKED_LIST_WORKSPACE_CONFIG.controlsPanelSize}
+      controlsPanelAutoAvoid={LINKED_LIST_WORKSPACE_CONFIG.controlsPanelAutoAvoid}
+      controlsPanelOverflowMargin={LINKED_LIST_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
+      defaultContextPanelSize={LINKED_LIST_WORKSPACE_CONFIG.contextPanelSize}
+      stepPanelAutoAvoid={LINKED_LIST_WORKSPACE_CONFIG.stepPanelAutoAvoid}
+      stepPanelOverflowMargin={LINKED_LIST_WORKSPACE_CONFIG.stepPanelOverflowMargin}
+      floatingPanelsEnabledMinHeight={LINKED_LIST_WORKSPACE_CONFIG.floatingPanelsEnabledMinHeight}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -850,201 +871,215 @@ export function LinkedListPage() {
           <span className="tree-workspace-pill">
             {t('module.l03.currentList')}: {currentChainValues.length}
           </span>
-          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
+          <span className="tree-workspace-pill">{stepDescription}</span>
         </>
       }
       controlsContent={
         <>
-          <label className="tree-workspace-field" htmlFor="linked-list-input">
-            <span>{t('module.l03.input.list')}</span>
-            <input
-              id="linked-list-input"
-              type="text"
-              value={listInput}
-              onChange={(event) => {
-                const nextListInput = event.target.value;
-                reset();
-                prevNodeRects.current = new Map();
-                skipNextLayoutAnimationRef.current = true;
-                setListInput(nextListInput);
-                recomputeInputState(nextListInput, operationType, valueInput, indexInput);
-              }}
-              placeholder="4, 7, 11"
-            />
-          </label>
-
-          <label className="tree-workspace-field" htmlFor="linked-list-operation">
-            <span>{t('module.l03.input.operation')}</span>
-            <select
-              id="linked-list-operation"
-              value={operationType}
-              onChange={(event) => {
-                const nextOperationType = event.target.value as LinkedListOperation['type'];
-                const normalizedValueInput = nextOperationType === 'insertAt' ? String(createRandomLinkedValue()) : valueInput;
-                reset();
-                prevNodeRects.current = new Map();
-                skipNextLayoutAnimationRef.current = true;
-                setOperationType(nextOperationType);
-                if (nextOperationType === 'insertAt') {
-                  setValueInput(normalizedValueInput);
-                }
-                recomputeInputState(listInput, nextOperationType, normalizedValueInput, indexInput);
-              }}
+          <div className="array-controls-grid linked-controls-grid">
+            <label
+              className="tree-workspace-field array-controls-field linked-controls-field-list"
+              htmlFor="linked-list-input"
             >
-              <option value="find">{t('module.l03.operation.find')}</option>
-              <option value="insertAt">{t('module.l03.operation.insertAt')}</option>
-              <option value="deleteAt">{t('module.l03.operation.deleteAt')}</option>
-            </select>
-          </label>
-
-          {(operationType === 'insertAt' || operationType === 'deleteAt') && (
-            <label className="tree-workspace-field" htmlFor="linked-list-index">
-              <span>{operationType === 'insertAt' ? t('module.l03.input.insertIndex') : t('module.l03.input.deleteIndex')}</span>
+              <span>{t('module.l03.input.list')}</span>
               <input
-                id="linked-list-index"
-                type="number"
-                value={indexInput}
+                id="linked-list-input"
+                type="text"
+                value={listInput}
                 onChange={(event) => {
-                  const nextIndexInput = event.target.value;
+                  const nextListInput = event.target.value;
                   reset();
                   prevNodeRects.current = new Map();
                   skipNextLayoutAnimationRef.current = true;
-                  setIndexInput(nextIndexInput);
-                  recomputeInputState(listInput, operationType, valueInput, nextIndexInput);
+                  setListInput(nextListInput);
+                  recomputeInputState(nextListInput, operationType, valueInput, indexInput);
                 }}
+                placeholder="4, 7, 11"
               />
             </label>
-          )}
 
-          {(operationType === 'find' || operationType === 'insertAt') && (
-            <label className="tree-workspace-field" htmlFor="linked-list-value">
-              <span>{t('module.l03.input.value')}</span>
-              <input
-                id="linked-list-value"
-                type="number"
-                value={valueInput}
+            <label className="tree-workspace-field array-controls-field" htmlFor="linked-list-operation">
+              <span>{t('module.l03.input.operation')}</span>
+              <select
+                id="linked-list-operation"
+                value={operationType}
                 onChange={(event) => {
-                  const nextValueInput = event.target.value;
+                  const nextOperationType = event.target.value as LinkedListOperation['type'];
+                  const normalizedValueInput = nextOperationType === 'insertAt' ? String(createRandomLinkedValue()) : valueInput;
                   reset();
                   prevNodeRects.current = new Map();
                   skipNextLayoutAnimationRef.current = true;
-                  setValueInput(nextValueInput);
-                  recomputeInputState(listInput, operationType, nextValueInput, indexInput);
+                  setOperationType(nextOperationType);
+                  if (nextOperationType === 'insertAt') {
+                    setValueInput(normalizedValueInput);
+                  }
+                  recomputeInputState(listInput, nextOperationType, normalizedValueInput, indexInput);
                 }}
-              />
+              >
+                <option value="find">{t('module.l03.operation.find')}</option>
+                <option value="insertAt">{t('module.l03.operation.insertAt')}</option>
+                <option value="deleteAt">{t('module.l03.operation.deleteAt')}</option>
+              </select>
             </label>
-          )}
 
-          <label htmlFor="linked-list-head-node" className="linked-toggle">
-            <input
-              id="linked-list-head-node"
-              type="checkbox"
-              checked={hasHeadNode}
-              onChange={(event) => setHasHeadNode(event.target.checked)}
-            />
-            <span>{t('module.l03.input.withHeadNode')}</span>
-          </label>
+            {(operationType === 'insertAt' || operationType === 'deleteAt') && (
+              <label className="tree-workspace-field array-controls-field" htmlFor="linked-list-index">
+                <span>{operationType === 'insertAt' ? t('module.l03.input.insertIndex') : t('module.l03.input.deleteIndex')}</span>
+                <input
+                  id="linked-list-index"
+                  type="number"
+                  value={indexInput}
+                  onChange={(event) => {
+                    const nextIndexInput = event.target.value;
+                    reset();
+                    prevNodeRects.current = new Map();
+                    skipNextLayoutAnimationRef.current = true;
+                    setIndexInput(nextIndexInput);
+                    recomputeInputState(listInput, operationType, valueInput, nextIndexInput);
+                  }}
+                />
+              </label>
+            )}
 
-          <div className="tree-workspace-field">
-            <span>{t('module.s01.speed')}</span>
-            <div className="tree-workspace-toggle-row">
-              {speedOptions.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
-                  onClick={() => setSpeed(option.value)}
-                >
-                  {t(option.key)}
-                </button>
-              ))}
+            {(operationType === 'find' || operationType === 'insertAt') && (
+              <label className="tree-workspace-field array-controls-field" htmlFor="linked-list-value">
+                <span>{t('module.l03.input.value')}</span>
+                <input
+                  id="linked-list-value"
+                  type="number"
+                  value={valueInput}
+                  onChange={(event) => {
+                    const nextValueInput = event.target.value;
+                    reset();
+                    prevNodeRects.current = new Map();
+                    skipNextLayoutAnimationRef.current = true;
+                    setValueInput(nextValueInput);
+                    recomputeInputState(listInput, operationType, nextValueInput, indexInput);
+                  }}
+                />
+              </label>
+            )}
+
+            <label htmlFor="linked-list-head-node" className="linked-toggle linked-controls-toggle">
+              <input
+                id="linked-list-head-node"
+                type="checkbox"
+                checked={hasHeadNode}
+                onChange={(event) => setHasHeadNode(event.target.checked)}
+              />
+              <span>{t('module.l03.input.withHeadNode')}</span>
+            </label>
+
+            <div className="tree-workspace-field array-controls-field array-controls-field-speed linked-controls-field-speed">
+              <span>{t('module.s01.speed')}</span>
+              <div className="tree-workspace-toggle-row">
+                {speedOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                    onClick={() => setSpeed(option.value)}
+                  >
+                    {t(option.key)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <label className="tree-workspace-field" htmlFor="linked-list-json-input">
-            <span>{t('module.l03.json.label')}</span>
-            <textarea
-              id="linked-list-json-input"
-              value={jsonInput}
-              onChange={(event) => setJsonInput(event.target.value)}
-              rows={6}
-              placeholder={t('module.l03.json.placeholder')}
-            />
-          </label>
+          <p className={`workspace-inline-feedback array-controls-feedback${error ? ' form-error' : ''}`} aria-live="polite">
+            {error || ''}
+          </p>
 
-          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
-          {jsonFeedback ? (
-            <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
-          ) : null}
+          <div className="linear-controls-section">
+            <div className="linear-controls-summary">
+              <div className="linear-controls-card">
+                <span>{t('playback.status')}</span>
+                <strong>{getStatusLabel(status, t)}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('playback.step')}</span>
+                <strong>
+                  {currentLogicalStep}/{totalLogicalSteps}
+                </strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l03.input.operation')}</span>
+                <strong>{operationLabel}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l03.input.withHeadNode')}</span>
+                <strong>{hasHeadNode ? 'On' : 'Off'}</strong>
+              </div>
+              {typeof targetIndex === 'number' ? (
+                <div className="linear-controls-card">
+                  <span>
+                    {activeOperationType === 'insertAt' ? t('module.l03.input.insertIndex') : t('module.l03.input.deleteIndex')}
+                  </span>
+                  <strong>{targetIndex}</strong>
+                </div>
+              ) : null}
+            </div>
 
-          <div className="tree-workspace-drawer-actions">
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
-              {t('module.l03.json.export')}
-            </button>
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
-              {t('module.l03.json.import')}
-            </button>
+            <div className="linear-controls-note-grid">
+              <p className="linear-controls-note">{stepDescription}</p>
+              {findResultText ? <p className="linear-controls-note">{findResultText}</p> : null}
+              <p className="linear-controls-note">
+                {t('module.l03.currentList')}: [{currentChainValues.join(', ')}]
+              </p>
+              <p className="linear-controls-note linear-controls-note-wide">
+                {t('module.s01.highlight')}: {highlightSummary}
+              </p>
+            </div>
+
           </div>
+
+          {LINKED_LIST_WORKSPACE_CONFIG.showJsonControls ? (
+            <>
+              <label className="tree-workspace-field" htmlFor="linked-list-json-input">
+                <span>{t('module.l03.json.label')}</span>
+                <textarea
+                  id="linked-list-json-input"
+                  value={jsonInput}
+                  onChange={(event) => setJsonInput(event.target.value)}
+                  rows={6}
+                  placeholder={t('module.l03.json.placeholder')}
+                />
+              </label>
+
+              {jsonFeedback ? (
+                <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>
+                  {jsonFeedback}
+                </p>
+              ) : null}
+
+              <div className="tree-workspace-drawer-actions">
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
+                  {t('module.l03.json.export')}
+                </button>
+                <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
+                  {t('module.l03.json.import')}
+                </button>
+              </div>
+            </>
+          ) : null}
         </>
       }
       stepContent={
-        <div className="workspace-panel-scroll">
-          <div className="workspace-panel-copy">
-            <h3>{getStepDescription(currentSnapshot, t)}</h3>
-            {findResultText ? <p>{findResultText}</p> : null}
-            <p>
-              {t('module.l03.currentList')}: [{currentChainValues.join(', ')}]
-            </p>
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
-            </div>
-            <div>
-              <dt>{t('playback.step')}</dt>
-              <dd>
-                {currentLogicalStep}/{totalLogicalSteps}
-              </dd>
-            </div>
-            <div>
-              <dt>{t('module.l03.input.operation')}</dt>
-              <dd>{operationLabel}</dd>
-            </div>
-            <div>
-              <dt>{t('module.l03.input.withHeadNode')}</dt>
-              <dd>{hasHeadNode ? 'On' : 'Off'}</dd>
-            </div>
-            {typeof targetIndex === 'number' ? (
-              <div>
-                <dt>{activeOperationType === 'insertAt' ? t('module.l03.input.insertIndex') : t('module.l03.input.deleteIndex')}</dt>
-                <dd>{targetIndex}</dd>
+        <div className="workspace-panel-scroll workspace-panel-scroll-linear">
+          <div className="workspace-panel-code-only">
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>{t('module.l03.pseudocode')}</h3>
+                <ol>
+                  {operationCodeLines.map((lineKey, index) => (
+                    <li key={lineKey} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
+                      {t(lineKey)}
+                    </li>
+                  ))}
+                </ol>
               </div>
-            ) : null}
-            <div>
-              <dt>{t('module.s01.highlight')}</dt>
-              <dd>{highlightSummary}</dd>
             </div>
-          </dl>
-
-          <div className="legend-row">
-            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-            <span className="legend-item legend-visiting">{t('module.l03.highlight.visiting')}</span>
-            <span className="legend-item legend-matched">{t('module.l03.highlight.matched')}</span>
-            <span className="legend-item legend-swapping">{t('module.l03.highlight.swapping')}</span>
-            <span className="legend-item legend-inserted">{t('module.l03.highlight.newNode')}</span>
-          </div>
-
-          <div className="pseudocode-block">
-            <h3>{t('module.l03.pseudocode')}</h3>
-            <ol>
-              {operationCodeLines.map((lineKey, index) => (
-                <li key={lineKey} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
-                  {t(lineKey)}
-                </li>
-              ))}
-            </ol>
           </div>
         </div>
       }

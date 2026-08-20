@@ -3,175 +3,354 @@ import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
 import { STACK_CAPACITY } from '../../modules/linear/stackOps';
-import { buildStackTimelineFromInput } from '../../modules/linear/stackTimelineAdapter';
+import { buildStackComparisonSteps, type StackComparisonStep, type StackLaneOutcome } from './stackComparisonUtils';
 import {
+  createSharedStackBases,
+  createInitialStackPageState,
+  getSequentialTopPointerTarget,
   getHighlightLabel,
+  getLinkedStackLayoutMode,
+  getStackPseudocodeActiveLines,
+  getStackWorkspaceConfig,
   getStatusLabel,
-  getStepDescription,
   resolveStackConfig,
-  resolveStackConfigFromJson,
-  serializeStackConfigAsJson,
+  type StackBases,
+  type StackComparisonSource,
   type StackConfig,
 } from './stackPageUtils';
 import type { HighlightType } from '../../types/animation';
 
-const DEFAULT_CONFIG: StackConfig = {
-  stack: [3, 8, 1],
-  operation: { type: 'push', value: 9 },
-};
+const STACK_WORKSPACE_CONFIG = getStackWorkspaceConfig();
+const INITIAL_STACK_PAGE_STATE = createInitialStackPageState();
 
 function createRandomPushValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
 
+function formatStack(values: number[]): string {
+  return values.length > 0 ? `[${values.join(', ')}]` : '[]';
+}
+
+function stacksEqual(left: number[], right: number[]): boolean {
+  return left.length === right.length && left.every((value, index) => right[index] === value);
+}
+
+function getOutcomeLabel(outcome: StackLaneOutcome, t: ReturnType<typeof useI18n>['t']): string {
+  if (outcome === 'overflow') {
+    return t('module.l04.compare.outcome.overflow');
+  }
+  if (outcome === 'empty') {
+    return t('module.l04.compare.outcome.empty');
+  }
+  return t('module.l04.compare.outcome.ok');
+}
+
+function getStepValue(step: StackComparisonStep | undefined): number | undefined {
+  if (!step) {
+    return undefined;
+  }
+
+  if (step.action === 'preparePush' || step.action === 'linkPush') {
+    return step.linked.incomingValue;
+  }
+
+  if (step.action === 'push') {
+    return step.linked.peekValue ?? step.sequential.peekValue;
+  }
+
+  if (step.action === 'pop') {
+    return step.linked.poppedValue ?? step.sequential.poppedValue;
+  }
+
+  if (step.action === 'peek') {
+    return step.linked.peekValue ?? step.sequential.peekValue;
+  }
+
+  return undefined;
+}
+
+function getComparisonStepDescription(step: StackComparisonStep | undefined, t: ReturnType<typeof useI18n>['t']): string {
+  if (!step) {
+    return '-';
+  }
+
+  if (step.action === 'initial') {
+    return t('module.l04.step.initial');
+  }
+
+  if (step.action === 'preparePush') {
+    return `${t('module.l04.step.preparePush')} ${getStepValue(step) ?? ''}`.trim();
+  }
+
+  if (step.action === 'linkPush') {
+    return `${t('module.l04.step.linkPush')} ${getStepValue(step) ?? ''}`.trim();
+  }
+
+  if (step.action === 'overflow') {
+    return t('module.l04.step.pushBlocked');
+  }
+
+  if (step.action === 'push') {
+    return `${t('module.l04.step.push')} ${getStepValue(step) ?? ''}`.trim();
+  }
+
+  if (step.action === 'pop') {
+    return `${t('module.l04.step.pop')} ${getStepValue(step) ?? ''}`.trim();
+  }
+
+  if (step.action === 'peek') {
+    return `${t('module.l04.step.peek')} ${getStepValue(step) ?? ''}`.trim();
+  }
+
+  return t('module.l04.step.completed');
+}
+
+function getComparisonNote(step: StackComparisonStep | undefined, t: ReturnType<typeof useI18n>['t']): string {
+  if (!step || step.action === 'initial') {
+    return t('module.l04.compare.note.initial');
+  }
+
+  if (step.action === 'preparePush') {
+    return t('module.l04.compare.note.preparePush');
+  }
+
+  if (step.action === 'linkPush') {
+    return t('module.l04.compare.note.linkPush');
+  }
+
+  if (step.action === 'overflow') {
+    return t('module.l04.compare.note.overflow');
+  }
+
+  return t('module.l04.compare.note.aligned');
+}
+
+type PointerLabelProps = {
+  className: string;
+  direction: 'left' | 'right' | 'down';
+  label: string;
+};
+
+function PointerLabel({ className, direction, label }: PointerLabelProps) {
+  if (direction === 'down') {
+    return (
+      <span className={className}>
+        <span className="stack-pointer-text">{label}</span>
+        <span className="stack-pointer-arrow" aria-hidden="true">
+          ↓
+        </span>
+      </span>
+    );
+  }
+
+  if (direction === 'left') {
+    return (
+      <span className={className}>
+        <span className="stack-pointer-arrow" aria-hidden="true">
+          ←
+        </span>
+        <span className="stack-pointer-text">{label}</span>
+      </span>
+    );
+  }
+
+  return (
+    <span className={className}>
+      <span className="stack-pointer-text">{label}</span>
+      <span className="stack-pointer-arrow" aria-hidden="true">
+        →
+      </span>
+    </span>
+  );
+}
+
+type SequentialOverflowPointerProps = {
+  topLabel: string;
+  nullLabel: string;
+};
+
+export function SequentialOverflowPointer({ topLabel, nullLabel }: SequentialOverflowPointerProps) {
+  return (
+    <div className="stack-top-pointer-overflow" aria-label="sequential-stack-top-overflow">
+      <div className="stack-cell stack-cell-compact stack-cell-unused stack-top-pointer-overflow-cell">
+        <strong className="stack-pointer-null-text">{nullLabel}</strong>
+        <PointerLabel
+          className="stack-top-pointer stack-top-pointer-overflow-inline"
+          direction="left"
+          label={topLabel}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function StackPage() {
   const { t } = useI18n();
 
-  const [stackInput, setStackInput] = useState(DEFAULT_CONFIG.stack.join(', '));
-  const [operationType, setOperationType] = useState<StackConfig['operation']['type']>(DEFAULT_CONFIG.operation.type);
-  const [valueInput, setValueInput] = useState(
-    String(DEFAULT_CONFIG.operation.type === 'push' ? DEFAULT_CONFIG.operation.value : ''),
-  );
-  const [error, setError] = useState('');
-  const [hasValidConfig, setHasValidConfig] = useState(true);
-  const [stackConfig, setStackConfig] = useState<StackConfig>(DEFAULT_CONFIG);
-  const [jsonInput, setJsonInput] = useState('');
-  const [jsonFeedback, setJsonFeedback] = useState('');
-  const [hasJsonError, setHasJsonError] = useState(false);
-  const stackCellsRef = useRef<HTMLDivElement | null>(null);
+  const [stackInput, setStackInput] = useState(INITIAL_STACK_PAGE_STATE.stackInput);
+  const [operationType, setOperationType] = useState<StackConfig['operation']['type']>(INITIAL_STACK_PAGE_STATE.operationType);
+  const [valueInput, setValueInput] = useState(INITIAL_STACK_PAGE_STATE.valueInput);
+  const [error, setError] = useState(INITIAL_STACK_PAGE_STATE.error);
+  const [hasValidConfig, setHasValidConfig] = useState(INITIAL_STACK_PAGE_STATE.hasValidConfig);
+  const [activeBases, setActiveBases] = useState<StackBases>(INITIAL_STACK_PAGE_STATE.activeBases);
+  const [comparisonSource, setComparisonSource] = useState<StackComparisonSource>(INITIAL_STACK_PAGE_STATE.comparisonSource);
+
+  const sequentialCellsRef = useRef<HTMLDivElement | null>(null);
+  const linkedCellsRef = useRef<HTMLDivElement | null>(null);
 
   const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
   const currentStep = currentFrame;
 
   const recomputeInputState = useCallback(
-    (nextStackInput: string, nextOperationType: StackConfig['operation']['type'], nextValueInput: string) => {
+    (
+      nextStackInput: string,
+      nextOperationType: StackConfig['operation']['type'],
+      nextValueInput: string,
+      nextBases: StackBases,
+    ) => {
       const resolved = resolveStackConfig(nextStackInput, nextOperationType, nextValueInput, t);
       setError(resolved.error);
       setHasValidConfig(resolved.config !== null);
       if (resolved.config) {
-        setStackConfig(resolved.config);
+        setComparisonSource({
+          sequential: [...nextBases.sequential],
+          linked: [...nextBases.linked],
+          operation: resolved.config.operation,
+        });
       }
     },
     [t],
   );
 
-  const timelineFrames = useMemo(
-    () => buildStackTimelineFromInput(stackConfig.stack, stackConfig.operation),
-    [stackConfig],
+  const comparisonResult = useMemo(
+    () => buildStackComparisonSteps(comparisonSource.sequential, comparisonSource.linked, comparisonSource.operation),
+    [comparisonSource],
   );
-  const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
+  const steps = comparisonResult.steps;
   const currentSnapshot = steps[currentStep] ?? steps[0];
-  const completedStackText = useMemo(() => {
-    const last = steps[steps.length - 1];
-    return (last?.stackState ?? []).join(', ');
-  }, [steps]);
 
   useEffect(() => {
     setTotalFrames(steps.length);
     reset();
-  }, [setTotalFrames, reset, steps.length]);
+  }, [reset, setTotalFrames, steps.length]);
 
   useEffect(() => {
-    const container = stackCellsRef.current;
-    if (!container || !currentSnapshot) {
+    const sequentialContainer = sequentialCellsRef.current;
+    const linkedContainer = linkedCellsRef.current;
+    if (!currentSnapshot) {
       return;
     }
 
-    const activeIndex = currentSnapshot.highlights[0]?.index ?? currentSnapshot.indices[0];
-    if (activeIndex === undefined) {
-      return;
+    const sequentialActiveIndex =
+      currentSnapshot.sequential.highlights[0]?.index ?? currentSnapshot.sequential.indices[0];
+    if (sequentialContainer && sequentialActiveIndex !== undefined) {
+      const target = sequentialContainer.querySelector<HTMLElement>(`[data-stack-index="${sequentialActiveIndex}"]`);
+      target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
-    const target = container.querySelector<HTMLElement>(`[data-stack-index="${activeIndex}"]`);
-    if (!target) {
-      return;
+    const linkedActiveIndex = currentSnapshot.linked.highlights[0]?.index ?? currentSnapshot.linked.indices[0];
+    if (linkedContainer && linkedActiveIndex !== undefined) {
+      const target = linkedContainer.querySelector<HTMLElement>(`[data-linked-stack-index="${linkedActiveIndex}"]`);
+      target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
+  }, [currentSnapshot]);
 
-    target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [currentStep, currentSnapshot]);
-
-  const syncInputToCompletedStack = useCallback(
+  const syncToCompletedStacks = useCallback(
     (nextValueInput = valueInput) => {
-      if (!hasValidConfig || steps.length === 0) {
+      if (!hasValidConfig || steps.length === 0 || operationType === 'peek') {
         return;
       }
-      if (operationType === 'peek') {
-        return;
-      }
-      if (stackInput === completedStackText) {
-        return;
-      }
+
+      const nextBases: StackBases = {
+        sequential: [...comparisonResult.completedSequential],
+        linked: [...comparisonResult.completedLinked],
+      };
+      const nextStackInput = nextBases.sequential.join(', ');
 
       reset();
-      setStackInput(completedStackText);
-      recomputeInputState(completedStackText, operationType, nextValueInput);
+      setActiveBases(nextBases);
+      setStackInput(nextStackInput);
+      recomputeInputState(nextStackInput, operationType, nextValueInput, nextBases);
     },
-    [completedStackText, hasValidConfig, operationType, recomputeInputState, reset, stackInput, steps.length, valueInput],
+    [comparisonResult.completedLinked, comparisonResult.completedSequential, hasValidConfig, operationType, recomputeInputState, reset, steps.length, valueInput],
   );
 
+  const handleResetToInitialState = useCallback(() => {
+    const nextState = createInitialStackPageState();
+    reset();
+    setStackInput(nextState.stackInput);
+    setOperationType(nextState.operationType);
+    setValueInput(nextState.valueInput);
+    setError(nextState.error);
+    setHasValidConfig(nextState.hasValidConfig);
+    setActiveBases(nextState.activeBases);
+    setComparisonSource(nextState.comparisonSource);
+  }, [reset]);
+
   useEffect(() => {
-    if (!hasValidConfig || steps.length === 0) {
+    if (!hasValidConfig || steps.length === 0 || currentSnapshot?.action !== 'completed' || operationType === 'peek') {
       return;
     }
 
-    if (operationType === 'peek' || currentSnapshot?.action !== 'completed') {
-      return;
-    }
+    const stacksChanged =
+      !stacksEqual(activeBases.sequential, comparisonResult.completedSequential) ||
+      !stacksEqual(activeBases.linked, comparisonResult.completedLinked);
 
-    if (stackInput === completedStackText) {
+    if (!stacksChanged) {
       return;
     }
 
     const timer = window.setTimeout(() => {
-      syncInputToCompletedStack();
+      if (operationType === 'push') {
+        const nextValue = String(createRandomPushValue());
+        setValueInput(nextValue);
+        syncToCompletedStacks(nextValue);
+        return;
+      }
+
+      syncToCompletedStacks();
     }, 0);
+
     return () => window.clearTimeout(timer);
-  }, [completedStackText, currentSnapshot?.action, hasValidConfig, operationType, stackInput, steps.length, syncInputToCompletedStack]);
-
-  const handleExportJson = useCallback(() => {
-    setJsonInput(serializeStackConfigAsJson(stackConfig));
-    setHasJsonError(false);
-    setJsonFeedback(t('module.l04.json.exported'));
-  }, [stackConfig, t]);
-
-  const handleImportJson = useCallback(() => {
-    const resolved = resolveStackConfigFromJson(jsonInput, t);
-    if (!resolved.config) {
-      setHasJsonError(true);
-      setJsonFeedback(resolved.error);
-      return;
-    }
-
-    const nextStackInput = resolved.config.stack.join(', ');
-    const nextOperationType = resolved.config.operation.type;
-    const nextValueInput = resolved.config.operation.type === 'push' ? String(resolved.config.operation.value) : '';
-
-    reset();
-    setStackInput(nextStackInput);
-    setOperationType(nextOperationType);
-    setValueInput(nextValueInput);
-    recomputeInputState(nextStackInput, nextOperationType, nextValueInput);
-    setHasJsonError(false);
-    setJsonFeedback(t('module.l04.json.imported'));
-  }, [jsonInput, recomputeInputState, reset, t]);
+  }, [
+    activeBases.linked,
+    activeBases.sequential,
+    comparisonResult.completedLinked,
+    comparisonResult.completedSequential,
+    currentSnapshot?.action,
+    hasValidConfig,
+    operationType,
+    steps.length,
+    syncToCompletedStacks,
+  ]);
 
   const handleNextStep = useCallback(() => {
     const willComplete = currentStep >= steps.length - 2;
     next();
-    if (willComplete) {
-      if (operationType === 'push') {
-        const nextValueInput = String(createRandomPushValue());
-        setValueInput(nextValueInput);
-        syncInputToCompletedStack(nextValueInput);
-        return;
-      }
-      syncInputToCompletedStack();
-    }
-  }, [currentStep, next, operationType, steps.length, syncInputToCompletedStack]);
 
-  const highlightMap = useMemo(() => {
+    if (!willComplete) {
+      return;
+    }
+
+    if (operationType === 'push') {
+      const nextValue = String(createRandomPushValue());
+      setValueInput(nextValue);
+      syncToCompletedStacks(nextValue);
+      return;
+    }
+
+    syncToCompletedStacks();
+  }, [currentStep, next, operationType, steps.length, syncToCompletedStacks]);
+
+  const sequentialHighlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
-    (currentSnapshot?.highlights ?? []).forEach((item) => map.set(item.index, item.type));
+    (currentSnapshot?.sequential.highlights ?? []).forEach((item) => map.set(item.index, item.type));
+    return map;
+  }, [currentSnapshot]);
+
+  const linkedHighlightMap = useMemo(() => {
+    const map = new Map<number, HighlightType>();
+    (currentSnapshot?.linked.highlights ?? []).forEach((item) => map.set(item.index, item.type));
     return map;
   }, [currentSnapshot]);
 
@@ -181,44 +360,67 @@ export function StackPage() {
     { key: 'module.s01.speed.fast', value: 350 },
   ] as const;
 
-  const currentStack = currentSnapshot?.stackState ?? [];
-  const currentSize = currentStack.length;
-  const currentTopIndex = currentSize - 1;
+  const currentSequentialStack = currentSnapshot?.sequential.stackState ?? [];
+  const currentLinkedStack = currentSnapshot?.linked.stackState ?? [];
+  const currentSequentialSize = currentSequentialStack.length;
+  const currentLinkedSize = currentLinkedStack.length;
+  const sequentialTopPointerTarget = getSequentialTopPointerTarget(currentSequentialSize);
+  const currentSequentialTopSlot = currentSequentialSize;
+  const currentLinkedTopIndex = currentLinkedSize - 1;
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
-  const focusPoint = useMemo(() => {
-    const activeIndex =
-      currentSnapshot?.highlights[0]?.index ??
-      currentSnapshot?.indices[0] ??
-      Math.max(currentTopIndex, 0);
-    return {
-      x: 50,
-      y: 82 - Math.min(Math.max(activeIndex, 0) * 9, 54),
-    };
-  }, [currentSnapshot?.highlights, currentSnapshot?.indices, currentTopIndex]);
-  const highlightSummary =
-    (currentSnapshot?.highlights ?? [])
-      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
-      .join(' | ') || t('module.s01.none');
   const operationLabel =
     operationType === 'push'
       ? t('module.l04.operation.push')
       : operationType === 'pop'
         ? t('module.l04.operation.pop')
         : t('module.l04.operation.peek');
+  const diverged = comparisonResult.diverged;
+  const stepDescription = getComparisonStepDescription(currentSnapshot, t);
+  const stepNote = getComparisonNote(currentSnapshot, t);
+  const sequentialHighlightSummary =
+    (currentSnapshot?.sequential.highlights ?? [])
+      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
+      .join(' | ') || t('module.s01.none');
+  const linkedHighlightSummary =
+    (currentSnapshot?.linked.highlights ?? [])
+      .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
+      .join(' | ') || t('module.s01.none');
+  const linkedIncomingValue = currentSnapshot?.linked.incomingValue;
+  const linkedFloatingAction = currentSnapshot?.linked.action;
+  const showLinkedFloatingNode = linkedFloatingAction === 'preparePush' || linkedFloatingAction === 'linkPush';
+  const showLinkedNextLink = linkedFloatingAction === 'linkPush';
+  const linkedDisplayNodes = [...currentLinkedStack]
+    .map((value, index) => ({ value, index }))
+    .reverse();
+  const linkedVisibleNodeCount = linkedDisplayNodes.length + (showLinkedFloatingNode ? 1 : 0);
+  const linkedStackLayoutMode = getLinkedStackLayoutMode(linkedVisibleNodeCount);
+  const linkedStackSceneClassName = `linked-stack-scene linked-stack-scene-${linkedStackLayoutMode}`;
+  const linkedStackFloatingClassName = `linked-stack-floating linked-stack-floating-${linkedStackLayoutMode}`;
+  const linkedStackCellsClassName = `linked-stack-cells linked-stack-cells-${linkedStackLayoutMode}`;
+  const sequentialOutcomeLabel = getOutcomeLabel(currentSnapshot?.sequential.outcome ?? 'ok', t);
+  const linkedOutcomeLabel = getOutcomeLabel(currentSnapshot?.linked.outcome ?? 'ok', t);
+  const sequentialCodeLines = getStackPseudocodeActiveLines(currentSnapshot, 'sequential');
+  const linkedCodeLines = getStackPseudocodeActiveLines(currentSnapshot, 'linked');
 
   return (
     <WorkspaceShell
-      pageClassName="array-page tree-page"
-      stageAriaLabel={t('module.l04.title')}
+      pageClassName={STACK_WORKSPACE_CONFIG.pageClassName}
+      panelLayout={STACK_WORKSPACE_CONFIG.panelLayout}
+      stageAriaLabel={t('module.l04.stage')}
       title={t('module.l04.title')}
       description={t('module.l04.body')}
-      stageClassName="workspace-stage-array"
-      stageBodyClassName="workspace-stage-body-array"
-      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
-      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 620 }}
-      defaultContextPanelSize={{ width: 320, height: 540 }}
-      focusPoint={focusPoint}
+      shellClassName={STACK_WORKSPACE_CONFIG.shellClassName}
+      stageClassName={STACK_WORKSPACE_CONFIG.stageClassName}
+      stageBodyClassName={STACK_WORKSPACE_CONFIG.stageBodyClassName}
+      controlsPanelClassName={STACK_WORKSPACE_CONFIG.controlsPanelClassName}
+      stepPanelClassName="workspace-context-sheet-linear workspace-context-sheet-linear-stack"
+      defaultControlsPanelSize={STACK_WORKSPACE_CONFIG.controlsPanelSize}
+      controlsPanelAutoAvoid={STACK_WORKSPACE_CONFIG.controlsPanelAutoAvoid}
+      controlsPanelOverflowMargin={STACK_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
+      defaultContextPanelSize={STACK_WORKSPACE_CONFIG.contextPanelSize}
+      stepPanelAutoAvoid={STACK_WORKSPACE_CONFIG.stepPanelAutoAvoid}
+      stepPanelOverflowMargin={STACK_WORKSPACE_CONFIG.stepPanelOverflowMargin}
+      floatingPanelsEnabledMinHeight={STACK_WORKSPACE_CONFIG.floatingPanelsEnabledMinHeight}
       stageMeta={
         <>
           <span className="tree-workspace-pill tree-workspace-pill-active">
@@ -229,198 +431,307 @@ export function StackPage() {
           </span>
           <span className="tree-workspace-pill">{operationLabel}</span>
           <span className="tree-workspace-pill">
-            {t('module.l01.lengthCapacity')}: {currentSize}/{STACK_CAPACITY}
+            {t('module.l04.compare.sequential')}: {currentSequentialSize}/{STACK_CAPACITY}
           </span>
-          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
+          <span className="tree-workspace-pill">
+            {t('module.l04.compare.linked')}: {currentLinkedSize}
+          </span>
+          <span className={`tree-workspace-pill${diverged ? '' : ' tree-workspace-pill-active-soft'}`}>
+            {diverged ? t('module.l04.compare.diverged') : t('module.l04.compare.aligned')}
+          </span>
+          <span className="tree-workspace-pill">{stepDescription}</span>
         </>
       }
       controlsContent={
         <>
-          <label className="tree-workspace-field" htmlFor="stack-input">
-            <span>{t('module.l04.input.stack')}</span>
-            <input
-              id="stack-input"
-              type="text"
-              value={stackInput}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                reset();
-                setStackInput(nextValue);
-                recomputeInputState(nextValue, operationType, valueInput);
-              }}
-              placeholder="3, 8, 1"
-            />
-          </label>
-
-          <label className="tree-workspace-field" htmlFor="stack-operation">
-            <span>{t('module.l04.input.operation')}</span>
-            <select
-              id="stack-operation"
-              value={operationType}
-              onChange={(event) => {
-                const nextValue = event.target.value as StackConfig['operation']['type'];
-                reset();
-                setOperationType(nextValue);
-                const normalized = nextValue === 'push' ? String(createRandomPushValue()) : '';
-                if (nextValue !== 'push') {
-                  setValueInput('');
-                } else {
-                  setValueInput(normalized);
-                }
-                recomputeInputState(stackInput, nextValue, normalized);
-              }}
-            >
-              <option value="push">{t('module.l04.operation.push')}</option>
-              <option value="pop">{t('module.l04.operation.pop')}</option>
-              <option value="peek">{t('module.l04.operation.peek')}</option>
-            </select>
-          </label>
-
-          {operationType === 'push' ? (
-            <label className="tree-workspace-field" htmlFor="stack-value">
-              <span>{t('module.l04.input.value')}</span>
+          <div className="array-controls-grid stack-controls-grid">
+            <label className="tree-workspace-field array-controls-field stack-controls-field-stack" htmlFor="stack-input">
+              <span>{t('module.l04.input.stack')}</span>
               <input
-                id="stack-value"
-                type="number"
-                value={valueInput}
+                id="stack-input"
+                type="text"
+                value={stackInput}
                 onChange={(event) => {
                   const nextValue = event.target.value;
                   reset();
-                  setValueInput(nextValue);
-                  recomputeInputState(stackInput, operationType, nextValue);
+                  setStackInput(nextValue);
+
+                  const resolved = resolveStackConfig(nextValue, operationType, valueInput, t);
+                  setError(resolved.error);
+                  setHasValidConfig(resolved.config !== null);
+                  if (resolved.config) {
+                    const nextBases = createSharedStackBases(resolved.config.stack);
+                    setActiveBases(nextBases);
+                    setComparisonSource({
+                      ...nextBases,
+                      operation: resolved.config.operation,
+                    });
+                  }
                 }}
+                placeholder="3, 8, 1"
               />
             </label>
-          ) : null}
 
-          <div className="tree-workspace-field">
-            <span>{t('module.s01.speed')}</span>
-            <div className="tree-workspace-toggle-row">
-              {speedOptions.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
-                  onClick={() => setSpeed(option.value)}
-                >
-                  {t(option.key)}
-                </button>
-              ))}
+            <label className="tree-workspace-field array-controls-field" htmlFor="stack-operation">
+              <span>{t('module.l04.input.operation')}</span>
+              <select
+                id="stack-operation"
+                value={operationType}
+                onChange={(event) => {
+                  const nextOperation = event.target.value as StackConfig['operation']['type'];
+                  reset();
+                  setOperationType(nextOperation);
+
+                  const normalizedValue = nextOperation === 'push' ? String(createRandomPushValue()) : '';
+                  setValueInput(normalizedValue);
+                  recomputeInputState(stackInput, nextOperation, normalizedValue, activeBases);
+                }}
+              >
+                <option value="push">{t('module.l04.operation.push')}</option>
+                <option value="pop">{t('module.l04.operation.pop')}</option>
+                <option value="peek">{t('module.l04.operation.peek')}</option>
+              </select>
+            </label>
+
+            {operationType === 'push' ? (
+              <label className="tree-workspace-field array-controls-field" htmlFor="stack-value">
+                <span>{t('module.l04.input.value')}</span>
+                <input
+                  id="stack-value"
+                  type="number"
+                  value={valueInput}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    reset();
+                    setValueInput(nextValue);
+                    recomputeInputState(stackInput, operationType, nextValue, activeBases);
+                  }}
+                />
+              </label>
+            ) : null}
+
+            <div className="tree-workspace-field array-controls-field stack-controls-field-speed">
+              <span>{t('module.s01.speed')}</span>
+              <div className="tree-workspace-toggle-row">
+                {speedOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
+                    onClick={() => setSpeed(option.value)}
+                  >
+                    {t(option.key)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <label className="tree-workspace-field" htmlFor="stack-json-input">
-            <span>{t('module.l04.json.label')}</span>
-            <textarea
-              id="stack-json-input"
-              value={jsonInput}
-              onChange={(event) => setJsonInput(event.target.value)}
-              rows={6}
-              placeholder={t('module.l04.json.placeholder')}
-            />
-          </label>
+          <p className={`workspace-inline-feedback array-controls-feedback${error ? ' form-error' : ''}`} aria-live="polite">
+            {error || ''}
+          </p>
 
-          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
-          {jsonFeedback ? (
-            <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
-          ) : null}
+          <div className="linear-controls-section">
+            <div className="linear-controls-summary">
+              <div className="linear-controls-card">
+                <span>{t('playback.status')}</span>
+                <strong>{getStatusLabel(status, t)}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('playback.step')}</span>
+                <strong>
+                  {currentStep}/{Math.max(steps.length - 1, 0)}
+                </strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l04.input.operation')}</span>
+                <strong>{operationLabel}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l04.compare.stateSequential')}</span>
+                <strong>{sequentialOutcomeLabel}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l04.compare.stateLinked')}</span>
+                <strong>{linkedOutcomeLabel}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l04.compare.sequential')}</span>
+                <strong>
+                  {currentSequentialSize}/{STACK_CAPACITY}
+                </strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l04.compare.linked')}</span>
+                <strong>{currentLinkedSize}</strong>
+              </div>
+            </div>
 
-          <div className="tree-workspace-drawer-actions">
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
-              {t('module.l04.json.export')}
-            </button>
-            <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
-              {t('module.l04.json.import')}
-            </button>
+            <div className="linear-controls-note-grid">
+              <p className="linear-controls-note linear-controls-note-wide">
+                {stepDescription} · {stepNote} · {diverged ? t('module.l04.compare.diverged') : t('module.l04.compare.aligned')}
+              </p>
+              <p className="linear-controls-note">
+                {t('module.l04.compare.sequential')}: {formatStack(currentSequentialStack)} | {t('module.s01.highlight')}:{' '}
+                {sequentialHighlightSummary}
+              </p>
+              <p className="linear-controls-note">
+                {t('module.l04.compare.linked')}: {formatStack(currentLinkedStack)} | {t('module.s01.highlight')}: {linkedHighlightSummary}
+              </p>
+            </div>
+
           </div>
         </>
       }
       stepContent={
-        <div className="workspace-panel-scroll">
-          <div className="workspace-panel-copy">
-            <h3>{getStepDescription(currentSnapshot, t)}</h3>
-            <p>
-              {t('module.l04.currentStack')}: [{currentStack.join(', ')}]
-            </p>
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
-            </div>
-            <div>
-              <dt>{t('playback.step')}</dt>
-              <dd>
-                {currentStep}/{Math.max(steps.length - 1, 0)}
-              </dd>
-            </div>
-            <div>
-              <dt>{t('module.l04.input.operation')}</dt>
-              <dd>{operationLabel}</dd>
-            </div>
-            {operationType === 'push' ? (
-              <div>
-                <dt>{t('module.l04.input.value')}</dt>
-                <dd>{stackConfig.operation.type === 'push' ? stackConfig.operation.value : '-'}</dd>
+        <div className="workspace-panel-scroll workspace-panel-scroll-linear">
+          <div className="workspace-panel-code-only workspace-panel-code-grid-double">
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>
+                  {t('module.l04.compare.sequential')} {t('module.l04.pseudocode')}
+                </h3>
+                <ol>
+                  <li className={sequentialCodeLines.includes(1) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line1')}</li>
+                  <li className={sequentialCodeLines.includes(2) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line2')}</li>
+                  <li className={sequentialCodeLines.includes(3) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line3')}</li>
+                  <li className={sequentialCodeLines.includes(4) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line4')}</li>
+                  <li className={sequentialCodeLines.includes(5) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line5')}</li>
+                  <li className={sequentialCodeLines.includes(6) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line6')}</li>
+                </ol>
               </div>
-            ) : null}
-            <div>
-              <dt>{t('module.l01.lengthCapacity')}</dt>
-              <dd>
-                {currentSize}/{STACK_CAPACITY}
-              </dd>
             </div>
-            <div>
-              <dt>{t('module.l04.top')}</dt>
-              <dd>{currentTopIndex >= 0 ? currentTopIndex : '-'}</dd>
-            </div>
-            <div>
-              <dt>{t('module.s01.highlight')}</dt>
-              <dd>{highlightSummary}</dd>
-            </div>
-          </dl>
 
-          <div className="legend-row">
-            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-            <span className="legend-item legend-inserted">{t('module.l04.highlight.pushed')}</span>
-            <span className="legend-item legend-moving">{t('module.l04.highlight.popped')}</span>
-            <span className="legend-item legend-matched">{t('module.l04.highlight.peeked')}</span>
-          </div>
-
-          <div className="pseudocode-block">
-            <h3>{t('module.l04.pseudocode')}</h3>
-            <ol>
-              <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l04.code.line1')}</li>
-              <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l04.code.line2')}</li>
-              <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l04.code.line3')}</li>
-              <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l04.code.line4')}</li>
-              <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l04.code.line5')}</li>
-              <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l04.code.line6')}</li>
-            </ol>
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>
+                  {t('module.l04.compare.linked')} {t('module.l04.pseudocode')}
+                </h3>
+                <ol>
+                  <li className={linkedCodeLines.includes(1) ? 'code-active' : ''}>{t('module.l04.linkedCode.line1')}</li>
+                  <li className={linkedCodeLines.includes(2) ? 'code-active' : ''}>{t('module.l04.linkedCode.line2')}</li>
+                  <li className={linkedCodeLines.includes(3) ? 'code-active' : ''}>{t('module.l04.linkedCode.line3')}</li>
+                  <li className={linkedCodeLines.includes(4) ? 'code-active' : ''}>{t('module.l04.linkedCode.line4')}</li>
+                  <li className={linkedCodeLines.includes(5) ? 'code-active' : ''}>{t('module.l04.linkedCode.line5')}</li>
+                  <li className={linkedCodeLines.includes(6) ? 'code-active' : ''}>{t('module.l04.linkedCode.line6')}</li>
+                  <li className={linkedCodeLines.includes(7) ? 'code-active' : ''}>{t('module.l04.linkedCode.line7')}</li>
+                </ol>
+              </div>
+            </div>
           </div>
         </div>
       }
       stageContent={
-        <div ref={stackCellsRef} className="stack-cells" aria-label="stack-cells">
-          {Array.from({ length: STACK_CAPACITY }, (_, index) => {
-            const value = currentStack[index] ?? null;
-            const highlight = highlightMap.get(index) ?? 'default';
-            const isTop = index === currentTopIndex;
-            const isUnused = value === null;
-            return (
-              <div
-                key={`${index}-${String(value)}`}
-                data-stack-index={index}
-                className={`stack-cell bar-${highlight}${isUnused ? ' stack-cell-unused' : ''}`}
-              >
-                {isTop ? <span className="stack-top-pointer">{t('module.l04.top')}</span> : null}
-                <span className="array-cell-index">{index}</span>
-                <strong>{value ?? '∅'}</strong>
+        <div className="stack-compare-stage">
+          <section className="stack-compare-lane">
+            <header className="stack-compare-lane-head">
+              <div>
+                <h3>{t('module.l04.compare.sequential')}</h3>
+                <p>
+                  {currentSequentialSize}/{STACK_CAPACITY}
+                </p>
               </div>
-            );
-          })}
-          {currentSize === 0 ? <div className="stack-empty">{t('module.l04.empty')}</div> : null}
+              <span className={`stack-compare-outcome stack-compare-outcome-${currentSnapshot?.sequential.outcome ?? 'ok'}`}>
+                {getOutcomeLabel(currentSnapshot?.sequential.outcome ?? 'ok', t)}
+              </span>
+            </header>
+
+            <div className="stack-compare-lane-body">
+              <div className="stack-cells-sequential-scene">
+                {sequentialTopPointerTarget.kind === 'null' ? (
+                  <SequentialOverflowPointer topLabel={t('module.l04.top')} nullLabel={t('module.l04.nullLiteral')} />
+                ) : null}
+
+                <div ref={sequentialCellsRef} className="stack-cells stack-cells-sequential" aria-label="sequential-stack-cells">
+                {Array.from({ length: STACK_CAPACITY }, (_, index) => {
+                  const value = currentSequentialStack[index] ?? null;
+                  const highlight = sequentialHighlightMap.get(index) ?? 'default';
+                  const isTop = sequentialTopPointerTarget.kind === 'cell' && sequentialTopPointerTarget.index === index;
+                  const isBottom = index === 0;
+                  const isUnused = value === null;
+
+                  return (
+                    <div
+                      key={`sequential-${index}-${String(value)}`}
+                      data-stack-index={index}
+                      className={`stack-cell stack-cell-compact bar-${highlight}${isUnused ? ' stack-cell-unused' : ''}`}
+                    >
+                      {isTop ? <PointerLabel className="stack-top-pointer" direction="left" label={t('module.l04.top')} /> : null}
+                      {isBottom ? <PointerLabel className="stack-bottom-pointer" direction="right" label={t('module.l04.bottom')} /> : null}
+                      <span className="array-cell-index">{index}</span>
+                      <strong>{value ?? '∅'}</strong>
+                    </div>
+                  );
+                })}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="stack-compare-lane">
+            <header className="stack-compare-lane-head">
+              <div>
+                <h3>{t('module.l04.compare.linked')}</h3>
+                <p>{currentLinkedSize}</p>
+              </div>
+              <span className={`stack-compare-outcome stack-compare-outcome-${currentSnapshot?.linked.outcome ?? 'ok'}`}>
+                {getOutcomeLabel(currentSnapshot?.linked.outcome ?? 'ok', t)}
+              </span>
+            </header>
+
+            <div className="stack-compare-lane-body">
+              <div className={linkedStackSceneClassName}>
+                {showLinkedFloatingNode && linkedIncomingValue !== undefined ? (
+                  <div className={linkedStackFloatingClassName}>
+                    <div className="linked-stack-node linked-stack-node-floating bar-new-node">
+                      <span className="linked-stack-variable-badge">s</span>
+                      <span className="array-cell-index">{currentLinkedSize}</span>
+                      <strong>{linkedIncomingValue}</strong>
+                    </div>
+                    {showLinkedNextLink ? (
+                      <span className="linked-stack-link linked-stack-link-floating">{t('module.l04.compare.linkTop')}</span>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                <div ref={linkedCellsRef} className={linkedStackCellsClassName} aria-label="linked-stack-cells">
+                  {linkedDisplayNodes.length > 0 ? (
+                    linkedDisplayNodes.map((node, displayIndex) => {
+                      const highlight = linkedHighlightMap.get(node.index) ?? 'default';
+                      const isTop = node.index === currentLinkedTopIndex;
+                      const isBottom = currentLinkedSize > 0 && node.index === 0;
+                      const isTail = displayIndex === linkedDisplayNodes.length - 1;
+
+                      return (
+                        <div
+                          key={`linked-${node.index}-${node.value}`}
+                          className={`linked-stack-item linked-stack-item-${linkedStackLayoutMode}${isTail ? ' linked-stack-item-tail' : ''}`}
+                        >
+                          <div
+                            data-linked-stack-index={node.index}
+                            className={`linked-stack-node linked-stack-node-${linkedStackLayoutMode} bar-${highlight}`}
+                          >
+                            {isTop ? <PointerLabel className="linked-stack-top-pointer" direction="right" label={t('module.l04.top')} /> : null}
+                            {isBottom ? <PointerLabel className="linked-stack-bottom-pointer" direction="left" label={t('module.l04.bottom')} /> : null}
+                            <span className="array-cell-index">{node.index}</span>
+                            <strong>{node.value}</strong>
+                          </div>
+                          {!isTail ? (
+                            <span
+                              className={`linked-stack-connector linked-stack-connector-${linkedStackLayoutMode}`}
+                              aria-hidden="true"
+                            />
+                          ) : null}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="stack-empty">{t('module.l04.empty')}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       }
       transportLeft={
@@ -452,8 +763,7 @@ export function StackPage() {
           <button
             type="button"
             className="tree-workspace-transport-btn"
-            onClick={reset}
-            disabled={!hasValidConfig || steps.length === 0}
+            onClick={handleResetToInitialState}
           >
             {t('playback.reset')}
           </button>
@@ -474,13 +784,19 @@ export function StackPage() {
         <>
           <span className="tree-workspace-transport-chip">{operationLabel}</span>
           {operationType === 'push' ? (
-            <span className="tree-workspace-transport-chip">
-              +{stackConfig.operation.type === 'push' ? stackConfig.operation.value : valueInput}
-            </span>
+            <span className="tree-workspace-transport-chip">+{valueInput}</span>
           ) : null}
-          <span className="tree-workspace-transport-chip">top:{currentTopIndex >= 0 ? currentTopIndex : '-'}</span>
+          <span className="tree-workspace-transport-chip">
+            S:{currentSequentialTopSlot}
+          </span>
+          <span className="tree-workspace-transport-chip">
+            L:{currentLinkedTopIndex >= 0 ? currentLinkedTopIndex : '-'}
+          </span>
           <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
-            {currentSize}/{STACK_CAPACITY}
+            {currentSequentialSize}/{STACK_CAPACITY}
+          </span>
+          <span className={`tree-workspace-transport-chip${diverged ? ' tree-workspace-transport-chip-alert' : ''}`}>
+            {diverged ? t('module.l04.compare.diverged') : t('module.l04.compare.aligned')}
           </span>
         </>
       }

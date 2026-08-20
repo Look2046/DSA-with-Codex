@@ -178,6 +178,14 @@ export const moduleRegistry: ModuleMetadata[] = [
     implemented: true,
   },
   {
+    id: 'T-07',
+    name: 'Huffman Tree',
+    route: '/modules/huffman-tree',
+    category: 'tree',
+    difficulty: 2,
+    implemented: true,
+  },
+  {
     id: 'T-05',
     name: 'B-Tree / B+ Tree',
     route: '/modules/btree',

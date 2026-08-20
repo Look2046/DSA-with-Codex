@@ -2,6 +2,25 @@
 
 Track actionable tasks here. Keep tasks small and testable.
 
+## P15 (Acceptance Sweep In Progress)
+- [x] Align `L-01 /modules/array` to the compact first-open workbench layout
+  - Done: centered array row, horizontal controls drawer, drawer no longer shifts during playback.
+
+- [x] Align `L-02 /modules/dynamic-array` to the same compact workbench layout
+  - Done: centered dynamic-array stage row, horizontal controls drawer, drawer fixed during resize playback.
+
+- [x] Align `L-03 /modules/linked-list` to the same compact workbench layout
+  - Done: widened/shortened drawer, `HEAD` label placement corrected, insert follow-up value now refreshes randomly.
+
+- [x] Rework `L-04 /modules/stack` into sequential-stack vs linked-stack comparison
+  - Done: sequential capacity reduced to `10`, controls drawer compacted, linked-stack comparison added, full-stack `push` now shows the requested divergence, `Reset` returns to the default teaching demo, sequential-stack `top` points to the next writable slot, linked-stack push now plays as `s created -> s.next = top -> top = s`, and the linked-stack no longer needs internal scrolling in the `10/11`-node comparison states.
+
+- [x] Re-unify `L-01`~`L-04` on one floating `Controls` / `Step` interaction baseline
+  - Done: `L-03` / `L-04` no longer use the temporary docked strip, `L-01`~`L-04` now all use widened floating controls, and the floating `Step` panel stays inside `1280x720` on all four pages.
+
+- [ ] Continue route-by-route acceptance from the next user-reported module issue
+  - Candidate focus: `L-05+` linear modules or cross-cutting blockers (`m0-scaffold-tmp` titles, router warning storm, Windows docs-check gap).
+
 ## P0 (V1 Must Have)
 - [x] M0 scaffold: initialize frontend app and route skeleton
   - DoD: app starts locally; routes `/`, `/modules`, `/modules/sorting`, `/about`, `*` work.

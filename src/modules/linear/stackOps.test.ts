@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { generateStackSteps, STACK_CAPACITY } from './stackOps';
 
 describe('generateStackSteps', () => {
+  it('uses the compact sequential stack capacity of 10', () => {
+    expect(STACK_CAPACITY).toBe(10);
+  });
+
   it('returns deterministic steps for the same push input', () => {
     const run1 = generateStackSteps([3, 8, 1], { type: 'push', value: 9 });
     const run2 = generateStackSteps([3, 8, 1], { type: 'push', value: 9 });

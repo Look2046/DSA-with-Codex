@@ -1,6 +1,6 @@
 import type { AnimationStep } from '../../types/animation';
 
-export const STACK_CAPACITY = 20;
+export const STACK_CAPACITY = 10;
 
 export type StackOperation = { type: 'push'; value: number } | { type: 'pop' } | { type: 'peek' };
 

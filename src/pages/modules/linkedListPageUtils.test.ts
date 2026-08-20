@@ -5,6 +5,7 @@ import type { LinkedListStep } from '../../modules/linear/linkedListOps';
 import {
   buildLogicalStepByIndex,
   getFindResultText,
+  getLinkedListWorkspaceConfig,
   parseNumberArrayAllowEmpty,
   resolveLinkedListConfig,
   resolveLinkedListConfigFromJson,
@@ -68,6 +69,24 @@ describe('linkedListPageUtils', () => {
     ];
 
     expect(buildLogicalStepByIndex(steps)).toEqual([0, 1, 1, 1, 2, 2]);
+  });
+
+  it('uses the compact L-03 workspace configuration without json controls', () => {
+    expect(getLinkedListWorkspaceConfig()).toEqual({
+      pageClassName: 'linked-list-page tree-page linear-adaptive linear-adaptive-viewport-lock',
+      controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer linked-controls-drawer',
+      controlsPanelSize: { width: 1040, height: 340 },
+      controlsPanelAutoAvoid: false,
+      controlsPanelOverflowMargin: 0,
+      stepPanelAutoAvoid: false,
+      stepPanelOverflowMargin: 0,
+      contextPanelSize: { width: 620, height: 340 },
+      stageClassName: 'workspace-stage-linked viz-canvas-stage-linked',
+      stageBodyClassName: 'workspace-stage-body-linked',
+      shellClassName: 'linked-list-workspace-shell',
+      floatingPanelsEnabledMinHeight: 0,
+      showJsonControls: false,
+    });
   });
 
   it('serializes and resolves linked-list JSON config', () => {

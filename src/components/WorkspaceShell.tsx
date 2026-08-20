@@ -42,7 +42,11 @@ type WorkspaceShellProps = {
   controlsPanelOverflowMargin?: number;
   defaultContextRailSize?: StageSize;
   defaultContextPanelSize?: StageSize;
+  stepPanelAutoAvoid?: boolean;
+  stepPanelOverflowMargin?: number;
   floatingPanelsEnabledMinWidth?: number;
+  floatingPanelsEnabledMinHeight?: number;
+  panelLayout?: 'auto' | 'docked';
 };
 
 function joinClasses(...values: Array<string | undefined | false>): string {
@@ -93,14 +97,18 @@ export function WorkspaceShell({
   controlsPanelOverflowMargin = 320,
   defaultContextRailSize = DEFAULT_CONTEXT_RAIL_SIZE,
   defaultContextPanelSize = DEFAULT_CONTEXT_PANEL_SIZE,
+  stepPanelAutoAvoid = true,
+  stepPanelOverflowMargin = 320,
   floatingPanelsEnabledMinWidth = 960,
+  floatingPanelsEnabledMinHeight = 0,
+  panelLayout = 'auto',
 }: WorkspaceShellProps) {
   const { t } = useI18n();
   const shellRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const controlsTabRef = useRef<HTMLButtonElement | null>(null);
   const controlsPanelRef = useRef<HTMLDivElement | null>(null);
-  const contextRailRef = useRef<HTMLDivElement | null>(null);
+  const contextRailRef = useRef<HTMLButtonElement | null>(null);
   const contextPanelRef = useRef<HTMLElement | null>(null);
 
   const [showControls, setShowControls] = useState(false);
@@ -136,7 +144,10 @@ export function WorkspaceShell({
     return () => observer.disconnect();
   }, []);
 
-  const floatingPanelsEnabled = stageSize.width >= floatingPanelsEnabledMinWidth;
+  const floatingPanelsEnabled =
+    panelLayout !== 'docked' &&
+    stageSize.width >= floatingPanelsEnabledMinWidth &&
+    stageSize.height >= floatingPanelsEnabledMinHeight;
   const focusCollisionRect = useMemo(
     () => createFocusCollisionRect(focusPoint, stageSize),
     [focusPoint, stageSize],
@@ -165,7 +176,8 @@ export function WorkspaceShell({
     defaultAnchorSize: defaultContextRailSize,
     defaultPanelSize: defaultContextPanelSize,
     collisionTarget: focusCollisionRect,
-    overflowMargin: 320,
+    autoAvoid: stepPanelAutoAvoid,
+    overflowMargin: stepPanelOverflowMargin,
     enabled: floatingPanelsEnabled,
   });
 
@@ -177,6 +189,33 @@ export function WorkspaceShell({
   const resolvedControlsLabel = controlsLabel ?? t('module.t01.workspace.controls');
   const resolvedStepLabel = stepLabel ?? t('playback.step');
   const resolvedControlsNote = controlsNote ?? t('module.t01.workspace.onDemand');
+  const isDockedLayout = panelLayout === 'docked';
+
+  const handleControlsToggle = () => {
+    if (isDockedLayout) {
+      const next = !showControls;
+      setShowControls(next);
+      if (next) {
+        setShowStep(false);
+      }
+      return;
+    }
+
+    setShowControls((previous) => !previous);
+  };
+
+  const handleStepToggle = () => {
+    if (isDockedLayout) {
+      const next = !showStep;
+      setShowStep(next);
+      if (next) {
+        setShowControls(false);
+      }
+      return;
+    }
+
+    setShowStep((previous) => !previous);
+  };
 
   return (
     <section className={pageClassName}>
@@ -185,75 +224,145 @@ export function WorkspaceShell({
         <p>{description}</p>
       </div>
 
-      <section ref={shellRef} className={joinClasses('tree-workspace-shell', shellClassName)}>
-        <div className="tree-workspace-controls-anchor">
-          <div className="tree-workspace-controls-tab-pin">
-            <button
-              ref={controlsTabRef}
-              type="button"
-              className="tree-workspace-edge-tab"
-              onClick={() => setShowControls((previous) => !previous)}
-              aria-expanded={showControls}
-            >
-              {resolvedControlsLabel}
-            </button>
-          </div>
-
-          {showControls ? (
-            <div
-              ref={controlsPanelRef}
-              className={joinClasses('tree-workspace-drawer', controlsPanelClassName)}
-              style={controlsPanelAnchor.panelStyle}
-              aria-label={resolvedControlsLabel}
-            >
-              <div
-                className={`tree-workspace-drawer-head tree-workspace-panel-drag-handle${
-                  controlsPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+      <section
+        ref={shellRef}
+        className={joinClasses('tree-workspace-shell', shellClassName)}
+        data-controls-open={showControls ? 'true' : 'false'}
+        data-floating-panels-enabled={floatingPanelsEnabled ? 'true' : 'false'}
+        data-step-open={showStep ? 'true' : 'false'}
+        data-panel-layout={panelLayout}
+      >
+        {isDockedLayout ? (
+          <div className="tree-workspace-docked-strip">
+            <div className="tree-workspace-docked-tabs">
+              <button
+                ref={controlsTabRef}
+                type="button"
+                className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
+                  showControls ? ' tree-workspace-context-tab-active' : ''
                 }`}
-                onPointerDown={controlsPanelAnchor.startDrag}
+                onClick={handleControlsToggle}
+                aria-expanded={showControls}
               >
-                <strong>{resolvedControlsLabel}</strong>
-                <span>{resolvedControlsNote}</span>
-              </div>
+                {resolvedControlsLabel}
+              </button>
 
-              {controlsContent}
+              <button
+                type="button"
+                className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
+                  showStep ? ' tree-workspace-context-tab-active' : ''
+                }`}
+                ref={contextRailRef}
+                onClick={handleStepToggle}
+                aria-pressed={showStep}
+              >
+                {resolvedStepLabel}
+              </button>
             </div>
-          ) : null}
-        </div>
 
-        <div className="tree-workspace-context-anchor">
-          <div ref={contextRailRef} className="tree-workspace-context-rail">
-            <button
-              type="button"
-              className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
-                showStep ? ' tree-workspace-context-tab-active' : ''
-              }`}
-              onClick={() => setShowStep((previous) => !previous)}
-              aria-pressed={showStep}
-            >
-              {resolvedStepLabel}
-            </button>
-          </div>
-
-          {showStep ? (
-            <aside
-              ref={contextPanelRef}
-              className={joinClasses('tree-workspace-context-sheet', stepPanelClassName)}
-              style={stepPanelAnchor.panelStyle}
-            >
+            {showControls ? (
               <div
-                className={`tree-workspace-panel-drag-handle${
-                  stepPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
-                }`}
-                onPointerDown={stepPanelAnchor.startDrag}
+                ref={controlsPanelRef}
+                className={joinClasses('tree-workspace-drawer', 'tree-workspace-docked-panel', controlsPanelClassName)}
+                aria-label={resolvedControlsLabel}
               >
-                <strong className="tree-workspace-step-label">{resolvedStepLabel}</strong>
+                <div
+                  className="tree-workspace-drawer-head"
+                >
+                  <strong>{resolvedControlsLabel}</strong>
+                  <span>{resolvedControlsNote}</span>
+                </div>
+
+                {controlsContent}
+              </div>
+            ) : null}
+
+            {showStep ? (
+              <aside
+                ref={contextPanelRef}
+                className={joinClasses('tree-workspace-context-sheet', 'tree-workspace-docked-panel', stepPanelClassName)}
+              >
+                <div className="tree-workspace-drawer-head">
+                  <strong className="tree-workspace-step-label">{resolvedStepLabel}</strong>
+                </div>
+
+                {stepContent}
+              </aside>
+            ) : null}
+          </div>
+        ) : (
+          <div className="tree-workspace-panel-strip">
+            <div className="tree-workspace-controls-anchor">
+              <div className="tree-workspace-controls-tab-pin">
+                <button
+                  ref={controlsTabRef}
+                  type="button"
+                  className="tree-workspace-edge-tab"
+                  onClick={handleControlsToggle}
+                  aria-expanded={showControls}
+                >
+                  {resolvedControlsLabel}
+                </button>
               </div>
 
-              {stepContent}
-            </aside>
-          ) : null}
-        </div>
+              {showControls ? (
+                <div
+                  ref={controlsPanelRef}
+                  className={joinClasses('tree-workspace-drawer', controlsPanelClassName)}
+                  style={controlsPanelAnchor.panelStyle}
+                  aria-label={resolvedControlsLabel}
+                >
+                  <div
+                    className={`tree-workspace-drawer-head tree-workspace-panel-drag-handle${
+                      controlsPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+                    }`}
+                    onPointerDown={controlsPanelAnchor.startDrag}
+                  >
+                    <strong>{resolvedControlsLabel}</strong>
+                    <span>{resolvedControlsNote}</span>
+                  </div>
+
+                  {controlsContent}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="tree-workspace-context-anchor">
+              <div className="tree-workspace-context-rail">
+                <button
+                  ref={contextRailRef}
+                  type="button"
+                  className={`tree-workspace-edge-tab tree-workspace-edge-tab-secondary${
+                    showStep ? ' tree-workspace-context-tab-active' : ''
+                  }`}
+                  onClick={handleStepToggle}
+                  aria-pressed={showStep}
+                >
+                  {resolvedStepLabel}
+                </button>
+              </div>
+
+              {showStep ? (
+                <aside
+                  ref={contextPanelRef}
+                  className={joinClasses('tree-workspace-context-sheet', stepPanelClassName)}
+                  style={stepPanelAnchor.panelStyle}
+                >
+                  <div
+                    className={`tree-workspace-panel-drag-handle${
+                      stepPanelAnchor.isDragging ? ' tree-workspace-panel-dragging' : ''
+                    }`}
+                    onPointerDown={stepPanelAnchor.startDrag}
+                  >
+                    <strong className="tree-workspace-step-label">{resolvedStepLabel}</strong>
+                  </div>
+
+                  {stepContent}
+                </aside>
+              ) : null}
+            </div>
+          </div>
+        )}
 
         <div
           ref={stageRef}

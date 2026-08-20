@@ -6,12 +6,55 @@ export type LinkedListConfig = {
   operation: LinkedListOperation;
 };
 
+export type LinkedListWorkspaceConfig = {
+  pageClassName: string;
+  panelLayout?: 'auto' | 'docked';
+  controlsPanelClassName: string;
+  controlsPanelSize: {
+    width: number;
+    height: number;
+  };
+  controlsPanelAutoAvoid: boolean;
+  controlsPanelOverflowMargin: number;
+  stepPanelAutoAvoid: boolean;
+  stepPanelOverflowMargin: number;
+  contextPanelSize: {
+    width: number;
+    height: number;
+  };
+  stageClassName: string;
+  stageBodyClassName: string;
+  shellClassName: string;
+  floatingPanelsEnabledMinHeight: number;
+  showJsonControls: boolean;
+};
+
 type Translator = (key: TranslationKey) => string;
 
 type JsonParseResult<T> = {
   config: T | null;
   error: string;
 };
+
+const LINKED_LIST_WORKSPACE_CONFIG: LinkedListWorkspaceConfig = {
+  pageClassName: 'linked-list-page tree-page linear-adaptive linear-adaptive-viewport-lock',
+  controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer linked-controls-drawer',
+  controlsPanelSize: { width: 1040, height: 340 },
+  controlsPanelAutoAvoid: false,
+  controlsPanelOverflowMargin: 0,
+  stepPanelAutoAvoid: false,
+  stepPanelOverflowMargin: 0,
+  contextPanelSize: { width: 620, height: 340 },
+  stageClassName: 'workspace-stage-linked viz-canvas-stage-linked',
+  stageBodyClassName: 'workspace-stage-body-linked',
+  shellClassName: 'linked-list-workspace-shell',
+  floatingPanelsEnabledMinHeight: 0,
+  showJsonControls: false,
+};
+
+export function getLinkedListWorkspaceConfig(): LinkedListWorkspaceConfig {
+  return LINKED_LIST_WORKSPACE_CONFIG;
+}
 
 export function parseNumberArrayAllowEmpty(raw: string): number[] | null {
   const trimmed = raw.trim();

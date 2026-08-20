@@ -62,11 +62,14 @@ describe('dynamicArrayPageUtils', () => {
 
   it('uses the compact L-02 workspace configuration without json controls', () => {
     expect(getDynamicArrayWorkspaceConfig()).toEqual({
-      controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer',
-      controlsPanelSize: { width: 760, height: 260 },
+      pageClassName: 'array-page tree-page linear-adaptive linear-adaptive-viewport-lock',
+      controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer linear-controls-drawer',
+      controlsPanelSize: { width: 980, height: 360 },
       controlsPanelAutoAvoid: false,
       controlsPanelOverflowMargin: 0,
-      contextPanelSize: { width: 340, height: 560 },
+      stepPanelAutoAvoid: false,
+      stepPanelOverflowMargin: 0,
+      contextPanelSize: { width: 620, height: 360 },
       stageClassName: 'workspace-stage-array workspace-stage-array-compact workspace-stage-dynamic-array-compact',
       stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
       showJsonControls: false,

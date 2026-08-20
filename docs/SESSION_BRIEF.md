@@ -6,7 +6,7 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p14-backlog-wave`
-- Current phase: `P15` acceptance-and-stabilization wave is active locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, `L-01 /modules/array` now has a first accepted-fix candidate landed locally, but the full surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
+- Current phase: `P15` acceptance-and-stabilization wave is active locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, `L-01`~`L-04` now all have accepted-fix candidates landed locally, but the full surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
 - Last local quality gates:
   - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
   - `npm run build` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
@@ -34,7 +34,38 @@ Use this file as the first thing to read in a new chat/session.
     - controls drawer now uses one horizontal workbench row (`field tops ~= 417`)
     - controls drawer stayed fixed at `left = 38`, `top = 373`
     - artifact: `output/playwright/p15-l02-dynamic-array-centered-controls.png`
+  - targeted `L-03 /modules/linked-list` acceptance recheck (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - widened/shortened controls drawer no longer overlaps the chain on fresh preview
+    - `HEAD` label now sits just above the head node instead of floating at the top of the stage
+    - insert completion now refreshes the next random insert value
+  - targeted `L-04 /modules/stack` comparison recheck (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - sequential stack capacity reduced to `10` and all `10` slots render without internal overflow (`clientHeight = scrollHeight = 320`)
+    - controls drawer bottom = `490.6`, top visible sequential slot (`index 9`) top = `626.1`, so opening the drawer no longer covers the stack
+    - full-stack push comparison confirms sequential stack stays `[0..9]` while linked stack continues to accept the same pushed value and the page marks the result as `已分叉`
+  - targeted `L-04 /modules/stack` linked-stack density follow-up (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - linked-stack now switches to compact/dense layouts so `10`-node and `11`-node comparison states both render with `clientHeight = scrollHeight`
+    - prepare-push step keeps the floating incoming node visible while preserving the full existing linked stack
+    - both sequential and linked stacks now show `TOP` / `BOTTOM` pointers during comparison playback
+  - targeted `L-04 /modules/stack` reset/pointer semantics follow-up (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - `Reset` now restores the default teaching demo (`[3, 8, 1] + push 9`) instead of only returning the current config to frame `0`
+    - sequential-stack `top` now points to the next writable slot, and on a full stack the page renders a dedicated `null` slot above the topmost cell with a horizontal `← top` pointer while the lane state remains `full`
+    - linked-stack push now plays as `create s -> s.next = top -> top = s`, with the old `top` pointer staying on the original top node until the final step
+  - targeted `L-03 /modules/linked-list` + `L-04 /modules/stack` docked-layout follow-up (passed locally, 2026-08-09, `feat/p14-backlog-wave`):
+    - compact docked `Controls` / `Step` now behave as one shared top tab strip instead of two unrelated expanders
+    - opening `Controls` now keeps the active panel in a shared top panel area instead of covering the linked-list / stack canvas
+    - `L-03` / `L-04` were moved back onto the viewport-locked adaptive path, removing page scroll while keeping the drawing stage stretched to the remaining page height
+    - `L-04` default `3/10` and full `10/10` sequential-stack states both remain fully visible at `1280x720`
+  - targeted `L-01`~`L-04` floating-panel re-unification follow-up (passed locally, 2026-08-09, `feat/p14-backlog-wave`):
+    - `L-03` / `L-04` no longer use the temporary docked-strip layout and are back on the same floating `Controls` / `Step` interaction as `L-01` / `L-02`
+    - `L-01` / `L-02` keep the widened `840px` floating controls drawer, while `L-03` / `L-04` now use `900px` / `920px` floating controls widths instead of the earlier dock-target sizing
+    - the widened floating `Step` panel is now kept inside the shell on all four pages (`bottom = 688` at `1280x720`) by disabling step-panel auto-avoid/overflow for this linear baseline
+    - all four pages keep `clientHeight = scrollHeight = 720` with no large bottom blank area (`gapBelowTransport = 19`)
   - `npm run check` (passed locally, 2026-07-21, `feat/p14-backlog-wave`; docs links + 94 test files / 262 tests + lint + build)
+  - code-only quality gates for the `L-04` pass (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - `npm test`
+    - `npm run lint`
+    - `npm run build`
+    - note: repo-wide `npm run check` is currently blocked on Windows because `./scripts/check-doc-links.sh` is a shell script and is not directly executable from this worktree's Windows environment
 
 ## 2) What Is Already Done
 
@@ -87,6 +118,12 @@ Use this file as the first thing to read in a new chat/session.
   - aligned these routes to the same pinned-button / movable-panel / stage-first interaction contract and added shared-shell compatibility styling for linked/linear stages
   - fixed `L-04` stack auto-sync timing so visible push/pop intermediate steps are no longer skipped before completion
   - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths across `SR-01` / `L-02` / `L-03` / `L-04` / `L-05`, circular queue mode switching, resize playback progression, linked-list step progression, and stack `Next` progression after the timing fix
+- `P15` acceptance sweep has now aligned the first four linear modules locally:
+  - `L-01` array: compact horizontal controls + centered stage row
+  - `L-02` dynamic array: compact horizontal controls + centered resize stage
+  - `L-03` linked list: compact horizontal controls + corrected `HEAD` label + no drawer overlap
+  - `L-04` stack: compact horizontal controls + `10`-slot sequential stack + side-by-side linked-stack comparison for full-stack push divergence, reset-to-default behavior, next-slot `top` semantics, three-step linked-stack push animation, and no linked-stack internal overflow
+  - follow-up: `L-01`~`L-04` now share the same widened floating `Controls` / fixed in-viewport floating `Step` window pattern instead of splitting between floating and docked panel behaviors
 - P9-M3 cross-module consistency + acceptance closure completed locally:
   - refreshed Playwright acceptance artifacts/report for `/modules` + all 15 implemented routes under `output/playwright/p9m3-*`
   - fixed the final pilot breakout drift so `L-01` and `SR-02` now also use the wide `tree-page` workspace pattern

@@ -254,6 +254,7 @@ export function DynamicArrayPage() {
     (currentSnapshot?.highlights ?? [])
       .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
       .join(' | ') || t('module.s01.none');
+  const stepDescription = getStepDescription(currentSnapshot, t);
   const resizeHintText =
     isResizePhase || isPromotePhase
       ? `${t('module.l02.resizeHint')} ${currentSnapshot?.resizeFrom ?? currentCapacity} -> ${currentSnapshot?.resizeTo ?? currentCapacity}`
@@ -301,18 +302,20 @@ export function DynamicArrayPage() {
 
   return (
     <WorkspaceShell
-      pageClassName="array-page tree-page"
+      pageClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.pageClassName}
       stageAriaLabel={t('module.l02.title')}
       title={t('module.l02.title')}
       description={t('module.l02.body')}
       stageClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.stageClassName}
       stageBodyClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.stageBodyClassName}
       controlsPanelClassName={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelClassName}
-      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
+      stepPanelClassName="workspace-context-sheet-linear"
       defaultControlsPanelSize={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelSize}
       controlsPanelAutoAvoid={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelAutoAvoid}
       controlsPanelOverflowMargin={DYNAMIC_ARRAY_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
       defaultContextPanelSize={DYNAMIC_ARRAY_WORKSPACE_CONFIG.contextPanelSize}
+      stepPanelAutoAvoid={DYNAMIC_ARRAY_WORKSPACE_CONFIG.stepPanelAutoAvoid}
+      stepPanelOverflowMargin={DYNAMIC_ARRAY_WORKSPACE_CONFIG.stepPanelOverflowMargin}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -325,7 +328,7 @@ export function DynamicArrayPage() {
           <span className="tree-workspace-pill">
             {t('module.l01.lengthCapacity')}: {currentLength}/{currentCapacity}
           </span>
-          <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
+          <span className="tree-workspace-pill">{stepDescription}</span>
           {resizeHintText ? <span className="tree-workspace-pill">{resizeHintText}</span> : null}
         </>
       }
@@ -403,6 +406,59 @@ export function DynamicArrayPage() {
             {error || jsonFeedback || ''}
           </p>
 
+          <div className="linear-controls-section">
+            <div className="linear-controls-summary">
+              <div className="linear-controls-card">
+                <span>{t('playback.status')}</span>
+                <strong>{getStatusLabel(status, t)}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('playback.step')}</span>
+                <strong>
+                  {currentStep}/{Math.max(steps.length - 1, 0)}
+                </strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l02.meta.currentCapacity')}</span>
+                <strong>{currentCapacity}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l02.meta.size')}</span>
+                <strong>{currentLength}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l02.input.value')}</span>
+                <strong>{config.operation.value}</strong>
+              </div>
+            </div>
+
+            <div className="linear-controls-note-grid">
+              <p className="linear-controls-note">{stepDescription}</p>
+              <p className="linear-controls-note">
+                {t('module.l02.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
+              </p>
+              {resizeHintText ? <p className="linear-controls-note">{resizeHintText}</p> : null}
+              {currentSnapshot?.action === 'append' ? (
+                <p className="linear-controls-note">
+                  {t('module.l02.appendedItem')}: {currentSnapshot.appendedValue ?? valueInput}
+                </p>
+              ) : null}
+              <p className="linear-controls-note linear-controls-note-wide">
+                {t('module.s01.highlight')}: {highlightSummary}
+              </p>
+              {isCapacityFull ? (
+                <p
+                  className={`linear-controls-note linear-controls-note-wide dynamic-array-capacity-full dynamic-array-status-line${
+                    fullWarningFlash ? ' dynamic-array-capacity-flash' : ''
+                  }`}
+                >
+                  {t('module.l02.fullWarning')}
+                </p>
+              ) : null}
+            </div>
+
+          </div>
+
           {DYNAMIC_ARRAY_WORKSPACE_CONFIG.showJsonControls ? (
             <>
               <label className="tree-workspace-field" htmlFor="dynamic-array-json-input">
@@ -429,77 +485,22 @@ export function DynamicArrayPage() {
         </>
       }
       stepContent={
-        <div className="workspace-panel-scroll">
-          <div className="workspace-panel-copy">
-            <h3>{getStepDescription(currentSnapshot, t)}</h3>
-            <p>
-              {t('module.l02.currentArray')}: [{(currentSnapshot?.arrayState ?? []).join(', ')}]
-            </p>
-            {resizeHintText ? <p>{resizeHintText}</p> : null}
-            {currentSnapshot?.action === 'append' ? (
-              <p>
-                {t('module.l02.appendedItem')}: {currentSnapshot.appendedValue ?? valueInput}
-              </p>
-            ) : null}
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
+        <div className="workspace-panel-scroll workspace-panel-scroll-linear">
+          <div className="workspace-panel-code-only">
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>{t('module.l02.pseudocode')}</h3>
+                <ol>
+                  <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l02.code.line1')}</li>
+                  <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l02.code.line2')}</li>
+                  <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l02.code.line3')}</li>
+                  <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l02.code.line4')}</li>
+                  <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l02.code.line5')}</li>
+                  <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l02.code.line6')}</li>
+                  <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.l02.code.line7')}</li>
+                </ol>
+              </div>
             </div>
-            <div>
-              <dt>{t('playback.step')}</dt>
-              <dd>
-                {currentStep}/{Math.max(steps.length - 1, 0)}
-              </dd>
-            </div>
-            <div>
-              <dt>{t('module.l02.meta.currentCapacity')}</dt>
-              <dd>{currentCapacity}</dd>
-            </div>
-            <div>
-              <dt>{t('module.l02.meta.size')}</dt>
-              <dd>{currentLength}</dd>
-            </div>
-            <div>
-              <dt>{t('module.l02.input.value')}</dt>
-              <dd>{config.operation.value}</dd>
-            </div>
-            <div>
-              <dt>{t('module.s01.highlight')}</dt>
-              <dd>{highlightSummary}</dd>
-            </div>
-          </dl>
-
-          <div className="legend-row">
-            <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-            <span className="legend-item legend-moving">{t('module.l02.highlight.migrating')}</span>
-            <span className="legend-item legend-inserted">{t('module.l02.highlight.appended')}</span>
-          </div>
-
-          <p
-            className={`array-preview${isCapacityFull ? ' dynamic-array-capacity-full' : ''}${
-              fullWarningFlash ? ' dynamic-array-capacity-flash' : ''
-            }`}
-          >
-            {t('module.l02.meta.currentCapacity')}: {currentCapacity} | {t('module.l02.meta.size')}: {currentLength}
-          </p>
-          <p className={isCapacityFull ? 'dynamic-array-capacity-full dynamic-array-status-line' : 'dynamic-array-status-line dynamic-array-status-placeholder'}>
-            {isCapacityFull ? t('module.l02.fullWarning') : '-'}
-          </p>
-
-          <div className="pseudocode-block">
-            <h3>{t('module.l02.pseudocode')}</h3>
-            <ol>
-              <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l02.code.line1')}</li>
-              <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l02.code.line2')}</li>
-              <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l02.code.line3')}</li>
-              <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l02.code.line4')}</li>
-              <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l02.code.line5')}</li>
-              <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l02.code.line6')}</li>
-              <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.l02.code.line7')}</li>
-            </ol>
           </div>
         </div>
       }
@@ -597,5 +598,3 @@ export function DynamicArrayPage() {
     />
   );
 }
-
-
