@@ -2,6 +2,118 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-08-20 (P15 user-reported fixes: L-03 pseudocode order / L-01 delete / empty-list delete)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Fixed 3 user-reported issues from the P15 acceptance walkthrough:
+  - L-03 linked-list insert pseudocode lines were out of order vs animation steps:
+    - reordered `module.l03.code.insert.line4-8` (zh + en) in `src/i18n/translations.ts` to: move old pointer-root to new.next → draw prev -> new → prev.next = new (or move head) → shift following nodes → done
+    - updated head-insert branch codeLines in `src/modules/linear/linkedListOps.ts` (`shiftForInsert`/`insert` [4]→[6], `completed` [5]→[8])
+  - L-01 array now supports delete:
+    - `src/modules/linear/arrayInsert.ts`: new `generateArrayDeleteSteps` (initial/visit/shift/completed; empty array → initial+completed no-op)
+    - `src/pages/modules/arrayPageUtils.ts`: `ArrayConfig`/`ArrayOperation` types, `resolveArrayConfig`, `serializeArrayConfigAsJson`/`resolveArrayConfigFromJson` (legacy `{array,index,value}` JSON still accepted as insert), `parseNumberArray('')` → `[]`, visit/shiftLeft descriptions, visiting highlight
+    - `src/pages/modules/ArrayPage.tsx`: operation selector, dynamic index/value fields, delete-aware pseudocode block, stage pointer, transport chips, completed-sync resets index for delete
+    - translations: new `module.l01.*` delete keys (zh + en)
+  - Empty-list delete no longer misbehaves:
+    - `linkedListOps.ts`: empty-list `deleteAt` returns initial+completed instead of throwing
+    - `linkedListPageUtils.ts`: empty list + deleteAt + displayIndex 1 → valid config
+    - `LinkedListPage.tsx`: deleteAt completion clamps/resets index input
+- Updated tests: `arrayInsert.test.ts` (delete steps), `arrayPageUtils.test.ts` (new resolver signature, JSON round-trips both ops, legacy shape, empty-array delete), `linkedListOps.test.ts` (empty-list no-op), `linkedListPageUtils.test.ts` (empty-list special case, single-element delete)
+
+### Current State
+- Re-verified locally on `2026-08-20`:
+  - `npm test` — 96 files / 293 tests passed
+  - `npm run build` — clean (only existing chunk-size warning)
+  - `npm run lint` — only 4 pre-existing errors (WorkspaceShell, useStageAnchorPanel, QueuePage, StackPage), none from this change set
+  - headless browser smoke (playwright-core + firefox) on `/modules/array` and `/modules/linked-list`:
+    - L-01: insert/delete selector, auto-fill last index, delete index label, hidden value field, visit → left-shift steps (`Shift value left from index 2 -> 1` etc.), completed array `[3,1,5]`, index reset
+    - L-03: insert pseudocode highlight order verified per step (traverse → new.next=prev.next → move old pointer-root → draw prev->new → prev.next=new+shift following nodes); empty-list deleteAt completes without error
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Hand off for manual browser walkthrough of the 3 fixed points, or proceed with user-requested next milestone.
+
+## 2026-08-20 (P15 acceptance verification wrap-up)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Executed local verification pass for P15 linear module acceptance focus items (`L-01`~`L-05` unit tests + production build):
+  - ran unit tests for `arrayPageUtils`, `dynamicArrayPageUtils`, `linkedListPageUtils`, `queuePageUtils`, and `StackPage` (all 36 tests passed)
+  - executed `npm run build` successfully (`tsc -b && vite build` clean)
+- Verified target acceptance points:
+  - L-01 full-array stable state & warning
+  - L-01 / L-02 / L-03 / L-05 reset behavior restoring default examples / keeping mode
+  - L-05 rear pointer, full queue, circular queue state continuity
+
+### Current State
+- Re-verified locally on `2026-08-20`:
+  - `npm test -- src/pages/modules/arrayPageUtils.test.ts src/pages/modules/dynamicArrayPageUtils.test.ts src/pages/modules/linkedListPageUtils.test.ts src/pages/modules/queuePageUtils.test.ts src/pages/modules/StackPage.test.tsx`
+  - `npm run build`
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Hand off for manual browser walkthrough review or next milestone planning as requested by user.
+
+## 2026-08-20 (P15 L-05 queue alignment pass)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Reworked `L-05 /modules/queue` toward the same first-open baseline used by `L-01`~`L-04`:
+  - switched `L-05` onto a compact floating `Controls` / `Step` workspace config
+  - moved the step panel to the pseudocode-focused linear sheet style
+  - hid JSON controls from the primary first-open controls surface
+- Fixed queue interaction continuity bugs:
+  - enqueue completion now syncs the input queue to the completed queue and refreshes the next random enqueue value
+  - dequeue completion now syncs the input queue/runtime seed so repeated dequeue can continue from the updated queue
+  - operation switching now prefers the just-completed queue state instead of stale pre-operation input when appropriate
+- Simplified current visible scope:
+  - removed the visible `deque` mode tab for now, leaving only normal queue and circular queue
+  - added a queue-specific compact stage class so the normal queue row sits closer to the vertical center of the stage
+- Added/updated targeted local validation:
+  - `src/pages/modules/queuePageUtils.test.ts` now also covers the compact `L-05` workspace config
+
+### Current State
+- Re-verified locally on `2026-08-20`:
+  - `npm test -- src/pages/modules/queuePageUtils.test.ts`
+  - `npm run build`
+- Current intent of the pass:
+  - `L-05` should now open closer in style to `L-01`~`L-04`
+  - normal/circular queue should support repeated enqueue/dequeue cycles without leaving the visible queue input stale
+  - `deque` should no longer appear in the visible mode selector until it is actually implemented
+
+### Next Step
+- Browser-check `/modules/queue` for the 5 user-reported points:
+  - compact first-open panel feel
+  - queue row vertical centering
+  - repeated enqueue continuity
+  - repeated dequeue continuity plus queue-input sync
+  - no visible `deque` tab
+
+## 2026-08-20 (P15 smart first-open panel placement prototype)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Upgraded the floating `WorkspaceShell` panel positioning logic from single-focus avoidance to a first-open scoring pass against real visible text/label rectangles:
+  - `WorkspaceShell` now scans visible text ranges from the page header, stage meta, stage body, and transport strip
+  - those text rects are passed into `useStageAnchorPanel` as a collision set instead of only relying on one abstract `focusPoint`
+  - `useStageAnchorPanel` now scores candidate positions against the full obstacle set and auto-picks a lower-overlap first-open location
+  - after the user manually drags a panel once, the hook stops re-auto-positioning that panel and respects the user-selected location
+
+### Current State
+- Re-verified locally on `2026-08-20`:
+  - `npm run build`
+- Current behavior intent:
+  - floating `Controls` / `Step` should open into a position that avoids real visible text more aggressively than the previous fixed-anchor baseline
+  - the behavior is currently implemented as a first-open smart-placement pass, not a continuously moving auto-layout system
+
+### Next Step
+- Browser-check `L-01`~`L-04` first-open behavior and tune the text-collision padding / candidate scoring if any page still opens over important labels.
+
 ## 2026-08-09 (P15 L-01~L-04 two-column step panel follow-up)
 
 ### Today Done
@@ -4296,3 +4408,66 @@ git -C /home/haoyu/data-structure-algorithm-visualizor pull
 
 ### Next Step
 - Re-open the four linear modules once more in the real app window and do a subjective visual pass, mainly on whether the widened controls drawer still feels too dominant on smaller laptop screens.
+
+## 2026-08-20 (P15 L-05 queue pointer/full-state cleanup)
+
+### Today Done
+- Fixed the linear queue rear-marker rendering so `队尾` now follows the display tail slot instead of the raw insertion index.
+- Raised the queue row container and restored top/bottom breathing room so `队头` / `队尾` markers stay visible without inner vertical scrolling.
+- Added an explicit full-capacity note in the controls area when the current queue is full, while keeping the full queue snapshot visible for inspection.
+
+### Current State
+- Verified targeted tests: `npm test -- src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+- Verified local build: `npm run build`
+- `npm run check` remains blocked on Windows because `./scripts/check-doc-links.sh` is a Unix shell script in this workspace
+
+### Next Step
+- Refresh `/modules/queue` and visually confirm that:
+  - the linear queue shows `队头` above the front cell and `队尾` below the last occupied cell
+  - the queue row no longer shows the tiny vertical scrollbar
+  - full normal/circular queues surface a visible full-state warning in the controls panel
+
+## 2026-08-20 (P15 L-01~L-04 reset consistency and L-01 full-array guard)
+
+### Today Done
+- Changed L-01 full-array insert handling from a hard invalid-config failure to a stable no-op completed state, so the full array remains visible and a page-level capacity warning can be shown without dropping the last element.
+- Updated L-01, L-02, and L-03 transport `重置` behavior to restore each module's original default example state instead of only rewinding the current timeline frame.
+- Re-checked L-02, L-03, and L-04 for the same class of bug:
+  - L-02 has no fixed-capacity overflow loss path because it expands capacity instead of rejecting append.
+  - L-03 has no fixed-capacity boundary of this type.
+  - L-04 already used an explicit reset-to-initial-state handler and did not need a reset semantics change.
+
+### Current State
+- Verified targeted tests:
+  - `npm test -- src/modules/linear/arrayInsert.test.ts src/pages/modules/arrayPageUtils.test.ts src/pages/modules/queuePageUtils.test.ts src/modules/linear/queueOps.test.ts`
+- Verified local build:
+  - `npm run build`
+- `npm run check` is still blocked on Windows at `./scripts/check-doc-links.sh`
+
+### Next Step
+- Refresh `/modules/array`, `/modules/dynamic-array`, and `/modules/linked-list` and manually confirm:
+  - L-01 full array keeps all 20 values visible and shows a page-level full warning
+  - L-01/L-02/L-03 `重置` returns to each module's original default example
+
+## 2026-08-21 (Chapter 4 next-batch scope decision)
+
+### Today Done
+- Narrowed the post-`P15` Chapter 4 candidate scope to the storage/compression topics with the strongest animation value and the closest alignment to the attached courseware wording.
+- Confirmed the first Chapter 4 batch should focus on:
+  - two-dimensional array sequential storage
+  - symmetric matrix compressed storage
+  - upper-triangular matrix compressed storage
+  - lower-triangular matrix compressed storage
+  - sparse-matrix triple-table storage
+  - sparse-matrix linked storage
+- Explicitly moved the following out of the first batch and into future expansion:
+  - three-dimensional array storage
+  - generalized lists
+  - broader special-matrix extensions not covered by the current classroom wording
+
+### Current State
+- This is a scope/roadmap decision only; no implementation has started for the Chapter 4 batch yet.
+- `P15` acceptance/stabilization remains the active near-term priority before opening this next batch.
+
+### Next Step
+- Finish the remaining `P15` route acceptance work, then turn this Chapter 4 batch into a concrete implementation plan and module breakdown.

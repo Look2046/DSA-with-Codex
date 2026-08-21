@@ -5,12 +5,11 @@ import { useI18n } from '../../i18n/useI18n';
 import { QUEUE_CAPACITY, type QueueMode as QueueRuntimeMode, type QueueRuntimeSnapshot } from '../../modules/linear/queueOps';
 import { buildQueueTimelineFromInput } from '../../modules/linear/queueTimelineAdapter';
 import {
+  getQueueWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
   resolveQueueConfig,
-  resolveQueueConfigFromJson,
-  serializeQueueConfigAsJson,
   type QueueConfig,
 } from './queuePageUtils';
 import type { HighlightType } from '../../types/animation';
@@ -20,10 +19,43 @@ const DEFAULT_CONFIG: QueueConfig = {
   operation: { type: 'enqueue', value: 9 },
 };
 
-type QueueMode = 'normal' | 'circular' | 'deque';
+type QueueMode = 'normal' | 'circular';
+const QUEUE_WORKSPACE_CONFIG = getQueueWorkspaceConfig();
 
 function createRandomQueueValue(): number {
   return Math.floor(Math.random() * 90) + 10;
+}
+
+function runtimeSeedsEqual(left: QueueRuntimeSnapshot | null, right: QueueRuntimeSnapshot | null): boolean {
+  if (left === right) {
+    return true;
+  }
+  if (!left || !right) {
+    return false;
+  }
+  return (
+    left.frontIndex === right.frontIndex &&
+    left.rearIndex === right.rearIndex &&
+    left.size === right.size &&
+    left.queueState.length === right.queueState.length &&
+    left.bufferState.length === right.bufferState.length &&
+    left.queueState.every((value, index) => value === right.queueState[index]) &&
+    left.bufferState.every((value, index) => value === right.bufferState[index])
+  );
+}
+
+function cloneQueueConfig(config: QueueConfig): QueueConfig {
+  return {
+    queue: [...config.queue],
+    operation:
+      config.operation.type === 'enqueue'
+        ? { type: 'enqueue', value: config.operation.value }
+        : { type: config.operation.type },
+  };
+}
+
+function shouldShowQueueFrontPointer(size: number, frontIndex: number, rearIndex: number, index: number): boolean {
+  return index === frontIndex && (size > 0 || frontIndex === rearIndex);
 }
 
 export function QueuePage() {
@@ -38,9 +70,6 @@ export function QueuePage() {
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
   const [queueConfig, setQueueConfig] = useState<QueueConfig>(DEFAULT_CONFIG);
-  const [jsonInput, setJsonInput] = useState('');
-  const [jsonFeedback, setJsonFeedback] = useState('');
-  const [hasJsonError, setHasJsonError] = useState(false);
   const [runtimeSeed, setRuntimeSeed] = useState<QueueRuntimeSnapshot | null>(null);
   const queueCellsRef = useRef<HTMLDivElement | null>(null);
   const runtimeMode: QueueRuntimeMode = mode === 'circular' ? 'circular' : 'normal';
@@ -56,6 +85,7 @@ export function QueuePage() {
       if (resolved.config) {
         setQueueConfig(resolved.config);
       }
+      return resolved;
     },
     [runtimeMode, t],
   );
@@ -102,7 +132,7 @@ export function QueuePage() {
   }, [setTotalFrames, reset, steps.length]);
 
   useEffect(() => {
-    if (mode === 'circular' || mode === 'deque') {
+    if (mode === 'circular') {
       return;
     }
 
@@ -124,69 +154,66 @@ export function QueuePage() {
     target.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
   }, [currentStep, currentSnapshot, mode]);
 
-  const handleExportJson = useCallback(() => {
-    setJsonInput(serializeQueueConfigAsJson(queueConfig));
-    setHasJsonError(false);
-    setJsonFeedback(t('module.l05.json.exported'));
-  }, [queueConfig, t]);
-
-  const handleImportJson = useCallback(() => {
-    const resolved = resolveQueueConfigFromJson(jsonInput, runtimeMode, t);
-    if (!resolved.config) {
-      setHasJsonError(true);
-      setJsonFeedback(resolved.error);
-      return;
-    }
-
-    const nextQueueInput = resolved.config.queue.join(', ');
-    const nextOperationType = resolved.config.operation.type;
-    const nextValueInput = resolved.config.operation.type === 'enqueue' ? String(resolved.config.operation.value) : '';
-
-    reset();
-    setRuntimeSeed(null);
-    setQueueInput(nextQueueInput);
-    setOperationType(nextOperationType);
-    setValueInput(nextValueInput);
-    recomputeInputState(nextQueueInput, nextOperationType, nextValueInput);
-    setHasJsonError(false);
-    setJsonFeedback(t('module.l05.json.imported'));
-  }, [jsonInput, recomputeInputState, reset, runtimeMode, t]);
-
-  const handleNextStep = useCallback(() => {
-    if (status === 'completed' && operationType !== 'front') {
-      const nextQueueInput = completedQueueText;
-      const nextValueInput = operationType === 'enqueue' ? String(createRandomQueueValue()) : valueInput;
-      const resolved = resolveQueueConfig(nextQueueInput, operationType, nextValueInput, runtimeMode, t);
-      if (!resolved.config) {
-        setQueueInput(nextQueueInput);
-        setRuntimeSeed(null);
-        setError(resolved.error);
-        setHasValidConfig(false);
+  const syncToCompletedQueue = useCallback(
+    (nextOperationType: QueueConfig['operation']['type'], nextValue = valueInput) => {
+      if (!completedRuntimeSeed) {
         return;
       }
 
-      setQueueInput(nextQueueInput);
-      if (operationType === 'enqueue') {
-        setValueInput(nextValueInput);
-      }
-      setRuntimeSeed(completedRuntimeSeed);
-      setError(resolved.error);
-      setHasValidConfig(true);
-      setQueueConfig(resolved.config);
+      const nextQueueInput = completedQueueText;
       reset();
-      window.setTimeout(() => {
-        next();
-      }, 0);
+      setQueueInput(nextQueueInput);
+      setRuntimeSeed(completedRuntimeSeed);
+      setOperationType(nextOperationType);
+      if (nextOperationType === 'enqueue') {
+        setValueInput(nextValue);
+      } else {
+        setValueInput('');
+      }
+      recomputeInputState(nextQueueInput, nextOperationType, nextOperationType === 'enqueue' ? nextValue : '');
+    },
+    [completedQueueText, completedRuntimeSeed, recomputeInputState, reset, valueInput],
+  );
+
+  useEffect(() => {
+    if (!hasValidConfig || steps.length === 0 || status !== 'completed' || currentSnapshot?.action !== 'completed' || operationType === 'front') {
       return;
     }
-    next();
-  }, [completedQueueText, completedRuntimeSeed, next, operationType, reset, runtimeMode, status, t, valueInput]);
+
+    const queueChanged = queueInput !== completedQueueText || !runtimeSeedsEqual(runtimeSeed, completedRuntimeSeed);
+    if (!queueChanged) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (operationType === 'enqueue') {
+        syncToCompletedQueue('enqueue', String(createRandomQueueValue()));
+        return;
+      }
+
+      syncToCompletedQueue(operationType);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    completedQueueText,
+    completedRuntimeSeed,
+    currentSnapshot?.action,
+    hasValidConfig,
+    operationType,
+    queueInput,
+    runtimeSeed,
+    status,
+    steps.length,
+    syncToCompletedQueue,
+  ]);
 
   const handleModeSwitch = useCallback(
     (nextMode: QueueMode) => {
       const nextRuntimeMode: QueueRuntimeMode = nextMode === 'circular' ? 'circular' : 'normal';
-      const nextQueueInput = status === 'completed' && operationType !== 'front' ? completedQueueText : queueInput;
-      const nextSeed = status === 'completed' ? completedRuntimeSeed : runtimeSeed;
+      const shouldUseCompletedState = status === 'completed' && currentSnapshot?.action === 'completed';
+      const nextQueueInput = shouldUseCompletedState ? completedQueueText : queueInput;
+      const nextSeed = shouldUseCompletedState ? completedRuntimeSeed : runtimeSeed;
       const resolved = resolveQueueConfig(nextQueueInput, operationType, valueInput, nextRuntimeMode, t);
       reset();
       setMode(nextMode);
@@ -198,7 +225,7 @@ export function QueuePage() {
         setQueueConfig(resolved.config);
       }
     },
-    [completedQueueText, completedRuntimeSeed, operationType, queueInput, reset, runtimeSeed, status, t, valueInput],
+    [completedQueueText, completedRuntimeSeed, currentSnapshot?.action, operationType, queueInput, reset, runtimeSeed, status, t, valueInput],
   );
 
   const highlightMap = useMemo(() => {
@@ -216,18 +243,21 @@ export function QueuePage() {
   const currentLength = currentSnapshot?.size ?? 0;
   const frontIndex = currentSnapshot?.frontIndex ?? 0;
   const rearIndex = currentSnapshot?.rearIndex ?? 0;
+  const isNormalQueueTailAtEnd = mode === 'normal' && rearIndex >= QUEUE_CAPACITY;
+  const isNormalQueueBlocked = mode === 'normal' && rearIndex >= QUEUE_CAPACITY;
+  const isQueueFull = mode === 'circular' ? currentLength >= QUEUE_CAPACITY - 1 : isNormalQueueBlocked;
+  const fullWarning =
+    isQueueFull ? t(mode === 'circular' ? 'module.l05.error.circularFull' : 'module.l05.error.enqueueFull') : '';
   const isWrapped = currentLength > 0 && frontIndex > rearIndex;
   const modeTabs: Array<{ key: QueueMode; labelKey: Parameters<typeof t>[0] }> = [
     { key: 'normal', labelKey: 'module.l05.tab.normal' },
     { key: 'circular', labelKey: 'module.l05.tab.circular' },
-    { key: 'deque', labelKey: 'module.l05.tab.deque' },
   ];
-  const isDequeMode = mode === 'deque';
-  const isPlayableConfig = hasValidConfig && runtimeError.length === 0 && !isDequeMode;
+  const isPlayableConfig = hasValidConfig && runtimeError.length === 0;
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
   const currentModeLabel = t(modeTabs.find((tab) => tab.key === mode)?.labelKey ?? 'module.l05.tab.normal');
   const focusPoint = useMemo(() => {
-    if (isDequeMode || currentLength === 0) {
+    if (currentLength === 0) {
       return null;
     }
     const indices = new Set<number>();
@@ -235,7 +265,7 @@ export function QueuePage() {
       indices.add(frontIndex);
     }
     if (typeof rearIndex === 'number') {
-      indices.add(rearIndex);
+      indices.add(isNormalQueueTailAtEnd ? QUEUE_CAPACITY - 0.35 : rearIndex);
     }
     currentSnapshot?.highlights.forEach((item) => indices.add(item.index));
     if (indices.size === 0) {
@@ -246,80 +276,191 @@ export function QueuePage() {
       x: ((averageIndex + 0.5) / QUEUE_CAPACITY) * 100,
       y: mode === 'circular' ? 52 : 44,
     };
-  }, [currentLength, currentSnapshot?.highlights, frontIndex, isDequeMode, mode, rearIndex]);
+  }, [currentLength, currentSnapshot?.highlights, frontIndex, isNormalQueueTailAtEnd, mode, rearIndex]);
   const highlightSummary =
     (currentSnapshot?.highlights ?? [])
       .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
       .join(' | ') || t('module.s01.none');
-  const pendingText = t('module.l05.deque.pending');
   const operationLabel =
     operationType === 'enqueue'
       ? t('module.l05.operation.enqueue')
       : operationType === 'dequeue'
         ? t('module.l05.operation.dequeue')
         : t('module.l05.operation.front');
+  const stepDescription = getStepDescription(currentSnapshot, t);
+  const queueState = currentSnapshot?.queueState ?? [];
+  const bufferState = currentSnapshot?.bufferState ?? [];
+  const compactBufferState = useMemo(() => bufferState.filter((value): value is number => value !== null), [bufferState]);
+  const showBufferNote =
+    mode === 'circular' ||
+    frontIndex !== 0 ||
+    rearIndex !== currentLength ||
+    compactBufferState.length !== queueState.length ||
+    compactBufferState.some((value, index) => value !== queueState[index]);
+
+  const handleResetOperation = useCallback(() => {
+    const defaultQueueInput = DEFAULT_CONFIG.queue.join(', ');
+    const defaultValueInput = String(DEFAULT_CONFIG.operation.type === 'enqueue' ? DEFAULT_CONFIG.operation.value : '');
+    const nextMode = mode;
+    const nextRuntimeMode: QueueRuntimeMode = nextMode === 'circular' ? 'circular' : 'normal';
+    const resolved = resolveQueueConfig(
+      defaultQueueInput,
+      DEFAULT_CONFIG.operation.type,
+      defaultValueInput,
+      nextRuntimeMode,
+      t,
+    );
+    reset();
+    setMode(nextMode);
+    setQueueInput(defaultQueueInput);
+    setOperationType(DEFAULT_CONFIG.operation.type);
+    setValueInput(defaultValueInput);
+    setRuntimeSeed(null);
+    setError(resolved.error);
+    setHasValidConfig(resolved.config !== null);
+    if (resolved.config) {
+      setQueueConfig(resolved.config);
+    } else {
+      setQueueConfig(cloneQueueConfig(DEFAULT_CONFIG));
+    }
+  }, [mode, reset, t]);
+
+  const stageVisualization = mode === 'circular' ? (
+    <div className="queue-ring" aria-label="queue-ring">
+      {Array.from({ length: QUEUE_CAPACITY }, (_, index) => {
+        const angle = (index / QUEUE_CAPACITY) * Math.PI * 2 - Math.PI / 2;
+        const radius = 160;
+        const centerX = 210;
+        const centerY = 200;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        const ux = Math.cos(angle);
+        const uy = Math.sin(angle);
+        const innerOffset = 34;
+        const outerOffset = 26;
+        const value = currentSnapshot?.bufferState[index] ?? null;
+        const highlight = highlightMap.get(index) ?? 'default';
+        const isFront = shouldShowQueueFrontPointer(currentLength, frontIndex, rearIndex, index);
+        const isTail = index === rearIndex;
+        const isUnused = value === null;
+
+        return (
+          <div
+            key={`ring-${index}-${String(value)}`}
+            data-queue-index={index}
+            className={`queue-ring-slot bar-${highlight}${isUnused ? ' queue-ring-slot-unused' : ''}`}
+            style={{ left: `${x}px`, top: `${y}px` }}
+          >
+            {isFront ? (
+              <span
+                className="queue-ring-pointer queue-ring-pointer-front"
+                style={{ left: `calc(50% + ${ux * outerOffset}px)`, top: `calc(50% + ${uy * outerOffset}px)` }}
+              >
+                F
+              </span>
+            ) : null}
+            {isTail ? (
+              <span
+                className="queue-ring-pointer queue-ring-pointer-rear"
+                style={{ left: `calc(50% - ${ux * innerOffset}px)`, top: `calc(50% - ${uy * innerOffset}px)` }}
+              >
+                R
+              </span>
+            ) : null}
+            <span className="array-cell-index">{index}</span>
+            <strong>{value ?? '∅'}</strong>
+          </div>
+        );
+      })}
+    </div>
+  ) : (
+    <div ref={queueCellsRef} className="array-cells queue-cells" aria-label="queue-cells">
+      {Array.from({ length: QUEUE_CAPACITY }, (_, index) => {
+        const value = currentSnapshot?.bufferState[index] ?? null;
+        const highlight = highlightMap.get(index) ?? 'default';
+        const isFront = shouldShowQueueFrontPointer(currentLength, frontIndex, rearIndex, index);
+        const isTail = index === rearIndex;
+        const isUnused = value === null;
+
+        return (
+          <div
+            key={`${index}-${String(value)}`}
+            data-queue-index={index}
+            className={`array-cell bar-${highlight}${isUnused ? ' array-cell-unused' : ''}`}
+          >
+            {isFront ? <span className="queue-front-pointer">{t('module.l05.front')}</span> : null}
+            {isTail ? <span className="queue-rear-pointer">{t('module.l05.rear')}</span> : null}
+            <span className="array-cell-index">{index}</span>
+            <strong>{value ?? '∅'}</strong>
+          </div>
+        );
+      })}
+      {isNormalQueueTailAtEnd ? (
+        <div className="queue-tail-endcap">
+          {shouldShowQueueFrontPointer(currentLength, frontIndex, rearIndex, QUEUE_CAPACITY) ? (
+            <span className="queue-front-pointer queue-front-pointer-end">{t('module.l05.front')}</span>
+          ) : null}
+          <span className="queue-rear-pointer queue-rear-pointer-end">{t('module.l05.rear')}</span>
+          <div className="array-cell array-cell-empty array-cell-unused queue-tail-endcap-cell">
+            <strong>∅</strong>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 
   return (
     <WorkspaceShell
-      pageClassName="array-page tree-page"
+      pageClassName={QUEUE_WORKSPACE_CONFIG.pageClassName}
       stageAriaLabel={t('module.l05.title')}
       title={t('module.l05.title')}
       description={t('module.l05.body')}
-      stageClassName="workspace-stage-array"
-      stageBodyClassName="workspace-stage-body-array"
-      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
-      stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 344, height: 640 }}
-      defaultContextPanelSize={{ width: 332, height: 560 }}
+      stageClassName={QUEUE_WORKSPACE_CONFIG.stageClassName}
+      stageBodyClassName={QUEUE_WORKSPACE_CONFIG.stageBodyClassName}
+      controlsPanelClassName={QUEUE_WORKSPACE_CONFIG.controlsPanelClassName}
+      stepPanelClassName="workspace-context-sheet-linear"
+      defaultControlsPanelSize={QUEUE_WORKSPACE_CONFIG.controlsPanelSize}
+      controlsPanelAutoAvoid={QUEUE_WORKSPACE_CONFIG.controlsPanelAutoAvoid}
+      controlsPanelOverflowMargin={QUEUE_WORKSPACE_CONFIG.controlsPanelOverflowMargin}
+      defaultContextPanelSize={QUEUE_WORKSPACE_CONFIG.contextPanelSize}
+      stepPanelAutoAvoid={QUEUE_WORKSPACE_CONFIG.stepPanelAutoAvoid}
+      stepPanelOverflowMargin={QUEUE_WORKSPACE_CONFIG.stepPanelOverflowMargin}
       focusPoint={focusPoint}
       stageMeta={
-        isDequeMode ? (
-          <>
-            <span className="tree-workspace-pill tree-workspace-pill-active">{currentModeLabel}</span>
-            <span className="tree-workspace-pill">{pendingText}</span>
-          </>
-        ) : (
-          <>
-            <span className="tree-workspace-pill tree-workspace-pill-active">
-              {t('playback.status')}: {getStatusLabel(status, t)}
-            </span>
-            <span className="tree-workspace-pill">
-              {t('playback.step')}: {currentStep}/{Math.max(steps.length - 1, 0)}
-            </span>
-            <span className="tree-workspace-pill">{currentModeLabel}</span>
-            <span className="tree-workspace-pill">
-              {t('module.l01.lengthCapacity')}: {currentLength}/{QUEUE_CAPACITY}
-            </span>
-            <span className="tree-workspace-pill">{getStepDescription(currentSnapshot, t)}</span>
-          </>
-        )
+        <>
+          <span className="tree-workspace-pill tree-workspace-pill-active">
+            {t('playback.status')}: {getStatusLabel(status, t)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('playback.step')}: {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+          <span className="tree-workspace-pill">{currentModeLabel}</span>
+          <span className="tree-workspace-pill">
+            {t('module.l01.lengthCapacity')}: {currentLength}/{QUEUE_CAPACITY}
+          </span>
+          <span className="tree-workspace-pill">{stepDescription}</span>
+        </>
       }
       controlsContent={
         <>
-          <div className="tree-workspace-field">
-            <span>{t('module.l05.input.operation')}</span>
-            <div className="tree-workspace-toggle-row">
-              {modeTabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`tree-workspace-toggle${mode === tab.key ? ' tree-workspace-toggle-active' : ''}`}
-                  onClick={() => handleModeSwitch(tab.key)}
-                >
-                  {t(tab.labelKey)}
-                </button>
-              ))}
+          <div className="array-controls-grid queue-controls-grid">
+            <div className="tree-workspace-field array-controls-field queue-controls-field-mode">
+              <span>{t('module.l05.input.operation')}</span>
+              <div className="tree-workspace-toggle-row">
+                {modeTabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`tree-workspace-toggle${mode === tab.key ? ' tree-workspace-toggle-active' : ''}`}
+                    onClick={() => handleModeSwitch(tab.key)}
+                  >
+                    {t(tab.labelKey)}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {isDequeMode ? (
-            <div className="tree-workspace-sample-block">
-              <span>{t('module.l05.tab.deque')}</span>
-              <code>{pendingText}</code>
-            </div>
-          ) : (
-            <>
-              <label className="tree-workspace-field" htmlFor="queue-input">
+              <label className="tree-workspace-field array-controls-field queue-controls-field-queue" htmlFor="queue-input">
                 <span>{t('module.l05.input.queue')}</span>
                 <input
                   id="queue-input"
@@ -334,17 +475,18 @@ export function QueuePage() {
                   }}
                   placeholder="3, 8, 1"
                 />
-              </label>
+            </label>
 
-              <label className="tree-workspace-field" htmlFor="queue-operation">
+            <label className="tree-workspace-field array-controls-field" htmlFor="queue-operation">
                 <span>{t('module.l05.input.operation')}</span>
                 <select
                   id="queue-operation"
                   value={operationType}
                   onChange={(event) => {
                     const nextValue = event.target.value as QueueConfig['operation']['type'];
-                    const nextQueueInput = status === 'completed' && operationType !== 'front' ? completedQueueText : queueInput;
-                    const nextSeed = status === 'completed' ? completedRuntimeSeed : runtimeSeed;
+                    const shouldUseCompletedState = status === 'completed' && currentSnapshot?.action === 'completed';
+                    const nextQueueInput = shouldUseCompletedState ? completedQueueText : queueInput;
+                    const nextSeed = shouldUseCompletedState ? completedRuntimeSeed : runtimeSeed;
                     reset();
                     setOperationType(nextValue);
                     setQueueInput(nextQueueInput);
@@ -362,10 +504,10 @@ export function QueuePage() {
                   <option value="dequeue">{t('module.l05.operation.dequeue')}</option>
                   <option value="front">{t('module.l05.operation.front')}</option>
                 </select>
-              </label>
+            </label>
 
-              {operationType === 'enqueue' ? (
-                <label className="tree-workspace-field" htmlFor="queue-value">
+            {operationType === 'enqueue' ? (
+              <label className="tree-workspace-field array-controls-field" htmlFor="queue-value">
                   <span>{t('module.l05.input.value')}</span>
                   <input
                     id="queue-value"
@@ -379,10 +521,10 @@ export function QueuePage() {
                       recomputeInputState(queueInput, operationType, nextValue);
                     }}
                   />
-                </label>
-              ) : null}
+              </label>
+            ) : null}
 
-              <div className="tree-workspace-field">
+            <div className="tree-workspace-field array-controls-field array-controls-field-speed">
                 <span>{t('module.s01.speed')}</span>
                 <div className="tree-workspace-toggle-row">
                   {speedOptions.map((option) => (
@@ -396,94 +538,67 @@ export function QueuePage() {
                     </button>
                   ))}
                 </div>
+            </div>
+          </div>
+
+          <p className={`workspace-inline-feedback array-controls-feedback${effectiveError ? ' form-error' : ''}`} aria-live="polite">
+            {effectiveError || ''}
+          </p>
+
+          <div className="linear-controls-section">
+            <div className="linear-controls-summary">
+              <div className="linear-controls-card">
+                <span>{t('playback.status')}</span>
+                <strong>{getStatusLabel(status, t)}</strong>
               </div>
+              <div className="linear-controls-card">
+                <span>{t('playback.step')}</span>
+                <strong>
+                  {currentStep}/{Math.max(steps.length - 1, 0)}
+                </strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l05.input.operation')}</span>
+                <strong>{operationLabel}</strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{currentModeLabel}</span>
+                <strong>
+                  F={frontIndex} / R={rearIndex}
+                </strong>
+              </div>
+              <div className="linear-controls-card">
+                <span>{t('module.l01.lengthCapacity')}</span>
+                <strong>
+                  {currentLength}/{QUEUE_CAPACITY}
+                </strong>
+              </div>
+            </div>
 
-              <label className="tree-workspace-field" htmlFor="queue-json-input">
-                <span>{t('module.l05.json.label')}</span>
-                <textarea
-                  id="queue-json-input"
-                  value={jsonInput}
-                  onChange={(event) => setJsonInput(event.target.value)}
-                  rows={6}
-                  placeholder={t('module.l05.json.placeholder')}
-                />
-              </label>
-
-              {effectiveError ? <p className="form-error workspace-inline-feedback">{effectiveError}</p> : null}
-              {jsonFeedback ? (
-                <p className={`${hasJsonError ? 'form-error' : 'array-preview'} workspace-inline-feedback`}>{jsonFeedback}</p>
+            <div className="linear-controls-note-grid">
+              <p className="linear-controls-note">{stepDescription}</p>
+              <p className="linear-controls-note">
+                {t('module.l05.currentQueue')}: [{queueState.join(', ')}]
+              </p>
+              {showBufferNote ? <p className="linear-controls-note">BUFFER: [{bufferState.map((value) => (value ?? '∅')).join(', ')}]</p> : null}
+              <p className="linear-controls-note">
+                {currentModeLabel}: F={frontIndex} / R={rearIndex}
+              </p>
+              {mode === 'circular' ? (
+                <p className="linear-controls-note">{isWrapped ? t('module.l05.circular.wrapped') : t('module.l05.circular.tip')}</p>
               ) : null}
-
-              <div className="tree-workspace-drawer-actions">
-                <button type="button" className="tree-workspace-ghost-button" onClick={handleExportJson}>
-                  {t('module.l05.json.export')}
-                </button>
-                <button type="button" className="tree-workspace-ghost-button" onClick={handleImportJson}>
-                  {t('module.l05.json.import')}
-                </button>
-              </div>
-            </>
-          )}
+              <p className="linear-controls-note linear-controls-note-wide">
+                {t('module.s01.highlight')}: {highlightSummary}
+              </p>
+            </div>
+          </div>
         </>
       }
       stepContent={
-        <div className="workspace-panel-scroll">
-          {isDequeMode ? (
-            <div className="workspace-panel-copy">
-              <h3>{currentModeLabel}</h3>
-              <p>{pendingText}</p>
-            </div>
-          ) : (
-            <>
-              <div className="workspace-panel-copy">
-                <h3>{getStepDescription(currentSnapshot, t)}</h3>
-                <p>
-                  {t('module.l05.currentQueue')}: [{(currentSnapshot?.queueState ?? []).join(', ')}]
-                </p>
-                <p>
-                  {t('module.l01.lengthCapacity')}: {currentLength}/{QUEUE_CAPACITY} | FRONT={frontIndex} | REAR={rearIndex}
-                </p>
-              </div>
-
-              <dl className="tree-workspace-kv">
-                <div>
-                  <dt>{t('playback.status')}</dt>
-                  <dd>{getStatusLabel(status, t)}</dd>
-                </div>
-                <div>
-                  <dt>{t('playback.step')}</dt>
-                  <dd>
-                    {currentStep}/{Math.max(steps.length - 1, 0)}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t('module.l05.input.operation')}</dt>
-                  <dd>{operationLabel}</dd>
-                </div>
-                <div>
-                  <dt>{currentModeLabel}</dt>
-                  <dd>
-                    F={frontIndex} / R={rearIndex}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t('module.s01.highlight')}</dt>
-                  <dd>{highlightSummary}</dd>
-                </div>
-              </dl>
-
-              <div className="legend-row">
-                <span className="legend-item legend-default">{t('module.s01.legend.default')}</span>
-                <span className="legend-item legend-inserted">{t('module.l05.highlight.enqueued')}</span>
-                <span className="legend-item legend-moving">{t('module.l05.highlight.dequeued')}</span>
-                <span className="legend-item legend-matched">{t('module.l05.highlight.front')}</span>
-              </div>
-
-              <p className={mode === 'circular' ? 'array-preview' : 'array-preview module-status-placeholder'}>
-                {mode === 'circular' ? (isWrapped ? t('module.l05.circular.wrapped') : t('module.l05.circular.tip')) : '-'}
-              </p>
-
-              <div className="pseudocode-block">
+        <div className="workspace-panel-scroll workspace-panel-scroll-linear">
+          <div className="workspace-panel-code-only">
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
                 <h3>{t('module.l05.pseudocode')}</h3>
                 <ol>
                   <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l05.code.line1')}</li>
@@ -494,85 +609,19 @@ export function QueuePage() {
                   <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l05.code.line6')}</li>
                 </ol>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       }
       stageContent={
-        isDequeMode ? (
-          <div className="stack-empty">{pendingText}</div>
-        ) : mode === 'circular' ? (
-          <div className="queue-ring" aria-label="queue-ring">
-            {Array.from({ length: QUEUE_CAPACITY }, (_, index) => {
-              const angle = (index / QUEUE_CAPACITY) * Math.PI * 2 - Math.PI / 2;
-              const radius = 160;
-              const centerX = 210;
-              const centerY = 200;
-              const x = centerX + Math.cos(angle) * radius;
-              const y = centerY + Math.sin(angle) * radius;
-              const ux = Math.cos(angle);
-              const uy = Math.sin(angle);
-              const innerOffset = 34;
-              const outerOffset = 26;
-              const value = currentSnapshot?.bufferState[index] ?? null;
-              const highlight = highlightMap.get(index) ?? 'default';
-              const isFront = index === frontIndex;
-              const isTail = index === rearIndex;
-              const isUnused = value === null;
-
-              return (
-                <div
-                  key={`ring-${index}-${String(value)}`}
-                  data-queue-index={index}
-                  className={`queue-ring-slot bar-${highlight}${isUnused ? ' queue-ring-slot-unused' : ''}`}
-                  style={{ left: `${x}px`, top: `${y}px` }}
-                >
-                  {isFront ? (
-                    <span
-                      className="queue-ring-pointer queue-ring-pointer-front"
-                      style={{ left: `calc(50% + ${ux * outerOffset}px)`, top: `calc(50% + ${uy * outerOffset}px)` }}
-                    >
-                      F
-                    </span>
-                  ) : null}
-                  {isTail ? (
-                    <span
-                      className="queue-ring-pointer queue-ring-pointer-rear"
-                      style={{ left: `calc(50% - ${ux * innerOffset}px)`, top: `calc(50% - ${uy * innerOffset}px)` }}
-                    >
-                      R
-                    </span>
-                  ) : null}
-                  <span className="array-cell-index">{index}</span>
-                  <strong>{value ?? '∅'}</strong>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div ref={queueCellsRef} className="array-cells queue-cells" aria-label="queue-cells">
-            {Array.from({ length: QUEUE_CAPACITY }, (_, index) => {
-              const value = currentSnapshot?.bufferState[index] ?? null;
-              const highlight = highlightMap.get(index) ?? 'default';
-              const isFront = index === frontIndex;
-              const isTail = index === rearIndex;
-              const isUnused = value === null;
-
-              return (
-                <div
-                  key={`${index}-${String(value)}`}
-                  data-queue-index={index}
-                  className={`array-cell bar-${highlight}${isUnused ? ' array-cell-unused' : ''}`}
-                >
-                  {isFront ? <span className="array-insert-pointer">{t('module.l05.front')}</span> : null}
-                  {isTail ? <span className="queue-tail-pointer">{t('module.l05.rear')}</span> : null}
-                  <span className="array-cell-index">{index}</span>
-                  <strong>{value ?? '∅'}</strong>
-                </div>
-              );
-            })}
-          </div>
-        )
+        <div className="queue-stage-layout">
+          {fullWarning ? (
+            <p className="queue-stage-warning dynamic-array-capacity-full" aria-live="polite">
+              {fullWarning}
+            </p>
+          ) : null}
+          {stageVisualization}
+        </div>
       }
       transportLeft={
         <>
@@ -595,7 +644,7 @@ export function QueuePage() {
           <button
             type="button"
             className="tree-workspace-transport-btn"
-            onClick={handleNextStep}
+            onClick={next}
             disabled={!isPlayableConfig || isAtLastFrame}
           >
             {t('playback.next')}
@@ -603,7 +652,7 @@ export function QueuePage() {
           <button
             type="button"
             className="tree-workspace-transport-btn"
-            onClick={reset}
+            onClick={handleResetOperation}
             disabled={!isPlayableConfig || steps.length === 0}
           >
             {t('playback.reset')}
@@ -617,23 +666,19 @@ export function QueuePage() {
             />
           </div>
           <span className="tree-workspace-transport-step">
-            {isDequeMode ? '-' : `${currentStep}/${Math.max(steps.length - 1, 0)}`}
+            {currentStep}/{Math.max(steps.length - 1, 0)}
           </span>
         </>
       }
       transportRight={
-        isDequeMode ? (
-          <span className="tree-workspace-transport-empty">{pendingText}</span>
-        ) : (
-          <>
-            <span className="tree-workspace-transport-chip">{currentModeLabel}</span>
-            <span className="tree-workspace-transport-chip">F:{frontIndex}</span>
-            <span className="tree-workspace-transport-chip">R:{rearIndex}</span>
-            <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
-              {currentLength}/{QUEUE_CAPACITY}
-            </span>
-          </>
-        )
+        <>
+          <span className="tree-workspace-transport-chip">{currentModeLabel}</span>
+          <span className="tree-workspace-transport-chip">F:{frontIndex}</span>
+          <span className="tree-workspace-transport-chip">R:{rearIndex}</span>
+          <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
+            {currentLength}/{QUEUE_CAPACITY}
+          </span>
+        </>
       }
     />
   );

@@ -45,7 +45,7 @@ function getQueueMaxSize(mode: QueueMode): number {
   return mode === 'circular' ? QUEUE_CIRCULAR_MAX_SIZE : QUEUE_CAPACITY;
 }
 
-function createRuntime(input: number[]): QueueRuntime {
+function createRuntime(input: number[], mode: QueueMode): QueueRuntime {
   const bufferState: Array<number | null> = Array.from({ length: QUEUE_CAPACITY }, () => null);
   input.forEach((value, index) => {
     bufferState[index] = value;
@@ -55,7 +55,7 @@ function createRuntime(input: number[]): QueueRuntime {
     queueState: [...input],
     bufferState,
     frontIndex: input.length > 0 ? 0 : 0,
-    rearIndex: input.length % QUEUE_CAPACITY,
+    rearIndex: mode === 'circular' ? input.length % QUEUE_CAPACITY : input.length,
     size: input.length,
   };
 }
@@ -66,6 +66,12 @@ function createRuntimeFromSnapshot(snapshot: QueueRuntimeSnapshot): QueueRuntime
   }
   if (snapshot.size < 0 || snapshot.size > QUEUE_CAPACITY) {
     throw new RangeError(`Queue size must be within [0, ${QUEUE_CAPACITY}]`);
+  }
+  if (snapshot.frontIndex < 0 || snapshot.frontIndex > QUEUE_CAPACITY) {
+    throw new RangeError(`Queue front index must be within [0, ${QUEUE_CAPACITY}]`);
+  }
+  if (snapshot.rearIndex < 0 || snapshot.rearIndex > QUEUE_CAPACITY) {
+    throw new RangeError(`Queue rear index must be within [0, ${QUEUE_CAPACITY}]`);
   }
   return {
     queueState: [...snapshot.queueState],
@@ -93,6 +99,10 @@ function frontRearIndices(runtime: QueueRuntime): number[] {
     return [runtime.frontIndex];
   }
   return [runtime.frontIndex, runtime.rearIndex];
+}
+
+function isQueueFull(runtime: QueueRuntime, mode: QueueMode): boolean {
+  return mode === 'circular' ? runtime.size >= QUEUE_CIRCULAR_MAX_SIZE : runtime.rearIndex >= QUEUE_CAPACITY;
 }
 
 function snapshot(
@@ -125,7 +135,7 @@ export function generateQueueSteps(
 ): QueueStep[] {
   assertQueueRange(input);
 
-  const runtime = runtimeSeed ? createRuntimeFromSnapshot(runtimeSeed) : createRuntime(input);
+  const runtime = runtimeSeed ? createRuntimeFromSnapshot(runtimeSeed) : createRuntime(input, mode);
   const steps: QueueStep[] = [];
   const maxSize = getQueueMaxSize(mode);
   if (runtime.size > maxSize) {
@@ -135,8 +145,17 @@ export function generateQueueSteps(
   steps.push(snapshot(runtime, 'initial', [1], []));
 
   if (operation.type === 'enqueue') {
-    if (runtime.size >= maxSize) {
-      throw new RangeError(mode === 'circular' ? 'Enqueue operation on full circular queue' : 'Enqueue operation on full queue');
+    if (isQueueFull(runtime, mode)) {
+      steps.push(
+        snapshot(
+          runtime,
+          'completed',
+          [6],
+          occupiedIndices(runtime).map((index) => ({ index, type: 'default' as const })),
+          { frontValue: runtime.queueState[0] },
+        ),
+      );
+      return steps;
     }
 
     const insertedIndex = runtime.rearIndex;
@@ -144,7 +163,7 @@ export function generateQueueSteps(
     if (runtime.size === 0) {
       runtime.frontIndex = insertedIndex;
     }
-    runtime.rearIndex = (runtime.rearIndex + 1) % QUEUE_CAPACITY;
+    runtime.rearIndex = mode === 'circular' ? (runtime.rearIndex + 1) % QUEUE_CAPACITY : runtime.rearIndex + 1;
     runtime.size += 1;
     runtime.queueState.push(operation.value);
 
@@ -167,10 +186,12 @@ export function generateQueueSteps(
     runtime.size -= 1;
 
     if (runtime.size === 0) {
-      runtime.frontIndex = (removedIndex + 1) % QUEUE_CAPACITY;
-      runtime.rearIndex = runtime.frontIndex;
+      runtime.frontIndex = mode === 'circular' ? (removedIndex + 1) % QUEUE_CAPACITY : removedIndex + 1;
+      if (mode === 'circular') {
+        runtime.rearIndex = runtime.frontIndex;
+      }
     } else {
-      runtime.frontIndex = (removedIndex + 1) % QUEUE_CAPACITY;
+      runtime.frontIndex = mode === 'circular' ? (removedIndex + 1) % QUEUE_CAPACITY : removedIndex + 1;
     }
 
     const dequeueHighlights = runtime.size > 0 ? [{ index: runtime.frontIndex, type: 'moving' as const }] : [];

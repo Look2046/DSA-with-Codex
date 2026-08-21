@@ -18,8 +18,28 @@ Track actionable tasks here. Keep tasks small and testable.
 - [x] Re-unify `L-01`~`L-04` on one floating `Controls` / `Step` interaction baseline
   - Done: `L-03` / `L-04` no longer use the temporary docked strip, `L-01`~`L-04` now all use widened floating controls, and the floating `Step` panel stays inside `1280x720` on all four pages.
 
-- [ ] Continue route-by-route acceptance from the next user-reported module issue
-  - Candidate focus: `L-05+` linear modules or cross-cutting blockers (`m0-scaffold-tmp` titles, router warning storm, Windows docs-check gap).
+- [x] Continue route-by-route acceptance from the next user-reported module issue
+  - Done: linear modules (`L-01`~`L-05`) verification pass completed successfully (all 36 unit tests passed, build clean).
+  - Cross-cutting backlog still includes: `m0-scaffold-tmp` titles, router warning storm, Windows docs-check gap.
+
+- [x] Fix user-reported P15 issues: L-03 insert pseudocode order / L-01 array delete / empty-list delete
+  - Done: L-03 insert pseudocode lines (zh+en) reordered to match animation steps, head-insert codeLines fixed.
+  - Done: L-01 array delete operation added (operation selector, delete index field, delete steps, JSON backward-compatible, left-shift labels, delete pseudocode).
+  - Done: empty-list deleteAt and empty-array delete are no-ops instead of errors; single-element delete index resets correctly.
+  - Verified: 96 test files / 293 tests pass, `npm run build` clean, headless browser smoke on `/modules/array` + `/modules/linked-list` passes.
+
+- [ ] Prepare the first Chapter 4 storage-visualization batch after `P15`
+  - Planned scope:
+    - two-dimensional array sequential storage
+    - symmetric matrix compressed storage
+    - upper-triangular matrix compressed storage
+    - lower-triangular matrix compressed storage
+    - sparse-matrix triple-table storage
+    - sparse-matrix linked storage
+  - Future expansion only:
+    - three-dimensional array storage
+    - generalized lists
+    - any banded-matrix-style extension not present in the current courseware wording
 
 ## P0 (V1 Must Have)
 - [x] M0 scaffold: initialize frontend app and route skeleton

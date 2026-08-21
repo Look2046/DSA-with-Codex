@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
@@ -169,6 +169,11 @@ type SequentialOverflowPointerProps = {
   nullLabel: string;
 };
 
+type ConnectorPoint = {
+  x: number;
+  y: number;
+};
+
 export function SequentialOverflowPointer({ topLabel, nullLabel }: SequentialOverflowPointerProps) {
   return (
     <div className="stack-top-pointer-overflow" aria-label="sequential-stack-top-overflow">
@@ -184,6 +189,47 @@ export function SequentialOverflowPointer({ topLabel, nullLabel }: SequentialOve
   );
 }
 
+export function buildLinkedStackConnectorPath(start: ConnectorPoint, end: ConnectorPoint): string {
+  const horizontalSpan = Math.abs(end.x - start.x);
+  const startDropY = start.y + Math.max(14, horizontalSpan * 0.08);
+  const travelX = start.x - Math.max(18, horizontalSpan * 0.16);
+  const safeAboveEndY = end.y - Math.max(20, horizontalSpan * 0.06);
+  const arcX = end.x + Math.max(28, horizontalSpan * 0.34);
+  const endApproachY = end.y - 12;
+
+  return [
+    `M ${start.x} ${start.y}`,
+    `C ${start.x} ${startDropY}, ${travelX} ${startDropY + 8}, ${arcX} ${safeAboveEndY}`,
+    `S ${end.x + 8} ${endApproachY}, ${end.x} ${endApproachY}`,
+    `L ${end.x} ${end.y}`,
+  ].join(' ');
+}
+
+export function LinkedStackLinkPreview({ path }: { path: string }) {
+  return (
+    <svg className="linked-stack-link-preview" aria-hidden="true">
+      <defs>
+        <marker
+          id="linked-stack-link-preview-arrowhead"
+          markerWidth="7"
+          markerHeight="7"
+          refX="5.2"
+          refY="3.5"
+          orient="auto"
+          markerUnits="strokeWidth"
+        >
+          <path d="M 0 0 L 7 3.5 L 0 7 z" className="linked-stack-link-preview-arrowhead" />
+        </marker>
+      </defs>
+      <path
+        d={path}
+        className="linked-stack-link-preview-path"
+        markerEnd="url(#linked-stack-link-preview-arrowhead)"
+      />
+    </svg>
+  );
+}
+
 export function StackPage() {
   const { t } = useI18n();
 
@@ -194,9 +240,13 @@ export function StackPage() {
   const [hasValidConfig, setHasValidConfig] = useState(INITIAL_STACK_PAGE_STATE.hasValidConfig);
   const [activeBases, setActiveBases] = useState<StackBases>(INITIAL_STACK_PAGE_STATE.activeBases);
   const [comparisonSource, setComparisonSource] = useState<StackComparisonSource>(INITIAL_STACK_PAGE_STATE.comparisonSource);
+  const [linkedPreviewPath, setLinkedPreviewPath] = useState('');
 
   const sequentialCellsRef = useRef<HTMLDivElement | null>(null);
   const linkedCellsRef = useRef<HTMLDivElement | null>(null);
+  const linkedSceneRef = useRef<HTMLDivElement | null>(null);
+  const linkedFloatingNodeRef = useRef<HTMLDivElement | null>(null);
+  const linkedTargetNodeRef = useRef<HTMLDivElement | null>(null);
 
   const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
   const currentStep = currentFrame;
@@ -389,6 +439,7 @@ export function StackPage() {
   const linkedFloatingAction = currentSnapshot?.linked.action;
   const showLinkedFloatingNode = linkedFloatingAction === 'preparePush' || linkedFloatingAction === 'linkPush';
   const showLinkedNextLink = linkedFloatingAction === 'linkPush';
+  const linkedIncomingNextIndex = currentSnapshot?.linked.incomingNextIndex;
   const linkedDisplayNodes = [...currentLinkedStack]
     .map((value, index) => ({ value, index }))
     .reverse();
@@ -401,6 +452,36 @@ export function StackPage() {
   const linkedOutcomeLabel = getOutcomeLabel(currentSnapshot?.linked.outcome ?? 'ok', t);
   const sequentialCodeLines = getStackPseudocodeActiveLines(currentSnapshot, 'sequential');
   const linkedCodeLines = getStackPseudocodeActiveLines(currentSnapshot, 'linked');
+
+  useLayoutEffect(() => {
+    if (!showLinkedNextLink) {
+      setLinkedPreviewPath('');
+      return;
+    }
+
+    const scene = linkedSceneRef.current;
+    const floatingNode = linkedFloatingNodeRef.current;
+    const targetNode = linkedTargetNodeRef.current;
+    if (!scene || !floatingNode || !targetNode) {
+      setLinkedPreviewPath('');
+      return;
+    }
+
+    const sceneRect = scene.getBoundingClientRect();
+    const floatingRect = floatingNode.getBoundingClientRect();
+    const targetRect = targetNode.getBoundingClientRect();
+
+    const start = {
+      x: floatingRect.left + floatingRect.width / 2 - sceneRect.left,
+      y: floatingRect.bottom - sceneRect.top,
+    };
+    const end = {
+      x: targetRect.left + targetRect.width / 2 - sceneRect.left,
+      y: targetRect.top - sceneRect.top,
+    };
+
+    setLinkedPreviewPath(buildLinkedStackConnectorPath(start, end));
+  }, [currentStep, linkedIncomingNextIndex, showLinkedNextLink]);
 
   return (
     <WorkspaceShell
@@ -680,20 +761,8 @@ export function StackPage() {
             </header>
 
             <div className="stack-compare-lane-body">
-              <div className={linkedStackSceneClassName}>
-                {showLinkedFloatingNode && linkedIncomingValue !== undefined ? (
-                  <div className={linkedStackFloatingClassName}>
-                    <div className="linked-stack-node linked-stack-node-floating bar-new-node">
-                      <span className="linked-stack-variable-badge">s</span>
-                      <span className="array-cell-index">{currentLinkedSize}</span>
-                      <strong>{linkedIncomingValue}</strong>
-                    </div>
-                    {showLinkedNextLink ? (
-                      <span className="linked-stack-link linked-stack-link-floating">{t('module.l04.compare.linkTop')}</span>
-                    ) : null}
-                  </div>
-                ) : null}
-
+              <div ref={linkedSceneRef} className={linkedStackSceneClassName}>
+                {showLinkedNextLink && linkedPreviewPath ? <LinkedStackLinkPreview path={linkedPreviewPath} /> : null}
                 <div ref={linkedCellsRef} className={linkedStackCellsClassName} aria-label="linked-stack-cells">
                   {linkedDisplayNodes.length > 0 ? (
                     linkedDisplayNodes.map((node, displayIndex) => {
@@ -701,6 +770,7 @@ export function StackPage() {
                       const isTop = node.index === currentLinkedTopIndex;
                       const isBottom = currentLinkedSize > 0 && node.index === 0;
                       const isTail = displayIndex === linkedDisplayNodes.length - 1;
+                      const isIncomingLinkTarget = showLinkedNextLink && linkedIncomingNextIndex === node.index;
 
                       return (
                         <div
@@ -708,8 +778,11 @@ export function StackPage() {
                           className={`linked-stack-item linked-stack-item-${linkedStackLayoutMode}${isTail ? ' linked-stack-item-tail' : ''}`}
                         >
                           <div
+                            ref={isIncomingLinkTarget ? linkedTargetNodeRef : null}
                             data-linked-stack-index={node.index}
-                            className={`linked-stack-node linked-stack-node-${linkedStackLayoutMode} bar-${highlight}`}
+                            className={`linked-stack-node linked-stack-node-${linkedStackLayoutMode} bar-${highlight}${
+                              isIncomingLinkTarget ? ' linked-stack-node-link-target' : ''
+                            }`}
                           >
                             {isTop ? <PointerLabel className="linked-stack-top-pointer" direction="right" label={t('module.l04.top')} /> : null}
                             {isBottom ? <PointerLabel className="linked-stack-bottom-pointer" direction="left" label={t('module.l04.bottom')} /> : null}
@@ -729,6 +802,21 @@ export function StackPage() {
                     <div className="stack-empty">{t('module.l04.empty')}</div>
                   )}
                 </div>
+
+                {showLinkedFloatingNode && linkedIncomingValue !== undefined ? (
+                  <div className={linkedStackFloatingClassName}>
+                    <div
+                      ref={linkedFloatingNodeRef}
+                      className={`linked-stack-node linked-stack-node-floating bar-new-node${
+                        showLinkedNextLink ? ' linked-stack-node-preview-active' : ''
+                      }`}
+                    >
+                      <span className="linked-stack-variable-badge">s</span>
+                      <span className="array-cell-index">{currentLinkedSize}</span>
+                      <strong>{linkedIncomingValue}</strong>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </section>

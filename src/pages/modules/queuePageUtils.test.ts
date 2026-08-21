@@ -3,6 +3,7 @@ import type { TranslationKey } from '../../i18n/translations';
 import { generateQueueSteps } from '../../modules/linear/queueOps';
 import type { QueueStep } from '../../modules/linear/queueOps';
 import {
+  getQueueWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
@@ -52,6 +53,12 @@ describe('queuePageUtils', () => {
       config: { queue: [], operation: { type: 'dequeue' } },
       error: 'module.l05.error.dequeueEmpty',
     });
+    expect(
+      resolveQueueConfig(Array.from({ length: 20 }, (_, index) => index).join(','), 'enqueue', '42', 'normal', t),
+    ).toEqual({
+      config: { queue: Array.from({ length: 20 }, (_, index) => index), operation: { type: 'enqueue', value: 42 } },
+      error: 'module.l05.error.enqueueFull',
+    });
   });
 
   it('maps playback status and step/highlight labels', () => {
@@ -100,8 +107,18 @@ describe('queuePageUtils', () => {
 
   it('uses one-empty-slot full rule for circular queue', () => {
     expect(resolveQueueConfig(Array.from({ length: 19 }, (_, index) => index).join(','), 'enqueue', '9', 'circular', t)).toEqual({
-      config: null,
+      config: { queue: Array.from({ length: 19 }, (_, index) => index), operation: { type: 'enqueue', value: 9 } },
       error: 'module.l05.error.circularFull',
+    });
+  });
+
+  it('uses the compact L-05 workspace configuration without json controls', () => {
+    expect(getQueueWorkspaceConfig()).toMatchObject({
+      pageClassName: 'array-page tree-page linear-adaptive linear-adaptive-viewport-lock',
+      controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer linear-controls-drawer',
+      stageClassName: 'workspace-stage-array workspace-stage-array-compact workspace-stage-queue-compact',
+      stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
+      showJsonControls: false,
     });
   });
 });

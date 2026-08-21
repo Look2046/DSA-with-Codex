@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   createFocusCollisionRect,
   useStageAnchorPanel,
+  type StageRect,
   type StagePoint,
   type StageSize,
 } from '../hooks/useStageAnchorPanel';
@@ -15,6 +16,7 @@ const DEFAULT_CONTROLS_TAB_SIZE: StageSize = { width: 48, height: 96 };
 const DEFAULT_CONTROLS_PANEL_SIZE: StageSize = { width: 226, height: 432 };
 const DEFAULT_CONTEXT_RAIL_SIZE: StageSize = { width: 54, height: 92 };
 const DEFAULT_CONTEXT_PANEL_SIZE: StageSize = { width: 286, height: 372 };
+const TEXT_COLLISION_PADDING = 8;
 
 type WorkspaceShellProps = {
   title: string;
@@ -71,6 +73,78 @@ function getContextPanelDefaultAnchorPosition(
   };
 }
 
+function expandRect(rect: DOMRect, padding: number): StageRect {
+  return {
+    x: rect.left - padding,
+    y: rect.top - padding,
+    width: rect.width + padding * 2,
+    height: rect.height + padding * 2,
+  };
+}
+
+function rectToLocal(rect: StageRect, boundsRect: DOMRect): StageRect {
+  return {
+    x: rect.x - boundsRect.left,
+    y: rect.y - boundsRect.top,
+    width: rect.width,
+    height: rect.height,
+  };
+}
+
+function isRectVisible(rect: DOMRect): boolean {
+  return rect.width > 1 && rect.height > 1;
+}
+
+function collectTextCollisionRects(root: HTMLElement, boundsRect: DOMRect): StageRect[] {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const rects: StageRect[] = [];
+  const seen = new Set<string>();
+
+  while (walker.nextNode()) {
+    const textNode = walker.currentNode;
+    const text = textNode.textContent?.trim();
+    if (!text) {
+      continue;
+    }
+
+    const parent = textNode.parentElement;
+    if (!parent) {
+      continue;
+    }
+
+    const parentStyle = window.getComputedStyle(parent);
+    if (
+      parentStyle.display === 'none' ||
+      parentStyle.visibility === 'hidden' ||
+      parentStyle.opacity === '0' ||
+      parent.closest('.tree-workspace-panel-strip')
+    ) {
+      continue;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(textNode);
+    const clientRects = Array.from(range.getClientRects());
+    range.detach?.();
+
+    clientRects.forEach((clientRect) => {
+      if (!isRectVisible(clientRect)) {
+        return;
+      }
+
+      const localRect = rectToLocal(expandRect(clientRect, TEXT_COLLISION_PADDING), boundsRect);
+      const key = `${Math.round(localRect.x)}:${Math.round(localRect.y)}:${Math.round(localRect.width)}:${Math.round(localRect.height)}`;
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      rects.push(localRect);
+    });
+  }
+
+  return rects;
+}
+
 export function WorkspaceShell({
   title,
   description,
@@ -114,6 +188,7 @@ export function WorkspaceShell({
   const [showControls, setShowControls] = useState(false);
   const [showStep, setShowStep] = useState(false);
   const [stageSize, setStageSize] = useState<StageSize>(DEFAULT_STAGE_SIZE);
+  const [textCollisionRects, setTextCollisionRects] = useState<StageRect[]>([]);
 
   useEffect(() => {
     const stageElement = stageRef.current;
@@ -152,6 +227,39 @@ export function WorkspaceShell({
     () => createFocusCollisionRect(focusPoint, stageSize),
     [focusPoint, stageSize],
   );
+
+  useEffect(() => {
+    const shellElement = shellRef.current;
+    const stageElement = stageRef.current;
+    if (!shellElement || !stageElement || !floatingPanelsEnabled) {
+      setTextCollisionRects([]);
+      return;
+    }
+
+    const updateTextCollisionRects = () => {
+      const shellRect = shellElement.getBoundingClientRect();
+      const roots = [
+        shellElement.parentElement?.querySelector('.tree-workspace-header'),
+        stageElement.querySelector('.tree-workspace-stage-meta'),
+        stageElement.querySelector('.workspace-stage-body'),
+        stageElement.querySelector('.tree-workspace-transport'),
+      ].filter((node): node is HTMLElement => node instanceof HTMLElement);
+
+      const nextRects = roots.flatMap((root) => collectTextCollisionRects(root, shellRect));
+      setTextCollisionRects(nextRects);
+    };
+
+    updateTextCollisionRects();
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => updateTextCollisionRects());
+    observer.observe(shellElement);
+    observer.observe(stageElement);
+    return () => observer.disconnect();
+  }, [floatingPanelsEnabled, showControls, showStep, stageSize.height, stageSize.width]);
+
   const controlsPanelAnchor = useStageAnchorPanel({
     stageRef,
     boundsRef: shellRef,
@@ -162,6 +270,7 @@ export function WorkspaceShell({
     defaultAnchorSize: defaultControlsTabSize,
     defaultPanelSize: defaultControlsPanelSize,
     collisionTarget: focusCollisionRect,
+    collisionTargets: textCollisionRects,
     autoAvoid: controlsPanelAutoAvoid,
     overflowMargin: controlsPanelOverflowMargin,
     enabled: floatingPanelsEnabled,
@@ -176,6 +285,7 @@ export function WorkspaceShell({
     defaultAnchorSize: defaultContextRailSize,
     defaultPanelSize: defaultContextPanelSize,
     collisionTarget: focusCollisionRect,
+    collisionTargets: textCollisionRects,
     autoAvoid: stepPanelAutoAvoid,
     overflowMargin: stepPanelOverflowMargin,
     enabled: floatingPanelsEnabled,

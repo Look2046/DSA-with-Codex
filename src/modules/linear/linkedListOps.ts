@@ -211,16 +211,16 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
         targetIndex: 0,
       });
 
-      appendStep(steps, operation.type, 'shiftForInsert', [4], nodes, headId, [{ id: detachedNode.id, type: 'new-node' }], {
+      appendStep(steps, operation.type, 'shiftForInsert', [6], nodes, headId, [{ id: detachedNode.id, type: 'new-node' }], {
         floatingNodeIds: [detachedNode.id],
         targetIndex: 0,
       });
 
       headId = detachedNode.id;
       detachedNode.detached = false;
-      appendStep(steps, operation.type, 'insert', [4], nodes, headId, [{ id: detachedNode.id, type: 'new-node' }]);
+      appendStep(steps, operation.type, 'insert', [6], nodes, headId, [{ id: detachedNode.id, type: 'new-node' }]);
 
-      appendStep(steps, operation.type, 'completed', [5], nodes, headId);
+      appendStep(steps, operation.type, 'completed', [8], nodes, headId);
       return steps;
     }
 
@@ -271,6 +271,12 @@ export function generateLinkedListSteps(input: number[], operation: LinkedListOp
       targetIndex: operation.index,
     });
     appendStep(steps, operation.type, 'completed', [8], nodes, headId);
+    return steps;
+  }
+
+  if (operation.type === 'deleteAt' && nodes.length === 0) {
+    appendStep(steps, operation.type, 'initial', [1], nodes, headId);
+    appendStep(steps, operation.type, 'completed', [5], nodes, headId);
     return steps;
   }
 

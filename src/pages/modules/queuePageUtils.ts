@@ -7,12 +7,50 @@ export type QueueConfig = {
   operation: QueueOperation;
 };
 
+export type QueueWorkspaceConfig = {
+  pageClassName: string;
+  controlsPanelClassName: string;
+  controlsPanelSize: {
+    width: number;
+    height: number;
+  };
+  controlsPanelAutoAvoid: boolean;
+  controlsPanelOverflowMargin: number;
+  stepPanelAutoAvoid: boolean;
+  stepPanelOverflowMargin: number;
+  contextPanelSize: {
+    width: number;
+    height: number;
+  };
+  stageClassName: string;
+  stageBodyClassName: string;
+  showJsonControls: boolean;
+};
+
 type Translator = (key: TranslationKey) => string;
 
 type JsonParseResult<T> = {
   config: T | null;
   error: string;
 };
+
+const QUEUE_WORKSPACE_CONFIG: QueueWorkspaceConfig = {
+  pageClassName: 'array-page tree-page linear-adaptive linear-adaptive-viewport-lock',
+  controlsPanelClassName: 'workspace-drawer-scroll array-controls-drawer linear-controls-drawer',
+  controlsPanelSize: { width: 980, height: 340 },
+  controlsPanelAutoAvoid: false,
+  controlsPanelOverflowMargin: 0,
+  stepPanelAutoAvoid: false,
+  stepPanelOverflowMargin: 0,
+  contextPanelSize: { width: 620, height: 340 },
+  stageClassName: 'workspace-stage-array workspace-stage-array-compact workspace-stage-queue-compact',
+  stageBodyClassName: 'workspace-stage-body-array workspace-stage-body-array-centered',
+  showJsonControls: false,
+};
+
+export function getQueueWorkspaceConfig(): QueueWorkspaceConfig {
+  return QUEUE_WORKSPACE_CONFIG;
+}
 
 export function parseNumberArrayAllowEmpty(raw: string): number[] | null {
   const trimmed = raw.trim();
@@ -50,7 +88,10 @@ export function resolveQueueConfig(
 
   if (operationType === 'enqueue') {
     if (parsedQueue.length >= maxSize) {
-      return { config: null, error: mode === 'circular' ? t('module.l05.error.circularFull') : t('module.l05.error.enqueueFull') };
+      return {
+        config: { queue: parsedQueue, operation: { type: 'enqueue', value: Number.isNaN(Number(valueInput)) ? 0 : Number(valueInput) } },
+        error: mode === 'circular' ? t('module.l05.error.circularFull') : t('module.l05.error.enqueueFull'),
+      };
     }
     const value = Number(valueInput);
     if (Number.isNaN(value)) {

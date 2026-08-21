@@ -327,6 +327,13 @@ export function LinkedListPage() {
       return;
     }
 
+    let nextIndexInput = indexInput;
+    if (operationType === 'deleteAt') {
+      const newLength = completedListText.length === 0 ? 0 : completedListText.split(',').length;
+      const rawIndex = Number.parseInt(indexInput, 10);
+      nextIndexInput = String(Math.max(1, Math.min(Number.isNaN(rawIndex) ? 1 : rawIndex, Math.max(newLength, 1))));
+    }
+
     // Clear FLIP baseline before swapping to the next operation input,
     // so stale rects do not cause artificial jump animations.
     prevNodeRects.current = new Map();
@@ -335,8 +342,33 @@ export function LinkedListPage() {
     // Prepare for a clean next-round step-0 state.
     reset();
     setListInput(completedListText);
-    recomputeInputState(completedListText, operationType, nextValueInput, indexInput);
+    setIndexInput(nextIndexInput);
+    recomputeInputState(completedListText, operationType, nextValueInput, nextIndexInput);
   }, [completedListText, hasValidConfig, listInput, steps, reset, recomputeInputState, operationType, valueInput, indexInput]);
+
+  const handleResetToInitialState = useCallback(() => {
+    reset();
+    prevNodeRects.current = new Map();
+    skipNextLayoutAnimationRef.current = true;
+    setListInput(DEFAULT_CONFIG.list.join(', '));
+    setOperationType(DEFAULT_CONFIG.operation.type);
+    setValueInput(String(DEFAULT_OPERATION.value));
+    setIndexInput(String(DEFAULT_OPERATION.index + 1));
+    setHasHeadNode(true);
+    setDisplayConfig({
+      list: [...DEFAULT_CONFIG.list],
+      operation: {
+        type: 'insertAt',
+        index: DEFAULT_OPERATION.index,
+        value: DEFAULT_OPERATION.value,
+      },
+    });
+    setError('');
+    setHasValidConfig(true);
+    setJsonInput('');
+    setJsonFeedback('');
+    setHasJsonError(false);
+  }, [reset]);
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -1212,7 +1244,7 @@ export function LinkedListPage() {
           <button
             type="button"
             className="tree-workspace-transport-btn"
-            onClick={reset}
+            onClick={handleResetToInitialState}
             disabled={!hasValidConfig || steps.length === 0}
           >
             {t('playback.reset')}

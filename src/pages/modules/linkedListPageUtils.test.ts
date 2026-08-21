@@ -47,6 +47,29 @@ describe('linkedListPageUtils', () => {
     expect(deleteError.error).toBe('module.l03.error.deleteIndex');
   });
 
+  it('treats delete on an empty list with index 1 as a valid no-op config', () => {
+    const resolved = resolveLinkedListConfig('', 'deleteAt', '', '1', t);
+
+    expect(resolved.error).toBe('');
+    expect(resolved.config).toEqual({
+      list: [],
+      operation: { type: 'deleteAt', index: 0 },
+    });
+  });
+
+  it('allows deleting the only node of a single-element list and rejects out-of-range index', () => {
+    const singleValid = resolveLinkedListConfig('5', 'deleteAt', '', '1', t);
+    const singleOverflow = resolveLinkedListConfig('5', 'deleteAt', '', '2', t);
+    const multi = resolveLinkedListConfig('5,6', 'deleteAt', '', '2', t);
+
+    expect(singleValid.config?.operation).toEqual({ type: 'deleteAt', index: 0 });
+    expect(singleValid.error).toBe('');
+    expect(singleOverflow.config).toBeNull();
+    expect(singleOverflow.error).toBe('module.l03.error.deleteIndex');
+    expect(multi.config?.operation).toEqual({ type: 'deleteAt', index: 1 });
+    expect(multi.error).toBe('');
+  });
+
   it('returns find result text only after completed step', () => {
     const completed = createStep('find', 'completed');
     const visiting = createStep('find', 'visit');

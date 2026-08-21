@@ -3,10 +3,13 @@ import { ARRAY_CAPACITY } from '../../modules/linear/arrayInsert';
 import type { ArrayInsertStep } from '../../modules/linear/arrayInsert';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
-export type InsertConfig = {
+export type ArrayOperation =
+  | { type: 'insert'; index: number; value: number }
+  | { type: 'delete'; index: number };
+
+export type ArrayConfig = {
   array: number[];
-  index: number;
-  value: number;
+  operation: ArrayOperation;
 };
 
 type Translator = (key: TranslationKey) => string;
@@ -60,10 +63,6 @@ export function parseNumberArray(raw: string): number[] | null {
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 
-  if (parts.length === 0) {
-    return null;
-  }
-
   const parsed = parts.map((item) => Number(item));
   if (parsed.some((value) => Number.isNaN(value))) {
     return null;
@@ -72,18 +71,50 @@ export function parseNumberArray(raw: string): number[] | null {
   return parsed;
 }
 
-export function resolveInsertConfig(
+export function resolveArrayConfig(
   arrayInput: string,
+  operationType: ArrayOperation['type'],
   indexInput: string,
   valueInput: string,
   t: Translator,
-): { config: InsertConfig | null; error: string } {
+): { config: ArrayConfig | null; error: string } {
   const parsedArray = parseNumberArray(arrayInput);
   if (!parsedArray) {
     return { config: null, error: t('module.l01.error.array') };
   }
+
+  if (operationType === 'delete') {
+    const parsedIndex = Number(indexInput);
+    if (parsedArray.length === 0) {
+      if (parsedIndex === 0) {
+        return { config: { array: [], operation: { type: 'delete', index: 0 } }, error: '' };
+      }
+      return { config: null, error: t('module.l01.error.deleteIndex') };
+    }
+    if (!Number.isInteger(parsedIndex) || parsedIndex < 0 || parsedIndex >= parsedArray.length) {
+      return { config: null, error: t('module.l01.error.deleteIndex') };
+    }
+    return { config: { array: parsedArray, operation: { type: 'delete', index: parsedIndex } }, error: '' };
+  }
+
   if (parsedArray.length >= ARRAY_CAPACITY) {
-    return { config: null, error: t('module.l01.error.capacity') };
+    const parsedIndex = Number(indexInput);
+    if (!Number.isInteger(parsedIndex) || parsedIndex < 0 || parsedIndex > parsedArray.length) {
+      return { config: null, error: t('module.l01.error.index') };
+    }
+
+    const parsedValue = Number(valueInput);
+    if (Number.isNaN(parsedValue)) {
+      return { config: null, error: t('module.l01.error.value') };
+    }
+
+    return {
+      config: {
+        array: parsedArray,
+        operation: { type: 'insert', index: parsedIndex, value: parsedValue },
+      },
+      error: t('module.l01.error.capacity'),
+    };
   }
 
   const parsedIndex = Number(indexInput);
@@ -99,8 +130,7 @@ export function resolveInsertConfig(
   return {
     config: {
       array: parsedArray,
-      index: parsedIndex,
-      value: parsedValue,
+      operation: { type: 'insert', index: parsedIndex, value: parsedValue },
     },
     error: '',
   };
@@ -110,11 +140,11 @@ function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-export function serializeInsertConfigAsJson(config: InsertConfig): string {
+export function serializeArrayConfigAsJson(config: ArrayConfig): string {
   return JSON.stringify(config, null, 2);
 }
 
-export function resolveInsertConfigFromJson(rawJson: string, t: Translator): JsonParseResult<InsertConfig> {
+export function resolveArrayConfigFromJson(rawJson: string, t: Translator): JsonParseResult<ArrayConfig> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawJson);
@@ -122,14 +152,37 @@ export function resolveInsertConfigFromJson(rawJson: string, t: Translator): Jso
     return { config: null, error: t('module.l01.json.error.parse') };
   }
 
-  if (!isObjectRecord(parsed) || !Array.isArray(parsed.array) || typeof parsed.index !== 'number' || typeof parsed.value !== 'number') {
+  if (!isObjectRecord(parsed) || !Array.isArray(parsed.array)) {
     return { config: null, error: t('module.l01.json.error.schema') };
   }
 
   const arrayInput = parsed.array.join(', ');
-  const indexInput = String(parsed.index);
-  const valueInput = String(parsed.value);
-  return resolveInsertConfig(arrayInput, indexInput, valueInput, t);
+
+  if (isObjectRecord(parsed.operation) && parsed.operation.type === 'insert') {
+    if (typeof parsed.operation.index !== 'number' || typeof parsed.operation.value !== 'number') {
+      return { config: null, error: t('module.l01.json.error.schema') };
+    }
+    return resolveArrayConfig(
+      arrayInput,
+      'insert',
+      String(parsed.operation.index),
+      String(parsed.operation.value),
+      t,
+    );
+  }
+
+  if (isObjectRecord(parsed.operation) && parsed.operation.type === 'delete') {
+    if (typeof parsed.operation.index !== 'number') {
+      return { config: null, error: t('module.l01.json.error.schema') };
+    }
+    return resolveArrayConfig(arrayInput, 'delete', String(parsed.operation.index), '', t);
+  }
+
+  if (typeof parsed.index === 'number' && typeof parsed.value === 'number') {
+    return resolveArrayConfig(arrayInput, 'insert', String(parsed.index), String(parsed.value), t);
+  }
+
+  return { config: null, error: t('module.l01.json.error.schema') };
 }
 
 export function getStatusLabel(status: PlaybackStatus, t: Translator): string {
@@ -155,8 +208,12 @@ export function getStepDescription(step: ArrayInsertStep | undefined, t: Transla
   if (step.action === 'initial') {
     return t('module.l01.step.initial');
   }
+  if (step.action === 'visit') {
+    return `${t('module.l01.step.visit')} ${step.indices[0]}`;
+  }
   if (step.action === 'shift') {
-    return `${t('module.l01.step.shift')} ${step.indices[0]} -> ${step.indices[1]}`;
+    const shiftLabel = step.indices[0] < step.indices[1] ? t('module.l01.step.shift') : t('module.l01.step.shiftLeft');
+    return `${shiftLabel} ${step.indices[0]} -> ${step.indices[1]}`;
   }
   if (step.action === 'insert') {
     return `${t('module.l01.step.insert')} ${step.indices[0]}`;
@@ -170,6 +227,9 @@ export function getHighlightLabel(type: HighlightType, t: Translator): string {
   }
   if (type === 'new-node') {
     return t('module.l01.highlight.inserted');
+  }
+  if (type === 'visiting') {
+    return t('module.l01.highlight.visiting');
   }
   return t('module.s01.highlight.default');
 }

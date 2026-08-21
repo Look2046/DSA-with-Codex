@@ -54,9 +54,32 @@ export function DynamicArrayPage() {
       if (resolved.config) {
         setConfig(resolved.config);
       }
+      return resolved;
     },
     [t],
   );
+
+  const handleResetToInitialState = useCallback(() => {
+    reset();
+    setArrayInput(DEFAULT_CONFIG.array.join(', '));
+    setCapacityInput(String(DEFAULT_CONFIG.capacity));
+    setValueInput(String(DEFAULT_CONFIG.operation.value));
+    setError('');
+    setHasValidConfig(true);
+    setConfig({
+      array: [...DEFAULT_CONFIG.array],
+      capacity: DEFAULT_CONFIG.capacity,
+      operation: { type: 'append', value: DEFAULT_CONFIG.operation.value },
+    });
+    setJsonInput('');
+    setJsonFeedback('');
+    setHasJsonError(false);
+    setFullWarningFlash(false);
+    if (fullWarningTimerRef.current !== null) {
+      window.clearTimeout(fullWarningTimerRef.current);
+      fullWarningTimerRef.current = null;
+    }
+  }, [reset]);
 
   const timelineFrames = useMemo(
     () => buildDynamicArrayTimelineFromInput(config.array, config.capacity, config.operation),
@@ -567,7 +590,7 @@ export function DynamicArrayPage() {
           <button
             type="button"
             className="tree-workspace-transport-btn"
-            onClick={reset}
+            onClick={handleResetToInitialState}
             disabled={!hasValidConfig || steps.length === 0}
           >
             {t('playback.reset')}

@@ -103,6 +103,14 @@ describe('generateLinkedListSteps', () => {
   it('throws for out-of-range operations', () => {
     expect(() => generateLinkedListSteps([1, 2], { type: 'insertAt', index: 3, value: 9 })).toThrow(RangeError);
     expect(() => generateLinkedListSteps([1, 2], { type: 'deleteAt', index: 2 })).toThrow(RangeError);
-    expect(() => generateLinkedListSteps([], { type: 'deleteAt', index: 0 })).toThrow(RangeError);
+    expect(() => generateLinkedListSteps([], { type: 'deleteAt', index: 1 })).not.toThrow(RangeError);
+  });
+
+  it('deleteAt on an empty list is a no-op timeline', () => {
+    const steps = generateLinkedListSteps([], { type: 'deleteAt', index: 0 });
+
+    expect(steps[0].action).toBe('initial');
+    expect(steps[steps.length - 1].action).toBe('completed');
+    expect(collectChainValues(steps[steps.length - 1])).toEqual([]);
   });
 });

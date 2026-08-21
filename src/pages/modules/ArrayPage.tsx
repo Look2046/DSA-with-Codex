@@ -2,23 +2,27 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
-import { ARRAY_CAPACITY, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
+import { ARRAY_CAPACITY, generateArrayDeleteSteps, generateArrayInsertSteps } from '../../modules/linear/arrayInsert';
 import {
   getArrayWorkspaceConfig,
   getHighlightLabel,
   getStatusLabel,
   getStepDescription,
-  resolveInsertConfig,
-  resolveInsertConfigFromJson,
-  serializeInsertConfigAsJson,
-  type InsertConfig,
+  resolveArrayConfig,
+  resolveArrayConfigFromJson,
+  serializeArrayConfigAsJson,
+  type ArrayConfig,
+  type ArrayOperation,
 } from './arrayPageUtils';
 import type { HighlightType } from '../../types/animation';
 
-const DEFAULT_CONFIG: InsertConfig = {
+const DEFAULT_CONFIG: ArrayConfig = {
   array: [3, 8, 1, 5, 6],
-  index: 2,
-  value: 9,
+  operation: {
+    type: 'insert',
+    index: 2,
+    value: 9,
+  },
 };
 
 function createRandomInsertValue(): number {
@@ -31,11 +35,12 @@ export function ArrayPage() {
   const { t } = useI18n();
 
   const [arrayInput, setArrayInput] = useState(DEFAULT_CONFIG.array.join(', '));
-  const [indexInput, setIndexInput] = useState(String(DEFAULT_CONFIG.index));
-  const [valueInput, setValueInput] = useState(String(DEFAULT_CONFIG.value));
+  const [operationType, setOperationType] = useState<ArrayOperation['type']>(DEFAULT_CONFIG.operation.type);
+  const [indexInput, setIndexInput] = useState(String(DEFAULT_CONFIG.operation.type === 'insert' ? DEFAULT_CONFIG.operation.index : 0));
+  const [valueInput, setValueInput] = useState(String(DEFAULT_CONFIG.operation.type === 'insert' ? DEFAULT_CONFIG.operation.value : ''));
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
-  const [insertConfig, setInsertConfig] = useState<InsertConfig>(DEFAULT_CONFIG);
+  const [arrayConfig, setArrayConfig] = useState<ArrayConfig>(DEFAULT_CONFIG);
   const [jsonInput, setJsonInput] = useState('');
   const [jsonFeedback, setJsonFeedback] = useState('');
   const [hasJsonError, setHasJsonError] = useState(false);
@@ -43,10 +48,14 @@ export function ArrayPage() {
   const { status, speedMs, currentFrame, setSpeed, setTotalFrames, play, pause, next, prev, reset } = useTimelinePlayer(0);
   const currentStep = currentFrame;
 
-  const steps = useMemo(
-    () => generateArrayInsertSteps(insertConfig.array, insertConfig.index, insertConfig.value),
-    [insertConfig],
-  );
+  const steps = useMemo(() => {
+    const operation = arrayConfig.operation;
+    if (operation.type === 'delete') {
+      return generateArrayDeleteSteps(arrayConfig.array, operation.index);
+    }
+    return generateArrayInsertSteps(arrayConfig.array, operation.index, operation.value);
+  }, [arrayConfig]);
+  const activeOperationType = arrayConfig.operation.type;
   const currentSnapshot = steps[currentStep] ?? steps[0];
   const logicalStepByIndex = useMemo(
     () =>
@@ -73,12 +82,13 @@ export function ArrayPage() {
   );
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
   const focusPoint = useMemo(() => {
-    const highlightedIndex = currentSnapshot?.highlights?.[0]?.index ?? insertConfig.index;
+    const operation = arrayConfig.operation;
+    const highlightedIndex = currentSnapshot?.highlights?.[0]?.index ?? (operation.type === 'delete' ? operation.index : operation.index);
     return {
       x: ((highlightedIndex + 0.5) / ARRAY_CAPACITY) * 100,
       y: 38,
     };
-  }, [currentSnapshot?.highlights, insertConfig.index]);
+  }, [arrayConfig, currentSnapshot?.highlights]);
   const highlightSummary =
     (currentSnapshot?.highlights ?? [])
       .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
@@ -86,23 +96,47 @@ export function ArrayPage() {
   const stepDescription = getStepDescription(currentSnapshot, t);
   const visualUsedLength = useMemo(() => {
     const logicalLength = currentSnapshot?.logicalLength ?? 0;
-    if (currentSnapshot?.action === 'shift') {
+    if (currentSnapshot?.action === 'shift' && activeOperationType === 'insert') {
       return Math.min(logicalLength + 1, ARRAY_CAPACITY);
     }
     return logicalLength;
-  }, [currentSnapshot]);
+  }, [activeOperationType, currentSnapshot]);
+  const isArrayFull = (currentSnapshot?.logicalLength ?? arrayConfig.array.length) >= ARRAY_CAPACITY;
+  const fullWarning = isArrayFull ? t('module.l01.error.capacity') : '';
 
   const recomputeInputState = useCallback(
-    (nextArrayInput: string, nextIndexInput: string, nextValueInput: string) => {
-      const resolved = resolveInsertConfig(nextArrayInput, nextIndexInput, nextValueInput, t);
+    (nextArrayInput: string, nextOperationType: ArrayOperation['type'], nextIndexInput: string, nextValueInput: string) => {
+      const resolved = resolveArrayConfig(nextArrayInput, nextOperationType, nextIndexInput, nextValueInput, t);
       setError(resolved.error);
       setHasValidConfig(resolved.config !== null);
       if (resolved.config) {
-        setInsertConfig(resolved.config);
+        setArrayConfig(resolved.config);
       }
+      return resolved;
     },
     [t],
   );
+
+  const handleResetToInitialState = useCallback(() => {
+    reset();
+    setArrayInput(DEFAULT_CONFIG.array.join(', '));
+    setOperationType(DEFAULT_CONFIG.operation.type);
+    setIndexInput(String(DEFAULT_CONFIG.operation.index));
+    setValueInput(String(DEFAULT_CONFIG.operation.type === 'insert' ? DEFAULT_CONFIG.operation.value : ''));
+    setError('');
+    setHasValidConfig(true);
+    setArrayConfig({
+      array: [...DEFAULT_CONFIG.array],
+      operation: {
+        type: 'insert',
+        index: DEFAULT_CONFIG.operation.index,
+        value: DEFAULT_CONFIG.operation.type === 'insert' ? DEFAULT_CONFIG.operation.value : 0,
+      },
+    });
+    setJsonInput('');
+    setJsonFeedback('');
+    setHasJsonError(false);
+  }, [reset]);
 
   const syncInputToCompletedArray = useCallback(
     (nextValueInput = valueInput) => {
@@ -114,11 +148,29 @@ export function ArrayPage() {
         return;
       }
 
+      let nextIndexInput = indexInput;
+      if (activeOperationType === 'delete') {
+        const newLength = completedArrayText.length === 0 ? 0 : completedArrayText.split(',').length;
+        const rawIndex = Number.parseInt(indexInput, 10);
+        nextIndexInput = String(Math.max(0, Math.min(Number.isNaN(rawIndex) ? 0 : rawIndex, Math.max(newLength - 1, 0))));
+      }
+
       reset();
       setArrayInput(completedArrayText);
-      recomputeInputState(completedArrayText, indexInput, nextValueInput);
+      setIndexInput(nextIndexInput);
+      recomputeInputState(completedArrayText, activeOperationType, nextIndexInput, nextValueInput);
     },
-    [arrayInput, completedArrayText, hasValidConfig, indexInput, recomputeInputState, reset, steps.length, valueInput],
+    [
+      activeOperationType,
+      arrayInput,
+      completedArrayText,
+      hasValidConfig,
+      indexInput,
+      recomputeInputState,
+      reset,
+      steps.length,
+      valueInput,
+    ],
   );
 
   useEffect(() => {
@@ -140,32 +192,48 @@ export function ArrayPage() {
     }
 
     const timer = window.setTimeout(() => {
-      const nextValueInput = String(createRandomInsertValue());
-      setValueInput(nextValueInput);
-      syncInputToCompletedArray(nextValueInput);
+      if (activeOperationType === 'insert') {
+        const nextValueInput = String(createRandomInsertValue());
+        setValueInput(nextValueInput);
+        syncInputToCompletedArray(nextValueInput);
+        return;
+      }
+      syncInputToCompletedArray();
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [arrayInput, completedArrayText, currentSnapshot?.action, hasValidConfig, steps.length, syncInputToCompletedArray]);
+  }, [
+    activeOperationType,
+    arrayInput,
+    completedArrayText,
+    currentSnapshot?.action,
+    hasValidConfig,
+    steps.length,
+    syncInputToCompletedArray,
+  ]);
 
   const handleNextStep = useCallback(() => {
     const willComplete = currentStep >= steps.length - 2;
     next();
     if (willComplete) {
-      const nextValueInput = String(createRandomInsertValue());
-      setValueInput(nextValueInput);
-      syncInputToCompletedArray(nextValueInput);
+      if (activeOperationType === 'insert') {
+        const nextValueInput = String(createRandomInsertValue());
+        setValueInput(nextValueInput);
+        syncInputToCompletedArray(nextValueInput);
+        return;
+      }
+      syncInputToCompletedArray();
     }
-  }, [currentStep, next, steps.length, syncInputToCompletedArray]);
+  }, [activeOperationType, currentStep, next, steps.length, syncInputToCompletedArray]);
 
   const handleExportJson = useCallback(() => {
-    setJsonInput(serializeInsertConfigAsJson(insertConfig));
+    setJsonInput(serializeArrayConfigAsJson(arrayConfig));
     setHasJsonError(false);
     setJsonFeedback(t('module.l01.json.exported'));
-  }, [insertConfig, t]);
+  }, [arrayConfig, t]);
 
   const handleImportJson = useCallback(() => {
-    const resolved = resolveInsertConfigFromJson(jsonInput, t);
+    const resolved = resolveArrayConfigFromJson(jsonInput, t);
     if (!resolved.config) {
       setHasJsonError(true);
       setJsonFeedback(resolved.error);
@@ -173,17 +241,20 @@ export function ArrayPage() {
     }
 
     const nextArrayInput = resolved.config.array.join(', ');
-    const nextIndexInput = String(resolved.config.index);
-    const nextValueInput = String(resolved.config.value);
+    const nextOperationType = resolved.config.operation.type;
+    const nextIndexInput = String(resolved.config.operation.index);
+    const nextValueInput =
+      resolved.config.operation.type === 'insert' ? String(resolved.config.operation.value) : valueInput;
 
     reset();
     setArrayInput(nextArrayInput);
+    setOperationType(nextOperationType);
     setIndexInput(nextIndexInput);
     setValueInput(nextValueInput);
-    recomputeInputState(nextArrayInput, nextIndexInput, nextValueInput);
+    recomputeInputState(nextArrayInput, nextOperationType, nextIndexInput, nextValueInput);
     setHasJsonError(false);
     setJsonFeedback(t('module.l01.json.imported'));
-  }, [jsonInput, recomputeInputState, reset, t]);
+  }, [jsonInput, recomputeInputState, reset, t, valueInput]);
 
   const highlightMap = useMemo(() => {
     const map = new Map<number, HighlightType>();
@@ -228,7 +299,7 @@ export function ArrayPage() {
           <span className="tree-workspace-pill">{stepDescription}</span>
         </>
       }
-      controlsContent={
+controlsContent={
         <>
           <div className="array-controls-grid">
           <label className="tree-workspace-field array-controls-field array-controls-field-array" htmlFor="array-input">
@@ -240,39 +311,63 @@ export function ArrayPage() {
               onChange={(event) => {
                 const nextValue = event.target.value;
                 setArrayInput(nextValue);
-                recomputeInputState(nextValue, indexInput, valueInput);
+                recomputeInputState(nextValue, operationType, indexInput, valueInput);
               }}
               placeholder="3, 8, 1, 5, 6"
             />
           </label>
 
-          <label className="tree-workspace-field array-controls-field" htmlFor="insert-index">
-            <span>{t('module.l01.input.index')}</span>
+          <label className="tree-workspace-field array-controls-field" htmlFor="array-operation">
+            <span>{t('module.l01.input.operation')}</span>
+            <select
+              id="array-operation"
+              value={operationType}
+              onChange={(event) => {
+                const nextOperationType = event.target.value as ArrayOperation['type'];
+                const nextIndexInput =
+                  nextOperationType === 'delete'
+                    ? String(Math.max(0, (arrayConfig.array.length || 1) - 1))
+                    : indexInput;
+                reset();
+                setOperationType(nextOperationType);
+                setIndexInput(nextIndexInput);
+                recomputeInputState(arrayInput, nextOperationType, nextIndexInput, valueInput);
+              }}
+            >
+              <option value="insert">{t('module.l01.operation.insert')}</option>
+              <option value="delete">{t('module.l01.operation.delete')}</option>
+            </select>
+          </label>
+
+          <label className="tree-workspace-field array-controls-field" htmlFor="array-index">
+            <span>{operationType === 'insert' ? t('module.l01.input.index') : t('module.l01.input.deleteIndex')}</span>
             <input
-              id="insert-index"
+              id="array-index"
               type="number"
               value={indexInput}
               onChange={(event) => {
                 const nextValue = event.target.value;
                 setIndexInput(nextValue);
-                recomputeInputState(arrayInput, nextValue, valueInput);
+                recomputeInputState(arrayInput, operationType, nextValue, valueInput);
               }}
             />
           </label>
 
-          <label className="tree-workspace-field array-controls-field" htmlFor="insert-value">
-            <span>{t('module.l01.input.value')}</span>
-            <input
-              id="insert-value"
-              type="number"
-              value={valueInput}
-              onChange={(event) => {
-                const nextValue = event.target.value;
-                setValueInput(nextValue);
-                recomputeInputState(arrayInput, indexInput, nextValue);
-              }}
-            />
-          </label>
+          {operationType === 'insert' && (
+            <label className="tree-workspace-field array-controls-field" htmlFor="array-value">
+              <span>{t('module.l01.input.value')}</span>
+              <input
+                id="array-value"
+                type="number"
+                value={valueInput}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setValueInput(nextValue);
+                  recomputeInputState(arrayInput, operationType, indexInput, nextValue);
+                }}
+              />
+            </label>
+          )}
 
           <div className="tree-workspace-field array-controls-field array-controls-field-speed">
             <span>{t('module.s01.speed')}</span>
@@ -308,13 +403,21 @@ export function ArrayPage() {
                 </strong>
               </div>
               <div className="linear-controls-card">
-                <span>{t('module.l01.input.index')}</span>
-                <strong>{insertConfig.index}</strong>
+                <span>{t('module.l01.input.operation')}</span>
+                <strong>
+                  {activeOperationType === 'insert' ? t('module.l01.operation.insert') : t('module.l01.operation.delete')}
+                </strong>
               </div>
               <div className="linear-controls-card">
-                <span>{t('module.l01.input.value')}</span>
-                <strong>{insertConfig.value}</strong>
+                <span>{activeOperationType === 'insert' ? t('module.l01.input.index') : t('module.l01.input.deleteIndex')}</span>
+                <strong>{arrayConfig.operation.index}</strong>
               </div>
+              {activeOperationType === 'insert' ? (
+                <div className="linear-controls-card">
+                  <span>{t('module.l01.input.value')}</span>
+                  <strong>{arrayConfig.operation.type === 'insert' ? arrayConfig.operation.value : ''}</strong>
+                </div>
+              ) : null}
               <div className="linear-controls-card">
                 <span>{t('module.l01.lengthCapacity')}</span>
                 <strong>
@@ -366,17 +469,36 @@ export function ArrayPage() {
           ) : null}
         </>
       }
-      stepContent={
+stepContent={
         <div className="workspace-panel-scroll workspace-panel-scroll-linear">
           <div className="workspace-panel-code-only">
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
                 <h3>{t('module.l01.pseudocode')}</h3>
                 <ol>
-                  <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l01.code.line1')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l01.code.line2')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l01.code.line3')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l01.code.line4')}</li>
+                  {activeOperationType === 'delete' ? (
+                    <>
+                      <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>
+                        {t('module.l01.code.delete.line1')}
+                      </li>
+                      <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>
+                        {t('module.l01.code.delete.line2')}
+                      </li>
+                      <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>
+                        {t('module.l01.code.delete.line3')}
+                      </li>
+                      <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>
+                        {t('module.l01.code.delete.line4')}
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l01.code.line1')}</li>
+                      <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l01.code.line2')}</li>
+                      <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l01.code.line3')}</li>
+                      <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l01.code.line4')}</li>
+                    </>
+                  )}
                 </ol>
               </div>
             </div>
@@ -384,22 +506,30 @@ export function ArrayPage() {
         </div>
       }
       stageContent={
-        <div className="array-cells" aria-label="array-cells">
-          {(currentSnapshot?.arrayState ?? []).map((value, index) => {
-            const highlight = highlightMap.get(index) ?? 'default';
-            const isEmpty = value === null;
-            const isUnused = index >= visualUsedLength;
-            const isInsertTarget = index === insertConfig.index;
-            const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}${isUnused ? ' array-cell-unused' : ''}`;
+        <div className="linear-stage-layout">
+          {fullWarning ? (
+            <p className="linear-stage-warning dynamic-array-capacity-full" aria-live="polite">
+              {fullWarning}
+            </p>
+          ) : null}
+          <div className="array-cells" aria-label="array-cells">
+            {(currentSnapshot?.arrayState ?? []).map((value, index) => {
+              const highlight = highlightMap.get(index) ?? 'default';
+              const isEmpty = value === null;
+              const isUnused = index >= visualUsedLength;
+              const isInsertTarget =
+                activeOperationType === 'insert' && arrayConfig.operation.type === 'insert' && index === arrayConfig.operation.index;
+              const cellClassName = `array-cell bar-${highlight}${isEmpty ? ' array-cell-empty' : ''}${isUnused ? ' array-cell-unused' : ''}`;
 
-            return (
-              <div key={`${index}-${String(value)}`} className={cellClassName}>
-                {isInsertTarget ? <span className="array-insert-pointer">↓</span> : null}
-                <span className="array-cell-index">{index}</span>
-                <strong>{value ?? '∅'}</strong>
-              </div>
-            );
-          })}
+              return (
+                <div key={`${index}-${String(value)}`} className={cellClassName}>
+                  {isInsertTarget ? <span className="array-insert-pointer">↓</span> : null}
+                  <span className="array-cell-index">{index}</span>
+                  <strong>{value ?? '∅'}</strong>
+                </div>
+              );
+            })}
+          </div>
         </div>
       }
       transportLeft={
@@ -431,7 +561,7 @@ export function ArrayPage() {
           <button
             type="button"
             className="tree-workspace-transport-btn"
-            onClick={reset}
+            onClick={handleResetToInitialState}
             disabled={!hasValidConfig || steps.length === 0}
           >
             {t('playback.reset')}
@@ -451,8 +581,12 @@ export function ArrayPage() {
       }
       transportRight={
         <>
-          <span className="tree-workspace-transport-chip">#{insertConfig.index}</span>
-          <span className="tree-workspace-transport-chip">{insertConfig.value}</span>
+          <span className="tree-workspace-transport-chip">#{arrayConfig.operation.index}</span>
+          {activeOperationType === 'insert' ? (
+            <span className="tree-workspace-transport-chip">
+              {arrayConfig.operation.type === 'insert' ? arrayConfig.operation.value : ''}
+            </span>
+          ) : null}
           <span className="tree-workspace-transport-chip tree-workspace-transport-chip-active">
             {currentSnapshot?.logicalLength ?? 0}/{ARRAY_CAPACITY}
           </span>

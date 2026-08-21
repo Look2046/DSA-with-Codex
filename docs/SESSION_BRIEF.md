@@ -8,6 +8,10 @@ Use this file as the first thing to read in a new chat/session.
 - Active branch (expected): `feat/p14-backlog-wave`
 - Current phase: `P15` acceptance-and-stabilization wave is active locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, `L-01`~`L-04` now all have accepted-fix candidates landed locally, but the full surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
 - Last local quality gates:
+  - targeted linear follow-up checks (passed locally, 2026-08-20, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/linear/arrayInsert.test.ts src/pages/modules/arrayPageUtils.test.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+    - `npm run build`
+    - `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
   - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
   - `npm run build` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
   - targeted Playwright smoke for `T-07 Huffman Tree` (passed locally via Chromium fallback, 2026-05-08):
@@ -124,6 +128,15 @@ Use this file as the first thing to read in a new chat/session.
   - `L-03` linked list: compact horizontal controls + corrected `HEAD` label + no drawer overlap
   - `L-04` stack: compact horizontal controls + `10`-slot sequential stack + side-by-side linked-stack comparison for full-stack push divergence, reset-to-default behavior, next-slot `top` semantics, three-step linked-stack push animation, and no linked-stack internal overflow
   - follow-up: `L-01`~`L-04` now share the same widened floating `Controls` / fixed in-viewport floating `Step` window pattern instead of splitting between floating and docked panel behaviors
+  - latest follow-up on 2026-08-20:
+    - `L-01` full-array insert no longer drops the last element; full state stays visible and surfaces a page-level warning
+    - `L-01` / `L-02` / `L-03` transport `Reset` now restores each module's original default demo instead of only rewinding the current timeline
+    - `L-04` reset semantics were re-checked and already matched the desired default-demo restore behavior
+- `L-05` queue stabilization is still the active acceptance hotspot locally:
+  - rear pointer semantics now target the next enqueue slot
+  - normal full queue keeps a visible tail-end empty slot and explicit full warning
+  - circular queue now preserves the latest completed state when switching operations/modes after a full-state enqueue
+  - `Reset` now restores the default demo while keeping the currently selected queue mode
 - P9-M3 cross-module consistency + acceptance closure completed locally:
   - refreshed Playwright acceptance artifacts/report for `/modules` + all 15 implemented routes under `output/playwright/p9m3-*`
   - fixed the final pilot breakout drift so `L-01` and `SR-02` now also use the wide `tree-page` workspace pattern
@@ -453,11 +466,11 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Continue `P15-M1` acceptance inventory route by route, using the fixed `L-01 /modules/array` result as the first user-reviewed acceptance sample.
-- Continue `P15-M2` product-surface fixes on high-signal routes:
+- P15 user-reported fixes delivered and verified locally (2026-08-20): L-03 insert pseudocode order, L-01 array delete operation, empty-list/empty-array delete no-ops.
+  - Verified: `npm test` 96 files / 293 tests pass; `npm run build` clean; headless firefox smoke on `/modules/array` + `/modules/linked-list` passes.
+- Pending: manual browser walkthrough of the 3 fixed points by user; then decide next milestone.
+- Address remaining cross-cutting items when requested:
   - scaffold placeholder titles (`m0-scaffold-tmp`)
-  - other layout/usability regressions surfaced during direct page acceptance
-- Fix high-signal acceptance blockers first:
   - router/module-load warning storm seen in Firefox dev audit
 - Only reopen new algorithm delivery after the current `43/43` surface is accepted or the user explicitly reprioritizes.
 - Keep quality gates unchanged:

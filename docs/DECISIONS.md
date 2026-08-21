@@ -677,3 +677,19 @@ Record architecture or workflow decisions here.
 - Alternatives considered: model DFS recursively and reconstruct stack state for the UI; use edge declaration order directly without a normalized adjacency-list traversal contract; introduce a separate graph-page shell tailored to recursion visuals.
 - Consequences: the DFS page can teach stack depth and backtracking with no hidden state, replay tests stay deterministic across speeds/seeks, and future graph traversals such as BFS can reuse the same normalized graph preset foundation without shell drift.
 - Owner: haoyu + codex
+
+## DEC-20260821-59
+- Date: 2026-08-21
+- Status: accepted
+- Context: The user reviewed Chapter 4 teaching scope and decided not to pursue a broad "special matrices + generalized lists" expansion. The current textbook/courseware emphasis should stay close to classroom wording, and low-yield concept-only topics should not take priority over spatial-storage demos with strong animation value.
+- Decision: After the current `P15` acceptance/stabilization wave, treat the next Chapter 4 candidate visualization batch as:
+  - two-dimensional array sequential storage
+  - symmetric matrix compressed storage
+  - upper-triangular matrix compressed storage
+  - lower-triangular matrix compressed storage
+  - sparse-matrix triple-table storage
+  - sparse-matrix linked storage
+  Explicitly defer generalized lists, and record three-dimensional arrays plus any banded-matrix-style content as future expansion rather than the first delivery batch.
+- Alternatives considered: include generalized lists in the first Chapter 4 batch; open with a broader "all special matrices" feature set; introduce extra notation beyond the attached courseware's current wording.
+- Consequences: the next content batch stays tightly aligned to the attached Chapter 4 courseware and prioritizes high-clarity storage-mapping animations. Broader array/storage topics remain possible later without blocking the first Chapter 4 rollout.
+- Owner: haoyu + codex

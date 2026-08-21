@@ -42,6 +42,7 @@ type UseStageAnchorPanelOptions = {
   defaultAnchorSize: StageSize;
   defaultPanelSize: StageSize;
   collisionTarget?: StageRect | null;
+  collisionTargets?: StageRect[];
   margin?: number;
   overflowMargin?: number;
   autoAvoid?: boolean;
@@ -150,6 +151,10 @@ function getRectOverlapArea(left: StageRect, right: StageRect): number {
   return Math.max(0, overlapRight - overlapLeft) * Math.max(0, overlapBottom - overlapTop);
 }
 
+function getTotalRectOverlapArea(candidate: StageRect, targets: StageRect[]): number {
+  return targets.reduce((total, target) => total + getRectOverlapArea(candidate, target), 0);
+}
+
 function createUniquePointKey(point: StagePoint): string {
   return `${Math.round(point.x * 10)}:${Math.round(point.y * 10)}`;
 }
@@ -193,12 +198,12 @@ function resolveBestAnchorPosition(
   preferredAnchorPosition: StagePoint,
   metrics: LayoutMetrics,
   stageSize: StageSize,
-  target: StageRect,
+  targets: StageRect[],
   margin: number,
   overflowMargin: number,
 ): StagePoint {
   const currentBox = buildBoundingBox(currentAnchorPosition, metrics);
-  if (getRectOverlapArea(currentBox, target) <= 0) {
+  if (targets.length === 0 || getTotalRectOverlapArea(currentBox, targets) <= 0) {
     return currentAnchorPosition;
   }
 
@@ -211,11 +216,13 @@ function resolveBestAnchorPosition(
   const cornerMaxX = Math.max(cornerMinX, stageSize.width - metrics.width - margin + overflowMargin);
   const cornerMaxY = Math.max(cornerMinY, stageSize.height - metrics.height - margin + overflowMargin);
   const candidateOrigins = [
-    ...buildCandidateBoxOrigins(currentBox, preferredBox, target),
+    ...targets.flatMap((target) => buildCandidateBoxOrigins(currentBox, preferredBox, target)),
     { x: cornerMinX, y: cornerMinY },
     { x: cornerMaxX, y: cornerMinY },
     { x: cornerMinX, y: cornerMaxY },
     { x: cornerMaxX, y: cornerMaxY },
+    { x: preferredBox.x, y: preferredBox.y },
+    { x: currentBox.x, y: currentBox.y },
   ];
 
   let bestAnchor = currentAnchorPosition;
@@ -241,7 +248,7 @@ function resolveBestAnchorPosition(
       y: clampedOrigin.y - metrics.offsetY,
     };
     const candidateBox = buildBoundingBox(candidateAnchor, metrics);
-    const overlapArea = getRectOverlapArea(candidateBox, target);
+    const overlapArea = getTotalRectOverlapArea(candidateBox, targets);
     const distanceToCurrent = getDistanceBetweenPoints(clampedOrigin, { x: currentBox.x, y: currentBox.y });
     const distanceToPreferred = getDistanceBetweenPoints(clampedOrigin, { x: preferredBox.x, y: preferredBox.y });
     const score = overlapArea * 1000000 + distanceToCurrent + distanceToPreferred * 0.25;
@@ -294,6 +301,7 @@ export function useStageAnchorPanel({
   defaultAnchorSize,
   defaultPanelSize,
   collisionTarget = null,
+  collisionTargets = [],
   margin = DEFAULT_MARGIN,
   overflowMargin = 0,
   autoAvoid = true,
@@ -303,8 +311,13 @@ export function useStageAnchorPanel({
   const [anchorSize, setAnchorSize] = useState<StageSize>(defaultAnchorSize);
   const [panelSize, setPanelSize] = useState<StageSize>(defaultPanelSize);
   const [dragState, setDragState] = useState<AnchorPanelDragState | null>(null);
+  const [hasUserMoved, setHasUserMoved] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState<StagePoint>(() =>
     defaultPanelPosition(DEFAULT_STAGE_SIZE, defaultAnchorSize, defaultPanelSize),
+  );
+  const allCollisionTargets = useMemo(
+    () => (collisionTarget ? [collisionTarget, ...collisionTargets] : collisionTargets),
+    [collisionTarget, collisionTargets],
   );
 
   const metrics = useMemo(
@@ -321,29 +334,44 @@ export function useStageAnchorPanel({
       return anchorPosition;
     }
 
-    const clamped = clampAnchorPosition(anchorPosition, metrics, boundsSize, margin, overflowMargin);
-    if (!isOpen || !autoAvoid || !collisionTarget) {
-      return clamped;
+    return clampAnchorPosition(anchorPosition, metrics, boundsSize, margin, overflowMargin);
+  }, [
+    anchorPosition,
+    boundsSize,
+    enabled,
+    margin,
+    metrics,
+    overflowMargin,
+  ]);
+
+  useEffect(() => {
+    if (!enabled || !isOpen || !autoAvoid || dragState || hasUserMoved) {
+      return;
     }
 
     const preferredAnchor = defaultPanelPosition(boundsSize, anchorSize, panelSize);
-    return resolveBestAnchorPosition(
-      clamped,
+    const clampedCurrent = clampAnchorPosition(anchorPosition, metrics, boundsSize, margin, overflowMargin);
+    const nextAnchor = resolveBestAnchorPosition(
+      clampedCurrent,
       preferredAnchor,
       metrics,
       boundsSize,
-      collisionTarget,
+      allCollisionTargets,
       margin,
       overflowMargin,
     );
+
+    setAnchorPosition((previous) => (arePointsEqual(previous, nextAnchor) ? previous : nextAnchor));
   }, [
+    allCollisionTargets,
     anchorPosition,
     anchorSize,
     autoAvoid,
     boundsSize,
-    collisionTarget,
     defaultPanelPosition,
+    dragState,
     enabled,
+    hasUserMoved,
     isOpen,
     margin,
     metrics,
@@ -468,6 +496,7 @@ export function useStageAnchorPanel({
       event.preventDefault();
       event.stopPropagation();
       event.currentTarget.setPointerCapture?.(event.pointerId);
+      setHasUserMoved(true);
 
       setDragState({
         pointerId: event.pointerId,

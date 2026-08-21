@@ -111,6 +111,12 @@ export function resolveLinkedListConfig(
   }
 
   const displayIndex = Number(indexInput);
+  if (parsedList.length === 0) {
+    if (displayIndex === 1) {
+      return { config: { list: [], operation: { type: 'deleteAt', index: 0 } }, error: '' };
+    }
+    return { config: null, error: t('module.l03.error.deleteIndex') };
+  }
   if (!Number.isInteger(displayIndex) || displayIndex < 1 || displayIndex > parsedList.length) {
     return { config: null, error: t('module.l03.error.deleteIndex') };
   }
