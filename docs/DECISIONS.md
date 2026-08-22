@@ -14,6 +14,19 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260822-62
+- Date: 2026-08-22
+- Status: accepted
+- Context: The first Chapter 4 batch was originally narrowed to special-matrix storage topics, but direct user follow-up clarified that the highest exam value for generalized lists is not broad structure coverage. The real classroom need is repeated practice on nested `head` / `tail` evaluation, ideally with automatic random problem generation under configurable limits.
+- Decision: Open one focused generalized-list module immediately after `M-06`, and scope it as an exam-oriented `head/tail` trainer instead of a generic generalized-list overview. The first delivery should:
+  - live in the same `storage` track as a Chapter 4 follow-up route
+  - expose only parameterized random generation, not free-form manual authoring
+  - let the user control atom-type count, list width, list depth, operation mode, and operation nesting depth
+  - generate only legal nested `head` / `tail` expressions and show the reduction process step by step
+- Alternatives considered: keep generalized lists deferred entirely; build a broad generalized-list concept page first; start with manual input parsing and custom expression editing.
+- Consequences: the Chapter 4 local surface grows beyond the original matrix-only pilot, but the first generalized-list delivery stays tightly exam-aligned and avoids a heavier parser/editor scope. The module also establishes a reusable “random legal expression + stepwise reduction” pattern for future training-style pages.
+- Owner: haoyu + codex
+
 ## DEC-20260821-61
 - Date: 2026-08-21
 - Status: accepted

@@ -27,6 +27,9 @@ import { TwoDimensionalArrayPage } from '../pages/modules/TwoDimensionalArrayPag
 import { SymmetricMatrixPage } from '../pages/modules/SymmetricMatrixPage';
 import { UpperTriangularMatrixPage } from '../pages/modules/UpperTriangularMatrixPage';
 import { LowerTriangularMatrixPage } from '../pages/modules/LowerTriangularMatrixPage';
+import { SparseMatrixTriplesPage } from '../pages/modules/SparseMatrixTriplesPage';
+import { SparseMatrixLinkedPage } from '../pages/modules/SparseMatrixLinkedPage';
+import { GeneralizedListHeadTailPage } from '../pages/modules/GeneralizedListHeadTailPage';
 import { BinaryTreeTraversalPage } from '../pages/modules/BinaryTreeTraversalPage';
 import { BstPage } from '../pages/modules/BstPage';
 import { AvlTreePage } from '../pages/modules/AvlTreePage';
@@ -84,6 +87,9 @@ export const router = createBrowserRouter([
       { path: 'modules/symmetric-matrix', element: <SymmetricMatrixPage /> },
       { path: 'modules/upper-triangular-matrix', element: <UpperTriangularMatrixPage /> },
       { path: 'modules/lower-triangular-matrix', element: <LowerTriangularMatrixPage /> },
+      { path: 'modules/sparse-matrix-triples', element: <SparseMatrixTriplesPage /> },
+      { path: 'modules/sparse-matrix-linked', element: <SparseMatrixLinkedPage /> },
+      { path: 'modules/generalized-list-head-tail', element: <GeneralizedListHeadTailPage /> },
       { path: 'modules/binary-tree', element: <BinaryTreeTraversalPage /> },
       { path: 'modules/bst', element: <BstPage /> },
       { path: 'modules/avl-tree', element: <AvlTreePage /> },

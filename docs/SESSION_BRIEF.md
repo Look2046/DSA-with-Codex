@@ -6,10 +6,10 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p14-backlog-wave`
-- Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, and local storage pilots `M-01` + `M-04` now bring the local implemented surface to `47` routes pending user review
+- Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, and local Chapter 4 pilots `M-01` + `M-07` now bring the local implemented surface to `50` routes pending user review
 - Last local quality gates:
   - Chapter 4 pilot checks (passed locally, 2026-08-21, `feat/p14-backlog-wave`):
-    - `npm test -- src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+    - `npm test -- src/modules/storage/generalizedListHeadTail.test.ts src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
     - `npm run build`
     - `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
   - targeted linear follow-up checks (passed locally, 2026-08-20, `feat/p14-backlog-wave`):
@@ -470,10 +470,10 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- Immediate review target: user browser walkthrough of `M-01 /modules/two-dimensional-array`, `M-02 /modules/symmetric-matrix`, `M-03 /modules/upper-triangular-matrix`, and `M-04 /modules/lower-triangular-matrix` to decide whether the current fixed-layout storage interaction is acceptable before expanding further.
+- Immediate review target: user browser walkthrough of `M-01 /modules/two-dimensional-array` through `M-07 /modules/generalized-list-head-tail` to decide whether the current Chapter 4 teaching interaction is acceptable before expanding further.
 - Keep the Chapter 4 pilot intentionally narrow unless the user accepts it:
-  - current local pilot scope = two-dimensional array sequential storage + symmetric matrix compressed storage + upper-triangular matrix compressed storage + lower-triangular matrix compressed storage
-  - deferred even within Chapter 4 batch = sparse triple-table, sparse linked storage
+  - current local pilot scope = two-dimensional array sequential storage + symmetric matrix compressed storage + upper-triangular matrix compressed storage + lower-triangular matrix compressed storage + sparse-matrix triple-table storage + sparse-matrix linked storage + generalized-list head/tail training
+  - deferred even within Chapter 4 batch = none
 - Address remaining cross-cutting items when requested:
   - scaffold placeholder titles (`m0-scaffold-tmp`)
   - router/module-load warning storm seen in Firefox dev audit

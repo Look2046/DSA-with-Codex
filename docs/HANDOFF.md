@@ -2,6 +2,115 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-08-22 (M-07 follow-up: generalized list head/tail trainer)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- After finishing the matrix + sparse-storage batch, opened one focused generalized-list follow-up route:
+  - `M-07 /modules/generalized-list-head-tail`
+- Kept the scope intentionally exam-oriented instead of broad:
+  - random legal generalized list generation under configurable limits
+  - random legal nested `head` / `tail` expression generation
+  - step-by-step reduction that peels the expression from the innermost legal operation outward
+- User-approved parameter surface:
+  - atom-type count: default `2`, min `1`, max `4`
+  - list width: default `3`, min `1`, max `5`
+  - list depth: default `2`, min `1`, max `4`
+  - operation mode: `仅 head` / `仅 tail` / `head / tail 混合`
+  - operation nesting depth: default `2`, min `1`, max `4`
+- Implementation details:
+  - `src/modules/storage/generalizedListHeadTail.ts`: config sanitization, generalized-list generator, legal operation-chain generator, stepwise reduction model
+  - `src/modules/storage/generalizedListHeadTail.test.ts`: config, legal generation, mode coverage, reduction coverage
+  - `src/pages/modules/GeneralizedListHeadTailPage.tsx`: parameter controls + generated list + stepwise reduction + rule explanation
+  - route/registry/catalog/i18n/css synced for `M-07`
+- Product-surface sync:
+  - home route-count copy updated from `49` to `50`
+
+### Current State
+- Local verification target for this subtask:
+  - `npm test -- src/modules/storage/generalizedListHeadTail.test.ts src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open `/modules/generalized-list-head-tail` and review:
+  - parameter panel ranges / defaults
+  - randomness quality of generated generalized lists
+  - whether the current step-by-step reduction is clear enough for exam-style nested `head/tail` problems
+- If accepted, the Chapter 4 local batch can pause for acceptance and commit.
+
+## 2026-08-22 (M-06 storage follow-up: sparse matrix linked storage)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- After the user accepted the current `M-05` direction, landed `M-06 /modules/sparse-matrix-linked` as the sixth storage-track pilot.
+- Followed the courseware wording on slide 21-22:
+  - sparse matrix linked storage is modeled as `带行指针的单链表存储法`
+  - each row has one head pointer
+  - each row's non-zero triplets are linked left-to-right in increasing column order
+- Implementation details:
+  - `src/modules/storage/sparseMatrixLinked.ts`: row-chain builder, node lookup, next-pointer explanation helpers
+  - `src/modules/storage/sparseMatrixLinked.test.ts`: bounds, row-chain structure, next-node, zero-cell coverage
+  - `src/pages/modules/SparseMatrixLinkedPage.tsx`: matrix / rule / row-pointer-linked page
+  - route/registry/catalog/i18n/css synced for `M-06`
+- Product-surface sync:
+  - home route-count copy updated from `48` to `49`
+
+### Current State
+- Local verification target for this subtask:
+  - `npm test -- src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open the six current storage pilots for direct browser review:
+  - `/modules/two-dimensional-array`
+  - `/modules/symmetric-matrix`
+  - `/modules/upper-triangular-matrix`
+  - `/modules/lower-triangular-matrix`
+  - `/modules/sparse-matrix-triples`
+  - `/modules/sparse-matrix-linked`
+- If the user accepts `M-06`, the first Chapter 4 storage batch can pause for acceptance or move into a new expansion topic.
+
+## 2026-08-22 (M-05 storage follow-up: sparse matrix triplet storage)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- After the user accepted the current `M-04` direction, landed `M-05 /modules/sparse-matrix-triples` as the fifth storage-track pilot.
+- Kept the same accepted storage-page interaction baseline:
+  - fixed three-column teaching layout
+  - click matrix cell directly to choose target
+  - zero elements remain clickable for explanation, but only non-zero elements enter the compressed structure
+- Implementation details:
+  - `src/modules/storage/sparseMatrixTriples.ts`: sparse presets, non-zero flattening, triplet-index lookup
+  - `src/modules/storage/sparseMatrixTriples.test.ts`: bounds, flatten order, triplet index, non-zero count coverage
+  - `src/pages/modules/SparseMatrixTriplesPage.tsx`: matrix / rule / triplet-table page
+  - route/registry/catalog/i18n/css synced for `M-05`
+- Product-surface sync:
+  - home route-count copy updated from `47` to `48`
+
+### Current State
+- Local verification target for this subtask:
+  - `npm test -- src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open the five current storage pilots for direct browser review:
+  - `/modules/two-dimensional-array`
+  - `/modules/symmetric-matrix`
+  - `/modules/upper-triangular-matrix`
+  - `/modules/lower-triangular-matrix`
+  - `/modules/sparse-matrix-triples`
+- If the user accepts `M-05`, continue to:
+  - sparse-matrix linked storage
+
 ## 2026-08-22 (M-04 storage follow-up: lower triangular matrix compressed storage)
 
 ### Today Done

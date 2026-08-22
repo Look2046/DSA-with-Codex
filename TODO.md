@@ -34,8 +34,11 @@ Track actionable tasks here. Keep tasks small and testable.
     - `M-02` symmetric matrix compressed storage
     - `M-03` upper-triangular matrix compressed storage
     - `M-04` lower-triangular matrix compressed storage
+    - `M-05` sparse-matrix triple-table storage
+    - `M-06` sparse-matrix linked storage
+    - `M-07` generalized-list head/tail training
     - local verification target:
-      - `npm test -- src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+      - `npm test -- src/modules/storage/generalizedListHeadTail.test.ts src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
       - `npm run build`
   - Planned scope:
     - two-dimensional array sequential storage
@@ -46,7 +49,6 @@ Track actionable tasks here. Keep tasks small and testable.
     - sparse-matrix linked storage
   - Future expansion only:
     - three-dimensional array storage
-    - generalized lists
     - any banded-matrix-style extension not present in the current courseware wording
 
 ## P0 (V1 Must Have)
