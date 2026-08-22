@@ -2,6 +2,144 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-08-22 (M-04 storage follow-up: lower triangular matrix compressed storage)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- After the user accepted the current `M-03` direction, landed `M-04 /modules/lower-triangular-matrix` as the fourth storage-track pilot.
+- Kept the same accepted storage-page interaction baseline:
+  - fixed three-column teaching layout
+  - click matrix cell directly to choose target
+  - strict upper-triangular constant region reuses one shared constant slot `c`
+- Implementation details:
+  - `src/modules/storage/lowerTriangularMatrix.ts`: preset matrices, lower-triangle index formula, shared-constant-slot mapping, flatten helper
+  - `src/modules/storage/lowerTriangularMatrix.test.ts`: bounds, stored-index, constant-slot, flatten-order coverage
+  - `src/pages/modules/LowerTriangularMatrixPage.tsx`: matrix / formula / compressed-memory page
+  - route/registry/catalog/i18n synced for `M-04`
+- Product-surface sync:
+  - home route-count copy updated from `46` to `47`
+
+### Current State
+- Local verification target for this subtask:
+  - `npm test -- src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open the four current storage pilots for direct browser review:
+  - `/modules/two-dimensional-array`
+  - `/modules/symmetric-matrix`
+  - `/modules/upper-triangular-matrix`
+  - `/modules/lower-triangular-matrix`
+- If the user accepts `M-04`, continue to:
+  - sparse-matrix triple-table
+  - sparse-matrix linked storage
+
+## 2026-08-21 (M-03 storage follow-up: upper triangular matrix compressed storage)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- User accepted the current `M-02` direction and asked to continue with the next Chapter 4 storage module.
+- Landed `M-03 /modules/upper-triangular-matrix` as the third storage-track pilot:
+  - fixed-layout teaching page consistent with `M-01` / `M-02`
+  - only stores the main diagonal plus the upper triangle
+  - strict lower-triangular zeros now map to one shared constant slot `c = 0`
+- Implementation details:
+  - `src/modules/storage/upperTriangularMatrix.ts`: preset matrices, upper-triangle index formula, shared-zero-slot mapping, flatten helper
+  - `src/modules/storage/upperTriangularMatrix.test.ts`: bounds, stored-index, zero-slot, flatten-order coverage
+  - `src/pages/modules/UpperTriangularMatrixPage.tsx`: matrix / formula / compressed-memory page
+  - route/registry/catalog/i18n/css synced for `M-03`
+- Product-surface sync:
+  - home route-count copy updated from `45` to `46`
+
+### Current State
+- Re-verified locally on `2026-08-21`:
+  - `npm test -- src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open the three current storage pilots for direct browser review:
+  - `/modules/two-dimensional-array`
+  - `/modules/symmetric-matrix`
+  - `/modules/upper-triangular-matrix`
+- If the user accepts this third page, continue to:
+  - lower-triangular matrix
+  - sparse-matrix triple-table
+  - sparse-matrix linked storage
+
+## 2026-08-21 (M-02 storage follow-up: symmetric matrix compressed storage)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- User accepted the revised `M-01` direction and asked to continue.
+- Landed `M-02 /modules/symmetric-matrix` as the second storage-track pilot:
+  - fixed-layout teaching page consistent with the current storage pages
+  - supports `只存上三角` / `只存下三角`
+  - shows mirrored reuse for off-half targets and maps them into compressed linear storage
+- Implementation details:
+  - `src/modules/storage/symmetricMatrix.ts`: preset matrices, symmetric mirroring, upper/lower compressed index formulas, flatten helpers
+  - `src/modules/storage/symmetricMatrix.test.ts`: upper/lower mapping and flatten order coverage
+  - `src/pages/modules/SymmetricMatrixPage.tsx`: matrix / formula / compressed-memory page
+  - route/registry/catalog/i18n/css synced for `M-02`
+- Product-surface sync:
+  - home route-count copy updated from `44` to `45`
+
+### Current State
+- Local verification target for this subtask:
+  - `npm test -- src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open `/modules/two-dimensional-array` and `/modules/symmetric-matrix` for direct browser review, then decide whether to continue to:
+  - upper-triangular matrix
+  - lower-triangular matrix
+  - sparse-matrix triple-table
+  - sparse-matrix linked storage
+
+## 2026-08-21 (M-01 Chapter 4 pilot: two-dimensional array sequential storage)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- User explicitly approved opening Chapter 4 with one pilot module before any broader expansion.
+- Landed a new storage-track pilot module:
+  - added new catalog category `storage`
+  - added `M-01 /modules/two-dimensional-array`
+  - implemented row-major two-dimensional array storage mapping only (`k = i * cols + j`)
+- Implementation details:
+  - `src/modules/storage/twoDimensionalArray.ts`: preset matrices, target validation, row-major step generator
+  - `src/modules/storage/twoDimensionalArrayTimelineAdapter.ts`: timeline frame adapter
+  - `src/modules/storage/twoDimensionalArray.test.ts`: mapping / scan-prefix / validation coverage
+  - `src/pages/modules/TwoDimensionalArrayPage.tsx`: matrix-to-linear teaching page on `WorkspaceShell`
+  - registry/router/catalog/i18n/css wired for the new `storage` category and `M-01`
+- Product-surface sync:
+  - home/catalog copy updated from `43` to `44` live routes and from `8` to `9` tracks
+
+### Current State
+- Re-verified locally on `2026-08-21`:
+  - `npm test -- src/modules/storage/twoDimensionalArray.test.ts`
+  - `npm run build`
+- Not yet re-verified:
+  - `npm run check` is still blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+  - no browser walkthrough/screenshot evidence yet for `M-01`
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open `/modules/two-dimensional-array` in the browser and let the user review whether the current row-major interaction is acceptable before expanding to:
+  - symmetric matrix
+  - upper-triangular matrix
+  - lower-triangular matrix
+  - sparse-matrix triple-table
+  - sparse-matrix linked storage
+
 ## 2026-08-20 (P15 user-reported fixes: L-03 pseudocode order / L-01 delete / empty-list delete)
 
 ### Today Done

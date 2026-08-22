@@ -1,7 +1,17 @@
 import type { TranslationKey } from '../i18n/translations';
 import type { ModuleCategory, ModuleDifficulty } from '../types/module';
 
-export const MODULE_CATEGORY_ORDER: ModuleCategory[] = ['linear', 'sort', 'search', 'tree', 'graph', 'hash', 'string', 'paradigm'];
+export const MODULE_CATEGORY_ORDER: ModuleCategory[] = [
+  'linear',
+  'storage',
+  'sort',
+  'search',
+  'tree',
+  'graph',
+  'hash',
+  'string',
+  'paradigm',
+];
 
 export const MODULE_CATEGORY_META: Record<
   ModuleCategory,
@@ -15,6 +25,11 @@ export const MODULE_CATEGORY_META: Record<
     label: 'modules.filter.linear',
     summary: 'modules.category.linear.summary',
     focus: 'modules.category.linear.focus',
+  },
+  storage: {
+    label: 'modules.filter.storage',
+    summary: 'modules.category.storage.summary',
+    focus: 'modules.category.storage.focus',
   },
   sort: {
     label: 'modules.filter.sort',
@@ -78,6 +93,10 @@ export const MODULE_DESCRIPTION_KEYS: Record<string, TranslationKey> = {
   'L-03': 'module.l03.body',
   'L-04': 'module.l04.body',
   'L-05': 'module.l05.body',
+  'M-01': 'module.m01.body',
+  'M-02': 'module.m02.body',
+  'M-03': 'module.m03.body',
+  'M-04': 'module.m04.body',
   'T-01': 'module.t01.body',
   'T-02': 'module.t02.body',
   'T-03': 'module.t03.body',

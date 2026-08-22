@@ -14,6 +14,18 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260821-61
+- Date: 2026-08-21
+- Status: accepted
+- Context: After `M-01` and `M-02`, the next Chapter 4 pilot needed to teach upper-triangular matrix compression without pretending that the strict lower triangle contains independently meaningful data. The teaching page also needed a precise answer for what happens when the user clicks a lower-triangular position.
+- Decision: Model `M-03` upper-triangular compression as:
+  - store the main diagonal and all cells above it in row order
+  - treat every strict lower-triangular position as a fixed zero element
+  - map those lower-triangular zero positions to one shared constant slot `c = 0` appended after the compressed upper-triangular sequence
+- Alternatives considered: disable clicks on the lower triangle entirely; keep lower-triangular zeros visible but claim they have no linear mapping; create one separate zero slot per omitted cell.
+- Consequences: the page can explain every clicked matrix position with a deterministic compressed-memory destination, while staying close to the standard textbook idea that special-matrix zero regions are not stored one by one. The same “shared constant slot” pattern can later be reused in the lower-triangular module.
+- Owner: haoyu + codex
+
 ## DEC-20260809-72
 - Date: 2026-08-09
 - Status: accepted
@@ -692,4 +704,17 @@ Record architecture or workflow decisions here.
   Explicitly defer generalized lists, and record three-dimensional arrays plus any banded-matrix-style content as future expansion rather than the first delivery batch.
 - Alternatives considered: include generalized lists in the first Chapter 4 batch; open with a broader "all special matrices" feature set; introduce extra notation beyond the attached courseware's current wording.
 - Consequences: the next content batch stays tightly aligned to the attached Chapter 4 courseware and prioritizes high-clarity storage-mapping animations. Broader array/storage topics remain possible later without blocking the first Chapter 4 rollout.
+- Owner: haoyu + codex
+
+## DEC-20260821-60
+- Date: 2026-08-21
+- Status: accepted
+- Context: After agreeing on the Chapter 4 storage scope, the user preferred to validate one concrete pilot before expanding into multiple special-matrix modules. The repo also had no dedicated category for storage/compression teaching pages, so adding the pilot under an existing track would blur future discovery.
+- Decision: Start Chapter 4 with one narrow pilot module only:
+  - add a new `storage` catalog category for array-storage and matrix-compression pages
+  - land `M-01` as `two-dimensional array sequential storage`
+  - keep the first implementation focused on row-major mapping only (`k = i * cols + j`)
+  - defer column-major variants and all matrix-compression pages until after user acceptance of the pilot
+- Alternatives considered: group the pilot under `linear`; start directly with multiple Chapter 4 modules; include both row-major and column-major storage in the first delivery.
+- Consequences: the first Chapter 4 review unit stays small and easy to judge, and future storage modules now have a clean catalog home. The tradeoff is that the local runtime surface increases from `43` to `44` implemented routes before the remaining `P15` cross-cutting cleanup is formally closed.
 - Owner: haoyu + codex

@@ -23,6 +23,10 @@ import { BinarySearchPage } from '../pages/modules/BinarySearchPage';
 import { LinearSearchPage } from '../pages/modules/LinearSearchPage';
 import { StackPage } from '../pages/modules/StackPage';
 import { QueuePage } from '../pages/modules/QueuePage';
+import { TwoDimensionalArrayPage } from '../pages/modules/TwoDimensionalArrayPage';
+import { SymmetricMatrixPage } from '../pages/modules/SymmetricMatrixPage';
+import { UpperTriangularMatrixPage } from '../pages/modules/UpperTriangularMatrixPage';
+import { LowerTriangularMatrixPage } from '../pages/modules/LowerTriangularMatrixPage';
 import { BinaryTreeTraversalPage } from '../pages/modules/BinaryTreeTraversalPage';
 import { BstPage } from '../pages/modules/BstPage';
 import { AvlTreePage } from '../pages/modules/AvlTreePage';
@@ -76,6 +80,10 @@ export const router = createBrowserRouter([
       { path: 'modules/linked-list', element: <LinkedListPage /> },
       { path: 'modules/stack', element: <StackPage /> },
       { path: 'modules/queue', element: <QueuePage /> },
+      { path: 'modules/two-dimensional-array', element: <TwoDimensionalArrayPage /> },
+      { path: 'modules/symmetric-matrix', element: <SymmetricMatrixPage /> },
+      { path: 'modules/upper-triangular-matrix', element: <UpperTriangularMatrixPage /> },
+      { path: 'modules/lower-triangular-matrix', element: <LowerTriangularMatrixPage /> },
       { path: 'modules/binary-tree', element: <BinaryTreeTraversalPage /> },
       { path: 'modules/bst', element: <BstPage /> },
       { path: 'modules/avl-tree', element: <AvlTreePage /> },

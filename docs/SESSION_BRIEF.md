@@ -6,8 +6,12 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p14-backlog-wave`
-- Current phase: `P15` acceptance-and-stabilization wave is active locally; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` brings the runtime surface to `43/43`, `L-01`~`L-04` now all have accepted-fix candidates landed locally, but the full surface is not yet user-accepted and new feature scope should stay paused until the first acceptance wave lands
+- Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, and local storage pilots `M-01` + `M-04` now bring the local implemented surface to `47` routes pending user review
 - Last local quality gates:
+  - Chapter 4 pilot checks (passed locally, 2026-08-21, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+    - `npm run build`
+    - `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
   - targeted linear follow-up checks (passed locally, 2026-08-20, `feat/p14-backlog-wave`):
     - `npm test -- src/modules/linear/arrayInsert.test.ts src/pages/modules/arrayPageUtils.test.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
     - `npm run build`
@@ -466,13 +470,13 @@ Use this file as the first thing to read in a new chat/session.
 
 ## 3) Next Priority
 
-- P15 user-reported fixes delivered and verified locally (2026-08-20): L-03 insert pseudocode order, L-01 array delete operation, empty-list/empty-array delete no-ops.
-  - Verified: `npm test` 96 files / 293 tests pass; `npm run build` clean; headless firefox smoke on `/modules/array` + `/modules/linked-list` passes.
-- Pending: manual browser walkthrough of the 3 fixed points by user; then decide next milestone.
+- Immediate review target: user browser walkthrough of `M-01 /modules/two-dimensional-array`, `M-02 /modules/symmetric-matrix`, `M-03 /modules/upper-triangular-matrix`, and `M-04 /modules/lower-triangular-matrix` to decide whether the current fixed-layout storage interaction is acceptable before expanding further.
+- Keep the Chapter 4 pilot intentionally narrow unless the user accepts it:
+  - current local pilot scope = two-dimensional array sequential storage + symmetric matrix compressed storage + upper-triangular matrix compressed storage + lower-triangular matrix compressed storage
+  - deferred even within Chapter 4 batch = sparse triple-table, sparse linked storage
 - Address remaining cross-cutting items when requested:
   - scaffold placeholder titles (`m0-scaffold-tmp`)
   - router/module-load warning storm seen in Firefox dev audit
-- Only reopen new algorithm delivery after the current `43/43` surface is accepted or the user explicitly reprioritizes.
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

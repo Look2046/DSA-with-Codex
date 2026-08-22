@@ -152,6 +152,16 @@ function CategoryGlyph({ category, ...props }: { category: ModuleCategory } & SV
           <path d="M4 17h16" />
         </svg>
       );
+    case 'storage':
+      return (
+        <svg {...baseProps}>
+          <rect x="4" y="5" width="14" height="11" rx="1.8" />
+          <path d="M8 9h6" />
+          <path d="M8 12h6" />
+          <path d="M20 8v11" />
+          <path d="M17 16h6" />
+        </svg>
+      );
     case 'search':
       return (
         <svg {...baseProps}>

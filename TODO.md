@@ -29,6 +29,14 @@ Track actionable tasks here. Keep tasks small and testable.
   - Verified: 96 test files / 293 tests pass, `npm run build` clean, headless browser smoke on `/modules/array` + `/modules/linked-list` passes.
 
 - [ ] Prepare the first Chapter 4 storage-visualization batch after `P15`
+  - Pilot landed locally (2026-08-21):
+    - `M-01` two-dimensional array sequential storage
+    - `M-02` symmetric matrix compressed storage
+    - `M-03` upper-triangular matrix compressed storage
+    - `M-04` lower-triangular matrix compressed storage
+    - local verification target:
+      - `npm test -- src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+      - `npm run build`
   - Planned scope:
     - two-dimensional array sequential storage
     - symmetric matrix compressed storage
