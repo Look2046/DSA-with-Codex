@@ -23,6 +23,41 @@ import type { HighlightType } from '../../types/animation';
 const STACK_WORKSPACE_CONFIG = getStackWorkspaceConfig();
 const INITIAL_STACK_PAGE_STATE = createInitialStackPageState();
 
+const SEQUENTIAL_STACK_PSEUDOCODE = {
+  push: [
+    { sourceLine: 1, textKey: 'module.l04.sequentialCode.line1', cLine: 'validate top position' },
+    { sourceLine: 2, textKey: 'module.l04.sequentialCode.line2', cLine: 'start push branch' },
+    { sourceLine: 3, textKey: 'module.l04.sequentialCode.line3', cLine: 'if (top == MAX) return OVERFLOW;' },
+    { sourceLine: 4, textKey: 'module.l04.sequentialCode.line4', cLine: 'data[top] = value; top = top + 1;' },
+  ],
+  pop: [
+    { sourceLine: 1, textKey: 'module.l04.sequentialCode.line1', cLine: 'validate top position' },
+    { sourceLine: 5, textKey: 'module.l04.sequentialCode.line5', cLine: 'top = top - 1; return data[top];' },
+  ],
+  peek: [
+    { sourceLine: 1, textKey: 'module.l04.sequentialCode.line1', cLine: 'validate top position' },
+    { sourceLine: 6, textKey: 'module.l04.sequentialCode.line6', cLine: 'return data[top - 1];' },
+  ],
+} as const;
+
+const LINKED_STACK_PSEUDOCODE = {
+  push: [
+    { sourceLine: 1, textKey: 'module.l04.linkedCode.line1', cLine: 'locate current top' },
+    { sourceLine: 2, textKey: 'module.l04.linkedCode.line2', cLine: 'start push branch' },
+    { sourceLine: 3, textKey: 'module.l04.linkedCode.line3', cLine: 'Node *s = createNode(value);' },
+    { sourceLine: 4, textKey: 'module.l04.linkedCode.line4', cLine: 's->next = top;' },
+    { sourceLine: 5, textKey: 'module.l04.linkedCode.line5', cLine: 'top = s;' },
+  ],
+  pop: [
+    { sourceLine: 1, textKey: 'module.l04.linkedCode.line1', cLine: 'locate current top' },
+    { sourceLine: 6, textKey: 'module.l04.linkedCode.line6', cLine: 'top = top->next;' },
+  ],
+  peek: [
+    { sourceLine: 1, textKey: 'module.l04.linkedCode.line1', cLine: 'locate current top' },
+    { sourceLine: 7, textKey: 'module.l04.linkedCode.line7', cLine: 'return top->data;' },
+  ],
+} as const;
+
 function createRandomPushValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
@@ -452,6 +487,14 @@ export function StackPage() {
   const linkedOutcomeLabel = getOutcomeLabel(currentSnapshot?.linked.outcome ?? 'ok', t);
   const sequentialCodeLines = getStackPseudocodeActiveLines(currentSnapshot, 'sequential');
   const linkedCodeLines = getStackPseudocodeActiveLines(currentSnapshot, 'linked');
+  const sequentialPseudocode = SEQUENTIAL_STACK_PSEUDOCODE[operationType];
+  const linkedPseudocode = LINKED_STACK_PSEUDOCODE[operationType];
+  const sequentialActiveDisplayLines = sequentialPseudocode
+    .map((item, index) => (sequentialCodeLines.includes(item.sourceLine) ? index + 1 : -1))
+    .filter((line) => line > 0);
+  const linkedActiveDisplayLines = linkedPseudocode
+    .map((item, index) => (linkedCodeLines.includes(item.sourceLine) ? index + 1 : -1))
+    .filter((line) => line > 0);
 
   useLayoutEffect(() => {
     if (!showLinkedNextLink) {
@@ -670,15 +713,32 @@ export function StackPage() {
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
                 <h3>
-                  {t('module.l04.compare.sequential')} {t('module.l04.pseudocode')}
+                  {t('module.l04.compare.sequential')} {t('module.l04.pseudocode')}：中文式
                 </h3>
                 <ol>
-                  <li className={sequentialCodeLines.includes(1) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line1')}</li>
-                  <li className={sequentialCodeLines.includes(2) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line2')}</li>
-                  <li className={sequentialCodeLines.includes(3) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line3')}</li>
-                  <li className={sequentialCodeLines.includes(4) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line4')}</li>
-                  <li className={sequentialCodeLines.includes(5) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line5')}</li>
-                  <li className={sequentialCodeLines.includes(6) ? 'code-active' : ''}>{t('module.l04.sequentialCode.line6')}</li>
+                  {sequentialPseudocode.map((item, index) => (
+                    <li
+                      key={`seq-cn-${item.sourceLine}`}
+                      className={sequentialActiveDisplayLines.includes(index + 1) ? 'code-active' : ''}
+                    >
+                      {t(item.textKey)}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>
+                  {t('module.l04.compare.sequential')} {t('module.l04.pseudocode')}：类 C 式
+                </h3>
+                <ol>
+                  {sequentialPseudocode.map((item, index) => (
+                    <li
+                      key={`seq-c-${item.sourceLine}`}
+                      className={sequentialActiveDisplayLines.includes(index + 1) ? 'code-active' : ''}
+                    >
+                      <code>{item.cLine}</code>
+                    </li>
+                  ))}
                 </ol>
               </div>
             </div>
@@ -686,16 +746,32 @@ export function StackPage() {
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
                 <h3>
-                  {t('module.l04.compare.linked')} {t('module.l04.pseudocode')}
+                  {t('module.l04.compare.linked')} {t('module.l04.pseudocode')}：中文式
                 </h3>
                 <ol>
-                  <li className={linkedCodeLines.includes(1) ? 'code-active' : ''}>{t('module.l04.linkedCode.line1')}</li>
-                  <li className={linkedCodeLines.includes(2) ? 'code-active' : ''}>{t('module.l04.linkedCode.line2')}</li>
-                  <li className={linkedCodeLines.includes(3) ? 'code-active' : ''}>{t('module.l04.linkedCode.line3')}</li>
-                  <li className={linkedCodeLines.includes(4) ? 'code-active' : ''}>{t('module.l04.linkedCode.line4')}</li>
-                  <li className={linkedCodeLines.includes(5) ? 'code-active' : ''}>{t('module.l04.linkedCode.line5')}</li>
-                  <li className={linkedCodeLines.includes(6) ? 'code-active' : ''}>{t('module.l04.linkedCode.line6')}</li>
-                  <li className={linkedCodeLines.includes(7) ? 'code-active' : ''}>{t('module.l04.linkedCode.line7')}</li>
+                  {linkedPseudocode.map((item, index) => (
+                    <li
+                      key={`linked-cn-${item.sourceLine}`}
+                      className={linkedActiveDisplayLines.includes(index + 1) ? 'code-active' : ''}
+                    >
+                      {t(item.textKey)}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>
+                  {t('module.l04.compare.linked')} {t('module.l04.pseudocode')}：类 C 式
+                </h3>
+                <ol>
+                  {linkedPseudocode.map((item, index) => (
+                    <li
+                      key={`linked-c-${item.sourceLine}`}
+                      className={linkedActiveDisplayLines.includes(index + 1) ? 'code-active' : ''}
+                    >
+                      <code>{item.cLine}</code>
+                    </li>
+                  ))}
                 </ol>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
 import { buildTrieTimelineFromInput } from '../../modules/tree/trieTimelineAdapter';
-import type { TrieOutcome, TriePhase, TrieStep } from '../../modules/tree/trie';
+import type { TrieOutcome, TriePhase } from '../../modules/tree/trie';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 type TriePreset = {
@@ -105,41 +105,6 @@ function getOutcomeLabel(outcome: TrieOutcome, t: TranslateFn): string {
   return t('module.t06.outcome.ongoing');
 }
 
-function getStepDescription(step: TrieStep | undefined, t: TranslateFn): string {
-  if (!step) {
-    return '-';
-  }
-
-  if (step.action === 'initial') {
-    return t('module.t06.step.initial');
-  }
-  if (step.action === 'insertVisit') {
-    return t('module.t06.step.insertVisit');
-  }
-  if (step.action === 'insertCreate') {
-    return t('module.t06.step.insertCreate');
-  }
-  if (step.action === 'insertReuse') {
-    return t('module.t06.step.insertReuse');
-  }
-  if (step.action === 'markTerminal') {
-    return t('module.t06.step.markTerminal');
-  }
-  if (step.action === 'searchStart') {
-    return t('module.t06.step.searchStart');
-  }
-  if (step.action === 'searchVisit') {
-    return t('module.t06.step.searchVisit');
-  }
-  if (step.action === 'searchHit') {
-    return t('module.t06.step.searchHit');
-  }
-  if (step.action === 'searchMiss') {
-    return t('module.t06.step.searchMiss');
-  }
-  return t('module.t06.step.completed');
-}
-
 export function TriePage() {
   const { t } = useI18n();
   const [presetKey, setPresetKey] = useState<PresetKey>(PRESETS[0].key);
@@ -234,7 +199,6 @@ export function TriePage() {
   const codeLines = useMemo(() => CODE_LINE_KEYS.map((key) => t(key)), [t]);
   const currentOutcomeLabel = getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t);
   const currentPhaseLabel = getPhaseLabel(currentSnapshot?.phase ?? 'insert', t);
-  const currentStepDescription = getStepDescription(currentSnapshot, t);
   const focusPoint =
     currentSnapshot?.currentId === null || currentSnapshot?.currentId === undefined
       ? null
@@ -247,11 +211,6 @@ export function TriePage() {
         .map((node) => (node.char === '' ? 'ROOT' : node.char.toUpperCase())),
     [currentSnapshot?.pathIds, nodeMap],
   );
-  const currentNodeLabel =
-    currentSnapshot?.currentId !== null && currentSnapshot?.currentId !== undefined
-      ? (nodeMap.get(currentSnapshot.currentId)?.char || 'ROOT')
-      : 'ROOT';
-  const matchedWord = currentSnapshot?.matchedWord ?? '-';
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
 
   const applyPreset = (nextPresetKey: PresetKey) => {
@@ -301,8 +260,8 @@ export function TriePage() {
       stageBodyClassName="workspace-stage-body-tree"
       controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 600 }}
-      defaultContextPanelSize={{ width: 320, height: 560 }}
+      defaultControlsPanelSize={{ width: 920, height: 300 }}
+      defaultContextPanelSize={{ width: 560, height: 560 }}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -324,7 +283,7 @@ export function TriePage() {
         </>
       }
       controlsContent={
-        <>
+        <div className="tree-controls-workbench">
           <div className="tree-workspace-field">
             <span>{t('module.t06.input.preset')}</span>
             <div className="tree-workspace-toggle-row">
@@ -400,53 +359,10 @@ export function TriePage() {
             <span>{t('module.t06.seed')}</span>
             <code>{formatWords(activeConfig.seedWords)}</code>
           </div>
-        </>
+        </div>
       }
       stepContent={
-        <>
-          <div className="tree-workspace-step-copy">
-            <h3>{currentStepDescription}</h3>
-            <p>
-              {t('module.t06.meta.phase')}: {currentPhaseLabel} · {t('module.t06.meta.outcome')}: {currentOutcomeLabel}
-            </p>
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.phase')}</dt>
-              <dd>{currentPhaseLabel}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.insert')}</dt>
-              <dd>{activeConfig.insertWord}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.query')}</dt>
-              <dd>{activeConfig.queryWord}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.current')}</dt>
-              <dd>{currentNodeLabel === '' ? 'ROOT' : currentNodeLabel.toUpperCase()}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.activeChar')}</dt>
-              <dd>{currentSnapshot?.activeChar?.toUpperCase() ?? '-'}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.match')}</dt>
-              <dd>{matchedWord}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t06.meta.outcome')}</dt>
-              <dd>{currentOutcomeLabel}</dd>
-            </div>
-          </dl>
-
-          <div className="tree-workspace-code-block">
+        <div className="tree-workspace-code-block tree-workspace-code-block-only">
             <span className="tree-workspace-code-title">{t('module.t06.code.title')}</span>
             <ol className="tree-workspace-code-list">
               {codeLines.map((line, index) => {
@@ -460,7 +376,6 @@ export function TriePage() {
               })}
             </ol>
           </div>
-        </>
       }
       stageContent={
         <div className="trie-stage-scene" aria-hidden="true">

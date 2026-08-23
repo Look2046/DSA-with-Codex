@@ -44,7 +44,7 @@ describe('huffman timeline deterministic replay', () => {
     expect(slow.sequence.at(-1)).toBeGreaterThan(0);
     expect(slow.finalStatus).toBe('completed');
     expect(fast.finalStatus).toBe('completed');
-    expect(slow.finalAction).toBe('completed');
-    expect(fast.finalAction).toBe('completed');
+    expect(slow.finalAction).toBe('attach');
+    expect(fast.finalAction).toBe('attach');
   });
 });

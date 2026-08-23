@@ -3,7 +3,7 @@ import { WorkspaceShell } from '../../components/WorkspaceShell';
 import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
 import { useI18n } from '../../i18n/useI18n';
 import { buildAvlTimelineFromInput } from '../../modules/tree/avlTimelineAdapter';
-import type { AvlRotationCase, AvlOutcome, AvlStep } from '../../modules/tree/avl';
+import type { AvlRotationCase, AvlOutcome } from '../../modules/tree/avl';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
 const DEFAULT_DATASET = [50, 20, 70, 10, 30];
@@ -85,41 +85,6 @@ function getOutcomeLabel(outcome: AvlOutcome, t: TranslateFn): string {
     return t('module.t03.outcome.rebalanced');
   }
   return t('module.t03.outcome.ongoing');
-}
-
-function getStepDescription(step: AvlStep | undefined, t: TranslateFn): string {
-  if (!step) {
-    return '-';
-  }
-
-  if (step.action === 'initial') {
-    return t('module.t03.step.initial');
-  }
-  if (step.action === 'visit') {
-    return t('module.t03.step.visit');
-  }
-  if (step.action === 'duplicate') {
-    return t('module.t03.step.duplicate');
-  }
-  if (step.action === 'inserted') {
-    return t('module.t03.step.inserted');
-  }
-  if (step.action === 'rebalanceCheck') {
-    return t('module.t03.step.rebalanceCheck');
-  }
-  if (step.action === 'imbalance') {
-    return t('module.t03.step.imbalance');
-  }
-  if (step.action === 'rotateLeft') {
-    return t('module.t03.step.rotateLeft');
-  }
-  if (step.action === 'rotateRight') {
-    return t('module.t03.step.rotateRight');
-  }
-  if (step.action === 'rebalanced') {
-    return t('module.t03.step.rebalanced');
-  }
-  return t('module.t03.step.completed');
 }
 
 function formatArrayPreview(values: number[], maxVisible = 24): string {
@@ -259,14 +224,6 @@ export function AvlTreePage() {
 
   const currentRotationCaseLabel = getRotationCaseLabel(currentSnapshot?.rotationCase ?? 'none', t);
   const currentOutcomeLabel = getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t);
-  const currentStepDescription = getStepDescription(currentSnapshot, t);
-  const currentNodeValue = currentSnapshot?.currentId !== null && currentSnapshot?.currentId !== undefined
-    ? (nodeMap.get(currentSnapshot.currentId)?.value ?? '-')
-    : '-';
-  const currentImbalanceValue =
-    currentSnapshot?.imbalanceId !== null && currentSnapshot?.imbalanceId !== undefined
-      ? (nodeMap.get(currentSnapshot.imbalanceId)?.value ?? '-')
-      : '-';
   const currentPathValues = useMemo(
     () =>
       (currentSnapshot?.pathIds ?? [])
@@ -275,7 +232,6 @@ export function AvlTreePage() {
     [currentSnapshot?.pathIds, nodeMap],
   );
   const currentTargetValue = currentSnapshot?.target ?? activeTarget;
-  const stepDetailText = `${t('module.t03.meta.target')}: ${currentTargetValue} · ${t('module.t03.meta.outcome')}: ${currentOutcomeLabel}`;
   const focusNodeId = currentSnapshot?.currentId ?? currentSnapshot?.imbalanceId ?? currentSnapshot?.insertedId ?? null;
   const focusPoint = useMemo(() => (focusNodeId === null ? null : (positionMap.get(focusNodeId) ?? null)), [focusNodeId, positionMap]);
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
@@ -290,8 +246,8 @@ export function AvlTreePage() {
       stageBodyClassName="workspace-stage-body-tree"
       controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 620 }}
-      defaultContextPanelSize={{ width: 320, height: 560 }}
+      defaultControlsPanelSize={{ width: 920, height: 300 }}
+      defaultContextPanelSize={{ width: 560, height: 560 }}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -310,7 +266,7 @@ export function AvlTreePage() {
         </>
       }
       controlsContent={
-        <>
+        <div className="tree-controls-workbench">
           <label className="tree-workspace-field" htmlFor="dataset-size-t03">
             <span>{t('module.s01.dataSize')}</span>
             <input
@@ -369,43 +325,10 @@ export function AvlTreePage() {
             <span>{t('module.t03.seed')}</span>
             <code>[{formatArrayPreview(seedData)}]</code>
           </div>
-        </>
+        </div>
       }
       stepContent={
-        <>
-          <div className="tree-workspace-step-copy">
-            <h3>{currentStepDescription}</h3>
-            <p>{stepDetailText}</p>
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t03.meta.target')}</dt>
-              <dd>{currentTargetValue}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t03.meta.current')}</dt>
-              <dd>{currentNodeValue}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t03.meta.imbalance')}</dt>
-              <dd>{currentImbalanceValue}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t03.meta.case')}</dt>
-              <dd>{currentRotationCaseLabel}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t03.meta.outcome')}</dt>
-              <dd>{currentOutcomeLabel}</dd>
-            </div>
-          </dl>
-
-          <div className="tree-workspace-code-block">
+        <div className="tree-workspace-code-block tree-workspace-code-block-only">
             <span className="tree-workspace-code-title">{t('module.t03.code.title')}</span>
             <ol className="tree-workspace-code-list">
               {codeLines.map((line, index) => {
@@ -419,7 +342,6 @@ export function AvlTreePage() {
               })}
             </ol>
           </div>
-        </>
       }
       stageContent={
         <div className="avl-stage-scene" aria-hidden="true">

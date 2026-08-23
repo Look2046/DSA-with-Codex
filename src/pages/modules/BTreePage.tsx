@@ -67,34 +67,6 @@ function getStatusLabel(status: PlaybackStatus, t: TranslateFn): string {
   }
 }
 
-function getStepDescription(step: BTreeComparisonStep | undefined, t: TranslateFn): string {
-  if (!step) {
-    return '-';
-  }
-  if (step.action === 'initial') {
-    return t('module.t05.step.initial');
-  }
-  if (step.action === 'descend') {
-    return t('module.t05.step.descend');
-  }
-  if (step.action === 'insertLeaf') {
-    return t('module.t05.step.insertLeaf');
-  }
-  if (step.action === 'splitLeaf') {
-    return t('module.t05.step.splitLeaf');
-  }
-  if (step.action === 'splitInternal') {
-    return t('module.t05.step.splitInternal');
-  }
-  if (step.action === 'promote') {
-    return t('module.t05.step.promote');
-  }
-  if (step.action === 'linkLeaves') {
-    return t('module.t05.step.linkLeaves');
-  }
-  return t('module.t05.step.completed');
-}
-
 function getOutcomeLabel(outcome: BTreeComparisonStep['outcome'], t: TranslateFn): string {
   return outcome === 'inserted' ? t('module.t05.outcome.inserted') : t('module.t05.outcome.ongoing');
 }
@@ -283,7 +255,6 @@ export function BTreePage() {
   const codeLines = useMemo(() => CODE_LINE_KEYS.map((key) => t(key)), [t]);
   const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
   const currentOutcomeLabel = getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t);
-  const currentStepDescription = getStepDescription(currentSnapshot, t);
   const currentActiveTreeLabel = getActiveTreeLabel(currentSnapshot?.activeTree ?? 'both', t);
 
   const applyPreset = (nextPresetKey: PresetKey) => {
@@ -324,8 +295,8 @@ export function BTreePage() {
       stageBodyClassName="workspace-stage-body-tree"
       controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 580 }}
-      defaultContextPanelSize={{ width: 320, height: 560 }}
+      defaultControlsPanelSize={{ width: 920, height: 300 }}
+      defaultContextPanelSize={{ width: 560, height: 560 }}
       stageMeta={
         <>
           <span className="tree-workspace-pill tree-workspace-pill-active">
@@ -346,7 +317,7 @@ export function BTreePage() {
         </>
       }
       controlsContent={
-        <>
+        <div className="tree-controls-workbench">
           <div className="tree-workspace-field">
             <span>{t('module.t05.input.preset')}</span>
             <div className="tree-workspace-toggle-row">
@@ -408,54 +379,10 @@ export function BTreePage() {
             <span>{t('module.t05.seed')}</span>
             <code>[{formatKeys(activeConfig.seedKeys)}]</code>
           </div>
-        </>
+        </div>
       }
       stepContent={
-        <>
-          <div className="tree-workspace-step-copy">
-            <h3>{currentStepDescription}</h3>
-            <p>
-              {t('module.t05.meta.activeTree.label')}: {currentActiveTreeLabel} · {t('module.t05.meta.outcome')}:{' '}
-              {currentOutcomeLabel}
-            </p>
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.activeTree.label')}</dt>
-              <dd>{currentActiveTreeLabel}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.target')}</dt>
-              <dd>{activeConfig.target}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.promoted')}</dt>
-              <dd>{currentSnapshot?.promotedKey ?? '-'}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.btreeRoot')}</dt>
-              <dd>{currentSnapshot?.bTreeRootId ?? '-'}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.bplusRoot')}</dt>
-              <dd>{currentSnapshot?.bPlusRootId ?? '-'}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.leafChain')}</dt>
-              <dd>{currentSnapshot?.leafChain.join(' -> ') || '-'}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t05.meta.outcome')}</dt>
-              <dd>{currentOutcomeLabel}</dd>
-            </div>
-          </dl>
-
-          <div className="tree-workspace-code-block">
+        <div className="tree-workspace-code-block tree-workspace-code-block-only">
             <span className="tree-workspace-code-title">{t('module.t05.code.title')}</span>
             <ol className="tree-workspace-code-list">
               {codeLines.map((line, index) => {
@@ -469,7 +396,6 @@ export function BTreePage() {
               })}
             </ol>
           </div>
-        </>
       }
       stageContent={
         <div className="btree-compare-stage" aria-hidden="true">

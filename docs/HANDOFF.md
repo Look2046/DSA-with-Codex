@@ -2,6 +2,135 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-08-22 (T-07 build pseudocode courseware alignment)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Kept the scope intentionally narrow after the chapter-code comparison review:
+  - only updated `T-07 /modules/huffman-tree` build/construction pseudocode
+  - did **not** change Huffman coding pseudocode
+  - did **not** change WPL pseudocode
+- `T-07` build pseudocode is now closer to Chapter 5 courseware `算法 5.13`:
+  - the Chinese-side wording now uses the textbook-style `HuffNode[0..n-1]`, `parent == -1`, and `HuffNode[n + i]` phrasing
+  - the C-style side now shows a more courseware-like `void HaffmanTree(...)` skeleton instead of the earlier short conceptual summary
+  - build-phase active-line highlighting was remapped so the richer displayed code still follows the existing animation states correctly
+
+### Current State
+- Verified targeted tests:
+  - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts`
+- Verified local build:
+  - `npm run build`
+- `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is not directly executable from PowerShell.
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open `/modules/huffman-tree` and review whether the new build/code window now looks acceptably close to the Chapter 5 classroom code style.
+- If accepted, the next follow-up can decide whether to:
+  - stop here and commit this focused `T-07` pseudocode adjustment
+  - or continue the same courseware-alignment pass on the next highest-value module (`L-03` is the strongest candidate)
+
+## 2026-08-22 (L/T/M pseudocode comparison draft)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Added one small runtime UI follow-up after the pseudocode review:
+  - `L-04 /modules/stack` step panel no longer shows mixed push/pop/peek pseudocode at the same time
+  - sequential-stack and linked-stack pseudocode now switch with the currently selected operation (`push` / `pop` / `peek`)
+  - active-line highlighting is remapped to the currently displayed subset instead of the old full combined list
+- Added the matching queue follow-up:
+  - `L-05 /modules/queue` pseudocode is now split by queue mode and operation
+  - current step panel switches between:
+    - normal queue + enqueue
+    - normal queue + dequeue
+    - normal queue + front
+    - circular queue + enqueue
+    - circular queue + dequeue
+    - circular queue + front
+  - active-line highlighting is remapped to the currently displayed subset instead of the old one-block queue pseudocode
+- Added one tree-panel follow-up after the user asked to simplify tree pages:
+  - `T-03` / `T-04` / `T-05` / `T-06` step panels now keep only pseudocode content and no longer repeat the old step-copy / key-value summary blocks
+  - the above tree pages plus `T-07` now use a horizontal workbench-style controls layout instead of the older narrow vertical drawer form layout
+  - `T-07 /modules/huffman-tree` no longer reuses one shared construction pseudocode for every phase:
+    - build mode shows construction pseudocode
+    - code walkthrough shows coding pseudocode
+    - WPL walkthrough shows WPL pseudocode
+  - `T-07` detail walkthrough steps now carry their own active pseudocode line mapping, so highlighting follows the coding/WPL sub-animation instead of the build timeline lines
+- Added one review-only comparison document for the currently implemented `L` / `T` / `M` routes:
+  - `docs/LTM_PSEUDOCODE_COMPARE.md`
+- Scope of the document:
+  - `L-01` ~ `L-05`
+  - `T-01` ~ `T-07`
+  - `M-01` ~ `M-07`
+- Document structure:
+  - current Chinese-style pseudocode now shown in the UI
+  - proposed C-like pseudocode counterpart for review
+  - explicit note when a module currently has no standalone pseudocode block and only uses rule/formula explanation
+
+### Current State
+- The comparison draft now has one accepted pilot implementation on `L-04`:
+  - stack pseudocode display is operation-specific instead of one combined block
+- Local verification for this stack follow-up:
+  - `npm test -- src/pages/modules/stackPageUtils.test.ts src/pages/modules/stackComparisonUtils.test.ts src/modules/linear/stackOps.test.ts`
+  - `npm run build`
+- Local verification for this queue follow-up:
+  - `npm test -- src/pages/modules/queuePageUtils.test.ts src/modules/linear/queueOps.test.ts`
+  - `npm run build`
+- Local verification for this tree-panel / Huffman follow-up:
+  - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts`
+  - `npm run build`
+- `npm run check` still fails immediately on this Windows worktree because `./scripts/check-doc-links.sh` is not directly executable from PowerShell.
+- Next decision needed from user:
+  - whether the proposed C-like wording direction is acceptable
+  - whether `M-02` ~ `M-07` should later gain real pseudocode blocks or stay as rule/formula-first teaching pages
+
+### Next Step
+- Continue rolling the same dual-column, operation-aware pseudocode treatment to the next accepted modules in small batches.
+
+## 2026-08-22 (T-07 Huffman tree phased-layout rebuild)
+
+### Today Done
+- Continued on:
+  - `feat/p14-backlog-wave`
+- Re-opened `T-07 /modules/huffman-tree` to address the user-reported teaching/visual issues in the construction stage.
+- Aligned the data timeline with a richer staged merge model:
+  - `select`
+  - `lift`
+  - `attach`
+  - `return`
+  - final `code` / `completed`
+- Reworked the page away from the old top-corner floating forest/code overlays:
+  - added explicit forest / merge / result stage regions
+  - kept original input weights always visible inside the stage
+  - moved the current forest snapshot and code table into stable stage cards
+  - added `WPL` display once codes are available
+  - added a `跳到编码` action that seeks directly to the code-generation step
+- Visual/runtime details:
+  - tree edges now use anchored cubic curves instead of rough center-to-center lines
+  - selected roots and the newly created parent root now have distinct highlight styles
+  - node positions now depend on the current phase, so selected subtrees lift into the merge area before returning to the forest
+- Synced supporting files:
+  - `src/modules/tree/huffman.test.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+
+### Current State
+- Verified targeted tests:
+  - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts`
+- Verified local build:
+  - `npm run build`
+- `npm run check` is still blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script and PowerShell cannot execute it directly.
+- Branch: `feat/p14-backlog-wave`
+
+### Next Step
+- Open `/modules/huffman-tree` and review:
+  - whether the phased forest/merge/result layout is now visually acceptable
+  - whether the lift -> attach -> return animation semantics feel clear enough
+  - whether code-table / WPL presentation matches the teaching goal
+- If accepted, commit this Huffman stage rebuild as one scoped change set before starting the next tree refinement.
+
 ## 2026-08-22 (M-07 follow-up: generalized list head/tail trainer)
 
 ### Today Done

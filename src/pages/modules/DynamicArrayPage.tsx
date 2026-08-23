@@ -21,6 +21,26 @@ const DEFAULT_CONFIG: DynamicArrayConfig = {
   operation: { type: 'append', value: 9 },
 };
 
+const DYNAMIC_ARRAY_CN_LINE_KEYS = [
+  'module.l02.code.line1',
+  'module.l02.code.line2',
+  'module.l02.code.line3',
+  'module.l02.code.line4',
+  'module.l02.code.line5',
+  'module.l02.code.line6',
+  'module.l02.code.line7',
+] as const;
+
+const DYNAMIC_ARRAY_C_LINES = [
+  'if (size < capacity) data[size++] = value;',
+  'else {',
+  '    newCapacity = capacity * 2;',
+  '    newData = malloc(newCapacity * sizeof(int));',
+  '    for (int i = 0; i < size; ++i) newData[i] = data[i];',
+  '    free(data); data = newData; capacity = newCapacity;',
+  '    data[size++] = value; }',
+] as const;
+
 function createRandomAppendValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
@@ -278,6 +298,7 @@ export function DynamicArrayPage() {
       .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
       .join(' | ') || t('module.s01.none');
   const stepDescription = getStepDescription(currentSnapshot, t);
+  const chinesePseudocodeLines = useMemo(() => DYNAMIC_ARRAY_CN_LINE_KEYS.map((key) => t(key)), [t]);
   const resizeHintText =
     isResizePhase || isPromotePhase
       ? `${t('module.l02.resizeHint')} ${currentSnapshot?.resizeFrom ?? currentCapacity} -> ${currentSnapshot?.resizeTo ?? currentCapacity}`
@@ -509,18 +530,28 @@ export function DynamicArrayPage() {
       }
       stepContent={
         <div className="workspace-panel-scroll workspace-panel-scroll-linear">
-          <div className="workspace-panel-code-only">
+          <div className="workspace-panel-code-only workspace-panel-code-grid-double">
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
-                <h3>{t('module.l02.pseudocode')}</h3>
+                <h3>{t('module.l02.pseudocode')}：中文式</h3>
                 <ol>
-                  <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l02.code.line1')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l02.code.line2')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l02.code.line3')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l02.code.line4')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l02.code.line5')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l02.code.line6')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(7) ? 'code-active' : ''}>{t('module.l02.code.line7')}</li>
+                  {chinesePseudocodeLines.map((line, index) => (
+                    <li key={`cn-${line}`} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
+                      {line}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>{t('module.l02.pseudocode')}：类 C 式</h3>
+                <ol>
+                  {DYNAMIC_ARRAY_C_LINES.map((line, index) => (
+                    <li key={`c-${line}`} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
+                      <code>{line}</code>
+                    </li>
+                  ))}
                 </ol>
               </div>
             </div>

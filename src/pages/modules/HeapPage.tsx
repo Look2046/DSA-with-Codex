@@ -7,7 +7,6 @@ import {
   buildMaxHeapArray,
   type HeapOperation,
   type HeapOutcome,
-  type HeapStep,
 } from '../../modules/tree/heap';
 import type { HighlightType, PlaybackStatus } from '../../types/animation';
 
@@ -123,61 +122,6 @@ function getOutcomeLabel(outcome: HeapOutcome, t: TranslateFn): string {
     return t('module.t04.outcome.extracted');
   }
   return t('module.t04.outcome.ongoing');
-}
-
-function getStepDescription(step: HeapStep | undefined, t: TranslateFn): string {
-  if (!step) {
-    return '-';
-  }
-
-  if (step.operation === 'build') {
-    if (step.action === 'initial') {
-      return t('module.t04.step.build.initial');
-    }
-    if (step.action === 'heapify') {
-      return t('module.t04.step.build.heapify');
-    }
-    if (step.action === 'compare') {
-      return t('module.t04.step.build.compare');
-    }
-    if (step.action === 'swap') {
-      return t('module.t04.step.build.swap');
-    }
-    return t('module.t04.step.build.completed');
-  }
-
-  if (step.operation === 'insert') {
-    if (step.action === 'initial') {
-      return t('module.t04.step.insert.initial');
-    }
-    if (step.action === 'append') {
-      return t('module.t04.step.insert.append');
-    }
-    if (step.action === 'compare') {
-      return t('module.t04.step.insert.compare');
-    }
-    if (step.action === 'swap') {
-      return t('module.t04.step.insert.swap');
-    }
-    return t('module.t04.step.insert.completed');
-  }
-
-  if (step.action === 'initial') {
-    return t('module.t04.step.extract.initial');
-  }
-  if (step.action === 'extractRoot') {
-    return t('module.t04.step.extract.extractRoot');
-  }
-  if (step.action === 'compare') {
-    return t('module.t04.step.extract.compare');
-  }
-  if (step.action === 'swap') {
-    return t('module.t04.step.extract.swap');
-  }
-  if (step.action === 'removeLast') {
-    return t('module.t04.step.extract.removeLast');
-  }
-  return t('module.t04.step.extract.completed');
 }
 
 function getCodeTitle(operation: HeapOperation, t: TranslateFn): string {
@@ -490,17 +434,7 @@ export function HeapPage() {
   const currentOperation = currentSnapshot?.operation ?? activeConfig.operation;
   const currentOperationLabel = getOperationLabel(currentOperation, t);
   const currentOutcomeLabel = getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t);
-  const currentStepDescription = getStepDescription(currentSnapshot, t);
-  const currentActiveValue =
-    currentSnapshot?.activeIndex !== null && currentSnapshot?.activeIndex !== undefined
-      ? (currentArray[currentSnapshot.activeIndex] ?? '-')
-      : '-';
-  const currentCompareValue =
-    currentSnapshot?.compareIndex !== null && currentSnapshot?.compareIndex !== undefined
-      ? (currentArray[currentSnapshot.compareIndex] ?? '-')
-      : '-';
   const currentRootValue = currentArray[0] ?? '-';
-  const currentTargetValue = currentSnapshot?.target ?? activeConfig.target;
   const currentCodeTitle = getCodeTitle(currentOperation, t);
   const currentCodeLines = useMemo(
     () => getCodeLineKeys(currentOperation).map((key) => t(key)),
@@ -513,16 +447,6 @@ export function HeapPage() {
         .filter((value): value is number => value !== undefined),
     [currentArray, currentSnapshot?.pathIndices],
   );
-  const detailParts = [
-    `${t('module.t04.meta.operation')}: ${currentOperationLabel}`,
-    `${t('module.t04.meta.outcome')}: ${currentOutcomeLabel}`,
-  ];
-  if (currentSnapshot?.extractedValue !== null && currentSnapshot?.extractedValue !== undefined) {
-    detailParts.push(`${t('module.t04.meta.extracted')}: ${currentSnapshot.extractedValue}`);
-  } else if (currentTargetValue !== null && currentTargetValue !== undefined && currentOperation === 'insert') {
-    detailParts.push(`${t('module.t04.meta.target')}: ${currentTargetValue}`);
-  }
-  const stepDetailText = detailParts.join(' · ');
   const focusIndex =
     currentSnapshot?.activeIndex ?? currentSnapshot?.compareIndex ?? currentSnapshot?.selectedIndex ?? null;
   const focusPoint = useMemo(
@@ -591,8 +515,8 @@ export function HeapPage() {
       stageBodyClassName="workspace-stage-body-tree"
       controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
       stepPanelClassName="workspace-context-sheet-wide workspace-context-sheet-rich"
-      defaultControlsPanelSize={{ width: 332, height: 620 }}
-      defaultContextPanelSize={{ width: 320, height: 560 }}
+      defaultControlsPanelSize={{ width: 920, height: 300 }}
+      defaultContextPanelSize={{ width: 560, height: 560 }}
       focusPoint={focusPoint}
       stageMeta={
         <>
@@ -611,7 +535,7 @@ export function HeapPage() {
         </>
       }
       controlsContent={
-        <>
+        <div className="tree-controls-workbench">
           <label className="tree-workspace-field" htmlFor="dataset-size-t04">
             <span>{t('module.s01.dataSize')}</span>
             <input
@@ -697,59 +621,10 @@ export function HeapPage() {
               <code>[{formatArrayPreview(heapPreview)}]</code>
             </div>
           ) : null}
-        </>
+        </div>
       }
       stepContent={
-        <>
-          <div className="tree-workspace-step-copy">
-            <h3>{currentStepDescription}</h3>
-            <p>{stepDetailText}</p>
-          </div>
-
-          <dl className="tree-workspace-kv">
-            <div>
-              <dt>{t('playback.status')}</dt>
-              <dd>{getStatusLabel(status, t)}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t04.meta.operation')}</dt>
-              <dd>{currentOperationLabel}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t04.meta.root')}</dt>
-              <dd>{currentRootValue}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t04.meta.active')}</dt>
-              <dd>{currentActiveValue}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t04.meta.compare')}</dt>
-              <dd>{currentCompareValue}</dd>
-            </div>
-            <div>
-              <dt>{t('module.t04.meta.size')}</dt>
-              <dd>{currentArray.length}</dd>
-            </div>
-            {currentOperation === 'insert' ? (
-              <div>
-                <dt>{t('module.t04.meta.target')}</dt>
-                <dd>{currentTargetValue ?? '-'}</dd>
-              </div>
-            ) : null}
-            {currentSnapshot?.extractedValue !== null && currentSnapshot?.extractedValue !== undefined ? (
-              <div>
-                <dt>{t('module.t04.meta.extracted')}</dt>
-                <dd>{currentSnapshot.extractedValue}</dd>
-              </div>
-            ) : null}
-            <div>
-              <dt>{t('module.t04.meta.outcome')}</dt>
-              <dd>{currentOutcomeLabel}</dd>
-            </div>
-          </dl>
-
-          <div className="tree-workspace-code-block">
+        <div className="tree-workspace-code-block tree-workspace-code-block-only">
             <span className="tree-workspace-code-title">{currentCodeTitle}</span>
             <ol className="tree-workspace-code-list">
               {currentCodeLines.map((line, index) => {
@@ -763,7 +638,6 @@ export function HeapPage() {
               })}
             </ol>
           </div>
-        </>
       }
       stageContent={
         <div className="heap-stage-scene" aria-hidden="true">

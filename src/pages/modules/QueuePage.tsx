@@ -19,6 +19,50 @@ const DEFAULT_CONFIG: QueueConfig = {
   operation: { type: 'enqueue', value: 9 },
 };
 
+const QUEUE_PSEUDOCODE = {
+  normal: {
+    enqueue: [
+      { sourceLine: 1, textKey: 'module.l05.code.normal.enqueue.line1', cLine: 'validate normal queue state' },
+      { sourceLine: 3, textKey: 'module.l05.code.normal.enqueue.line2', cLine: 'if (rear == MAXSIZE) return OVERFLOW;' },
+      { sourceLine: 3, textKey: 'module.l05.code.normal.enqueue.line3', cLine: 'data[rear] = value;' },
+      { sourceLine: 3, textKey: 'module.l05.code.normal.enqueue.line4', cLine: 'rear = rear + 1;' },
+      { sourceLine: 6, textKey: 'module.l05.code.normal.enqueue.line5', cLine: 'finish enqueue;' },
+    ],
+    dequeue: [
+      { sourceLine: 1, textKey: 'module.l05.code.normal.dequeue.line1', cLine: 'validate normal queue state' },
+      { sourceLine: 4, textKey: 'module.l05.code.normal.dequeue.line2', cLine: 'x = data[front]; delete front element;' },
+      { sourceLine: 4, textKey: 'module.l05.code.normal.dequeue.line3', cLine: 'front = front + 1;' },
+      { sourceLine: 6, textKey: 'module.l05.code.normal.dequeue.line4', cLine: 'finish dequeue;' },
+    ],
+    front: [
+      { sourceLine: 1, textKey: 'module.l05.code.normal.front.line1', cLine: 'validate normal queue state' },
+      { sourceLine: 5, textKey: 'module.l05.code.normal.front.line2', cLine: 'return data[front];' },
+      { sourceLine: 6, textKey: 'module.l05.code.normal.front.line3', cLine: 'finish front read;' },
+    ],
+  },
+  circular: {
+    enqueue: [
+      { sourceLine: 1, textKey: 'module.l05.code.circular.enqueue.line1', cLine: 'validate circular queue state' },
+      { sourceLine: 3, textKey: 'module.l05.code.circular.enqueue.line2', cLine: 'data[rear] = value;' },
+      { sourceLine: 3, textKey: 'module.l05.code.circular.enqueue.line3', cLine: 'rear = (rear + 1) % MAXSIZE;' },
+      { sourceLine: 3, textKey: 'module.l05.code.circular.enqueue.line4', cLine: 'if empty before enqueue, keep front at first element;' },
+      { sourceLine: 6, textKey: 'module.l05.code.circular.enqueue.line5', cLine: 'finish enqueue;' },
+    ],
+    dequeue: [
+      { sourceLine: 1, textKey: 'module.l05.code.circular.dequeue.line1', cLine: 'validate circular queue state' },
+      { sourceLine: 4, textKey: 'module.l05.code.circular.dequeue.line2', cLine: 'x = data[front]; delete front element;' },
+      { sourceLine: 4, textKey: 'module.l05.code.circular.dequeue.line3', cLine: 'front = (front + 1) % MAXSIZE;' },
+      { sourceLine: 4, textKey: 'module.l05.code.circular.dequeue.line4', cLine: 'if empty after dequeue, make front and rear meet;' },
+      { sourceLine: 6, textKey: 'module.l05.code.circular.dequeue.line5', cLine: 'finish dequeue;' },
+    ],
+    front: [
+      { sourceLine: 1, textKey: 'module.l05.code.circular.front.line1', cLine: 'validate circular queue state' },
+      { sourceLine: 5, textKey: 'module.l05.code.circular.front.line2', cLine: 'return data[front];' },
+      { sourceLine: 6, textKey: 'module.l05.code.circular.front.line3', cLine: 'finish front read;' },
+    ],
+  },
+} as const;
+
 type QueueMode = 'normal' | 'circular';
 const QUEUE_WORKSPACE_CONFIG = getQueueWorkspaceConfig();
 
@@ -288,6 +332,10 @@ export function QueuePage() {
         ? t('module.l05.operation.dequeue')
         : t('module.l05.operation.front');
   const stepDescription = getStepDescription(currentSnapshot, t);
+  const activePseudocode = QUEUE_PSEUDOCODE[mode][operationType];
+  const activeDisplayLines = activePseudocode
+    .map((item, index) => (currentSnapshot?.codeLines.includes(item.sourceLine) ? index + 1 : -1))
+    .filter((line) => line > 0);
   const queueState = currentSnapshot?.queueState ?? [];
   const bufferState = currentSnapshot?.bufferState ?? [];
   const compactBufferState = useMemo(() => bufferState.filter((value): value is number => value !== null), [bufferState]);
@@ -596,17 +644,38 @@ export function QueuePage() {
       }
       stepContent={
         <div className="workspace-panel-scroll workspace-panel-scroll-linear">
-          <div className="workspace-panel-code-only">
+          <div className="workspace-panel-code-only workspace-panel-code-grid-double">
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
-                <h3>{t('module.l05.pseudocode')}</h3>
+                <h3>
+                  {currentModeLabel} {operationLabel} {t('module.l05.pseudocode')}：中文式
+                </h3>
                 <ol>
-                  <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l05.code.line1')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l05.code.line2')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l05.code.line3')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l05.code.line4')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(5) ? 'code-active' : ''}>{t('module.l05.code.line5')}</li>
-                  <li className={currentSnapshot?.codeLines.includes(6) ? 'code-active' : ''}>{t('module.l05.code.line6')}</li>
+                  {activePseudocode.map((item, index) => (
+                    <li
+                      key={`cn-${mode}-${operationType}-${item.sourceLine}-${index}`}
+                      className={activeDisplayLines.includes(index + 1) ? 'code-active' : ''}
+                    >
+                      {t(item.textKey)}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>
+                  {currentModeLabel} {operationLabel} {t('module.l05.pseudocode')}：类 C 式
+                </h3>
+                <ol>
+                  {activePseudocode.map((item, index) => (
+                    <li
+                      key={`c-${mode}-${operationType}-${item.sourceLine}-${index}`}
+                      className={activeDisplayLines.includes(index + 1) ? 'code-active' : ''}
+                    >
+                      <code>{item.cLine}</code>
+                    </li>
+                  ))}
                 </ol>
               </div>
             </div>

@@ -25,6 +25,34 @@ const DEFAULT_CONFIG: ArrayConfig = {
   },
 };
 
+const INSERT_CN_LINES = [
+  'module.l01.code.line1',
+  'module.l01.code.line2',
+  'module.l01.code.line3',
+  'module.l01.code.line4',
+] as const;
+
+const DELETE_CN_LINES = [
+  'module.l01.code.delete.line1',
+  'module.l01.code.delete.line2',
+  'module.l01.code.delete.line3',
+  'module.l01.code.delete.line4',
+] as const;
+
+const INSERT_C_LINES = [
+  'if (index < 0 || index > length) return ERROR;',
+  'for (int i = length; i > index; --i) arr[i] = arr[i - 1];',
+  'arr[index] = value; length++;',
+  'return OK;',
+] as const;
+
+const DELETE_C_LINES = [
+  'if (index < 0 || index >= length) return ERROR;',
+  'for (int i = index; i < length - 1; ++i) arr[i] = arr[i + 1];',
+  'length--;',
+  'return OK;',
+] as const;
+
 function createRandomInsertValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
@@ -94,6 +122,11 @@ export function ArrayPage() {
       .map((item) => `${item.index}:${getHighlightLabel(item.type, t)}`)
       .join(' | ') || t('module.s01.none');
   const stepDescription = getStepDescription(currentSnapshot, t);
+  const chinesePseudocodeLines = useMemo(
+    () => (activeOperationType === 'delete' ? DELETE_CN_LINES.map((key) => t(key)) : INSERT_CN_LINES.map((key) => t(key))),
+    [activeOperationType, t],
+  );
+  const cStylePseudocodeLines = activeOperationType === 'delete' ? DELETE_C_LINES : INSERT_C_LINES;
   const visualUsedLength = useMemo(() => {
     const logicalLength = currentSnapshot?.logicalLength ?? 0;
     if (currentSnapshot?.action === 'shift' && activeOperationType === 'insert') {
@@ -471,34 +504,28 @@ controlsContent={
       }
 stepContent={
         <div className="workspace-panel-scroll workspace-panel-scroll-linear">
-          <div className="workspace-panel-code-only">
+          <div className="workspace-panel-code-only workspace-panel-code-grid-double">
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
-                <h3>{t('module.l01.pseudocode')}</h3>
+                <h3>{t('module.l01.pseudocode')}：中文式</h3>
                 <ol>
-                  {activeOperationType === 'delete' ? (
-                    <>
-                      <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>
-                        {t('module.l01.code.delete.line1')}
-                      </li>
-                      <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>
-                        {t('module.l01.code.delete.line2')}
-                      </li>
-                      <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>
-                        {t('module.l01.code.delete.line3')}
-                      </li>
-                      <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>
-                        {t('module.l01.code.delete.line4')}
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li className={currentSnapshot?.codeLines.includes(1) ? 'code-active' : ''}>{t('module.l01.code.line1')}</li>
-                      <li className={currentSnapshot?.codeLines.includes(2) ? 'code-active' : ''}>{t('module.l01.code.line2')}</li>
-                      <li className={currentSnapshot?.codeLines.includes(3) ? 'code-active' : ''}>{t('module.l01.code.line3')}</li>
-                      <li className={currentSnapshot?.codeLines.includes(4) ? 'code-active' : ''}>{t('module.l01.code.line4')}</li>
-                    </>
-                  )}
+                  {chinesePseudocodeLines.map((line, index) => (
+                    <li key={`cn-${line}`} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
+                      {line}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>{t('module.l01.pseudocode')}：类 C 式</h3>
+                <ol>
+                  {cStylePseudocodeLines.map((line, index) => (
+                    <li key={`c-${line}`} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
+                      <code>{line}</code>
+                    </li>
+                  ))}
                 </ol>
               </div>
             </div>

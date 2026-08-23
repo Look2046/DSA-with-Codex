@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildHuffmanTimeline, normalizeHuffmanItems, parseHuffmanInput, type HuffmanStep } from './huffman';
+import {
+  buildHuffmanCodeDetailSteps,
+  buildHuffmanTimeline,
+  buildHuffmanWplDetailSteps,
+  normalizeHuffmanItems,
+  parseHuffmanInput,
+  type HuffmanStep,
+} from './huffman';
 
 function payloads(items: Array<{ label: string; weight: number }>): HuffmanStep[] {
   return buildHuffmanTimeline(items).map((frame) => frame.payload);
@@ -34,6 +41,53 @@ describe('huffman tree timeline generation', () => {
     expect(firstSelect?.round).toBe(1);
   });
 
+  it('keeps the initial forest display order the same as the input order', () => {
+    const steps = payloads([
+      { label: 'A', weight: 7 },
+      { label: 'B', weight: 5 },
+      { label: 'C', weight: 2 },
+      { label: 'D', weight: 4 },
+    ]);
+    const initial = steps[0];
+
+    expect(initial.displayRoots.map((id) => initial.nodes.find((node) => node.id === id)?.label)).toEqual([
+      'A',
+      'B',
+      'C',
+      'D',
+    ]);
+    expect(initial.forestRoots.map((id) => initial.nodes.find((node) => node.id === id)?.label)).toEqual([
+      'C',
+      'D',
+      'B',
+      'A',
+    ]);
+  });
+
+  it('emits the new staged merge actions in order for each round', () => {
+    const steps = payloads([
+      { label: 'A', weight: 7 },
+      { label: 'B', weight: 5 },
+      { label: 'C', weight: 2 },
+      { label: 'D', weight: 4 },
+    ]);
+
+    expect(steps.map((step) => step.action)).toEqual([
+      'initial',
+      'select',
+      'lift',
+      'attach',
+      'return',
+      'select',
+      'lift',
+      'attach',
+      'return',
+      'select',
+      'lift',
+      'attach',
+    ]);
+  });
+
   it('builds prefix codes for every leaf after construction', () => {
     const steps = payloads([
       { label: 'A', weight: 7 },
@@ -43,12 +97,30 @@ describe('huffman tree timeline generation', () => {
     ]);
 
     expect(finalStep(steps)?.codes).toEqual([
-      { label: 'A', weight: 7, code: '0' },
-      { label: 'B', weight: 5, code: '10' },
-      { label: 'C', weight: 2, code: '110' },
-      { label: 'D', weight: 4, code: '111' },
+      { label: 'A', weight: 7, code: '0', pathLength: 1 },
+      { label: 'B', weight: 5, code: '10', pathLength: 2 },
+      { label: 'C', weight: 2, code: '110', pathLength: 3 },
+      { label: 'D', weight: 4, code: '111', pathLength: 3 },
     ]);
-    expect(finalStep(steps)?.action).toBe('completed');
+    expect(finalStep(steps)?.action).toBe('attach');
+  });
+
+  it('builds detail steps for code and wpl walkthroughs on the final tree', () => {
+    const steps = payloads([
+      { label: 'A', weight: 7 },
+      { label: 'B', weight: 5 },
+      { label: 'C', weight: 2 },
+      { label: 'D', weight: 4 },
+    ]);
+    const completed = finalStep(steps);
+
+    const codeDetails = buildHuffmanCodeDetailSteps(completed);
+    const wplDetails = buildHuffmanWplDetailSteps(completed);
+
+    expect(codeDetails.some((step) => step.leafLabel === 'A' && step.currentCode === '0')).toBe(true);
+    expect(codeDetails.some((step) => step.leafLabel === 'D' && step.currentCode === '111')).toBe(true);
+    expect(wplDetails.some((step) => step.factorText === '7 × 1 = 7')).toBe(true);
+    expect(wplDetails.at(-1)?.finalTotal).toBe(35);
   });
 
   it('normalizes labels, weights, duplicates, and maximum item count', () => {
@@ -75,6 +147,7 @@ describe('huffman tree timeline generation', () => {
       { label: 'F', weight: 7 },
       { label: 'G', weight: 8 },
       { label: 'H', weight: 9 },
+      { label: 'I', weight: 10 },
     ]);
   });
 

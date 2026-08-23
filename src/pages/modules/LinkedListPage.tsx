@@ -156,6 +156,37 @@ function getOperationCodeLines(operation: LinkedListOperation['type']): Translat
   ];
 }
 
+function getOperationCStyleLines(operation: LinkedListOperation['type']): readonly string[] {
+  if (operation === 'find') {
+    return [
+      'Node *p = head;',
+      'while (p != NULL) {',
+      '    if (p->data == target) return p;',
+      '    p = p->next;',
+      '} return NULL;',
+    ] as const;
+  }
+
+  if (operation === 'insertAt') {
+    return [
+      'if (index < 1 || index > length + 1) return ERROR;',
+      'Node *prev = locatePrev(head, index);',
+      'Node *s = createNode(value);',
+      's->next = prev->next;',
+      'prev->next = s;',
+      'return OK;',
+    ] as const;
+  }
+
+  return [
+    'if (index < 1 || index > length) return ERROR;',
+    'Node *prev = locatePrev(head, index);',
+    'Node *target = prev->next;',
+    'prev->next = target->next;',
+    'free(target); return OK;',
+  ] as const;
+}
+
 function collectMainChainOrder(snapshot: LinkedListStep | undefined): string[] {
   if (!snapshot) {
     return [];
@@ -642,6 +673,7 @@ export function LinkedListPage() {
   }, [currentSnapshot, floatingNodeIds, highlightByNodeId, nodeMap, activeOperationType, t]);
 
   const operationCodeLines = useMemo(() => getOperationCodeLines(activeOperationType), [activeOperationType]);
+  const operationCStyleLines = useMemo(() => getOperationCStyleLines(activeOperationType), [activeOperationType]);
   const targetIndex =
     typeof currentSnapshot?.targetIndex === 'number'
       ? currentSnapshot.targetIndex
@@ -1099,14 +1131,26 @@ export function LinkedListPage() {
       }
       stepContent={
         <div className="workspace-panel-scroll workspace-panel-scroll-linear">
-          <div className="workspace-panel-code-only">
+          <div className="workspace-panel-code-only workspace-panel-code-grid-double">
             <div className="workspace-panel-linear-code">
               <div className="pseudocode-block pseudocode-block-linear">
-                <h3>{t('module.l03.pseudocode')}</h3>
+                <h3>{t('module.l03.pseudocode')}：中文式</h3>
                 <ol>
                   {operationCodeLines.map((lineKey, index) => (
                     <li key={lineKey} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
                       {t(lineKey)}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+            <div className="workspace-panel-linear-code">
+              <div className="pseudocode-block pseudocode-block-linear">
+                <h3>{t('module.l03.pseudocode')}：类 C 式</h3>
+                <ol>
+                  {operationCStyleLines.map((line, index) => (
+                    <li key={`c-${line}`} className={currentSnapshot?.codeLines.includes(index + 1) ? 'code-active' : ''}>
+                      <code>{line}</code>
                     </li>
                   ))}
                 </ol>
