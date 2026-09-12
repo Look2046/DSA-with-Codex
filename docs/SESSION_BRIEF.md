@@ -1,0 +1,558 @@
+# SESSION_BRIEF
+
+Use this file as the first thing to read in a new chat/session.
+
+## 1) Current Snapshot
+
+- Project: Data Structure Algorithm Visualizor
+- Active branch (expected): `feat/p14-backlog-wave`
+- Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, local Chapter 4 pilots `M-01` + `M-07` had expanded the local implemented surface, `G-02A` graph-definition follow-up was accepted on 2026-08-28, the temporary `G-02B` adjacency-list storage page has now landed locally for review, and the paused temporary `T-00A` concept-first tree-definition page brings the current local implemented surface to `53` routes pending user review
+- Last local quality gates:
+  - Workspace canvas zoom checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
+    - `npm run build`
+    - targeted eslint on changed source files passed
+    - `npm test -- src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts`
+    - `npm run check:docs`
+    - Edge/Playwright smoke confirmed zoom toolbar and `100% -> 110%` scaling on `/modules/linked-list`, `/modules/dfs`, `/modules/heap`, and `/modules/binary-tree`, with page/console errors = `0`
+    - follow-up Edge/Playwright regression confirmed `L-03 /modules/linked-list` arrow endpoints remain attached after zoom: single-list at `110%`, double-list at `110%`, and double-list at `150%`
+    - follow-up Edge/Playwright regression confirmed double-list continuous insertion keeps the final `prev.next -> new` frame visible on both first and second insertions
+    - repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside the zoom change
+  - `L-03 /modules/linked-list` double-list pointer-lane + final-link refinement checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts`
+    - `npm run build`
+    - Edge/Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/modules/linked-list` confirmed `next` on the lower lane, `prev` on the upper lane, visible final `prior.next -> new node` transient arrow length about `75px`, and page/console errors = `0`
+  - `L-03 /modules/linked-list` double-list arrowhead color + spacing refinement checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
+    - Edge/Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/modules/linked-list` confirmed double mode renders separate blue `next` and purple `prev` arrowhead markers, reverse arrows count = `3`, adjacent node gaps = `28px`, and page/console errors = `0`
+  - `L-03 /modules/linked-list` double-list pointer choreography refinement checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts`
+    - `npm run build`
+    - targeted eslint on changed source files passed
+    - Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/modules/linked-list` confirmed explicit double-list `prev`/`next` labels, purple reverse arrows, timeline advance to `5/6`, and page/console errors = `0`
+  - `L-03 /modules/linked-list` double/circular expansion checks (passed locally, 2026-09-09, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts`
+    - `npm run build`
+    - targeted eslint on changed source files passed
+    - Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/modules/linked-list` confirmed double-list reverse arrows and circular-list return edge with page/console errors = `0`
+    - repo-wide `npm run check` still stops at pre-existing lint errors outside `L-03` after docs check and all `327` tests pass
+  - Chapter 4 pilot checks (passed locally, 2026-08-21, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/storage/generalizedListHeadTail.test.ts src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts`
+    - `npm run build`
+    - `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+  - targeted linear follow-up checks (passed locally, 2026-08-20, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/linear/arrayInsert.test.ts src/pages/modules/arrayPageUtils.test.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+    - `npm run build`
+    - `npm run check` remains blocked on this Windows worktree because `./scripts/check-doc-links.sh` is a Unix shell script
+  - `npm test -- src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
+  - `npm run build` (passed locally, 2026-05-08, `feat/p14-backlog-wave`)
+  - targeted Playwright smoke for `T-07 Huffman Tree` (passed locally via Chromium fallback, 2026-05-08):
+    - `/modules/huffman-tree`: title `T-07 Huffman Tree`, default sample advances `Step 1/9 -> Step 2/9`
+    - `.huffman-node` count = `4`, selected nodes after `Next` = `2`, console/page errors = `0`
+    - artifact: `output/playwright/t07-huffman-smoke.png`
+  - `./scripts/check-doc-links.sh` (passed locally, 2026-07-21, `feat/p14-backlog-wave`)
+  - representative Playwright audit (2026-07-21, `feat/p14-backlog-wave`):
+    - `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` all still report page title `m0-scaffold-tmp`
+    - `/modules/huffman-tree` default `Next` still advances `Step 1/9 -> Step 2/9`
+    - `/modules/heap-sort` in Firefox dev audit reported `57` console warnings, dominated by module-load warnings routed through `src/app/router.tsx`
+  - targeted `L-01 /modules/array` acceptance recheck (passed locally in Firefox, 2026-07-21, `feat/p14-backlog-wave`):
+    - controls drawer first-open rect now stays inside a `1280x720` viewport (`bottom = 708.6`)
+    - first array cell height reduced from the earlier reproduced `380px` stretch to `49px`
+    - JSON label/control is no longer rendered in the primary controls drawer
+    - artifact: `output/playwright/p15-l01-array-acceptance.png`
+  - targeted `L-01 /modules/array` acceptance recheck v2 (passed locally in Firefox, 2026-07-21, `feat/p14-backlog-wave`):
+    - array row moved into the vertical center band (`array row top = 414.1`, no longer under the stage meta)
+    - controls drawer now uses one horizontal workbench row (`field tops ~= 439.6`)
+    - controls drawer no longer shifts during repeated `Next` steps (`left = 38`, `top = 395.6` remained stable)
+    - artifact: `output/playwright/p15-l01-array-centered-controls.png`
+  - targeted `L-02 /modules/dynamic-array` acceptance recheck (passed locally in Firefox, 2026-07-30, `feat/p14-backlog-wave`):
+    - dynamic-array row moved into the vertical center band (`row top = 391.5`, no longer under the stage meta)
+    - controls drawer now uses one horizontal workbench row (`field tops ~= 417`)
+    - controls drawer stayed fixed at `left = 38`, `top = 373`
+    - artifact: `output/playwright/p15-l02-dynamic-array-centered-controls.png`
+  - targeted `L-03 /modules/linked-list` acceptance recheck (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - widened/shortened controls drawer no longer overlaps the chain on fresh preview
+    - `HEAD` label now sits just above the head node instead of floating at the top of the stage
+    - insert completion now refreshes the next random insert value
+  - targeted `L-04 /modules/stack` comparison recheck (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - sequential stack capacity reduced to `10` and all `10` slots render without internal overflow (`clientHeight = scrollHeight = 320`)
+    - controls drawer bottom = `490.6`, top visible sequential slot (`index 9`) top = `626.1`, so opening the drawer no longer covers the stack
+    - full-stack push comparison confirms sequential stack stays `[0..9]` while linked stack continues to accept the same pushed value and the page marks the result as `已分叉`
+  - targeted `L-04 /modules/stack` linked-stack density follow-up (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - linked-stack now switches to compact/dense layouts so `10`-node and `11`-node comparison states both render with `clientHeight = scrollHeight`
+    - prepare-push step keeps the floating incoming node visible while preserving the full existing linked stack
+    - both sequential and linked stacks now show `TOP` / `BOTTOM` pointers during comparison playback
+  - targeted `L-04 /modules/stack` reset/pointer semantics follow-up (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - `Reset` now restores the default teaching demo (`[3, 8, 1] + push 9`) instead of only returning the current config to frame `0`
+    - sequential-stack `top` now points to the next writable slot, and on a full stack the page renders a dedicated `null` slot above the topmost cell with a horizontal `← top` pointer while the lane state remains `full`
+    - linked-stack push now plays as `create s -> s.next = top -> top = s`, with the old `top` pointer staying on the original top node until the final step
+  - targeted `L-03 /modules/linked-list` + `L-04 /modules/stack` docked-layout follow-up (passed locally, 2026-08-09, `feat/p14-backlog-wave`):
+    - compact docked `Controls` / `Step` now behave as one shared top tab strip instead of two unrelated expanders
+    - opening `Controls` now keeps the active panel in a shared top panel area instead of covering the linked-list / stack canvas
+    - `L-03` / `L-04` were moved back onto the viewport-locked adaptive path, removing page scroll while keeping the drawing stage stretched to the remaining page height
+    - `L-04` default `3/10` and full `10/10` sequential-stack states both remain fully visible at `1280x720`
+  - targeted `L-01`~`L-04` floating-panel re-unification follow-up (passed locally, 2026-08-09, `feat/p14-backlog-wave`):
+    - `L-03` / `L-04` no longer use the temporary docked-strip layout and are back on the same floating `Controls` / `Step` interaction as `L-01` / `L-02`
+    - `L-01` / `L-02` keep the widened `840px` floating controls drawer, while `L-03` / `L-04` now use `900px` / `920px` floating controls widths instead of the earlier dock-target sizing
+    - the widened floating `Step` panel is now kept inside the shell on all four pages (`bottom = 688` at `1280x720`) by disabling step-panel auto-avoid/overflow for this linear baseline
+    - all four pages keep `clientHeight = scrollHeight = 720` with no large bottom blank area (`gapBelowTransport = 19`)
+  - `npm run check` (passed locally, 2026-07-21, `feat/p14-backlog-wave`; docs links + 94 test files / 262 tests + lint + build)
+  - code-only quality gates for the `L-04` pass (passed locally, 2026-08-08, `feat/p14-backlog-wave`):
+    - `npm test`
+    - `npm run lint`
+    - `npm run build`
+    - note: repo-wide `npm run check` is currently blocked on Windows because `./scripts/check-doc-links.sh` is a shell script and is not directly executable from this worktree's Windows environment
+
+## 2) What Is Already Done
+
+- Frontend scaffold (Vite + React + TypeScript)
+- Route shell and page placeholders
+- zh/en one-click language toggle (UI text)
+- S-01 bubble sort basic playback + bars/highlights + speed/data-size controls
+- S-01 bubble sort enhanced demo with localized UI and pseudocode highlight
+- Unit test baseline for bubble sort step generation
+- CI workflow and unified local quality gate
+- L-01 array insert v1 with validated input, timeline playback, explicit empty-slot shift steps, and insertion animation
+- Unit tests for array insert step generation (deterministic + edge cases)
+- Reusable timeline engine hook (`useTimelinePlayer`) with reducer-driven playback tick loop
+- S-01/L-01/L-03 migrated to timeline engine path (no direct playback store dependency in module pages)
+- Deterministic S-01 replay test for seek/speed/resume stability
+- Playwright cross-module regression artifacts refreshed for timeline migration
+- L-01 JSON import/export landed with schema validation and deterministic round-trip tests
+- L-03 JSON import/export landed with schema validation and deterministic round-trip tests
+- P3 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P3.md`
+- P4 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P4.md`
+- P5 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P5.md`
+- `S-03 Insertion Sort` module landed with timeline playback + deterministic tests
+- `S-04 Shell Sort` module landed with gap-based timeline playback + deterministic tests
+- `S-05 Quick Sort` module landed with partition/pivot visualization + deterministic tests
+- `S-06 Merge Sort` module landed with split/merge buffer visualization + deterministic tests
+- `SR-02 Binary Search` module landed with pointer visualization + JSON import/export + deterministic tests
+- `SR-01 Linear Search` module landed with pointer progression + JSON import/export + deterministic tests
+- `/modules` category filter expanded to include `search`
+- P5-M3 acceptance refresh completed with Playwright artifacts for all implemented modules (`output/playwright/p5m3-*.png` + `p5m3-acceptance-report.txt`)
+- P6 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P6.md`
+- P7 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P7.md`
+- P8 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P8.md`
+- P9 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P9.md`
+- P10 implementation plan drafted in `docs/IMPLEMENTATION_PLAN_P10.md`
+- P9-M1 workspace-shell foundation + pilot migrations completed locally:
+  - added shared `WorkspaceShell` component for the validated stage-first shell contract
+  - migrated `S-01 Bubble Sort`, `L-01 Array`, and `SR-02 Binary Search`
+  - moved pilot-page legend/pseudocode/runtime detail into the right `Step` panel where appropriate
+  - refreshed local Playwright smoke artifacts under `output/playwright/p9m1-*`
+- P9-M2 sorting-shell rollout batch 1 completed locally:
+  - migrated `S-02 Selection Sort`, `S-03 Insertion Sort`, and `S-04 Shell Sort` to the shared `WorkspaceShell`
+  - standardized sorting-shell breakout with `pageClassName="bubble-page tree-page"` and `shellClassName="workspace-shell-sorting"`
+  - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, pinned edge buttons, movable panels, stage-click collapse, and final-frame disable on `S-02`~`S-04`
+- P9-M2 sorting-shell rollout batch 2 completed locally:
+  - migrated `S-05 Quick Sort` and `S-06 Merge Sort` to the shared `WorkspaceShell`
+  - preserved quick-sort pivot/hole/group semantics and merge-sort buffer + implementation-mode semantics inside the shared shell
+  - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths, working control/step panels, `S-06` bottom-up mode switching, and final-frame disable on `S-05` / `S-06`
+- P9-M2 search + linear shell rollout completed locally:
+  - migrated `SR-01`, `L-02`, `L-03`, `L-04`, and `L-05` to the shared `WorkspaceShell`
+  - aligned these routes to the same pinned-button / movable-panel / stage-first interaction contract and added shared-shell compatibility styling for linked/linear stages
+  - fixed `L-04` stack auto-sync timing so visible push/pop intermediate steps are no longer skipped before completion
+  - local Playwright smoke at `1440x1100` confirmed `1416px` page/shell/stage widths across `SR-01` / `L-02` / `L-03` / `L-04` / `L-05`, circular queue mode switching, resize playback progression, linked-list step progression, and stack `Next` progression after the timing fix
+- `P15` acceptance sweep has now aligned the first four linear modules locally:
+  - `L-01` array: compact horizontal controls + centered stage row
+  - `L-02` dynamic array: compact horizontal controls + centered resize stage
+  - `L-03` linked list: compact horizontal controls + corrected `HEAD` label + no drawer overlap
+  - `L-04` stack: compact horizontal controls + `10`-slot sequential stack + side-by-side linked-stack comparison for full-stack push divergence, reset-to-default behavior, next-slot `top` semantics, three-step linked-stack push animation, and no linked-stack internal overflow
+  - follow-up: `L-01`~`L-04` now share the same widened floating `Controls` / fixed in-viewport floating `Step` window pattern instead of splitting between floating and docked panel behaviors
+  - latest follow-up on 2026-08-20:
+    - `L-01` full-array insert no longer drops the last element; full state stays visible and surfaces a page-level warning
+    - `L-01` / `L-02` / `L-03` transport `Reset` now restores each module's original default demo instead of only rewinding the current timeline
+    - `L-04` reset semantics were re-checked and already matched the desired default-demo restore behavior
+- `L-05` queue stabilization is still the active acceptance hotspot locally:
+  - rear pointer semantics now target the next enqueue slot
+  - normal full queue keeps a visible tail-end empty slot and explicit full warning
+  - circular queue now preserves the latest completed state when switching operations/modes after a full-state enqueue
+  - `Reset` now restores the default demo while keeping the currently selected queue mode
+- P9-M3 cross-module consistency + acceptance closure completed locally:
+  - refreshed Playwright acceptance artifacts/report for `/modules` + all 15 implemented routes under `output/playwright/p9m3-*`
+  - fixed the final pilot breakout drift so `L-01` and `SR-02` now also use the wide `tree-page` workspace pattern
+  - local Playwright acceptance at `1440x1100` confirmed:
+    - `/modules`: `19` cards, `15` ready badges, `15` open links
+    - all `15` implemented routes open without route-level runtime errors and advance on default `Next`
+    - all non-tree routes keep `1416px` page / shell / stage widths
+    - representative pinned-button + draggable-panel + stage-click-collapse checks pass on `S-01`, `SR-01`, `L-03`, `L-05`, `T-01`, and `T-02`
+- P10 planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P10.md`
+  - chose the next phase sequence as `AVL Tree -> Heap -> tree-track acceptance closure`
+  - pushed the validated `P9` closure branch to `origin/feat/p9-m2-sorting-shell-rollout`
+- P10-M1 `T-03 AVL Tree` completed locally:
+  - added AVL insert + rebalance generator / timeline adapter / page / route
+  - covered explicit `LL` / `LR` / `RR` / `RL` rotation teaching states with deterministic tests
+  - marked `T-03` as implemented in module registry and localized zh/en UI copy
+  - targeted Playwright smoke confirmed `/modules` shows `T-03` as `Ready`, `/modules/avl-tree` opens cleanly, and default `Next` advances from `0/11` to `1/11`
+  - captured local smoke artifacts (`output/playwright/p10m1-modules-smoke.png`, `output/playwright/p10m1-avl-tree-smoke.png`)
+- P10-M2 `T-04 Heap` completed locally:
+  - added heap build / insert / extract-root generator + timeline adapter + page / route
+  - kept tree view and array view synchronized from one deterministic heap snapshot model
+  - marked `T-04` as implemented in module registry and localized zh/en UI copy
+  - targeted Playwright smoke confirmed `/modules` shows `T-04` as `Ready`, `/modules/heap` opens cleanly, and default `Next` advances from `0/11` to `1/11`
+  - captured local smoke artifacts (`output/playwright/p10m2-modules-smoke.png`, `output/playwright/p10m2-heap-smoke.png`)
+- P10-M3 tree-track acceptance closure completed locally:
+  - refreshed Playwright tree-track evidence under `output/playwright/p10m3-*`
+  - `/modules` now verifies `19` cards, `17` ready badges, `17` open links, and `6` tree-filter cards
+  - targeted smoke confirms `T-01` / `T-02` / `T-03` / `T-04` all open without console errors and default `Next` advances on all four routes
+  - targeted shell checks confirm `T-03` / `T-04` open both `Controls` + `Step` panels and clicking the stage collapses them from `2 -> 0`
+- P11 planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P11.md`
+  - chose the next phase sequence as `Graph Representation -> DFS -> graph-track acceptance closure`
+  - selected graph-track foundation over immediately continuing with `Trie` / `B-Tree / B+ Tree`
+- P11-M1 `G-01 Graph Representation` completed locally:
+  - added graph category support in discovery / registry / route / zh-en i18n
+  - implemented `G-01` with one deterministic graph model driving graph canvas + adjacency list + adjacency matrix under the shared `WorkspaceShell`
+  - added deterministic graph coverage (`graphRepresentation.test.ts`, `graphRepresentationTimelineReplay.test.ts`)
+  - targeted Playwright smoke confirmed:
+    - `/modules`: `21` cards, `18` ready badges, `18` open links
+    - graph filter shows `2` cards and `1` open link
+    - `/modules/graph-representation` opens cleanly, default `Next` advances `0/20 -> 1/20`, and stage-click collapse works after opening `Controls` + `Step`
+  - captured local smoke artifacts:
+    - `output/playwright/p11m1-modules-smoke.png`
+    - `output/playwright/p11m1-modules-graph-filter.png`
+    - `output/playwright/p11m1-graph-representation-panels.png`
+    - `output/playwright/p11m1-graph-representation-smoke.png`
+    - `output/playwright/p11m1-smoke-report.txt`
+- P11-M2 `G-02 DFS` completed locally:
+  - added deterministic DFS traversal generation, timeline adapter, page, route wiring, and replay coverage
+  - implemented explicit visit / inspect-neighbor / descend / skip-visited / backtrack teaching states on top of the shared graph preset foundation
+  - marked `G-02` as implemented in the module registry and added zh/en UI copy plus graph-track styling support
+  - targeted Playwright smoke confirmed:
+    - `/modules`: `21` cards, `19` ready badges, `19` open links
+    - graph filter shows `2` cards, `2` ready badges, and `2` live open links
+    - `/modules/dfs` opens cleanly from the graph filter, `Controls` + `Step` panels open, and clicking the stage collapses them back to the pinned buttons
+    - default `Next` advances `0/28 -> 1/28`
+    - console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p11m2-modules-smoke.png`
+    - `output/playwright/p11m2-modules-graph-filter.png`
+    - `output/playwright/p11m2-dfs-panels.png`
+    - `output/playwright/p11m2-dfs-smoke.png`
+    - `output/playwright/p11m2-smoke-report.txt`
+- P11-M3 graph-track acceptance closure completed locally:
+  - refreshed graph-track Playwright evidence for `/modules`, graph filter, `G-01`, and `G-02` under `output/playwright/p11m3-*`
+  - re-verified graph discovery and route consistency on the accepted shared shell contract
+  - targeted Playwright acceptance at `1440x1100` confirmed:
+    - `/modules`: `21` cards, `19` ready badges, `19` open links
+    - graph filter: `2` cards, `2` ready badges, `2` open links
+    - `G-01`: opens cleanly, `Controls` + `Step` panels collapse on stage click, default `Next` advances `0/20 -> 1/20`, and console errors = `0`
+    - `G-02`: opens cleanly, `Controls` + `Step` panels collapse on stage click, default `Next` advances `0/28 -> 1/28`, and console errors = `0`
+  - captured local acceptance artifacts:
+    - `output/playwright/p11m3-modules-smoke.png`
+    - `output/playwright/p11m3-modules-graph-filter.png`
+    - `output/playwright/p11m3-graph-representation-panels.png`
+    - `output/playwright/p11m3-graph-representation-smoke.png`
+    - `output/playwright/p11m3-dfs-panels.png`
+    - `output/playwright/p11m3-dfs-smoke.png`
+    - `output/playwright/p11m3-acceptance-report.txt`
+- `P12` planning baseline drafted locally:
+  - added `docs/IMPLEMENTATION_PLAN_P12.md`
+  - chose the near-term wave as:
+    - `H-01 Hash Table - Chaining`
+    - `H-02 Hash Table - Open Addressing`
+    - `G-03 BFS`
+    - `G-04 Dijkstra`
+    - `G-05 Bellman-Ford`
+    - `G-06 Floyd-Warshall`
+    - `G-07 Kruskal`
+    - `G-08 Prim`
+    - `S-07 Heap Sort`
+    - `ST-01 KMP`
+  - moved the remaining blueprint items into the explicit long-term backlog:
+    - `T-05`, `T-06`, `G-09`, `S-08`~`S-11`, `ST-02`, `P-01`~`P-05`
+- `P12-M1` hash foundations are accepted locally on `feat/p12-m1-hash-foundations`:
+  - added `hash` category support in discovery/filtering/registry/routing
+  - landed `H-01 Hash Table - Chaining` with deterministic bucket-chain playback and replay coverage
+  - landed `H-02 Hash Table - Open Addressing` with deterministic linear-probing/tombstone playback and replay coverage
+  - added zh/en copy plus shared hash-stage styling for both pages
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=hash`: `2` cards, `2` ready badges, `2` open links
+    - `/modules/hash-chaining`: opens cleanly, default `Next` advances `0/11 -> 1/11`, console errors = `0`
+    - `/modules/hash-open-addressing`: opens cleanly, default `Next` advances `0/21 -> 1/21`, console errors = `0`
+  - captured local acceptance artifacts:
+    - `output/playwright/p12m1-modules-hash-filter.png`
+    - `output/playwright/p12m1-hash-chaining-smoke.png`
+    - `output/playwright/p12m1-hash-open-addressing-smoke.png`
+    - `output/playwright/p12m1-acceptance-report.txt`
+- `P12-M2` `G-03 BFS` is accepted locally on `feat/p12-m2-bfs`:
+  - added deterministic BFS traversal generation, timeline adapter, page, route wiring, and replay coverage
+  - implemented explicit enqueue/dequeue/frontier/level-order teaching states on top of the shared graph preset foundation
+  - marked `G-03` as implemented in the module registry and added zh/en UI copy plus graph-stage styling support for frontier highlighting
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `3` cards, `3` ready badges, `3` open links
+    - `/modules/bfs`: opens cleanly, default `Next` advances `0/34 -> 1/34`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m2-modules-graph-filter.png`
+    - `output/playwright/p12m2-bfs-smoke.png`
+    - `output/playwright/p12m2-smoke-report.txt`
+- `P12-M3` shortest-path batch is accepted locally on `feat/p12-m3-shortest-paths`:
+  - added reusable weighted-graph preset helpers for the shortest-path track
+  - landed `G-04 Dijkstra` with deterministic distance relaxation playback, timeline adapter, page, route, and replay coverage
+  - landed `G-05 Bellman-Ford` with deterministic pass-by-pass edge relaxation playback, negative-edge preset support, timeline adapter, page, route, and replay coverage
+  - landed `G-06 Floyd-Warshall` with deterministic via-node matrix updates, timeline adapter, page, route, and replay coverage
+  - refined weighted-graph preset groups so Dijkstra stays on non-negative datasets, Bellman-Ford uses the negative-edge teaching preset, and Floyd-Warshall uses the all-pairs teaching preset
+  - marked `G-04`~`G-06` as implemented in the module registry and extended zh/en UI copy plus weighted-graph / matrix stage styling
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `6` cards, `6` ready badges, `6` open links
+    - `/modules/dijkstra`: opens cleanly, default `Next` advances `0/34 -> 1/34`, console errors = `0`
+    - `/modules/bellman-ford`: opens cleanly, default `Next` advances `0/75 -> 1/75`, console errors = `0`
+    - `/modules/floyd-warshall`: opens cleanly, default `Next` advances `0/138 -> 1/138`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m3-modules-graph-filter.png`
+    - `output/playwright/p12m3-dijkstra-smoke.png`
+    - `output/playwright/p12m3-bellman-ford-smoke.png`
+    - `output/playwright/p12m3-floyd-warshall-smoke.png`
+    - `output/playwright/p12m3-g04-smoke-report.txt`
+    - `output/playwright/p12m3-g05-smoke-report.txt`
+    - `output/playwright/p12m3-g06-smoke-report.txt`
+- `P12-M4` MST batch is accepted locally on `feat/p12-m4-mst`:
+  - extended the shared weighted-graph foundation to support the undirected MST teaching preset across both MST pages
+  - landed `G-07 Kruskal` with deterministic sorted-edge inspection, component merge / cycle-skip playback, timeline adapter, page, route, and replay coverage
+  - landed `G-08 Prim` with deterministic frontier-queue growth, stale-edge skip playback, timeline adapter, page, route, and replay coverage
+  - refined shared weighted-graph / graph-stage styling so accepted, frontier, and rejected MST edges remain visually distinct
+  - marked `G-07` / `G-08` as implemented in the module registry and extended zh/en UI copy plus MST-stage summary views
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `8` cards, `8` ready badges, `8` open links
+    - `/modules/kruskal`: opens cleanly, default `Next` advances `0/12 -> 1/12`, console errors = `0`
+    - `/modules/prim`: opens cleanly, default `Next` advances `0/12 -> 1/12`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m4-modules-graph-filter.png`
+    - `output/playwright/p12m4-kruskal-smoke.png`
+    - `output/playwright/p12m4-prim-smoke.png`
+    - `output/playwright/p12m4-g07-smoke-report.txt`
+    - `output/playwright/p12m4-g08-smoke-report.txt`
+- `P12-M5` `S-07 Heap Sort` + `ST-01 KMP` are accepted locally on `feat/p12-m5-heap-sort-kmp`:
+  - landed `S-07 Heap Sort` with deterministic heap-build / extract-max playback, timeline adapter, page, route, and replay coverage
+  - landed `ST-01 KMP` with deterministic prefix-table / fallback / alignment playback, timeline adapter, page, route, and replay coverage
+  - opened the `string` category in discovery / registry / filters / zh-en i18n
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=sort`: `7` cards, `7` ready badges, `7` open links
+    - `/modules/heap-sort`: opens cleanly, default `Next` advances `0/51 -> 1/51`, console errors = `0`
+    - `/modules?category=string`: `1` card, `1` ready badge, `1` open link
+    - `/modules/kmp`: opens cleanly, default `Next` advances `0/68 -> 1/68`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p12m5-modules-sort-filter.png`
+    - `output/playwright/p12m5-heap-sort-smoke.png`
+    - `output/playwright/p12m5-modules-string-filter.png`
+    - `output/playwright/p12m5-kmp-smoke.png`
+- `P12-M6` near-term wave acceptance closure completed locally:
+  - refreshed discovery evidence for `/modules` plus graph / hash / sort / string filters
+  - `/modules` now verifies `31` cards, `29` ready badges, and `29` open links
+  - captured local acceptance artifacts:
+    - `output/playwright/p12m6-modules-smoke.png`
+    - `output/playwright/p12m6-modules-graph-filter.png`
+    - `output/playwright/p12m6-modules-hash-filter.png`
+    - `output/playwright/p12m6-modules-sort-filter.png`
+    - `output/playwright/p12m6-modules-string-filter.png`
+    - `output/playwright/p12m6-acceptance-report.txt`
+- Post-`P12` planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P13.md`
+  - chose immediate execution order as `ST-02` -> `G-09`, then tree backlog (`T-06` -> `T-05`)
+  - kept standalone/offline export work excluded from the mainline backlog unless explicitly requested
+- `P13-M1` `ST-02 Rabin-Karp` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed rolling-hash generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=string`: `2` cards, `2` ready badges, `2` open links
+    - `/modules/rabin-karp`: opens cleanly, default `Next` advances `0/46 -> 1/46`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m1-modules-string-filter.png`
+    - `output/playwright/p13m1-rabin-karp-smoke.png`
+    - `output/playwright/p13m1-smoke-report.txt`
+- `P13-M2` `G-09 Topological Sort` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed Kahn queue + indegree progression generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=graph`: `9` cards, `9` ready badges, `9` open links
+    - `/modules/topological-sort`: opens cleanly, default `Next` advances `0/46 -> 1/46`, console errors = `0`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m2-modules-graph-filter.png`
+    - `output/playwright/p13m2-g09-topological-sort-smoke.png`
+    - `output/playwright/p13m2-g09-smoke-report.txt`
+- `P13-M3` `T-06 Trie` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed trie generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules?category=tree`: `6` cards, `6` ready badges, `6` open links
+    - `/modules/trie`: opens cleanly, default `Next` advances `0/11 -> 1/11`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m3-modules-tree-filter.png`
+    - `output/playwright/p13m3-trie-smoke.png`
+- `P13-M4` `T-05 B-Tree / B+ Tree` is accepted locally on `feat/p13-m1-rabin-karp`:
+  - landed side-by-side B-Tree / B+ Tree insert generator/timeline/page/route/registry/i18n wiring and deterministic replay coverage
+  - local `npm run check` passed on `2026-04-19`
+  - targeted Playwright smoke confirmed:
+    - `/modules/btree`: opens cleanly, default `Next` advances `0/7 -> 1/7`
+  - captured local smoke artifacts:
+    - `output/playwright/p13m3-btree-smoke.png`
+- `P13-M5` current functional-module closure completed locally:
+  - `/modules` now verifies `33` cards, `33` ready badges, and `33` open links
+  - the shared runtime registry no longer has any pending module cards
+- `P14` planning baseline completed locally:
+  - added `docs/IMPLEMENTATION_PLAN_P14.md`
+  - selected the final backlog wave as `S-08`~`S-11` plus `P-01`~`P-05`
+  - chose a new `paradigm` category for the concept/technique track so `/modules` can group `P-01`~`P-05` explicitly
+- `P14-M1` / `P14-M2` sorting backlog closure completed locally:
+  - landed `S-08 Counting Sort`, `S-09 Radix Sort`, `S-10 Bucket Sort`, and `S-11 Sorting Race`
+  - updated route/registry/style wiring for the expanded sorting track
+  - local `npm run check` passed on `2026-04-19` (`feat/p14-backlog-wave`)
+- `P14-M3` / `P14-M4` paradigm-track closure completed locally:
+  - landed `P-01 Divide & Conquer`, `P-02 Dynamic Programming`, `P-03 Greedy`, `P-04 Backtracking`, and `P-05 Union-Find`
+  - opened the `paradigm` category across discovery/filtering, routing, registry, tests, and zh/en copy
+  - localized the `Greedy` stage lane-state labels so the final paradigm batch stays zh/en-consistent
+- `P14-M5` original blueprint closure completed locally:
+  - `/modules` now verifies `42` cards, `42` ready badges, and `42` open links
+  - `/modules?category=sort` verifies `11` ready/open sorting cards
+  - `/modules?category=paradigm` verifies `5` ready/open paradigm cards
+  - all `9` newly landed `P14` module routes open cleanly, default `Next` advances, and no browser-side runtime errors were captured in the targeted Playwright smoke
+  - refreshed acceptance artifacts/report under `output/playwright/p14m5-*`
+  - the runtime registry now has no pending entries left in the original 42-module blueprint
+- Post-`P14` `T-07 Huffman Tree` extension completed locally:
+  - added deterministic Huffman forest construction, minimum-root selection, merge playback, and final prefix-code generation with left edge = `0` and right edge = `1`
+  - added `/modules/huffman-tree` page/route/registry/catalog/i18n/style/test wiring
+  - runtime registry now reports `43` modules, `43` implemented modules, and `7/7` tree-track modules ready
+  - targeted tests, build, and full `npm run check` passed locally on 2026-05-08
+  - targeted browser smoke passed on `/modules/huffman-tree` with `Step 1/9 -> Step 2/9` and no console/page errors
+- 2026-07-21 workspace/acceptance kickoff completed locally:
+  - added `docs/REPO_WORKSPACE_POLICY.md` and `docs/CURRENT_WORKTREE_CHANGESET_MAP.md`
+  - ignored local-only design/output directories and moved scratch screenshots/logs out of the top-level `output/playwright/` review path
+  - completed a first representative Playwright audit and confirmed the next phase should be acceptance/stabilization rather than new feature delivery
+- P8-M1 tree onboarding + `T-01 Binary Tree Traversal` completed:
+  - added `tree` category support in `/modules` filter + i18n labels
+  - registered `T-01`~`T-06` in module registry (`T-01` implemented)
+  - added `T-01` timeline/page/route (`/modules/binary-tree`) with four traversal modes
+  - added deterministic tests (`binaryTreeTraversal.test.ts`, `binaryTreeTraversalTimelineReplay.test.ts`)
+  - captured local Playwright smoke artifacts (`output/playwright/p8m1-modules-tree-filter.png`, `output/playwright/p8m1-t01-binary-tree-smoke.png`)
+- P8-M2 `T-02 BST` completed:
+  - added BST generator/timeline/page/route (`/modules/bst`) with `searchPath` / `insert` / `delete`
+  - explicit delete-case timeline branches landed (`leaf` / `oneChild` / `twoChildren + successor`)
+  - added deterministic tests (`bst.test.ts`, `bstTimelineReplay.test.ts`)
+  - marked `T-02` as implemented in module registry
+  - captured local Playwright smoke artifacts (`output/playwright/p8m2-modules-tree-filter.png`, `output/playwright/p8m2-t02-bst-smoke.png`)
+- P8-M3 tree-track polish (completed):
+  - `T-01` production route now uses the new single-stage shell (edge drawer + stage-first animation area + floating algorithm window)
+  - `T-01` wide complete-tree spacing was rebalanced so large datasets keep distinct outer null hints and avoid near-vertical outer leaf-to-null edges
+  - `T-01` added traversal output sequence panel and node value display toggle (`number`/`letter`)
+  - preorder guide-step timing refined (arrival + D/L/R shown in one step)
+  - binary-tree canvas route generation replaced: hardcoded sample-specific steps -> recursive rule-driven generator for arbitrary tree shapes (data/null/root rules)
+  - binary-tree canvas route playback now draws progressively from root-top entry to end, with hidden future segments, dashed completed segments, line-end arrows, and a moving front arrow
+  - data-node entry markers landed on route (`1` from up, `2` from left-down, `3` from right-down) and now reveal progressively with route drawing order
+  - reusable rule spec added: `docs/modules/T-01-preorder-trace-rules.md`
+  - `T-01` active trace arrowheads now anchor to terminal straight travel segments instead of whole composite paths, improving dashed-trace readability
+  - `T-01` route-order overlay now numbers arrow-capable straight travel segments instead of mixed arc/path fragments
+  - `T-01` recursive view now switches to mode-specific preorder/inorder/postorder pseudocode instead of generic conditional branches
+  - `T-01` recursive panel now opens as a draggable, resizable floating window so the traversal canvas keeps full width
+  - `T-01` floating recursion panel now includes an in-panel tip recommending single-step playback for clearer recursion/animation comparison
+  - `T-01` floating panel wording is now promoted to a generic algorithm window instead of recursion-only wording
+  - `T-01` level-order mode now hides null children in the main stage and uses a level-by-level threading trace that only connects real nodes
+  - `T-01` level-order algorithm window now opens correctly and shows queue-state playback plus queue-specific pseudocode
+  - `T-01` level-order algorithm window now separates current dequeue / action summary / waiting queue, and keeps the waiting queue on one horizontal lane with new-enqueue highlighting
+  - `T-01` floating algorithm window now keeps edge/corner resizing effective even when the popup starts flush against the viewport boundary
+  - `T-01` floating algorithm window no longer stops at a hardcoded `560x760`; it can now grow up to the viewport-safe bounds
+  - `T-01` level-order root-enqueue step now immediately animates the root-entry trace and marks the just-enqueued root on the main stage instead of lagging until visit
+  - `T-01` level-order visit steps now also mark newly enqueued child nodes on the main stage with a queue-matched pulse/badge so they visually echo the queue-side `New` chips
+  - `T-01` level-order root-to-left-child route now uses a wider outer root arc plus an upper-left offset line, and the top entry line now lands on that same outer arc radius so the root-side connector no longer masquerades as a straight line behind the node
+- `T-01` preorder trace rules are now shared between playground and formal page; formal guide rendering follows the canonical absolute-left/right data/null/root rules
+  - captured visual checkpoint artifact (`output/playwright/p8m3-t01-traversal-sequence-letter.png`)
+  - browser-side Playwright verification confirms the traversal canvas keeps its width when the floating recursion window opens, and the window can be dragged/resized at `1280x720`
+  - browser-side Playwright verification confirms level-order mode shows `0` null nodes / null-legend entries, the algorithm window opens, and the queue panel updates after stepping
+  - script-level validation confirms right/bottom-edge resize now expands by shifting the popup inward when needed, and `enqueueRoot` now emits an active root-entry trace segment before the first dequeue/visit step
+- P8-M3 tree consistency + acceptance closure completed:
+  - `T-01` / `T-02` now share the accepted tree workspace shell with pinned edge buttons, draggable control/step panels, stage-click collapse, and focus-aware auto-avoid
+  - refreshed Playwright acceptance artifacts for `/modules` + all 15 implemented routes under `output/playwright/p8m3-*.png`
+  - added local smoke / acceptance evidence:
+    - `output/playwright/p8m3-runtime-smoke.txt`
+    - `output/playwright/p8m3-acceptance-report.txt`
+- P7-M3 sorting consistency/acceptance closure completed:
+  - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p7m3-*.png`)
+  - added acceptance report `output/playwright/p7m3-acceptance-report.txt`
+- P6-M2 local browser walkthrough captured for `S-04` (`output/playwright/p6m2-shell-sort.png`)
+- P6-M3 discovery + acceptance refresh completed:
+  - refreshed Playwright screenshots for `/modules` + all implemented module routes (`output/playwright/p6m3-*.png`)
+  - added acceptance report `output/playwright/p6m3-acceptance-report.txt`
+- `/modules` page upgraded with category filters, module cards, and implemented/pending route-safe actions
+- `S-02 Selection Sort` module landed with timeline playback + deterministic tests
+- `L-04 Stack` module landed with timeline playback + JSON import/export + deterministic tests
+- `L-05 Queue` module landed with timeline playback + JSON import/export + deterministic tests
+- `L-02 Dynamic Array` module landed with resize-focused timeline playback + JSON import/export + deterministic tests
+- `S-01`/`S-02`/`S-03`/`S-04` sorting visuals received focused UX iteration:
+  - swap/shift animation semantics aligned toward temp/hole choreography
+  - default dataset size and preset controls aligned
+  - sorted persistence + finale polish + index rows aligned across `S-01`~`S-04`
+- P4-M3 consistency pass closed:
+  - S-01/S-02 playback status/step display aligned with linear modules
+  - L-03/L-05 status block layout stabilized to reduce page jitter
+  - L-05 circular queue runtime hardening added (no app crash on full enqueue path)
+  - L-05 circular queue ring pointer positioning refined (F outer / R inner toward ring center)
+  - auto-randomized insert/push/enqueue value flow aligned across L-01/L-02/L-03(insertAt)/L-04/L-05
+  - Playwright acceptance artifacts refreshed for all implemented modules (`output/playwright/p4m3-*.png` + `p4m3-acceptance-report.txt`)
+  - L-02 capacity-full warning switched to status-style warning semantics (avoid error-style false signal)
+- `L-03 /modules/linked-list` now includes the previously missing double-linked-list and circular-linked-list modes locally:
+  - the existing route now switches between `singly` / `doubly` / `circular`
+  - double linked list renders `prev | data | next` nodes plus reverse arrows
+  - double linked list insert/delete now uses explicit four-pointer choreography instead of the old single-list-style animation
+  - circular linked list keeps tail linked back to `head` and renders a distinct return arc
+  - mode-specific pseudocode and JSON mode support are included, with old JSON defaulting to `singly`
+
+## 3) Next Priority
+
+- The rebuilt graph-definition line is not fully finished yet:
+  - `G-01 /modules/graph-representation` is still treated as accepted "for now"
+  - temporary `G-02A /modules/graph-adjacency-matrix` is accepted as the adjacency-matrix storage page
+  - temporary `G-02B /modules/graph-adjacency-list` has now landed locally as the adjacency-list storage first pass and is awaiting user review
+  - old `G-02 /modules/dfs` remains in place and must not be renumbered during follow-up work
+  - graph follow-up still remains open for the remaining definition/storage pages the user expects, including adjacency-list-related work
+- Immediate next module target:
+  - continue the graph-definition/storage line rather than switching tracks
+  - review and refine `G-02B` first if the user wants changes, then continue the remaining graph basic-content line before resuming any tree-definition follow-up
+  - treat the newly added temporary `T-00A /modules/tree-definition` page as paused local work, not the active priority
+- Address remaining cross-cutting items when requested:
+  - scaffold placeholder titles (`m0-scaffold-tmp`)
+  - router/module-load warning storm seen in Firefox dev audit
+- Keep quality gates unchanged:
+  - meaningful code changes: `npm run check`
+  - docs-only changes: `./scripts/check-doc-links.sh`
+
+## 4) Guardrails
+
+- Source of truth docs:
+  - `docs/HANDOFF.md`
+  - `docs/DECISIONS.md`
+  - `TODO.md`
+- Do not skip branch workflow (`docs/*`, `feat/*`)
+- Avoid editing unrelated files in the same branch
+- Keep historical standalone/offline export work outside the active mainline backlog unless explicitly requested
+- Do not open new feature scope while `P15` acceptance/stabilization is the active wave unless the user explicitly overrides that priority
+
+## 5) Quick Start Commands
+
+```bash
+git fetch
+git switch main
+git pull
+npm install
+npm run dev
+```
+
+## 6) Session Kickoff Prompt (Copy/Paste)
+
+```text
+Read docs/SESSION_BRIEF.md, docs/HANDOFF.md, docs/DECISIONS.md, and TODO.md first.
+Then continue with the next priority only.
+Before coding, restate scope and acceptance criteria in 3-5 bullets.
+After coding, run npm run check and summarize file-level changes.
+```
+
+## 7) Update Rule
+
+Update this file when any of the following changes:
+- current phase/milestone
+- default active branch
+- next priority
+- required quality gate commands
