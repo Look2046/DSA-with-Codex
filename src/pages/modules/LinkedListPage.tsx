@@ -53,6 +53,27 @@ const DOUBLY_PREV_LINK_OFFSET_Y = -16;
 const DOUBLY_TRANSIENT_ENTRY_OFFSET_X = 24;
 const LINKED_LIST_WORKSPACE_CONFIG = getLinkedListWorkspaceConfig();
 
+const LINKED_LIST_TITLE_KEYS: Record<LinkedListMode, TranslationKey> = {
+  singly: 'module.l03.title',
+  doubly: 'module.l03b.title',
+  circular: 'module.l03c.title',
+};
+
+const LINKED_LIST_BODY_KEYS: Record<LinkedListMode, TranslationKey> = {
+  singly: 'module.l03.body',
+  doubly: 'module.l03b.body',
+  circular: 'module.l03c.body',
+};
+
+function createDefaultConfig(mode: LinkedListMode): LinkedListConfig {
+  return {
+    ...DEFAULT_CONFIG,
+    mode,
+    list: [...DEFAULT_CONFIG.list],
+    operation: { ...DEFAULT_CONFIG.operation },
+  };
+}
+
 function createRandomLinkedValue(): number {
   return Math.floor(Math.random() * 90) + 10;
 }
@@ -194,22 +215,23 @@ function getOperationCStyleLines(mode: LinkedListMode, operation: LinkedListOper
     }
     if (operation === 'insertAt') {
       return [
-        'DNode *s = createNode(value);',
-        'DNode *prev = locatePrev(head, index);',
-        'DNode *next = prev ? prev->next : head;',
-        's->prior = prev; s->next = next;',
+        'if (index < 0 || index > length) return ERROR;',
+        'DNode *prev = (index == 0) ? NULL : locate(head, index - 1);',
+        'DNode *next = (prev == NULL) ? head : prev->next;',
+        'DNode *s = createNode(value); s->prior = prev;',
+        's->next = next;',
         'if (next) next->prior = s;',
         'if (prev) prev->next = s; else head = s;',
-        'return OK;',
-        'check bidirectional links;',
+        'length++; return OK;',
       ] as const;
     }
     return [
+      'if (index < 0 || index >= length) return ERROR;',
       'DNode *target = locate(head, index);',
       'DNode *prev = target->prior;',
       'DNode *next = target->next;',
       'if (prev) prev->next = next; else head = next;',
-      'if (next) next->prior = prev;',
+      'if (next) next->prior = prev; free(target); return OK;',
     ] as const;
   }
 
@@ -226,22 +248,22 @@ function getOperationCStyleLines(mode: LinkedListMode, operation: LinkedListOper
     }
     if (operation === 'insertAt') {
       return [
+        'if (index < 0 || index > length) return ERROR;',
         'Node *s = createNode(value);',
-        'if (head == NULL) s->next = s;',
-        'Node *prev = locatePrevCircular(head, index);',
-        's->next = prev ? prev->next : head;',
-        'if (prev) prev->next = s;',
-        'if (index == 1) head = s;',
-        'tail->next = head;',
-        'return OK;',
+        'if (head == NULL) { head = s; s->next = s; return OK; }',
+        'Node *tail = locateTail(head); Node *prev = (index == 0) ? tail : locateCircular(head, index - 1);',
+        's->next = prev->next;',
+        'prev->next = s;',
+        'if (index == 0) head = s;',
+        'length++; return OK;',
       ] as const;
     }
     return [
-      'if (head == NULL) return OK;',
-      'Node *target = locateCircular(head, index);',
-      'Node *prev = locatePrevCircular(head, index);',
-      'if (target == head) head = target->next;',
-      'prev->next = target->next; free(target);',
+      'if (index < 0 || index >= length) return ERROR;',
+      'if (length == 1) { free(head); head = NULL; return OK; }',
+      'Node *tail = locateTail(head); Node *target = locateCircular(head, index);',
+      'Node *prev = (index == 0) ? tail : locateCircular(head, index - 1);',
+      'prev->next = target->next; if (index == 0) head = target->next; free(target);',
     ] as const;
   }
 
@@ -257,20 +279,22 @@ function getOperationCStyleLines(mode: LinkedListMode, operation: LinkedListOper
 
   if (operation === 'insertAt') {
     return [
-      'if (index < 1 || index > length + 1) return ERROR;',
-      'Node *prev = locatePrev(head, index);',
+      'if (index < 0 || index > length) return ERROR;',
+      'Node *prev = (index == 0) ? NULL : locate(head, index - 1);',
       'Node *s = createNode(value);',
-      's->next = prev->next;',
-      'prev->next = s;',
+      's->next = (prev == NULL) ? head : prev->next;',
+      'if (prev == NULL) head = s;',
+      'else prev->next = s;',
+      'length = length + 1;',
       'return OK;',
     ] as const;
   }
 
   return [
-    'if (index < 1 || index > length) return ERROR;',
-    'Node *prev = locatePrev(head, index);',
-    'Node *target = prev->next;',
-    'prev->next = target->next;',
+    'if (index < 0 || index >= length) return ERROR;',
+    'Node *prev = (index == 0) ? NULL : locate(head, index - 1);',
+    'Node *target = (prev == NULL) ? head : prev->next;',
+    'if (prev == NULL) head = target->next; else prev->next = target->next;',
     'free(target); return OK;',
   ] as const;
 }
@@ -401,16 +425,17 @@ function buildCurvePath(from: { x: number; y: number }, to: { x: number; y: numb
   return `M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}`;
 }
 
-export function LinkedListPage() {
+function LinkedListWorkbenchPage({ fixedMode }: { fixedMode: LinkedListMode }) {
   const { t } = useI18n();
+  const defaultConfig = useMemo(() => createDefaultConfig(fixedMode), [fixedMode]);
 
-  const [mode, setMode] = useState<LinkedListMode>(DEFAULT_CONFIG.mode);
-  const [listInput, setListInput] = useState(DEFAULT_CONFIG.list.join(', '));
-  const [operationType, setOperationType] = useState<LinkedListOperation['type']>(DEFAULT_CONFIG.operation.type);
+  const mode = fixedMode;
+  const [listInput, setListInput] = useState(defaultConfig.list.join(', '));
+  const [operationType, setOperationType] = useState<LinkedListOperation['type']>(defaultConfig.operation.type);
   const [valueInput, setValueInput] = useState(String(DEFAULT_OPERATION.value));
   const [indexInput, setIndexInput] = useState(String(DEFAULT_OPERATION.index + 1));
   const [hasHeadNode, setHasHeadNode] = useState(true);
-  const [displayConfig, setDisplayConfig] = useState<LinkedListConfig>(DEFAULT_CONFIG);
+  const [displayConfig, setDisplayConfig] = useState<LinkedListConfig>(defaultConfig);
   const [error, setError] = useState('');
   const [hasValidConfig, setHasValidConfig] = useState(true);
   const [jsonInput, setJsonInput] = useState('');
@@ -496,15 +521,14 @@ export function LinkedListPage() {
     reset();
     prevNodeRects.current = new Map();
     skipNextLayoutAnimationRef.current = true;
-    setListInput(DEFAULT_CONFIG.list.join(', '));
-    setMode(DEFAULT_CONFIG.mode);
-    setOperationType(DEFAULT_CONFIG.operation.type);
+    setListInput(defaultConfig.list.join(', '));
+    setOperationType(defaultConfig.operation.type);
     setValueInput(String(DEFAULT_OPERATION.value));
     setIndexInput(String(DEFAULT_OPERATION.index + 1));
     setHasHeadNode(true);
     setDisplayConfig({
-      mode: DEFAULT_CONFIG.mode,
-      list: [...DEFAULT_CONFIG.list],
+      mode,
+      list: [...defaultConfig.list],
       operation: {
         type: 'insertAt',
         index: DEFAULT_OPERATION.index,
@@ -516,7 +540,7 @@ export function LinkedListPage() {
     setJsonInput('');
     setJsonFeedback('');
     setHasJsonError(false);
-  }, [reset]);
+  }, [defaultConfig, mode, reset]);
 
   useEffect(() => {
     setTotalFrames(steps.length);
@@ -556,7 +580,6 @@ export function LinkedListPage() {
     }
 
     const nextOperationType = resolved.config.operation.type;
-    const nextMode = resolved.config.mode;
     const nextListInput = resolved.config.list.join(', ');
     const nextValueInput =
       resolved.config.operation.type === 'find' || resolved.config.operation.type === 'insertAt'
@@ -570,15 +593,14 @@ export function LinkedListPage() {
     reset();
     prevNodeRects.current = new Map();
     skipNextLayoutAnimationRef.current = true;
-    setMode(nextMode);
     setListInput(nextListInput);
     setOperationType(nextOperationType);
     setValueInput(nextValueInput);
     setIndexInput(nextIndexInput);
-    recomputeInputState(nextMode, nextListInput, nextOperationType, nextValueInput, nextIndexInput);
+    recomputeInputState(mode, nextListInput, nextOperationType, nextValueInput, nextIndexInput);
     setHasJsonError(false);
     setJsonFeedback(t('module.l03.json.imported'));
-  }, [indexInput, jsonInput, recomputeInputState, reset, t, valueInput]);
+  }, [indexInput, jsonInput, mode, recomputeInputState, reset, t, valueInput]);
 
   useEffect(() => {
     if (status === 'playing') {
@@ -1123,9 +1145,9 @@ export function LinkedListPage() {
     <WorkspaceShell
       pageClassName={LINKED_LIST_WORKSPACE_CONFIG.pageClassName}
       panelLayout={LINKED_LIST_WORKSPACE_CONFIG.panelLayout}
-      stageAriaLabel={t('module.l03.title')}
-      title={t('module.l03.title')}
-      description={t('module.l03.body')}
+      stageAriaLabel={t(LINKED_LIST_TITLE_KEYS[mode])}
+      title={t(LINKED_LIST_TITLE_KEYS[mode])}
+      description={t(LINKED_LIST_BODY_KEYS[mode])}
       shellClassName={LINKED_LIST_WORKSPACE_CONFIG.shellClassName}
       stageClassName={LINKED_LIST_WORKSPACE_CONFIG.stageClassName}
       stageBodyClassName={LINKED_LIST_WORKSPACE_CONFIG.stageBodyClassName}
@@ -1158,26 +1180,6 @@ export function LinkedListPage() {
       controlsContent={
         <>
           <div className="array-controls-grid linked-controls-grid">
-            <label className="tree-workspace-field array-controls-field" htmlFor="linked-list-mode">
-              <span>{t('module.l03.input.mode')}</span>
-              <select
-                id="linked-list-mode"
-                value={mode}
-                onChange={(event) => {
-                  const nextMode = event.target.value as LinkedListMode;
-                  reset();
-                  prevNodeRects.current = new Map();
-                  skipNextLayoutAnimationRef.current = true;
-                  setMode(nextMode);
-                  recomputeInputState(nextMode, listInput, operationType, valueInput, indexInput);
-                }}
-              >
-                <option value="singly">{t('module.l03.mode.singly')}</option>
-                <option value="doubly">{t('module.l03.mode.doubly')}</option>
-                <option value="circular">{t('module.l03.mode.circular')}</option>
-              </select>
-            </label>
-
             <label
               className="tree-workspace-field array-controls-field linked-controls-field-list"
               htmlFor="linked-list-input"
@@ -1271,21 +1273,20 @@ export function LinkedListPage() {
               <span>{t('module.l03.input.withHeadNode')}</span>
             </label>
 
-            <div className="tree-workspace-field array-controls-field array-controls-field-speed linked-controls-field-speed">
+            <label className="tree-workspace-field array-controls-field array-controls-field-speed linked-controls-field-speed" htmlFor="speed-select-LinkedListPage">
               <span>{t('module.s01.speed')}</span>
-              <div className="tree-workspace-toggle-row">
+              <select
+                id="speed-select-LinkedListPage"
+                value={speedMs}
+                onChange={(event) => setSpeed(Number(event.target.value))}
+              >
                 {speedOptions.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    className={`tree-workspace-toggle${speedMs === option.value ? ' tree-workspace-toggle-active' : ''}`}
-                    onClick={() => setSpeed(option.value)}
-                  >
+                  <option key={option.key} value={option.value}>
                     {t(option.key)}
-                  </button>
+                  </option>
                 ))}
-              </div>
-            </div>
+              </select>
+              </label>
           </div>
 
           <p className={`workspace-inline-feedback array-controls-feedback${error ? ' form-error' : ''}`} aria-live="polite">
@@ -1625,4 +1626,16 @@ export function LinkedListPage() {
       }
     />
   );
+}
+
+export function LinkedListPage() {
+  return <LinkedListWorkbenchPage fixedMode="singly" />;
+}
+
+export function DoublyLinkedListPage() {
+  return <LinkedListWorkbenchPage fixedMode="doubly" />;
+}
+
+export function CircularLinkedListPage() {
+  return <LinkedListWorkbenchPage fixedMode="circular" />;
 }

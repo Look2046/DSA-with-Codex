@@ -1,0 +1,164 @@
+import type { TranslationKey } from '../i18n/translations';
+import type { ModuleCategory, ModuleDifficulty } from '../types/module';
+
+export const MODULE_CATEGORY_ORDER: ModuleCategory[] = [
+  'linear',
+  'storage',
+  'tree',
+  'graph',
+  'search',
+  'sort',
+  'string',
+  'paradigm',
+];
+
+export const MODULE_CATEGORY_META: Record<
+  ModuleCategory,
+  {
+    label: TranslationKey;
+    summary: TranslationKey;
+    focus: TranslationKey;
+  }
+> = {
+  linear: {
+    label: 'modules.filter.linear',
+    summary: 'modules.category.linear.summary',
+    focus: 'modules.category.linear.focus',
+  },
+  storage: {
+    label: 'modules.filter.storage',
+    summary: 'modules.category.storage.summary',
+    focus: 'modules.category.storage.focus',
+  },
+  sort: {
+    label: 'modules.filter.sort',
+    summary: 'modules.category.sort.summary',
+    focus: 'modules.category.sort.focus',
+  },
+  search: {
+    label: 'modules.filter.search',
+    summary: 'modules.category.search.summary',
+    focus: 'modules.category.search.focus',
+  },
+  tree: {
+    label: 'modules.filter.tree',
+    summary: 'modules.category.tree.summary',
+    focus: 'modules.category.tree.focus',
+  },
+  graph: {
+    label: 'modules.filter.graph',
+    summary: 'modules.category.graph.summary',
+    focus: 'modules.category.graph.focus',
+  },
+  hash: {
+    label: 'modules.filter.hash',
+    summary: 'modules.category.hash.summary',
+    focus: 'modules.category.hash.focus',
+  },
+  string: {
+    label: 'modules.filter.string',
+    summary: 'modules.category.string.summary',
+    focus: 'modules.category.string.focus',
+  },
+  paradigm: {
+    label: 'modules.filter.paradigm',
+    summary: 'modules.category.paradigm.summary',
+    focus: 'modules.category.paradigm.focus',
+  },
+};
+
+export const MODULE_DIFFICULTY_LABEL_KEYS: Record<ModuleDifficulty, TranslationKey> = {
+  1: 'modules.level.foundation',
+  2: 'modules.level.core',
+  3: 'modules.level.advanced',
+};
+
+export const MODULE_TITLE_KEYS: Record<string, TranslationKey> = {
+  'L-04': 'module.l04a.title',
+  'L-05': 'module.l05a.title',
+  'T-01': 'module.t00a.title',
+  'T-02': 'module.t01.title',
+  'T-03': 'module.t02.title',
+  'T-04': 'module.t03.title',
+  'T-05': 'module.t04.title',
+  'T-06': 'module.t07.title',
+  'T-07': 'module.t05.title',
+  'T-08': 'module.t05b.title',
+  'T-09': 'module.t06.title',
+  'G-02': 'module.g02a.title',
+  'G-03': 'module.g02b.title',
+  'G-04': 'module.g02.title',
+  'G-05': 'module.g03.title',
+  'G-06': 'module.g04.title',
+  'G-07': 'module.g05.title',
+  'G-08': 'module.g06.title',
+  'G-09': 'module.g07.title',
+  'G-10': 'module.g08.title',
+  'G-11': 'module.g09.title',
+};
+
+export function getModuleTitleKeyById(moduleId: string): TranslationKey {
+  return MODULE_TITLE_KEYS[moduleId] ?? (`module.${moduleId.toLowerCase().replace(/-/g, '')}.title` as TranslationKey);
+}
+
+export const MODULE_DESCRIPTION_KEYS: Record<string, TranslationKey> = {
+  'S-01': 'module.s01.body',
+  'S-02': 'module.s02.body',
+  'S-03': 'module.s03.body',
+  'S-04': 'module.s04.body',
+  'S-05': 'module.s05.body',
+  'S-06': 'module.s06.body',
+  'S-07': 'module.s07.body',
+  'S-08': 'module.s08.body',
+  'S-09': 'module.s09.body',
+  'S-10': 'module.s10.body',
+  'S-11': 'module.s11.body',
+  'SR-01': 'module.sr01.body',
+  'SR-02': 'module.sr02.body',
+  'L-01': 'module.l01.body',
+  'L-02': 'module.l02.body',
+  'L-03': 'module.l03.body',
+  'L-03B': 'module.l03b.body',
+  'L-03C': 'module.l03c.body',
+  'L-04': 'module.l04.body',
+  'L-04B': 'module.l04b.body',
+  'L-05': 'module.l05.body',
+  'L-05B': 'module.l05b.body',
+  'L-05C': 'module.l05c.body',
+  'M-01': 'module.m01.body',
+  'M-02': 'module.m02.body',
+  'M-03': 'module.m03.body',
+  'M-04': 'module.m04.body',
+  'M-05': 'module.m05.body',
+  'M-06': 'module.m06.body',
+  'M-07': 'module.m07.body',
+  'T-01': 'module.t00a.body',
+  'T-02': 'module.t01.body',
+  'T-03': 'module.t02.body',
+  'T-04': 'module.t03.body',
+  'T-05': 'module.t04.body',
+  'T-06': 'module.t07.body',
+  'T-07': 'module.t05.body',
+  'T-08': 'module.t05b.body',
+  'T-09': 'module.t06.body',
+  'G-01': 'module.g01.body',
+  'G-02': 'module.g02a.body',
+  'G-03': 'module.g02b.body',
+  'G-04': 'module.g02.body',
+  'G-05': 'module.g03.body',
+  'G-06': 'module.g04.body',
+  'G-07': 'module.g05.body',
+  'G-08': 'module.g06.body',
+  'G-09': 'module.g07.body',
+  'G-10': 'module.g08.body',
+  'G-11': 'module.g09.body',
+  'H-01': 'module.h01.body',
+  'H-02': 'module.h02.body',
+  'ST-01': 'module.st01.body',
+  'ST-02': 'module.st02.body',
+  'P-01': 'module.p01.body',
+  'P-02': 'module.p02.body',
+  'P-03': 'module.p03.body',
+  'P-04': 'module.p04.body',
+  'P-05': 'module.p05.body',
+};

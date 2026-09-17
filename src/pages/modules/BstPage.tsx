@@ -1,0 +1,601 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { WorkspaceShell } from '../../components/WorkspaceShell';
+import { useTimelinePlayer } from '../../engine/timeline/useTimelinePlayer';
+import { useI18n } from '../../i18n/useI18n';
+import { buildBstTimelineFromInput } from '../../modules/tree/bstTimelineAdapter';
+import type { BstDeleteCase, BstOperation, BstOutcome, BstStep } from '../../modules/tree/bst';
+import type { HighlightType, PlaybackStatus } from '../../types/animation';
+
+const DEFAULT_DATASET = [50, 30, 70, 20, 40, 60, 80, 65];
+const MIN_SIZE = 5;
+const MAX_SIZE = 15;
+
+type BstOperationConfig = {
+  operation: BstOperation;
+  target: number;
+};
+
+function createRandomUniqueDataset(size: number): number[] {
+  const pool = Array.from({ length: 99 }, (_, index) => index + 1);
+
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+  }
+
+  return pool.slice(0, size);
+}
+
+function createRandomInsertTarget(existingValues: number[]): number {
+  const existing = new Set(existingValues);
+  const candidates = Array.from({ length: 99 }, (_, index) => index + 1).filter((value) => !existing.has(value));
+  if (candidates.length === 0) {
+    return Math.max(...existingValues, 0) + 1;
+  }
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function getStatusLabel(status: PlaybackStatus, t: ReturnType<typeof useI18n>['t']): string {
+  switch (status) {
+    case 'idle':
+      return t('playback.status.idle');
+    case 'playing':
+      return t('playback.status.playing');
+    case 'paused':
+      return t('playback.status.paused');
+    case 'completed':
+      return t('playback.status.completed');
+    default:
+      return status;
+  }
+}
+
+function getOperationLabel(operation: BstOperation, t: ReturnType<typeof useI18n>['t']): string {
+  if (operation === 'searchPath') {
+    return t('module.t02.operation.searchPath');
+  }
+  if (operation === 'insert') {
+    return t('module.t02.operation.insert');
+  }
+  return t('module.t02.operation.delete');
+}
+
+function getDeleteCaseLabel(deleteCase: BstDeleteCase, t: ReturnType<typeof useI18n>['t']): string {
+  if (deleteCase === 'leaf') {
+    return t('module.t02.case.leaf');
+  }
+  if (deleteCase === 'oneChild') {
+    return t('module.t02.case.oneChild');
+  }
+  if (deleteCase === 'twoChildren') {
+    return t('module.t02.case.twoChildren');
+  }
+  return t('module.t02.case.none');
+}
+
+function getOutcomeLabel(outcome: BstOutcome, t: ReturnType<typeof useI18n>['t']): string {
+  if (outcome === 'found') {
+    return t('module.t02.outcome.found');
+  }
+  if (outcome === 'inserted') {
+    return t('module.t02.outcome.inserted');
+  }
+  if (outcome === 'deleted') {
+    return t('module.t02.outcome.deleted');
+  }
+  if (outcome === 'notFound') {
+    return t('module.t02.outcome.notFound');
+  }
+  if (outcome === 'duplicate') {
+    return t('module.t02.outcome.duplicate');
+  }
+  return t('module.t02.outcome.ongoing');
+}
+
+function formatArrayPreview(values: number[], maxVisible = 24): string {
+  if (values.length <= maxVisible) {
+    return values.join(', ');
+  }
+  const leftCount = Math.floor(maxVisible / 2);
+  const rightCount = maxVisible - leftCount;
+  const leftPart = values.slice(0, leftCount).join(', ');
+  const rightPart = values.slice(-rightCount).join(', ');
+  return `${leftPart}, ..., ${rightPart} (n=${values.length})`;
+}
+
+function getStepDescription(step: BstStep | undefined, t: ReturnType<typeof useI18n>['t']): string {
+  if (!step) {
+    return '-';
+  }
+
+  if (step.action === 'initial') {
+    return t('module.t02.step.initial');
+  }
+
+  if (step.action === 'visit') {
+    return t('module.t02.step.visit');
+  }
+
+  if (step.action === 'found') {
+    return t('module.t02.step.found');
+  }
+
+  if (step.action === 'notFound') {
+    return t('module.t02.step.notFound');
+  }
+
+  if (step.action === 'inserted') {
+    return t('module.t02.step.inserted');
+  }
+
+  if (step.action === 'duplicate') {
+    return t('module.t02.step.duplicate');
+  }
+
+  if (step.action === 'deleteCase') {
+    return t('module.t02.step.deleteCase');
+  }
+
+  if (step.action === 'successor') {
+    return t('module.t02.step.successor');
+  }
+
+  if (step.action === 'deleted') {
+    return t('module.t02.step.deleted');
+  }
+
+  return t('module.t02.step.completed');
+}
+
+export function BstPage() {
+  const { t } = useI18n();
+  const autoNextInsertValueKeyRef = useRef<string | null>(null);
+
+  const [datasetSize, setDatasetSize] = useState(DEFAULT_DATASET.length);
+  const [seedData, setSeedData] = useState<number[]>(DEFAULT_DATASET);
+  const [operationInput, setOperationInput] = useState<BstOperation>('searchPath');
+  const [targetInput, setTargetInput] = useState(String(DEFAULT_DATASET[0] ?? 0));
+  const [error, setError] = useState('');
+  const [activeConfig, setActiveConfig] = useState<BstOperationConfig>({
+    operation: 'searchPath',
+    target: DEFAULT_DATASET[0] ?? 0,
+  });
+
+  const { status, speedMs, currentFrame, setTotalFrames, setSpeed, play, pause, next, prev, reset } = useTimelinePlayer(0);
+
+  const timelineFrames = useMemo(
+    () => buildBstTimelineFromInput(seedData, activeConfig.operation, activeConfig.target),
+    [activeConfig.operation, activeConfig.target, seedData],
+  );
+  const steps = useMemo(() => timelineFrames.map((frame) => frame.payload), [timelineFrames]);
+  const currentStep = currentFrame;
+  const currentSnapshot = steps[currentStep] ?? steps[0];
+  const isAtLastFrame = steps.length === 0 || currentStep >= steps.length - 1;
+
+  useEffect(() => {
+    setTotalFrames(steps.length);
+    reset();
+  }, [reset, setTotalFrames, steps.length]);
+
+  useEffect(() => {
+    if (
+      activeConfig.operation !== 'insert' ||
+      !isAtLastFrame ||
+      currentSnapshot?.outcome !== 'inserted'
+    ) {
+      return;
+    }
+
+    const nextKey = `${activeConfig.target}:${currentFrame}:${seedData.join(',')}`;
+    if (autoNextInsertValueKeyRef.current === nextKey) {
+      return;
+    }
+
+    autoNextInsertValueKeyRef.current = nextKey;
+    const timerId = window.setTimeout(() => {
+      setTargetInput(String(createRandomInsertTarget([...seedData, activeConfig.target])));
+      setError('');
+    }, 0);
+    return () => window.clearTimeout(timerId);
+  }, [activeConfig.operation, activeConfig.target, currentFrame, currentSnapshot?.outcome, isAtLastFrame, seedData]);
+
+  const nodeMap = useMemo(
+    () => new Map((currentSnapshot?.treeState ?? []).map((node) => [node.id, node])),
+    [currentSnapshot?.treeState],
+  );
+
+  const positionMap = useMemo(() => {
+    const positions = new Map<number, { x: number; y: number }>();
+
+    if (!currentSnapshot || currentSnapshot.rootId === null) {
+      return positions;
+    }
+
+    const depthOf = (nodeId: number | null): number => {
+      if (nodeId === null) {
+        return 0;
+      }
+      const node = nodeMap.get(nodeId);
+      if (!node) {
+        return 0;
+      }
+      return Math.max(depthOf(node.left), depthOf(node.right)) + 1;
+    };
+
+    const maxDepth = Math.max(depthOf(currentSnapshot.rootId), 1);
+    const yStep = maxDepth > 1 ? 76 / (maxDepth - 1) : 0;
+
+    const placeNode = (nodeId: number | null, depth: number, minX: number, maxX: number) => {
+      if (nodeId === null) {
+        return;
+      }
+
+      const node = nodeMap.get(nodeId);
+      if (!node) {
+        return;
+      }
+
+      const x = (minX + maxX) / 2;
+      const y = 12 + depth * yStep;
+      positions.set(nodeId, { x, y });
+
+      placeNode(node.left, depth + 1, minX, x);
+      placeNode(node.right, depth + 1, x, maxX);
+    };
+
+    placeNode(currentSnapshot.rootId, 0, 4, 96);
+    return positions;
+  }, [currentSnapshot, nodeMap]);
+
+  const edges = useMemo(() => {
+    if (!currentSnapshot) {
+      return [] as Array<{ from: number; to: number }>;
+    }
+
+    const nextEdges: Array<{ from: number; to: number }> = [];
+
+    currentSnapshot.treeState.forEach((node) => {
+      if (node.left !== null) {
+        nextEdges.push({ from: node.id, to: node.left });
+      }
+      if (node.right !== null) {
+        nextEdges.push({ from: node.id, to: node.right });
+      }
+    });
+
+    return nextEdges;
+  }, [currentSnapshot]);
+
+  const highlightMap = useMemo(() => {
+    const map = new Map<number, HighlightType>();
+    (currentSnapshot?.highlights ?? []).forEach((entry) => {
+      map.set(entry.index, entry.type);
+    });
+    return map;
+  }, [currentSnapshot]);
+
+  const pathSet = useMemo(() => new Set(currentSnapshot?.pathIds ?? []), [currentSnapshot?.pathIds]);
+
+  const speedOptions = [
+    { key: 'module.s01.speed.slow', value: 1200 },
+    { key: 'module.s01.speed.normal', value: 700 },
+    { key: 'module.s01.speed.fast', value: 350 },
+  ] as const;
+
+  const operationOptions: BstOperation[] = ['searchPath', 'insert', 'delete'];
+
+  const handleRegenerate = () => {
+    const nextData = createRandomUniqueDataset(datasetSize);
+    setSeedData(nextData);
+    setTargetInput(String(nextData[0] ?? 0));
+    setError('');
+    reset();
+  };
+
+  const handleApply = () => {
+    const parsedTarget = Number(targetInput);
+
+    if (!Number.isInteger(parsedTarget)) {
+      setError(t('module.t02.input.targetInvalid'));
+      return;
+    }
+
+    setError('');
+    setActiveConfig({ operation: operationInput, target: parsedTarget });
+    reset();
+  };
+
+  const currentOperationLabel = getOperationLabel(currentSnapshot?.operation ?? activeConfig.operation, t);
+  const currentDeleteCaseLabel = getDeleteCaseLabel(currentSnapshot?.deleteCase ?? 'none', t);
+  const currentOutcomeLabel = getOutcomeLabel(currentSnapshot?.outcome ?? 'ongoing', t);
+  const currentStepDescription = getStepDescription(currentSnapshot, t);
+  const currentTargetValue = currentSnapshot?.target ?? activeConfig.target;
+  const currentNodeLabel = currentSnapshot?.currentId ?? '-';
+  const currentSuccessorLabel = currentSnapshot?.successorId ?? '-';
+  const isDeleteFlow = (currentSnapshot?.operation ?? activeConfig.operation) === 'delete';
+  const showDeleteCase = isDeleteFlow && (currentSnapshot?.deleteCase ?? 'none') !== 'none';
+  const showSuccessor = isDeleteFlow && currentSnapshot?.successorId !== null;
+  const pathValues = useMemo(
+    () =>
+      (currentSnapshot?.pathIds ?? [])
+        .map((nodeId) => nodeMap.get(nodeId)?.value)
+        .filter((value): value is number => value !== undefined),
+    [currentSnapshot?.pathIds, nodeMap],
+  );
+  const stepDetailText = `${currentOperationLabel} · ${t('module.t02.meta.target')}: ${currentTargetValue} · ${
+    t('module.t02.meta.outcome')
+  }: ${currentOutcomeLabel}`;
+  const focusNodeId = currentSnapshot?.currentId ?? currentSnapshot?.successorId ?? null;
+  const focusPoint = useMemo(
+    () => (focusNodeId === null ? null : (positionMap.get(focusNodeId) ?? null)),
+    [focusNodeId, positionMap],
+  );
+
+  return (
+    <WorkspaceShell
+      pageClassName="array-page tree-page bst-page"
+      title={t('module.t02.title')}
+      description={t('module.t02.body')}
+      stageAriaLabel="bst-stage"
+      stageClassName="bst-stage"
+      stageBodyClassName="workspace-stage-body-tree"
+      controlsPanelClassName="workspace-drawer-xl workspace-drawer-scroll"
+      stepPanelClassName="workspace-context-sheet-rich"
+      defaultControlsPanelSize={{ width: 920, height: 300 }}
+      defaultContextPanelSize={{ width: 420, height: 520 }}
+      focusPoint={focusPoint}
+      stageMeta={
+        <>
+          <span className="tree-workspace-pill">{currentOperationLabel}</span>
+          <span className="tree-workspace-pill tree-workspace-pill-active">
+            {t('playback.status')}: {getStatusLabel(status, t)}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.t02.meta.target')}: {currentTargetValue}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.t02.meta.current')}: {currentNodeLabel}
+          </span>
+          <span className="tree-workspace-pill">
+            {t('module.t02.meta.outcome')}: {currentOutcomeLabel}
+          </span>
+        </>
+      }
+      controlsContent={
+        <div className="tree-controls-workbench">
+          <label className="tree-workspace-field" htmlFor="dataset-size-t02">
+            <span>{t('module.s01.dataSize')}</span>
+            <select
+              id="dataset-size-t02"
+              value={datasetSize}
+              onChange={(event) => setDatasetSize(Number(event.target.value))}
+              >
+                {Array.from({ length: MAX_SIZE - MIN_SIZE + 1 }, (_, optionIndex) => MIN_SIZE + optionIndex).map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+          </label>
+
+          <div className="tree-workspace-field">
+            <span>{t('module.t02.meta.operation')}</span>
+            <div className="tree-workspace-toggle-row">
+              {operationOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`tree-workspace-toggle${operationInput === option ? ' tree-workspace-toggle-active' : ''}`}
+                  onClick={() => {
+                    setOperationInput(option);
+                    reset();
+                  }}
+                >
+                  {getOperationLabel(option, t)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <label className="tree-workspace-field" htmlFor="bst-target-input">
+            <span>{t('module.t02.input.target')}</span>
+            <input
+              id="bst-target-input"
+              type="number"
+              value={targetInput}
+              onChange={(event) => {
+                setTargetInput(event.target.value);
+                setError('');
+                reset();
+              }}
+            />
+          </label>
+
+          <label className="tree-workspace-field" htmlFor="speed-select-BstPage">
+            <span>{t('module.s01.speed')}</span>
+            <select
+              id="speed-select-BstPage"
+              value={speedMs}
+              onChange={(event) => setSpeed(Number(event.target.value))}
+            >
+              {speedOptions.map((option) => (
+                <option key={option.key} value={option.value}>
+                  {t(option.key)}
+                </option>
+              ))}
+            </select>
+            </label>
+
+          {error ? <p className="form-error workspace-inline-feedback">{error}</p> : null}
+
+          <div className="tree-workspace-drawer-actions">
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleRegenerate}>
+              {t('module.s01.regenerate')}
+            </button>
+            <button type="button" className="tree-workspace-ghost-button" onClick={handleApply}>
+              {t('module.t02.apply')}
+            </button>
+          </div>
+
+          <div className="tree-workspace-sample-block">
+            <span>{t('module.t02.seed')}</span>
+            <code>[{formatArrayPreview(seedData)}]</code>
+          </div>
+        </div>
+      }
+      stepContent={
+        <>
+          <div className="tree-workspace-step-copy">
+            <h3>{currentStepDescription}</h3>
+            <p>{stepDetailText}</p>
+          </div>
+          <dl className="tree-workspace-kv">
+            <div>
+              <dt>{t('playback.status')}</dt>
+              <dd>{getStatusLabel(status, t)}</dd>
+            </div>
+            <div>
+              <dt>{t('module.t02.meta.operation')}</dt>
+              <dd>{currentOperationLabel}</dd>
+            </div>
+            <div>
+              <dt>{t('module.t02.meta.target')}</dt>
+              <dd>{currentTargetValue}</dd>
+            </div>
+            <div>
+              <dt>{t('module.t02.meta.current')}</dt>
+              <dd>{currentNodeLabel}</dd>
+            </div>
+            {showSuccessor ? (
+              <div>
+                <dt>{t('module.t02.meta.successor')}</dt>
+                <dd>{currentSuccessorLabel}</dd>
+              </div>
+            ) : null}
+            {showDeleteCase ? (
+              <div>
+                <dt>{t('module.t02.meta.case')}</dt>
+                <dd>{currentDeleteCaseLabel}</dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>{t('module.t02.meta.outcome')}</dt>
+              <dd>{currentOutcomeLabel}</dd>
+            </div>
+          </dl>
+        </>
+      }
+      stageContent={
+        <div className="avl-stage-scene" aria-hidden="true">
+          <svg className="tree-edge-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {edges.map((edge) => {
+              const from = positionMap.get(edge.from);
+              const to = positionMap.get(edge.to);
+              return (
+                <line
+                  key={`${edge.from}-${edge.to}`}
+                  className="tree-edge"
+                  x1={from?.x ?? 0}
+                  y1={from?.y ?? 0}
+                  x2={to?.x ?? 0}
+                  y2={to?.y ?? 0}
+                />
+              );
+            })}
+          </svg>
+
+          <div className="tree-node-layer">
+            {(currentSnapshot?.treeState ?? []).map((node) => {
+              const highlightType = highlightMap.get(node.id);
+              const isPath = pathSet.has(node.id);
+              const stateClass =
+                highlightType === 'matched'
+                  ? ' bar-matched'
+                  : highlightType === 'new-node'
+                    ? ' bar-new-node'
+                    : highlightType === 'comparing' || highlightType === 'visiting'
+                      ? ' bar-visiting'
+                      : '';
+              const pathClass = isPath ? ' bst-node-path' : '';
+
+              const marker: string[] = [];
+              if (currentSnapshot?.currentId === node.id) {
+                marker.push('C');
+              }
+              if (currentSnapshot?.successorId === node.id) {
+                marker.push('S');
+              }
+
+              return (
+                <div
+                  key={node.id}
+                  className={`tree-node bst-node${stateClass}${pathClass}`}
+                  style={{
+                    left: `${positionMap.get(node.id)?.x ?? 0}%`,
+                    top: `${positionMap.get(node.id)?.y ?? 0}%`,
+                  }}
+                >
+                  {marker.length > 0 ? <span className="tree-node-tag">{marker.join('/')}</span> : null}
+                  <span className="tree-node-value">{node.value}</span>
+                  <span className="tree-node-index">#{node.id}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {(currentSnapshot?.treeState.length ?? 0) === 0 ? <p className="array-preview bst-empty">{t('module.t02.empty')}</p> : null}
+        </div>
+      }
+      transportLeft={
+        <>
+          <button type="button" className="tree-workspace-transport-btn" onClick={prev} disabled={steps.length === 0 || currentStep <= 0}>
+            {t('playback.prev')}
+          </button>
+          <button
+            type="button"
+            className="tree-workspace-transport-btn tree-workspace-transport-btn-primary"
+            onClick={status === 'playing' ? pause : play}
+            disabled={steps.length === 0 || (status !== 'playing' && isAtLastFrame)}
+          >
+            {status === 'playing' ? t('playback.pause') : t('playback.play')}
+          </button>
+          <button type="button" className="tree-workspace-transport-btn" onClick={next} disabled={isAtLastFrame}>
+            {t('playback.next')}
+          </button>
+          <button type="button" className="tree-workspace-transport-btn" onClick={reset} disabled={steps.length === 0}>
+            {t('playback.reset')}
+          </button>
+          <div className="tree-workspace-transport-progress" aria-hidden="true">
+            <span
+              className="tree-workspace-transport-progress-fill"
+              style={{
+                width: `${steps.length <= 1 ? 0 : (currentStep / Math.max(steps.length - 1, 1)) * 100}%`,
+              }}
+            />
+          </div>
+          <span className="tree-workspace-transport-step">
+            {currentStep}/{Math.max(steps.length - 1, 0)}
+          </span>
+        </>
+      }
+      transportRight={
+        pathValues.length === 0 ? (
+          <span className="tree-workspace-transport-empty">{t('module.t02.legend.path')}: -</span>
+        ) : (
+          <>
+            <span className="tree-workspace-transport-empty">{t('module.t02.legend.path')}</span>
+            {pathValues.map((value, index) => (
+              <span
+                key={`${value}-${index}`}
+                className={`tree-workspace-transport-chip${index === pathValues.length - 1 ? ' tree-workspace-transport-chip-active' : ''}`}
+              >
+                {value}
+              </span>
+            ))}
+          </>
+        )
+      }
+    />
+  );
+}
