@@ -14,6 +14,101 @@ Record architecture or workflow decisions here.
 
 ---
 
+## DEC-20260914-01
+- Date: 2026-09-14
+- Status: accepted
+- Context: User review of `L-01 /modules/array` found that the implemented module page still looked far from the selected prototype. The prior migration had unified behavior, but visually it still read as an old animation page with a new command bar.
+- Decision: Treat formal module pages as a full-canvas workbench aligned to the selected prototype:
+  - fixed top application header with a module picker signal
+  - fixed left module-category rail
+  - central grid canvas that fills the remaining viewport
+  - compact floating control card open by default
+  - full-width bottom transport bar
+  - route-specific controls should stay compact and avoid duplicating status that already appears in stage meta or transport chips
+- Alternatives considered: keep the command-bar shell and only retheme colors; redesign `L-01` alone without changing the shared shell; wait for every module-specific visual pass before changing the shared frame.
+- Consequences: `WorkspaceShell` pages now inherit the prototype-like page frame. Some individual module canvases may still need route-specific cleanup, but future module work should start from this shared frame instead of the old page layout.
+- Owner: haoyu + codex
+
+## DEC-20260913-04
+- Date: 2026-09-13
+- Status: accepted
+- Context: User review clarified that the earlier shell work had not actually applied the agreed page relationship uniformly. Several concept/storage pages still had standalone `storage-workbench`, `graph-concept-workbench`, adjacency, or tree-definition shells, so the app still felt like multiple unrelated products.
+- Decision: Use `WorkspaceShell` as the shared page relationship for both timeline and static teaching pages. For static/concept pages, introduce `StaticWorkbenchShell` as a thin adapter:
+  - title and description live in the shared command bar
+  - parameters live in the left `控制` panel
+  - explanation/notes live in the right `步骤` panel by default
+  - visualization content stays in the central stage
+  - bottom transport can still be hidden from the same command bar
+- Alternatives considered: keep static pages on their own workbench CSS; restyle old workbenches to look similar without shared behavior; migrate every old tree special page in the same pass.
+- Consequences: storage, graph-definition, adjacency-storage, and tree-definition pages now share the same region model as algorithm playback pages. `T-01` and `T-02` were later migrated in a dedicated 2026-09-14 pass, so all formal module pages now use the same command-bar workbench relationship.
+- Owner: haoyu + codex
+
+## DEC-20260913-03
+- Date: 2026-09-13
+- Status: accepted
+- Context: The user review clarified that single, double, and circular linked lists must be selected as separate module entries from the navigation tree, not as a secondary structural selector inside one linked-list control panel.
+- Decision: Split the linked-list family into distinct module registry entries and routes:
+  - `L-03 /modules/linked-list` for single linked list
+  - `L-03B /modules/doubly-linked-list` for double linked list
+  - `L-03C /modules/circular-linked-list` for circular linked list
+  The shared linked-list page implementation may still reuse code internally, but the route fixes the mode and the control panel no longer exposes a linked-list type selector.
+- Alternatives considered: keep one `L-03` route with a control-panel dropdown; add homepage shortcuts that still land on the combined page; duplicate the whole page three times instead of sharing implementation internally.
+- Consequences: navigation now matches the course mental model, homepage/module entry labels are clearer, and controls are reserved for parameters of the current module. JSON import remains tolerant for older saved examples, but it must not silently switch the active route's linked-list type.
+- Owner: haoyu + codex
+
+## DEC-20260913-02
+- Date: 2026-09-13
+- Status: accepted
+- Context: After homepage navigation was consolidated, user review noted that opening a module still felt like the old animation-page shell. The previous change only added bottom transport hiding; it did not replace the old vertical edge-tab interaction model.
+- Decision: Refresh shared `WorkspaceShell` pages as a top-command workbench:
+  - move the module title/description into a compact command bar inside the workbench
+  - expose `控制`, `步骤`, and `播放栏` as command buttons in one top-right group
+  - remove old left/right vertical edge-tab buttons from shared-shell module pages
+  - make `控制` and `步骤` mutually exclusive to avoid overlapping panels
+  - scope the new styling to `.workspace-shell-page` so special hand-written pages are not restyled accidentally
+- Alternatives considered: redesign every module route separately first; leave vertical edge tabs in place while changing colors only; keep `控制` and `步骤` open together.
+- Consequences: most module pages immediately inherit a clearer workbench relationship, while individual module canvases can still be cleaned up route by route. Special pages outside `WorkspaceShell` will need separate treatment if the same shell pattern is desired there.
+- Owner: haoyu + codex
+
+## DEC-20260913-01
+- Date: 2026-09-13
+- Status: accepted
+- Context: After the quick-navigation homepage landed, the app still had multiple competing top-level entry surfaces: `/`, `/modules`, header `模块`, brand link, homepage category actions, and the old catalog page. User review found the resulting relationship confusing, and the homepage left navigation was not a real expandable tree.
+- Decision: Make the new quick-navigation homepage the single top-level module entry:
+  - render `HomePage` for both `/` and `/modules`
+  - point the brand link and header `模块` link to `/`
+  - keep module cards and tree children linking directly to actual module routes
+  - replace homepage category anchor links with expandable left-tree groups
+  - keep the old `ModulesPage` source present but no longer route to it as a primary navigation surface
+- Alternatives considered: keep `/modules` as the old catalog; keep homepage category actions linking to `/modules?category=...`; create a third landing page just for tree navigation.
+- Consequences: users have one clear entry relationship: homepage for navigation, module routes for workbench pages. The old catalog page no longer competes with the homepage, and any future module-page redesign can proceed without changing top-level routing again.
+- Owner: haoyu + codex
+
+## DEC-20260912-03
+- Date: 2026-09-12
+- Status: accepted
+- Context: The selected module-page prototype expects left, right, and bottom regions to get out of the way so the canvas can be maximized. Most module pages already inherit left `Controls` and right `Step` as on-demand shared-shell panels, but the bottom transport stayed visible at all times.
+- Decision: Treat collapsibility as a shared workspace-shell capability:
+  - keep left controls and right step context as on-demand panels
+  - add a shared bottom playback-bar toggle to `WorkspaceShell`
+  - keep playback visible by default so first-use operation remains obvious
+  - tighten shared panel density in CSS before doing route-specific redesigns
+- Alternatives considered: hide transport by default; add one-off collapse code per module; defer the bottom region until every module is redesigned separately.
+- Consequences: most existing modules get the bottom hide/show behavior immediately through the shared shell, while special pages outside `WorkspaceShell` can be handled later if needed. The first module-wide UI pass stays low-risk and keeps algorithm logic untouched.
+- Owner: haoyu + codex
+
+## DEC-20260912-02
+- Date: 2026-09-12
+- Status: accepted
+- Context: The previous homepage direction felt inconvenient and too AI-generated, and a prototype review clarified that the root page should be useful mainly as a fast entry point. A learning-progress widget had appeared in prototype work without a real product model for how progress is calculated.
+- Decision: Treat `/` as a practical quick-navigation page:
+  - surface the same course/module categories used by the catalog/workbench navigation
+  - prioritize direct module entry, recent visits, common entries, favorites, and search
+  - do not show learning progress until a real progress model is explicitly designed and implemented
+- Alternatives considered: keep redirecting `/` to `/modules`; build a marketing-style hero page; keep a placeholder progress metric in the homepage prototype.
+- Consequences: the first screen is quieter and more operational, and it avoids presenting unsupported progress data. Any future progress feature must define its storage, calculation, and UX contract before returning to the homepage.
+- Owner: haoyu + codex
+
 ## DEC-20260912-01
 - Date: 2026-09-12
 - Status: accepted

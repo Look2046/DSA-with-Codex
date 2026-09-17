@@ -6,8 +6,76 @@ Use this file as the first thing to read in a new chat/session.
 
 - Project: Data Structure Algorithm Visualizor
 - Active branch (expected): `feat/p14-backlog-wave`
-- Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, local Chapter 4 pilots `M-01` + `M-07` had expanded the local implemented surface, `G-02A` graph-definition follow-up was accepted on 2026-08-28, the temporary `G-02B` adjacency-list storage page has now landed locally for review, and the paused temporary `T-00A` concept-first tree-definition page brings the current local implemented surface to `53` routes pending user review
+- Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, local Chapter 4 pilots `M-01` + `M-07` had expanded the local implemented surface, graph definition/storage pages have now been renumbered without temporary `A/B` suffixes (`G-02` adjacency matrix, `G-03` adjacency list, graph algorithms shifted to `G-04`~`G-11`), and the paused temporary `T-00A` concept-first tree-definition page brings the current local implemented surface to `53` routes pending user review
 - Last local quality gates:
+  - Full pseudocode audit checks (passed locally through tests/build, 2026-09-14, `feat/p14-backlog-wave`):
+    - re-audited all user-facing pseudocode surfaces beyond the earlier double-column pass, including sorting/search/string/tree/graph/hash/paradigm single-column pages and the linear double-column pages
+    - corrected bubble-sort early-exit display/highlight, queue variant pseudocode models, circular linked-list tail/head wording, divide-and-conquer base-case order, backtracking undo line, counting-sort stable placement decrement, and B-Tree/B+Tree descent/overflow wording
+    - updated `docs/PSEUDOCODE_AUDIT.md`
+    - `npm test -- src/modules/sorting/bubbleSort.test.ts src/modules/sorting/countingSort.test.ts src/modules/paradigm/divideConquer.test.ts src/modules/paradigm/backtracking.test.ts src/modules/tree/btreeComparison.test.ts src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+    - `npm run build`
+    - `git diff --check`
+    - `npm run check` was attempted; docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`
+  - Control-panel default-hidden check (passed locally, 2026-09-14, `feat/p14-backlog-wave`):
+    - `WorkspaceShell` now initializes `showControls` as `false`
+    - `T-01` and `T-02` special tree pages already had `showStageControls = false`
+    - `npx eslint src/components/WorkspaceShell.tsx`
+    - `npm run build`
+    - `npm run check` was attempted; docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`
+  - Dual pseudocode audit checks (passed locally, 2026-09-14, `feat/p14-backlog-wave`):
+    - audited double-column `中文式 / 类 C 式` pseudocode for array, dynamic array, linked-list variants, stack, queue, and Huffman pages
+    - corrected linked-list 0-based index semantics, circular-list head insertion wording, stack/queue placeholder C-style lines, dynamic-array resize wording, and Huffman C-style construction/code/WPL details
+    - added `docs/PSEUDOCODE_AUDIT.md`
+    - `npm test -- src/modules/linear/arrayInsert.test.ts src/modules/linear/dynamicArrayOps.test.ts src/modules/linear/linkedListOps.test.ts src/modules/linear/queueOps.test.ts src/modules/linear/stackOps.test.ts src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts`
+    - `npm run build`
+    - `npm run check` was attempted; docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`
+    - targeted eslint on touched module pages was attempted, but it still stops on pre-existing React lint issues in `HuffmanTreePage.tsx` and `StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`
+  - Selected prototype module-frame alignment checks (passed locally, 2026-09-14, `feat/p14-backlog-wave`):
+    - `npx eslint src/app/layout/Layout.tsx src/components/WorkspaceShell.tsx src/pages/modules/ArrayPage.tsx src/i18n/translations.ts`
+    - `npm run build`
+    - Edge/Playwright smoke captured `output/playwright/l01-prototype-align-pass5.png`, `output/playwright/l01-collapsible-sidebars.png`, `output/playwright/module-rail-expanded-tree-final.png`, `output/playwright/module-sidebars-topbar-refine.png`, `output/playwright/workspace-zoom-step-controls-refine.png`, `output/playwright/workspace-controls-near-button.png`, `output/playwright/zoom-visible-with-transport-hidden.png`, `output/playwright/fixed-sidebar-toggle-positions.png`, and `output/playwright/sidebar-toggle-no-overlap.png`
+    - browser metrics confirmed fixed top header, left module rail, full-grid stage, open floating control card, bottom transport, no horizontal overflow, and page/console errors = `0`
+    - follow-up browser metrics confirmed the left module rail has narrow `72px` and expanded module-tree `248px` states, the expand/collapse button sits at the top of the left rail with a fixed click position and no overlap with `线性结构`, expanded tree shows concrete module entries with the current module highlighted, a fixed-position right-edge arrow button opens the right sidebar, `步骤` is no longer in the top command bar, zoom controls are in the bottom transport row, hiding `播放栏` keeps `- / 100% / +` visible at the canvas bottom-right, right-sidebar step content stacks vertically, the controls panel opens near the top `控制` button, and the two top bars now share a flatter white style
+    - decision recorded as `DEC-20260914-01`
+  - Special tree page command-bar migration checks (passed locally, 2026-09-14, `feat/p14-backlog-wave`):
+    - `npx eslint src/pages/modules/BstPage.tsx src/pages/modules/BinaryTreeTraversalPage.tsx`
+    - `npm test -- src/modules/tree/binaryTreeTraversal.test.ts src/modules/tree/binaryTreeTraversalTimelineReplay.test.ts src/modules/tree/bst.test.ts src/modules/tree/bstTimelineReplay.test.ts`
+    - `npm run build`
+    - `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside this migration
+    - Edge/Playwright smoke confirmed `/modules/binary-tree` and `/modules/bst` render top command bars, old `.tree-workspace-edge-tab` count is `0`, `控制` / `步骤` remain mutually exclusive, `播放栏` hides the bottom transport, tree nodes and edges remain visible, and page/console errors = `0`
+    - full formal module scan found no remaining module `.tsx` page outside the new workbench/command-bar pattern, excluding test/playground files
+  - Static module workspace unification checks (passed locally, 2026-09-13, `feat/p14-backlog-wave`):
+    - `npm run build`
+    - targeted eslint on changed TS/TSX files passed; CSS was ignored by eslint config when included in the command
+    - `npm test -- src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/generalizedListHeadTail.test.ts src/modules/graph/graphRepresentation.test.ts`
+    - Edge/Playwright smoke confirmed `M-01`, `M-02`, `M-07`, `G-01`, `G-02A`, `G-02B`, `T-00A`, and `L-03B` render the shared `.tree-workspace-shell`, have command buttons `控制` / `步骤` / `播放栏`, do not render old standalone workbench wrappers, and page/console errors = `0`
+    - follow-up completed on 2026-09-14: `T-01 /modules/binary-tree` and `T-02 /modules/bst` were migrated to the same command-bar shell
+  - Linked-list variant split checks (passed locally, 2026-09-13, `feat/p14-backlog-wave`):
+    - `npm test -- src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts`
+    - `npm run build`
+    - `npx eslint src/pages/modules/LinkedListPage.tsx src/data/moduleRegistry.ts src/app/router.tsx src/i18n/translations.ts` passed with one existing exhaustive-deps warning in `LinkedListPage`
+    - Edge/Playwright smoke confirmed homepage linear navigation now lists separate `单链表`, `双链表`, and `循环链表` entries; `/modules/doubly-linked-list` renders `L-03B 双链表`; `/modules/circular-linked-list` renders `L-03C 循环链表`; the old `#linked-list-mode` selector is absent; page/console errors = `0`
+  - Module workbench shell refresh checks (passed locally, 2026-09-13, `feat/p14-backlog-wave`):
+    - `npm run build`
+    - `npx eslint src/components/WorkspaceShell.tsx src/pages/HomePage.tsx`
+    - Edge/Playwright smoke confirmed homepage no longer has `查看本组`, the left tree does not 404, linked-list module route renders the new `.tree-workspace-command-bar`, old vertical edge tabs are absent, `控制`/`步骤` are mutually exclusive, and `播放栏` hides bottom transport; page/console errors = `0`
+    - repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside this shell refresh
+  - Homepage navigation relationship cleanup checks (passed locally, 2026-09-13, `feat/p14-backlog-wave`):
+    - `npm run build`
+    - `npx eslint src/app/router.tsx src/app/layout/Layout.tsx src/pages/HomePage.tsx`
+    - Edge/Playwright smoke confirmed `/`, top `模块`, brand link, and direct `#/modules` all land on the new quick-navigation homepage; left tree expands; center `链表` card reaches `#/modules/linked-list`; page/console errors = `0`
+    - repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside this navigation cleanup
+  - Shared module workspace collapse-control checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
+    - `npm run build`
+    - `npx eslint src/components/WorkspaceShell.tsx src/i18n/translations.ts src/pages/HomePage.tsx`
+    - Edge/Playwright smoke on `/modules/linked-list` confirmed the new `播放栏` toggle hides/restores the bottom transport while leaving the linked-list canvas rendered; page/console errors = `0`
+    - Edge/Playwright shared smoke on `/modules/quick-sort` and `/modules/dfs` confirmed the same bottom transport collapse behavior; page/console errors = `0`
+    - repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside the shared-workspace change
+  - Homepage quick-navigation redesign checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
+    - `npm run build`
+    - `npx eslint src/pages/HomePage.tsx`
+    - Edge/Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/` confirmed all 9 category sections render, no `学习进度` text appears, search for `链表` filters to the linked-list card, and clicking it reaches `#/modules/linked-list` with `.linked-diagram-canvas` rendered; page/console errors = `0`
+    - repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside the homepage change
   - Workspace canvas zoom checks (passed locally, 2026-09-12, `feat/p14-backlog-wave`):
     - `npm run build`
     - targeted eslint on changed source files passed
@@ -499,22 +567,28 @@ Use this file as the first thing to read in a new chat/session.
   - double linked list insert/delete now uses explicit four-pointer choreography instead of the old single-list-style animation
   - circular linked list keeps tail linked back to `head` and renders a distinct return arc
   - mode-specific pseudocode and JSON mode support are included, with old JSON defaulting to `singly`
+- `L-04`/`L-05` stack and queue variants have been split into standalone module entries instead of control-panel structure switches:
+  - stack routes: `/modules/sequential-stack`, `/modules/linked-stack`
+  - queue routes: `/modules/sequential-queue`, `/modules/linked-queue`, `/modules/circular-queue`
+  - legacy `/modules/stack` and `/modules/queue` remain as compatibility aliases to the sequential variants
+  - each split page now owns its title, description, metadata, pseudocode, and stage visualization
 
 ## 3) Next Priority
 
 - The rebuilt graph-definition line is not fully finished yet:
   - `G-01 /modules/graph-representation` is still treated as accepted "for now"
-  - temporary `G-02A /modules/graph-adjacency-matrix` is accepted as the adjacency-matrix storage page
-  - temporary `G-02B /modules/graph-adjacency-list` has now landed locally as the adjacency-list storage first pass and is awaiting user review
-  - old `G-02 /modules/dfs` remains in place and must not be renumbered during follow-up work
+  - `G-02 /modules/graph-adjacency-matrix` is accepted as the adjacency-matrix storage page
+  - `G-03 /modules/graph-adjacency-list` has now landed locally as the adjacency-list storage first pass and is awaiting user review
+  - graph algorithms have been renumbered continuously from `G-04 /modules/dfs` through `G-11 /modules/topological-sort`
   - graph follow-up still remains open for the remaining definition/storage pages the user expects, including adjacency-list-related work
 - Immediate next module target:
   - continue the graph-definition/storage line rather than switching tracks
-  - review and refine `G-02B` first if the user wants changes, then continue the remaining graph basic-content line before resuming any tree-definition follow-up
+  - review and refine `G-03` first if the user wants changes, then continue the remaining graph basic-content line before resuming any tree-definition follow-up
   - treat the newly added temporary `T-00A /modules/tree-definition` page as paused local work, not the active priority
 - Address remaining cross-cutting items when requested:
   - scaffold placeholder titles (`m0-scaffold-tmp`)
   - router/module-load warning storm seen in Firefox dev audit
+  - existing React lint blockers preventing full `npm run check` from going green after docs/tests pass
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`
   - docs-only changes: `./scripts/check-doc-links.sh`

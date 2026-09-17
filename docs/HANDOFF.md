@@ -2,6 +2,1905 @@
 
 Use this file for end-of-day handoff. Add one new section per day (latest first).
 
+## 2026-09-17 (Kruskal graph density trial)
+
+### Today Done
+- Follow-up heap-sort animation clarity refinement after user review:
+  - clarified the visual semantics of heap-sort extraction: the heap root is swapped with the last element of the current heap interval, and the extracted maximum remains in the array's trailing sorted interval
+  - added a prominent animated motion path on the heap tree for swap and extract-max frames
+  - swap frames now show a blue dashed motion path, two moving dots, pulsing swapped heap nodes, and enlarged moving bars in the array strip
+  - extract-max frames now show a green path from the heap root toward the sorted suffix, plus a highlighted sorted chip/bar at the destination
+  - enlarged the bottom array/bar panel from a mini strip into a much taller synchronized array view so heap changes and sorted suffix changes are visible without close inspection
+  - adjusted heap-sort random/default dataset generation so the first bottom-up heapify pass reaches a visible swap quickly instead of opening with several no-swap comparison-only frames
+- Follow-up left module rail centering refinement after user review:
+  - clicking a collapsed left-rail category icon now records the intended module-tree target before expanding the rail
+  - if the clicked category is the current module's category, the active module link is scrolled to the vertical center of the expanded tree
+  - if the clicked category is not the current category, the opened category group is used as the centering target
+  - the expand/collapse toggle now reuses the same centering path when opening the rail from the top button
+  - added expanded-rail bottom scroll room so late modules such as hash-table pages can still be centered instead of clamping near the bottom
+- Follow-up heap-sort visualization redesign after user review:
+  - changed `S-07 /modules/heap-sort` from a bar-dominant sorting view to a heap-tree-dominant view
+  - the main stage now renders the active heap as a complete-binary-tree node/edge diagram
+  - current compare/swap/path highlights now appear on heap nodes and heap edges
+  - the sorted suffix is shown as a compact strip outside the active heap
+  - the array/bar representation is retained as a compact auxiliary strip at the bottom to preserve the array-storage mapping
+  - reduced the built-in heap-sort data-size picker max from `100` to `31` so the complete heap tree remains inspectable; manual larger input still shows an overflow count
+- Follow-up module taxonomy refinement after user review:
+  - moved `T-03 Binary Search Tree (BST)` from the tree category to the search category
+  - moved `H-01 Hash Table - Chaining` and `H-02 Hash Table - Open Addressing` from the standalone hash category to the search category
+  - removed `hash` from the top-level module category order so the left rail/homepage no longer show a separate Hashing/哈希 group
+  - updated search/tree category descriptions in English and Chinese to reflect that BST and hash tables belong under search
+  - updated the module filtering unit test fixture so hash-table modules are expected under search
+- Follow-up directed-edge curve refinement after user review:
+  - audited graph pages after the request that directed edges should not overlap when opposite directions exist
+  - confirmed static graph pages (`G-01`/`G-02`/`G-03`) already use curved directed edge paths
+  - upgraded the shared graph-stage geometry helper so algorithm pages can render directed edges as quadratic curves and undirected edges as straight segments
+  - changed directed algorithm pages (`G-04` DFS, `G-05` BFS, `G-06` Dijkstra directed preset, `G-07` Bellman-Ford, `G-08` Floyd-Warshall, `G-11` topological sort) from straight line edges to curved SVG paths
+  - kept Dijkstra's undirected preset as straight edges with no arrowheads
+  - moved weighted-edge labels to the curve midpoint instead of the old straight-line midpoint
+  - added `fill: none` to shared graph edges so SVG paths do not accidentally fill
+- Follow-up Dijkstra graph-type correction after user review:
+  - added a `positiveUndirected` weighted-graph preset for Dijkstra because Dijkstra applies to non-negative directed and undirected graphs
+  - included both `positiveDirected` and `positiveUndirected` in the Dijkstra non-negative preset picker
+  - changed Dijkstra edge/relation display to use an undirected connector for undirected presets
+  - changed the Dijkstra canvas so outline arrows are rendered only for directed presets
+  - added localized labels for the new positive undirected preset
+  - added unit coverage for the undirected Dijkstra shortest-path result and for exposing both non-negative presets
+- Follow-up left module rail interaction refinement after user review:
+  - collapsed left module-rail category icons now open the full sidebar in place instead of navigating directly to the first module in that category
+  - opening from a collapsed category icon also ensures that category is expanded in the remembered module tree
+  - the collapsed search/module icon now opens the full sidebar while staying on the current module route
+- Follow-up directed-arrow refinement after user review:
+  - replaced the filled SVG marker arrowheads on directed graph algorithm pages with G03-style open outline arrow paths
+  - clipped graph edge start/end points before drawing so arrow tips stop outside node circles instead of being covered by nodes
+  - added a shared `graphStageGeometry` helper for straight graph-stage edge clipping and outline arrowhead construction
+  - kept existing edge state colors for normal, completed, selected, and active algorithm edges
+- Follow-up layout refinement after user review:
+  - changed the Kruskal stage from a top-graph/bottom-panels layout into a G02-like left/right composition
+  - left side now contains only the draggable graph canvas
+  - right side now stacks the current-step explanation, connected components, and sorted-edge order vertically
+  - connected components now render as a two-column compact grid
+  - sorted-edge order now sits under connected components on the right side and uses a two-column compact grid
+  - disabled whole-stage panning for Kruskal and moved panning to the graph-only layer so dragging the right-side content does not move the graph
+  - kept the compact component chips so one- or two-character vertex labels no longer sit inside oversized boxes
+- Follow-up fix after user review:
+  - removed the current-step explanation card from above `连通分量`; that text remains available in the existing step sidebar and top status pill
+  - Kruskal right-side stage content now contains only `连通分量` and `边顺序`
+  - extended the same left-graph/right-status stage composition to `G-04`~`G-11`
+  - graph algorithm stage view cards now stack vertically in the right column instead of occupying a bottom row under the graph
+- Follow-up Kruskal process-semantics refinement after user review:
+  - initial graph now shows all edges as weak dashed pending edges instead of fully visible ordinary edges
+  - candidate edge is highlighted separately in amber during inspection
+  - chosen MST edges become green solid lines as they are selected
+  - cycle-rejected edges become red dashed lines
+  - the right-side sorted-edge panel now starts empty and reveals only processed edges as playback advances, instead of showing every sorted candidate from the beginning
+  - added a localized empty state for the edge-order panel before any edge has been processed
+- Trial-refined the graph algorithm visual language on the Kruskal page that contains `边顺序` and `连通分量`:
+  - reduced shared graph edge stroke widths so ordinary/selected/frontier/rejected/active lines read thinner and more consistent
+  - reduced weighted-edge label size and weight so edge weights no longer dominate the graph
+  - added a Kruskal-specific stage class so this page can reserve more room for the lower information panels without changing every graph algorithm page at once
+- Reworked the Kruskal lower panels:
+  - `边顺序` now uses compact wrapping chips instead of tall scrolling cards
+  - `连通分量` now uses compact inline component rows and small node chips instead of oversized boxes for one- or two-character labels
+  - removed the remaining visible hint/subtitle spans from these panels
+
+### Verification
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/heap-sort` confirmed:
+  - default bottom array/bar area height is about `224px`
+  - first swap frame renders `1` animated motion path, `2` moving dots, and `2` moving bars
+  - first extract-max frame renders `1` animated extract path, `1` active sorted chip, `1` sorted bar, and the sorted suffix count increases at the array tail
+  - fresh default data reaches the first visible swap at frame `3/56`, avoiding the previous long comparison-only opening
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/hash-open-addressing` confirmed:
+  - collapsed left rail starts with `data-module-rail-expanded = false`
+  - clicking the active `查找` category icon changes `data-module-rail-expanded` to `true`
+  - the expanded module tree highlights `H-02 哈希表 - 开放寻址法`
+  - the active module link is vertically centered in the rail (`activeCenterDeltaFromRail = 0`)
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/kruskal` confirmed:
+  - graph edge stroke is `0.42px`
+  - edge-weight text is `2.65px` / font weight `600`
+  - latest layout check confirms the stage is a two-column grid, with left side about `969px` and right side about `329px`
+  - latest layout check confirms the right-side panel order is explanation, connected components, sorted-edge order
+  - latest layout check confirms the right-side row heights are about `135px / 165px / 239px`
+  - latest layout check confirms `连通分量` renders two columns and has `scrollHeight = clientHeight = 132`
+  - latest layout check confirms `边顺序` renders two columns and has `scrollHeight = clientHeight = 207`
+  - latest interaction check confirms dragging the graph moves nodes by `70,35`
+  - latest interaction check confirms dragging the right-side content moves neither the graph nor the right-side panels
+  - latest cross-route check confirms `G-04`~`G-11` each use a two-column graph stage of about `969px / 329px`
+  - latest cross-route check confirms the status panels sit to the right of the graph on all eight routes
+  - latest cross-route check confirms no graph-stage view header contains the active step-description text
+  - latest cross-route check confirms Kruskal right-side headers are only `Component groups` and `Sorted edge order`
+  - latest Kruskal process check confirms initial state has `8` pending edges, `0` selected edges, `0` rejected edges, and an empty processed-edge panel
+  - latest Kruskal process check confirms after inspection there is `1` amber candidate edge and `7` pending edges
+  - latest Kruskal process check confirms selected edges become green solid lines and appear in the processed-edge panel
+  - latest Kruskal process check confirms a cycle-rejected edge becomes a red dashed line and appears as a rejected row
+  - page/console errors count is `0`
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/{dfs,bfs,dijkstra,bellman-ford,floyd-warshall,topological-sort}` confirmed:
+  - `.graph-edge-layer marker` count is `0`
+  - `[marker-end]` count is `0`
+  - `.graph-edge-outline-arrow` renders with `fill: none`
+  - page/console errors count is `0`
+  - line endpoints are clipped away from node centers (`minStartDistance = 6.4`, `minEndDistance = 7.6` in stage coordinates on checked routes)
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/dfs` confirmed:
+  - collapsed left rail starts with `data-module-rail-expanded = false`
+  - clicking a collapsed rail icon changes `data-module-rail-expanded` to `true`
+  - the URL stays on `#/modules/dfs`
+  - the full module tree becomes visible with `display: grid`
+  - page/console errors count is `0`
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/dijkstra` confirmed:
+  - the right-sidebar preset picker shows both `Positive directed graph` and `Positive undirected graph`
+  - switching to `Positive undirected graph` makes `.graph-edge-outline-arrow` count `0`
+  - the graph still renders `8` weighted edges
+  - the sample edge list uses undirected connectors such as `A - B (4)`
+  - page/console errors count is `0`
+- Browser verification on directed graph algorithm routes confirmed:
+  - `dfs`, `bfs`, `dijkstra`, `bellman-ford`, `floyd-warshall`, and `topological-sort` render all graph edges with `Q` curve commands
+  - all checked directed pages keep outline arrowheads visible
+  - `.graph-edge` computed fill is `none`
+  - Dijkstra's undirected preset still renders `8` straight `L` edge paths and `0` arrowheads
+  - Floyd-Warshall's reciprocal `A -> D` and `D -> A` paths use opposite curve controls, so the two directions are visually separated
+  - page/console errors count is `0`
+- Browser verification on module taxonomy confirmed:
+  - `/modules/bst`, `/modules/hash-chaining`, and `/modules/hash-open-addressing` show `Search` in the top module picker
+  - the left module tree no longer has a standalone `Hashing` group
+  - the expanded Search group contains `SR-01`, `SR-02`, `T-03`, `H-01`, and `H-02`
+  - the expanded Tree group no longer contains `T-03`
+  - the homepage left tree no longer shows a standalone Hashing/哈希 group
+  - page/console errors count is `0`
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/heap-sort` confirmed:
+  - default stage renders `10` heap nodes and `9` heap edges
+  - auxiliary mini-array renders `10` bars
+  - built-in data-size selector max value is `31`
+  - after advancing playback, heap nodes, path nodes, and active heap edges are highlighted
+  - page/console errors count is `0`
+- Passed:
+  - `npx eslint src/pages/modules/HeapSortPage.tsx`
+  - `npm test -- src/modules/sorting/heapSort.test.ts src/modules/sorting/heapTimelineReplay.test.ts`
+  - `npm run build`
+  - browser interaction verification for heap-sort swap / extract-max motion and enlarged bottom bars
+  - `npx eslint src/app/layout/Layout.tsx`
+  - `npm run build`
+  - browser interaction verification for collapsed-left-rail icon expansion and active-module centering
+  - `npx eslint src/pages/modules/HeapSortPage.tsx`
+  - `npm test -- src/modules/sorting/heapSort.test.ts src/modules/sorting/heapTimelineReplay.test.ts`
+  - `npm test -- src/pages/modulesPageUtils.test.ts`
+  - `npx eslint src/data/moduleRegistry.ts src/pages/moduleCatalog.ts src/pages/modulesPageUtils.test.ts src/i18n/translations.ts`
+  - `npx eslint src/pages/modules/graphStageGeometry.ts src/pages/modules/DfsPage.tsx src/pages/modules/BfsPage.tsx src/pages/modules/DijkstraPage.tsx src/pages/modules/BellmanFordPage.tsx src/pages/modules/FloydWarshallPage.tsx src/pages/modules/TopologicalSortPage.tsx`
+  - `npm test -- src/modules/graph/dijkstra.test.ts src/modules/graph/dijkstraTimelineReplay.test.ts`
+  - `npx eslint src/modules/graph/weightedGraph.ts src/modules/graph/dijkstra.test.ts src/pages/modules/DijkstraPage.tsx src/i18n/translations.ts`
+  - `npx eslint src/app/layout/Layout.tsx`
+  - `npx eslint src/pages/modules/DfsPage.tsx src/pages/modules/BfsPage.tsx src/pages/modules/DijkstraPage.tsx src/pages/modules/BellmanFordPage.tsx src/pages/modules/FloydWarshallPage.tsx src/pages/modules/TopologicalSortPage.tsx src/pages/modules/graphStageGeometry.ts`
+  - `npx eslint src/pages/modules/KruskalPage.tsx`
+  - `npx eslint src/pages/modules/KruskalPage.tsx src/i18n/translations.ts`
+  - `npm test -- src/modules/graph/kruskal.test.ts src/modules/graph/kruskalTimelineReplay.test.ts`
+  - `npm run build`
+  - `git diff --check -- src/pages/modules/HeapSortPage.tsx src/index.css`
+  - `git diff --check -- src/data/moduleRegistry.ts src/pages/moduleCatalog.ts src/pages/modulesPageUtils.test.ts src/i18n/translations.ts`
+  - `git diff --check -- src/pages/modules/graphStageGeometry.ts src/pages/modules/DfsPage.tsx src/pages/modules/BfsPage.tsx src/pages/modules/DijkstraPage.tsx src/pages/modules/BellmanFordPage.tsx src/pages/modules/FloydWarshallPage.tsx src/pages/modules/TopologicalSortPage.tsx src/index.css`
+  - `git diff --check -- src/modules/graph/weightedGraph.ts src/modules/graph/dijkstra.test.ts src/pages/modules/DijkstraPage.tsx src/i18n/translations.ts`
+  - `git diff --check -- src/app/layout/Layout.tsx src/index.css`
+  - `git diff --check -- src/pages/modules/graphStageGeometry.ts src/pages/modules/DfsPage.tsx src/pages/modules/BfsPage.tsx src/pages/modules/DijkstraPage.tsx src/pages/modules/BellmanFordPage.tsx src/pages/modules/FloydWarshallPage.tsx src/pages/modules/TopologicalSortPage.tsx src/index.css docs/HANDOFF.md`
+  - `git diff --check -- src/pages/modules/KruskalPage.tsx src/index.css docs/HANDOFF.md`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`104` files / `335` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/modules/HeapSortPage.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/pages/moduleCatalog.ts`
+  - `src/pages/modulesPageUtils.test.ts`
+  - `src/modules/graph/weightedGraph.ts`
+  - `src/modules/graph/dijkstra.test.ts`
+  - `src/i18n/translations.ts`
+  - `src/pages/modules/graphStageGeometry.ts`
+  - `src/pages/modules/DfsPage.tsx`
+  - `src/pages/modules/BfsPage.tsx`
+  - `src/pages/modules/DijkstraPage.tsx`
+  - `src/pages/modules/BellmanFordPage.tsx`
+  - `src/pages/modules/FloydWarshallPage.tsx`
+  - `src/pages/modules/TopologicalSortPage.tsx`
+  - `src/app/layout/Layout.tsx`
+  - `src/pages/modules/KruskalPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- If this Kruskal density direction is accepted, apply the same lower-panel typography/packing rules to adjacent graph algorithm pages that still show bulky chips or clipped data panels.
+
+## 2026-09-16 (G-04 to G-11 graph algorithm layout cleanup)
+
+### Today Done
+- Updated the shared graph-algorithm stage layout used by `G-04`~`G-11`:
+  - increased the graph canvas area from the previous squat layout to a measured `420px` at the checked desktop viewport
+  - compressed the lower data/state area to a measured `120px`
+  - removed the inner graph-canvas card chrome so the graph itself reads as the primary canvas content
+- Tightened graph algorithm data/status panels:
+  - compacted card headers, row padding, gaps, chip sizes, and distance/state rows
+  - changed graph-list and distance/status panels to denser auto-fitting grids
+  - made chips and short labels avoid unnecessary word breaks where possible
+- Removed visible graph-page subtitles across:
+  - `G-04 /modules/dfs`
+  - `G-05 /modules/bfs`
+  - `G-06 /modules/dijkstra`
+  - `G-07 /modules/bellman-ford`
+  - `G-08 /modules/floyd-warshall`
+  - `G-09 /modules/kruskal`
+  - `G-10 /modules/prim`
+  - `G-11 /modules/topological-sort`
+- Removed the old graph-canvas label text from the same routes.
+
+### Verification
+- Browser verification on all eight routes confirmed:
+  - graph canvas height is `420px`
+  - lower view area height is `120px`
+  - visible `.graph-stage-view-head span` count is `0`
+  - `.graph-stage-label` count/visible count is `0`
+  - page/console errors count is `0`
+- Passed:
+  - `npx eslint src/pages/modules/DfsPage.tsx src/pages/modules/BfsPage.tsx src/pages/modules/DijkstraPage.tsx src/pages/modules/BellmanFordPage.tsx src/pages/modules/FloydWarshallPage.tsx src/pages/modules/PrimPage.tsx src/pages/modules/KruskalPage.tsx src/pages/modules/TopologicalSortPage.tsx`
+  - `npm run build`
+  - `git diff --check` on touched graph page files and `src/index.css`
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `src/pages/modules/DfsPage.tsx`
+  - `src/pages/modules/BfsPage.tsx`
+  - `src/pages/modules/DijkstraPage.tsx`
+  - `src/pages/modules/BellmanFordPage.tsx`
+  - `src/pages/modules/FloydWarshallPage.tsx`
+  - `src/pages/modules/PrimPage.tsx`
+  - `src/pages/modules/KruskalPage.tsx`
+  - `src/pages/modules/TopologicalSortPage.tsx`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- If visual review still finds any graph algorithm page crowded or too sparse, tune the specific view-card content rather than reverting the shared graph-stage ratio.
+
+## 2026-09-16 (G-03 adjacency list cleanup)
+
+### Today Done
+- Updated `G-03 /modules/graph-adjacency-list` to follow the refined G-02 page rules:
+  - rebuilt the right-sidebar controls as compact dropdown fields for direction, weight mode, and vertex count
+  - removed the `图示样本` title and the explanatory subtitle under the adjacency-list storage panel
+  - removed the inner graph drawing board background/border/radius so the graph sits directly on the shared workspace canvas
+  - changed `定义与说明` from two columns to one ordered single-column list
+  - expanded the teaching copy with vertex-array/head-pointer structure, edge-node fields, directed/undirected storage rules, weighted edge fields, sparse-graph space cost, degree rules, adjacency-check trade-offs, and BFS/DFS suitability
+- Disabled whole-stage panning for G-03 and added a local graph-only pan layer so dragging moves only graph nodes/edges while the adjacency-list storage and notes stay fixed.
+- Tightened adjacency-list controls and storage rows:
+  - flattened the old large toolbar styling
+  - reduced row gaps, node width, and list-card padding
+  - kept combined right-sidebar controls in a single column like G-02
+
+### Verification
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/graph-adjacency-list` confirmed:
+  - graph title count is `0`
+  - adjacency-list storage header subtitle count is `0`
+  - `.adjacency-list-graph-panel` and `.adjacency-list-graph-stage` are transparent with no border/radius/shadow
+  - `定义与说明` renders one grid column and `12` numbered paragraphs
+  - dragging the graph moves nodes by `55,40` while the list panel and info panel remain at `0,0` delta
+  - combined right-sidebar controls render as one full-width column
+- Passed:
+  - `npx eslint src/pages/modules/GraphAdjacencyListPage.tsx`
+  - `npm run build`
+
+### Current State
+- Updated:
+  - `src/pages/modules/GraphAdjacencyListPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue applying the same static graph-page cleanup rules to remaining graph concept/representation pages if they still show inner drawing boards, subtitles, or old control styles.
+
+## 2026-09-16 (G-02 adjacency matrix cleanup)
+
+### Today Done
+- Cleaned up `G-02 /modules/graph-adjacency-matrix` drawing-area styling:
+  - removed the extra inner white board from the graph sample area
+  - made the graph stage transparent, borderless, and radius-free so it matches the shared workspace canvas
+- Reworked the G-02 right-sidebar controls:
+  - direction and weight mode now use compact dropdown fields instead of stacked styled toggle buttons
+  - controls render as a single tight column in the combined right sidebar
+  - the no-step combined sidebar can use the full drawer height instead of being capped to a short scrolling block
+- Removed explanatory subtitle text from the graph sample, vertex array, and adjacency matrix section headers.
+- Tightened the vertex array and adjacency matrix presentation:
+  - vertex chips use smaller padding, tighter gaps, and compact text
+  - matrix cells are fixed to a compact size and no longer inherit the larger generic matrix cell width
+- Follow-up layout refinement after user review:
+  - changed the right-side storage area from three vertical blocks into a compact two-column storage row
+  - made the vertex array render vertically beside the adjacency matrix
+  - changed `定义与说明` to a single-column list instead of the previous two-column layout
+- Follow-up whitespace/content refinement:
+  - made the right-side storage row shrink to the real vertex-array and matrix content width so the matrix panel no longer has a large empty area on its right
+  - expanded `定义与说明` with fuller descriptions of vertex-array indexing, unweighted/weighted matrix values, directed/undirected semantics, degree rules, query complexity, sparse/dense graph trade-offs, and typical matrix-based algorithms
+- Follow-up graph-sample interaction refinement:
+  - removed the `图示样本` section title from the graph drawing area
+  - aligned the `顶点数组` and `邻接矩阵` blocks to the same height
+  - disabled whole-stage panning for G-02 and moved panning to a local graph-only layer so dragging moves only the graph nodes/edges
+- Follow-up storage-canvas refinement:
+  - merged `顶点数组` into the same storage canvas/table as `邻接矩阵`
+  - replaced the independent vertex-array panel with a fixed left vertex-array column inside the matrix table
+  - aligned each vertex-array row with the corresponding matrix row, matching the G-03 mental model of a header array paired with its storage structure
+  - restored visible vertex-array cell styling inside the combined table so the left column still reads as array cells rather than plain text
+  - restored the matrix row vertex markers (`v0`~`v4`) and added a visible spacer between the vertex-array column and matrix body
+
+### Verification
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/graph-adjacency-matrix` confirmed:
+  - `.adjacency-matrix-graph-panel` is transparent with no border/radius/shadow
+  - `.adjacency-matrix-graph-stage` is transparent with no border/radius/background image
+  - section subtitle count is `0`
+  - the right controls section has `max-height: none` and no inner overflow
+  - controls render as a single column
+  - vertex chips and matrix cells render compactly
+  - latest layout check confirms the vertex array panel sits left of the matrix panel, vertex chips share one vertical x-position, and `定义与说明` has one grid column
+  - latest whitespace check confirms the storage row shrinks to `474px`, the matrix panel is `314px`, and the matrix table is `280px`, leaving only normal panel padding instead of a large blank area
+  - latest interaction check confirms the graph title count is `0`, the vertex-array and matrix panels are both `305px` high, dragging moves graph nodes by `60,35`, and the storage/info panels remain at `0,0` delta
+  - latest storage-canvas check confirms independent vertex-array panel count is `0`, the matrix table has one vertex-array column plus five matrix columns, and all five vertex rows align with matrix rows at `0px` top/height difference
+  - latest cell-style check confirms vertex-array cells have `1px` border, white background, `8px` radius, and still align with matrix rows at `0px` top/height difference
+  - latest spacing check confirms the matrix row headers render `v0`~`v4`, the spacer column is `18px` wide, the visual gap from vertex-array cells to matrix row headers is `26px`, and row alignment remains `0px` top/height difference
+- Passed:
+  - `npx eslint src/pages/modules/GraphAdjacencyMatrixPage.tsx`
+  - `npm run build`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`104` files / `333` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+- Not run:
+  - `npm test -- src/modules/graph/adjacencyMatrix.test.ts` because this repository currently has `src/modules/graph/adjacencyMatrix.ts` but no matching `adjacencyMatrix.test.ts` file.
+
+### Current State
+- Updated:
+  - `src/pages/modules/GraphAdjacencyMatrixPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue through remaining graph pages for the same cleanup categories: no inner drawing board, compact right-sidebar controls, no explanatory subtitles, and dense data panels.
+
+## 2026-09-16 (T-01 compact controls and tree-shape generation)
+
+### Today Done
+- Follow-up refinement after user review:
+  - removed `随机树` as a tree-kind option; `随机生成` now generates a new ordinary-tree sample while keeping the selected kind as `普通树`
+  - removed the redundant `树类型` summary chip from the control panel
+  - compressed the T-01 shape dropdown so it no longer stretches vertically in the right sidebar
+  - forced the seven `当前节点关系` cards onto one row at the checked desktop viewport
+  - expanded `定义与说明` with richer teaching content about recursive tree definition, parent uniqueness, paths, forest, node degree, levels, and binary-tree special forms
+- Follow-up control-density refinement:
+  - removed the visible `形态` label so the tree-shape dropdown and `随机生成` button sit on the same visual row
+  - `随机生成` no longer changes the selected tree shape; selecting `二叉树` and clicking it keeps the dropdown on `二叉树`
+  - enlarged the four summary-chip fonts while reducing each chip to a measured `22px` height
+- Follow-up sidebar-density refinement:
+  - changed the T-01 control panel to a single vertical column because the page has few controls
+  - narrowed the T-01 combined right sidebar from the shared `380px` width to a measured `304px`
+  - kept the stage shrink behavior aligned with the narrower sidebar so the canvas reclaims the extra horizontal space
+- Follow-up tree-sample interaction refinement:
+  - removed the extra white card shell from the `树形样本` area so it visually reads closer to the shared canvas surface
+  - removed the inner `tree-definition-stage` drawing-board background/border/radius as well; the tree sample now sits directly on the shared workspace canvas like other modules
+  - added an `enableStagePan` switch to the shared/static workbench shell and disabled whole-stage panning for T-01
+  - moved panning to a local `树形样本` pan layer so dragging moves only the tree nodes/edges, while `当前节点关系` and `定义与说明` stay fixed
+- Updated static workbench behavior so pages without explicit step content no longer render a default `步骤` sidebar section.
+- Refined `T-01 /modules/tree-definition` controls:
+  - replaced the loose toggle-style panel with a compact tree-shape dropdown, one `随机生成` button, and small stat chips
+  - kept the right drawer focused on controls only for this no-step module
+- Extended the tree-definition sample model with five selectable shapes:
+  - `普通树`
+  - `随机树`
+  - `二叉树`
+  - `完全二叉树`
+  - `满二叉树`
+- Added deterministic seeded random tree generation plus fixed complete/full binary-tree samples.
+- Added unit coverage for complete-tree shape, full-tree internal-node degree, and random-tree determinism.
+
+### Verification
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/tree-definition` confirmed:
+  - the right drawer renders `1` controls section and `0` steps sections
+  - the dropdown options are `普通树 / 二叉树 / 完全二叉树 / 满二叉树`
+  - `完全二叉树` renders `9` nodes
+  - `满二叉树` renders `7` nodes
+  - `随机生成` keeps the kind as `普通树`, generates `7`~`10` nodes, and changes the edge layout across clicks
+  - the `树类型` summary label is gone, the dropdown height is `30px`, and the seven relation cards share one row
+  - latest check confirms dropdown height `30px`, random-button height `26px`, summary-chip height `22px`, and clicking `随机生成` while `二叉树` is selected keeps the value as `binary`
+  - latest sidebar check confirms right drawer width `304px`, dropdown/button/summary chips all share one column, and the central stage shrinks to the narrower drawer width
+  - latest tree-sample check confirms the sample card background/border/shadow are gone, dragging moves nodes by `80,40`, and the relation panel remains at `0,0` delta
+  - latest inner-stage check confirms `.tree-definition-stage` has transparent background, no background image, `0px` border, and `0px` radius, while local panning still works and relation content remains fixed
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`104` files / `333` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+- Passed:
+  - `npm run build`
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/components/StaticWorkbenchShell.tsx`
+  - `src/modules/tree/treeDefinition.ts`
+  - `src/modules/tree/treeDefinition.test.ts`
+  - `src/pages/modules/TreeDefinitionPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Review other static/no-step modules only if any still show unwanted placeholder step content after the shared `showStepPanel` rule.
+
+## 2026-09-16 (G-01 graph definition control and canvas cleanup)
+
+### Today Done
+- Fixed `G-01 /modules/graph-representation` drawing-area styling:
+  - removed the inner `graph-concept-stage` background/border/radius/shadow
+  - removed the inner `graph-concept-canvas` background/border/radius
+  - the graph now sits directly on the shared workspace canvas instead of on a separate white board
+- Rebuilt the G-01 right-sidebar controls away from the old dense toggle-button strip:
+  - tab, direction, weight, density, scenario, and vertex count now use compact dropdowns
+  - graph generation/demo/reset actions remain buttons but render as full-width flat rows
+  - removed the old rendered control clusters/dividers that created stacked styled buttons in the narrow sidebar
+- Flattened the old G-01 control CSS by removing heavy gradients, gold active states, inset shadows, and clustered button chrome.
+- Fixed the shared combined-right-sidebar behavior for no-step pages:
+  - when the right drawer has no `.tree-workspace-sidebar-section-steps`, the controls section no longer keeps the old `min(44svh, 340px)` cap
+  - G-01 controls now expand to the full available right drawer height instead of scrolling inside a short upper block
+
+### Verification
+- Browser verification on `http://127.0.0.1:4186/ui/visualizer/#/modules/graph-representation` confirmed:
+  - `.graph-concept-stage` has no background image, `0px` border, `0px` radius, and no shadow
+  - `.graph-concept-canvas` has no background image, `0px` border, and `0px` radius
+  - right-sidebar controls render `6` full-width dropdowns at `30px` height
+  - action buttons render full-width, flat, no-shadow rows at `28px` height
+  - old `.graph-concept-control-cluster` elements no longer render
+  - no-step controls section measures `706px` high with `max-height: none`; controls body height and scroll height both measure `674px`, so the content is fully visible
+- Passed:
+  - `npx eslint src/pages/modules/GraphRepresentationPage.tsx`
+  - `npm run build`
+
+### Current State
+- Updated:
+  - `src/pages/modules/GraphRepresentationPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue checking other graph/storage concept pages for the same two classes of issue: inner drawing-board backgrounds and legacy dense button clusters in the combined right sidebar.
+
+## 2026-09-16 (Tree module numbering and definition-page cleanup)
+
+### Today Done
+- Renumbered the tree module display/catalog sequence into a continuous `T-01`~`T-09` run:
+  - `T-01` 树的定义与基本关系
+  - `T-02` 二叉树遍历
+  - `T-03` 二叉搜索树（BST）
+  - `T-04` AVL 树
+  - `T-05` 堆
+  - `T-06` Huffman Tree
+  - `T-07` B-Tree
+  - `T-08` B+ Tree
+  - `T-09` Trie
+- Kept existing routes unchanged, only updating module IDs/title mappings so saved links do not break.
+- Updated homepage quick/favorite module IDs that referenced the old tree numbering.
+- Updated the tree-definition page:
+  - removed explanatory subtitle lines under `树形样本`, `当前节点关系`, and `定义与说明`
+  - changed `当前节点关系` from one item per row to an auto-fitting multi-column row layout
+  - changed `定义与说明` from two columns to one full-width row per point
+  - removed old double-column helper logic and stale CSS
+
+### Verification
+- Browser/Playwright CLI confirmed:
+  - `/modules/tree-definition` page title is `T-01 树的定义与基本关系`
+  - expanded left tree group lists `T-01` through `T-09` continuously
+  - `树形样本`, `当前节点关系`, and `定义与说明` each have `0` subtitle spans
+  - `当前节点关系` renders multiple cards on the same row
+  - definition paragraphs render as full-width single-column rows
+- Passed:
+  - targeted ESLint on changed TS/TSX files
+  - tree tests (`14` files / `56` tests)
+  - `npm run build`
+  - `git diff --check` for the touched files
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/data/moduleRegistry.ts`
+  - `src/pages/moduleCatalog.ts`
+  - `src/pages/HomePage.tsx`
+  - `src/i18n/translations.ts`
+  - `src/pages/modules/TreeDefinitionPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- If the user wants the same no-subtitle rule beyond the tree-definition page, audit non-tree static storage/graph pages next because many still have `<strong>title</strong><span>explanation</span>` section headers.
+
+## 2026-09-16 (Combined right-sidebar control panel cleanup)
+
+### Today Done
+- Fixed the user-reported `M-01 /modules/two-dimensional-array` issue where the right-sidebar control panel content was constrained inside an extremely small inner area.
+- Added a shared combined-sidebar rule so all control bodies rendered inside the right drawer ignore old floating-panel width/max-height constraints.
+- Added a combined-sidebar max height for the control section (`min(44svh, 340px)`) so short control panels show fully while long control panels get a usable scroll area and do not consume the whole step drawer.
+- Added compact two-column right-sidebar grid rules for static workbench controls:
+  - storage pages (`M-01`~`M-07`)
+  - adjacency storage pages
+  - tree-definition / graph-concept style static pages
+
+### Verification
+- Browser/Playwright CLI measurement passed on `M-01`:
+  - drawer width `380px`
+  - controls body width `379px`
+  - controls body height `100px`
+  - controls scroll height `100px`
+  - toolbar columns `173.5px 173.5px`
+- Browser/Playwright CLI cross-check passed on:
+  - `/modules/two-dimensional-array`
+  - `/modules/symmetric-matrix`
+  - `/modules/generalized-list-head-tail`
+  - `/modules/graph-representation`
+  - `/modules/graph-adjacency-matrix`
+  - `/modules/tree-definition`
+  - `/modules/array`
+  - `/modules/linked-list`
+  - `/modules/quick-sort`
+- Confirmed checked pages now have right-sidebar controls matching drawer width, `max-height: none` on the inner control body, and reasonable two-column control grids where applicable.
+- Passed:
+  - `npm run build`
+  - `git diff --check src/index.css`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue using the shared combined-sidebar control-body rule instead of adding page-by-page fixes for old drawer sizing problems.
+
+## 2026-09-16 (Linear module compact controls and names)
+
+### Today Done
+- Updated the 8 requested linear modules so the combined right-sidebar control panel uses a compact two-column layout:
+  - 单链表 / 双链表 / 循环链表
+  - 顺序栈 / 链栈
+  - 顺序队列 / 链队列 / 循环队列
+- Added combined-sidebar CSS overrides for linked-list, stack, and queue control grids so old page-specific wide-column rules no longer create sparse rows in the right drawer.
+- Renamed the visible Chinese module titles to exactly match the user's requested names:
+  - `单链表`, `双链表`, `循环链表`, `顺序栈`, `链栈`, `顺序队列`, `链队列`, `循环队列`
+- Fixed `L-04` and `L-05` module title key mapping so the top module picker also shows `顺序栈` and `顺序队列` instead of the old aggregate labels.
+- Cleaned up related Chinese stack/queue copy that still said `顺序存储栈`, `链式栈`, or `链式队列`.
+
+### Verification
+- Browser checked all 8 target routes at `http://127.0.0.1:4186/ui/visualizer/` with Chinese language enabled:
+  - `/modules/linked-list`
+  - `/modules/doubly-linked-list`
+  - `/modules/circular-linked-list`
+  - `/modules/sequential-stack`
+  - `/modules/linked-stack`
+  - `/modules/sequential-queue`
+  - `/modules/linked-queue`
+  - `/modules/circular-queue`
+- Confirmed each route shows the requested Chinese name in the page title and top picker, and the right-sidebar controls use two equal columns (`166.25px 166.25px` at the checked viewport).
+- Passed:
+  - `npm run build`
+  - targeted linear tests (`7` files / `65` tests)
+  - `git diff --check` passed, with only Windows LF/CRLF warnings
+  - targeted ESLint on touched TS files passed with only the existing `LinkedListPage.tsx` hook dependency warning
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `src/i18n/translations.ts`
+  - `src/pages/moduleCatalog.ts`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- If the user accepts this visual density, keep using the same combined-sidebar two-column rule for any remaining page-specific control panels that feel too loose.
+
+## 2026-09-16 (Array combined sidebar layout fix)
+
+### Today Done
+- Fixed the `L-01 /modules/array` combined right-sidebar layout so the controls area no longer behaves like an old floating drawer inside the new sidebar.
+- Added combined-sidebar-specific CSS overrides for `.array-controls-drawer`:
+  - width now follows the right drawer instead of forcing `440px`
+  - removed the old max-height/internal-scroll clamp
+  - controls grid now uses compact drawer-friendly columns
+- This addresses the user-reported problem where the controls and steps sections left large blank space while the controls content was clipped in a narrow inner scroller.
+- Follow-up fix: constrained the array stage body and linear stage layout to `width/max-width: 100%` with `min-width: 0`, so opening the right drawer shrinks the actual canvas content area instead of only shrinking the outer stage frame.
+- Follow-up control-density fix: in the array combined right sidebar, `插入值` and `演示速度` now share one row in a stable two-column grid. The old base rule that forced speed into column `4` is overridden in combined-sidebar mode to avoid implicit narrow columns.
+
+### Verification
+- Browser measurement on `http://127.0.0.1:4186/ui/visualizer/#/modules/array` after opening the right drawer:
+  - before: drawer width `380px`, controls body width `440px`, controls body height `116px`, scroll height `288px`
+  - after: combined drawer width `380px`, controls body width `379px`, controls body height and scroll height both `276px`, overflow `visible`
+  - after: steps section receives the remaining drawer height and keeps its own normal scrolling
+- Follow-up browser measurement confirmed the array canvas content now shrinks with the right drawer:
+  - `1280px` viewport: stage body `1206px -> 826px`, array cells `1142px -> 762px`
+  - `1024px` viewport: stage body `950px -> 570px`, array cells `886px -> 506px`
+- Follow-up browser measurement confirmed the array controls grid is now two columns (`166.25px 166.25px` at `1280px` viewport) and `插入值` / `演示速度` sit on the same row with equal widths.
+- Passed:
+  - `npm run build`
+  - `npx eslint src/pages/modules/ArrayPage.tsx src/components/WorkspaceShell.tsx`
+  - `git diff --check` passed, with only Windows LF/CRLF warnings
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Visually review `/modules/array` with the right drawer open and confirm the controls + steps vertical split now feels like one coherent sidebar instead of a nested clipped panel.
+
+## 2026-09-15 (Right-sidebar combined controls trial)
+
+### Today Done
+- Added an opt-in `WorkspaceShell` right-sidebar mode for combining controls and step/pseudocode content in one right drawer.
+- Promoted the accepted combined right-sidebar rule to the default `WorkspaceShell` mode, so shared workbench modules now use it unless they explicitly opt out.
+- Updated the old docked/adaptive branch so combined mode still uses the same right-side drawer contract instead of dropping controls.
+- In the trial mode:
+  - the top `控制` button opens the right drawer instead of a floating control panel
+  - the right-edge arrow opens/closes the same combined drawer
+  - the drawer is split vertically: controls on top, step/pseudocode details below
+  - the canvas shrinks left by the right drawer width instead of being covered
+- Refined the quick-sort trial after visual review:
+  - removed the top `控制` command button in combined-sidebar mode; the right-edge arrow is the drawer entry
+  - changed `数据集大小` and `演示速度` to compact selects
+  - compressed the four regenerate actions into one 2x2 button grid and removed the sample-input block
+  - tightened the step panel with a two-column metric grid
+  - moved the legend out of the right drawer and into a vertical overlay on the left side of the stage
+  - further tightened the controls area by reducing section header/body padding and control row gaps
+  - removed `状态`, `数据集大小`, and `高亮` from the quick-sort step metrics
+  - rearranged step metrics into three rows:
+    - `Low / High / 支点值`
+    - `左指针 / 右指针 / 当前分组`
+    - `当前坑位 / 步骤`
+  - removed the quick-sort legend entirely from both the stage and the right sidebar
+- Added global compacting rules for combined-sidebar controls:
+  - smaller labels/fields/buttons
+  - tighter toggle/action row gaps
+  - hidden sample blocks inside the controls section
+  - hidden legend rows/stage legends in combined mode
+- Converted `BST` from its old page-local workbench shell to shared `WorkspaceShell`.
+- Adapted the custom `Binary Tree Traversal` page to the same combined right-sidebar contract:
+  - removed the top `控制` command
+  - right-edge arrow opens/closes both controls and pseudocode
+  - combined drawer has the same controls/steps vertical sections
+  - canvas shrinks left instead of being covered
+- Completed the accepted compact-control rule across module pages:
+  - replaced remaining `数据集大小` / dataset-size sliders with compact selects
+  - replaced remaining `演示速度` segmented/toggle buttons with compact selects
+  - included special cases such as binary tree traversal, BST, heap sort, stack/queue, and Huffman node count
+- Removed explanatory subtitle-style text from the shared workbench shell and key standalone areas:
+  - module page title descriptions
+  - top workbench command-bar descriptions
+  - right drawer section helper text such as `仅在需要时展开`
+  - app-brand subtitle
+  - homepage section subtitle counts
+  - modules catalog card summaries and empty-state body text
+  - simple About / Sorting overview / Not found page body blurbs
+  - binary-tree traversal recursion-card notes
+  - generic visualization canvas subtitle rendering
+- This now covers shared `WorkspaceShell` pages broadly; `Binary Tree Traversal` remains custom internally because it owns stage-size-dependent trace layout and the draggable recursion window, but its visible workbench shell follows the shared interaction rule.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/components/WorkspaceShell.tsx src/pages/modules/QuickSortPage.tsx`
+- `npm run build` passed.
+- Browser/Playwright smoke on `http://127.0.0.1:4186/ui/visualizer/#/modules/quick-sort` passed:
+  - clicking `控制` sets both `data-controls-open` and `data-step-open` to `true`
+  - stage width shrinks by `380px`
+  - one combined right drawer appears with two vertical sections
+  - old floating `.tree-workspace-drawer` count is `0`
+  - right-edge arrow closes and reopens the same combined drawer
+  - top command bar no longer contains `控制`
+  - controls use selects for dataset size and speed
+  - sample input block count is `0`
+  - regenerate button count is `4`
+  - step metrics render in two columns
+  - stage legend is on the left side of the drawing area
+  - follow-up browser check confirmed controls section height is about `151px`, step metrics render as `3 / 3 / 2`, and removed labels are absent
+  - follow-up browser check confirmed quick-sort legend count is `0`
+  - page/console errors = `0`
+- Cross-module browser smoke passed on:
+  - `/modules/quick-sort`
+  - `/modules/array`
+  - `/modules/linked-list`
+  - `/modules/dfs`
+  - `/modules/graph-adjacency-matrix`
+- Follow-up browser smoke passed on:
+  - `/modules/bst`
+  - `/modules/binary-tree`
+  - `/modules/quick-sort`
+  - `/modules/array`
+- Each sampled route showed:
+  - no top `控制` command button
+  - `data-right-sidebar-mode="combined"`
+  - one combined right drawer with controls and step sections after clicking the right arrow
+  - old floating control drawer count `0`
+  - page/console errors = `0`
+- Additional stage-width checks confirmed sampled routes shrink the canvas by the right drawer width when opened.
+- Follow-up control smoke passed on:
+  - `/modules/bubble-sort`
+  - `/modules/heap-sort`
+  - `/modules/huffman-tree`
+  - `/modules/bst`
+  - `/modules/binary-tree`
+  - `/modules/array`
+  - `/modules/stack`
+  - `/modules/queue`
+- Each sampled control panel showed:
+  - `input[type="range"]` count `0`
+  - speed-button count `0`
+  - at least one speed select
+- Static scan found no remaining module-page matches for speed buttons or dataset range inputs:
+  - `type="range"`
+  - `onClick={() => setSpeed(...)}`
+  - speed-active toggle/button patterns
+- `npm run build` passed after the select conversion.
+- Subtitle-removal verification:
+  - Targeted eslint passed for `WorkspaceShell`, `StaticWorkbenchShell`, `VisualizationCanvas`, `Layout`, `HomePage`, `ModulesPage`, simple standalone pages, `BinaryTreeTraversalPage`, and `BinaryTreeCanvasPlaygroundPage`.
+  - Static scan found no matches for subtitle/helper-text selectors and JSX patterns such as `app-subtitle`, `workspace.onDemand`, `modules-card-summary`, `tree-recursion-card-note`, and `subtitle=`.
+  - Browser smoke on `/`, `/modules`, `/modules/array`, `/modules/bst`, and `/modules/binary-tree` found zero matching nodes for brand subtitles, workbench header paragraphs, command-title spans, sidebar helper spans, module-card summaries, and recursion-card notes.
+- `git diff --check` passed, with only Windows LF/CRLF warnings.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/pages/modules/QuickSortPage.tsx`
+  - `src/pages/modules/BstPage.tsx`
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - module pages with remaining dataset-size or speed controls, now normalized to selects
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of `/modules/bst`, `/modules/binary-tree`, and a few representative shared-shell modules. If accepted, the remaining work is page-specific tightening, not another shell migration pass.
+
+## 2026-09-15 (Graph module numbering cleanup)
+
+### Today Done
+- Renumbered graph modules to remove temporary `A/B` suffixes.
+- Graph module IDs now run continuously from `G-01` through `G-11`:
+  - `G-02` adjacency matrix storage
+  - `G-03` adjacency list storage
+  - `G-04` DFS through `G-11` topological sort
+- Preserved existing graph routes and page implementations.
+- Added an explicit graph title-key mapping so homepage, document title, top module picker, and expanded sidebar use the new visible IDs while reusing the existing translation namespaces.
+- Updated zh/en graph titles to match the new numbering.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/data/moduleRegistry.ts src/pages/moduleCatalog.ts src/app/layout/Layout.tsx src/pages/HomePage.tsx src/i18n/translations.ts`
+- `npm run build` passed.
+- Browser/Playwright smoke on `http://127.0.0.1:4185/ui/visualizer/` passed:
+  - source/browser text no longer contains `G-02A` or `G-02B`
+  - expanded module rail graph group lists `G-01` through `G-11`
+  - `/modules/graph-adjacency-matrix` title is `G-02 图的邻接矩阵存储`
+  - `/modules/graph-adjacency-list` title is `G-03 图的邻接表存储`
+  - `/modules/dfs` title is `G-04 深度优先搜索（DFS）`
+  - `/modules/topological-sort` title is `G-11 Topological Sort`
+- `git diff --check` passed, with only Windows LF/CRLF warnings.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/data/moduleRegistry.ts`
+  - `src/pages/moduleCatalog.ts`
+  - `src/app/layout/Layout.tsx`
+  - `src/pages/HomePage.tsx`
+  - `src/i18n/translations.ts`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of the graph group in the homepage and expanded module rail.
+
+## 2026-09-15 (B-Tree canvas layer cleanup)
+
+### Today Done
+- Removed the extra framed inner canvas/card visual from both `B-Tree` and `B+ Tree` pages.
+- Updated B-Tree stage styling so `.btree-stage-panel` is transparent, borderless, and shadowless.
+- Let the B-Tree/B+ Tree visualization use the full shared workspace stage width instead of a constrained inner panel.
+- Kept the small tree-title label as a lightweight translucent overlay instead of a separate canvas/card frame.
+
+### Verification
+- `npm run build` passed.
+- Browser/Playwright smoke on `http://127.0.0.1:4184/ui/visualizer/` passed:
+  - `/modules/btree`: inner `.btree-stage-panel` has `0px` border, transparent background, and no shadow
+  - `/modules/bplus-tree`: same transparent/borderless panel state, with B+ leaf strip still present
+  - both routes report no `.app-error` / `.form-error`
+- `git diff --check` passed for touched files, with only Windows LF/CRLF warnings.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of `/modules/btree` and `/modules/bplus-tree` to confirm the extra inner canvas layer is gone.
+
+## 2026-09-15 (active module group can collapse)
+
+### Today Done
+- Fixed the expanded module sidebar so the currently active module category can be collapsed.
+- Removed the derived `visibleExpandedModuleTreeCategories` behavior that forced the active category back open during render.
+- Preserved the current route/module while collapsing:
+  - clicking the active category header only toggles that group
+  - the page remains on the current module route
+  - the top module picker still shows the current module
+- Kept persisted category state as the source of truth, so collapsing the active group is remembered.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/app/layout/Layout.tsx`
+- `npm run build` passed.
+- Browser/Playwright smoke on `http://127.0.0.1:4183/ui/visualizer/#/modules/trie` passed:
+  - before click: active `树结构` group was expanded and contained the active `Trie` link
+  - after clicking active group title: group became `aria-expanded="false"`
+  - route stayed `#/modules/trie`
+  - top module picker still showed `T-06 Trie`
+  - stored expanded categories changed to `["linear"]`
+- `git diff --check` passed for touched files, with only Windows LF/CRLF warnings.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/app/layout/Layout.tsx`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of collapsing the current module category in the expanded left sidebar.
+
+## 2026-09-15 (Trie continuous random insertion)
+
+### Today Done
+- Updated `T-06 /modules/trie` to match the continuous-insert behavior now used by B-Tree/B+ Tree.
+- After a completed insert/search playback:
+  - the inserted word is merged into the current seed word list
+  - a new random lowercase word not already in the seed is generated automatically
+  - the search word is also set to that new word, so the next cycle teaches "insert then verify this new word"
+  - playback resets to the beginning of the next Trie timeline
+- Changed manual `应用` so it uses the current evolving seed word list rather than reloading the selected preset every time.
+- Added a completion/status guard to prevent automatic random-word generation from cascading through multiple inserts in one render cycle.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/pages/modules/TriePage.tsx`
+- Targeted Trie tests passed:
+  - `npm test -- src/modules/tree/trie.test.ts src/modules/tree/trieTimelineReplay.test.ts`
+- `npm run build` passed.
+- Browser/Playwright smoke on `http://127.0.0.1:4182/ui/visualizer/#/modules/trie` passed:
+  - default insert `team` is added into the seed after completion
+  - the next insert/query word changes to a generated word such as `kiplor`
+  - the generated word is not already in the updated seed list
+  - page reports no `.app-error` / `.form-error`
+- `git diff --check` passed for touched files, with only Windows LF/CRLF warnings.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/modules/TriePage.tsx`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of continuous random insertion on `/modules/trie`.
+
+## 2026-09-15 (B-Tree continuous random insertion)
+
+### Today Done
+- Updated the standalone `B-Tree` and `B+ Tree` pages so completed insertions can continue into the next insertion without returning to the original preset seed.
+- After the insertion reaches the completed frame:
+  - the inserted target is merged into the next seed key list
+  - a new random target not already in the seed is generated automatically
+  - playback resets to the beginning of the next insertion timeline
+- Changed manual `应用插入` so it uses the current evolving seed list rather than reloading the selected preset every time.
+- Added a guard so automatic next-target generation advances exactly one insertion at a time instead of cascading through multiple random insertions while the timeline reset is still settling.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/pages/modules/BTreePage.tsx`
+- Targeted B-Tree tests passed:
+  - `npm test -- src/modules/tree/btreeComparison.test.ts src/modules/tree/btreeComparisonTimelineReplay.test.ts`
+- `npm run build` passed.
+- Browser/Playwright smoke on `http://127.0.0.1:4181/ui/visualizer/` passed:
+  - `/modules/btree`: after completing insert `7`, seed becomes `[5, 6, 7, 10, 12, 20, 30]`, a new target is generated, and playback resets to the next timeline
+  - `/modules/bplus-tree`: same continuous-insert behavior, with the B+ leaf strip still present
+  - new random targets were not present in the updated seed list
+- `git diff --check` passed for the touched files, with only Windows LF/CRLF warnings.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/modules/BTreePage.tsx`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of continuous random insertion on both `/modules/btree` and `/modules/bplus-tree`.
+
+## 2026-09-15 (B-Tree and B+ Tree split)
+
+### Today Done
+- Split the previous combined `T-05 B-Tree / B+ Tree` comparison route into two standalone navigation entries:
+  - `T-05 /modules/btree` for B-Tree
+  - `T-05B /modules/bplus-tree` for B+ Tree
+- Reworked `BTreePage` into a variant-driven workbench page so each route renders one focused tree instead of the old side-by-side comparison canvas.
+- Filtered the existing combined B-Tree/B+ timeline per route, preserving the underlying algorithm generator while showing only the relevant phase sequence.
+- Updated registry, router, module catalog, zh/en copy, and B-Tree stage CSS so both pages match the shared module workbench style.
+- Fixed module-title key generation for multi-hyphen IDs such as `T-05B`, and made the homepage default-expanded categories include the tree group so the new B+ Tree entry is easier to find.
+- Kept the shared stage-pan hook buildable and connected the BST special canvas panning path enough to avoid leaving a half-wired compile failure.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/app/layout/Layout.tsx src/pages/HomePage.tsx src/pages/modules/BTreePage.tsx src/pages/modules/BstPage.tsx src/hooks/useStagePan.ts src/components/WorkspaceShell.tsx src/data/moduleRegistry.ts src/pages/moduleCatalog.ts src/i18n/translations.ts`
+- Targeted tree tests passed:
+  - `npm test -- src/modules/tree/bst.test.ts src/modules/tree/bstTimelineReplay.test.ts src/modules/tree/btreeComparison.test.ts src/modules/tree/btreeComparisonTimelineReplay.test.ts`
+- `npm run build` passed.
+- Browser/Playwright smoke on fresh dev server `http://127.0.0.1:4180/ui/visualizer/` passed:
+  - homepage shows both `B-Tree` and `B+ Tree`
+  - `/modules/btree` renders `T-05 B-Tree`, one B-Tree panel, and no B+ leaf strip
+  - `/modules/bplus-tree` renders `T-05B B+ Tree`, one B+ panel, and the B+ leaf strip
+  - both routes report no `.app-error` / `.form-error`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/modules/BTreePage.tsx`
+  - `src/app/router.tsx`
+  - `src/data/moduleRegistry.ts`
+  - `src/pages/moduleCatalog.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `src/app/layout/Layout.tsx`
+  - `src/pages/HomePage.tsx`
+  - `src/pages/modules/BstPage.tsx`
+  - `src/components/WorkspaceShell.tsx`
+  - `src/hooks/useStagePan.ts`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of the separated `B-Tree` and `B+ Tree` entries in the homepage/sidebar and both module routes.
+- If accepted, the next cleanup candidate is the known full-lint blocker set so `npm run check` can complete green.
+
+## 2026-09-15 (category order and collapsible menu memory)
+
+### Today Done
+- Reordered module categories to:
+  - `线性结构`
+  - `数组与广义表`
+  - `树结构`
+  - `图结构`
+  - `查找算法`
+  - `哈希表`
+  - `排序算法`
+  - `字符串`
+  - `算法范式`
+- Updated the shared `MODULE_CATEGORY_ORDER`, so the homepage, module catalog, and module workbench rail use the same order.
+- Changed the homepage quick-navigation tree to read from the shared category order instead of maintaining a separate order constant.
+- Added persisted expand/collapse state for homepage first-level category menus.
+- Added expand/collapse buttons for first-level category groups in the expanded module workbench rail, with persisted state.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/pages/HomePage.tsx src/app/layout/Layout.tsx src/pages/moduleCatalog.ts`
+- `npm run build` passed.
+- Browser/Playwright DOM check passed:
+  - homepage category order matches the requested order
+  - homepage first-level menu state is written to and restored from `localStorage`
+  - expanded module workbench rail category order matches the requested order
+  - expanded module workbench rail first-level menu state is written to and restored from `localStorage`
+- `git diff --check` passed.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/moduleCatalog.ts`
+  - `src/pages/HomePage.tsx`
+  - `src/app/layout/Layout.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of the new category order and remembered menu expansion.
+
+## 2026-09-15 (storage category renamed)
+
+### Today Done
+- Renamed the user-facing Chinese storage category label from `存储结构` to `数组与广义表`.
+- Updated the homepage category label and shared module-category translation.
+- Adjusted the Chinese category summary from `数组存储与特殊矩阵压缩` to `数组、矩阵与广义表`.
+- Kept the internal category key `storage` unchanged, so routes, registry grouping, CSS tone names, and data filters remain stable.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/pages/HomePage.tsx src/i18n/translations.ts`
+- `npm run build` passed.
+- Source search confirmed no remaining `存储结构` text in `src`.
+- Browser/Playwright DOM check passed:
+  - homepage contains `数组与广义表`
+  - `/modules?category=storage` contains `数组与广义表`
+  - neither page contains old `存储结构`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/HomePage.tsx`
+  - `src/i18n/translations.ts`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of homepage/sidebar category wording.
+
+## 2026-09-15 (static modules hide playback bar by default)
+
+### Today Done
+- Added a shared `WorkspaceShell` option for the default bottom playback/transport visibility.
+- Updated `StaticWorkbenchShell` so static/concept/storage modules default to a hidden playback bar instead of showing the previous `静态演示` bottom strip.
+- Preserved the canvas zoom control by falling back to the existing bottom-right floating zoom UI when the playback bar is hidden.
+- Guarded route transitions so moving from a static module to a timeline module resets the playback bar to that module's default instead of carrying over the hidden state.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/components/WorkspaceShell.tsx src/components/StaticWorkbenchShell.tsx`
+- `npm run build` passed.
+- Browser/Playwright DOM check passed:
+  - `/modules/two-dimensional-array`: `data-transport-open="false"`, no `.tree-workspace-transport`, floating zoom visible
+  - static -> `/modules/linked-queue`: `data-transport-open="true"`, `.tree-workspace-transport` visible
+  - direct `/modules/linked-queue`: `data-transport-open="true"`, `.tree-workspace-transport` visible
+- `git diff --check` passed.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/components/StaticWorkbenchShell.tsx`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of static modules such as storage / graph-definition pages; playback-capable modules should still open with the bottom bar visible.
+
+## 2026-09-15 (linked-queue enqueue visual refinement)
+
+### Today Done
+- Refined `L-05B /modules/linked-queue` enqueue playback after user feedback that it still looked worse than linked-list / linked-stack operations.
+- Separated the stable queue row from the incoming `s` node in the linked-queue stage markup, so the new node is no longer laid out as if it already belonged to the main chain.
+- Repositioned the incoming `s` node below/right of the old `rear`, matching the current linked-list and linked-stack language: create beside the structure, show the pointer link, then enter the structure.
+- Reworked the `linkEnqueue` connector into a visible elbow-style preview of `rear->next = s`; the final `enqueue` step then removes the floating node and shows it inside the main queue row as the new `rear`.
+- Kept sequential queue and circular queue behavior unchanged.
+
+### Verification
+- Targeted queue tests passed:
+  - `npm test -- src/modules/linear/queueOps.test.ts src/modules/linear/queueTimelineReplay.test.ts src/pages/modules/queuePageUtils.test.ts`
+  - `3` files / `21` tests passed.
+- Targeted eslint passed:
+  - `npx eslint src/pages/modules/QueuePage.tsx src/pages/modules/queuePageUtils.ts src/modules/linear/queueOps.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+- `npm run build` passed.
+- `git diff --check` passed.
+- Browser/Playwright check on `/modules/linked-queue` confirmed:
+  - step `1/4`: incoming `s` node is below/right of the main queue row
+  - step `2/4`: connector is visible and old `rear` remains highlighted
+  - step `3/4`: `s` enters the main row and the queue renders four linked nodes
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of the linked-queue enqueue animation; if needed, tune the connector shape further after seeing it in the app.
+
+## 2026-09-15 (all module workspace relationship audit)
+
+### Today Done
+- Re-audited the recent module-frame changes across all implemented registry routes after the user asked whether recent work had only changed individual modules.
+- Confirmed source structure:
+  - most formal pages use `WorkspaceShell`
+  - static/concept pages use `StaticWorkbenchShell`
+  - `T-01 /modules/binary-tree` and `T-02 /modules/bst` remain hand-written but now follow the same command-bar relationship
+- Found a real cross-module gap: the command bar was consistent everywhere, but on several routes the right `步骤` drawer still overlaid the canvas because older responsive rules could force `.tree-stage-visual` back into normal document flow.
+- Added a desktop shared-workspace CSS override so every `.workspace-shell-page` keeps the stage absolutely positioned and gives up the right drawer width when `data-step-open='true'`.
+
+### Verification
+- Browser/Playwright full-route audit passed:
+  - `58` registry module routes checked
+  - every route has the shared workspace shell, command bar, right-side step toggle, and no visible old `.tree-workspace-edge-tab`
+  - command buttons are consistently `控制 / 播放栏` or `Controls / Playback`
+  - after opening `步骤` and then `控制`, every route keeps both panels open
+  - every route reports no stage/right-drawer overlap
+  - no route exposes an `算法` command button
+- `npm run build` passed.
+- `git diff --check` passed.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review across several module families; the automated audit says the shared workspace relationship is now applied across all registry module routes.
+
+## 2026-09-15 (independent panels and right drawer motion)
+
+### Today Done
+- Decoupled the workspace `控制` panel and right `步骤` sidebar toggles:
+  - opening `控制` no longer closes the right `步骤` sidebar
+  - opening `步骤` no longer closes the `控制` panel
+- Removed the visible `算法` entry from `T-01 /modules/binary-tree`; the command bar now matches the shared workspace language with `控制` and `播放栏`.
+- Added a right-to-left drawer entrance animation for the `步骤` sidebar while keeping the canvas pushed aside when the sidebar is open.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/components/WorkspaceShell.tsx src/pages/modules/BinaryTreeTraversalPage.tsx src/pages/modules/BstPage.tsx`
+- Targeted tree tests passed:
+  - `npm test -- src/modules/tree/binaryTreeTraversal.test.ts src/modules/tree/binaryTreeTraversalTimelineReplay.test.ts src/modules/tree/bst.test.ts src/modules/tree/bstTimelineReplay.test.ts`
+  - `4` files / `21` tests passed.
+- `npm run build` passed.
+- `git diff --check` passed.
+- Browser verification at `1280x720`:
+  - `T-03 /modules/avl-tree`: after opening `步骤` then `控制`, both `data-step-open` and `data-controls-open` are `true`
+  - `T-03 /modules/avl-tree`: stage right edge `900px`, step sheet left edge `900px`, so the sheet pushes rather than overlays the canvas
+  - `T-01 /modules/binary-tree`: command buttons are `控制` and `播放栏`; no visible `算法` button or recursion toggle copy remains
+  - `T-01 /modules/binary-tree`: after opening both panels, stage right edge `900px`, step sheet left edge `900px`, and the sheet animation name is `workspace-step-drawer-in`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - `src/pages/modules/BstPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of the independent side panels and right drawer motion on a few module pages.
+
+## 2026-09-15 (right step sidebar pushes canvas)
+
+### Today Done
+- Updated the shared workspace CSS so opening the right `步骤` sidebar shrinks the central canvas area instead of overlaying it.
+- The behavior now mirrors the left module rail relationship: the stage gives up the sidebar width and the right panel sits beside it.
+- Kept the floating zoom control inside the shrunken stage, so it stays attached to the active canvas area when the playback row is hidden.
+
+### Verification
+- `npm run build` passed.
+- `git diff --check` passed.
+- Browser measurement on `T-01 /modules/binary-tree` at `1280x720`:
+  - before opening `步骤`: stage width `1208px`, right edge `1280`
+  - after opening `步骤`: stage width `828px`, right edge `900`
+  - step sheet width `380px`, left edge `900`
+  - stage right edge and sheet left edge match, so the sidebar no longer overlays the canvas
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review on a few module pages with `步骤` open.
+
+## 2026-09-15 (tree workspace page-language alignment)
+
+### Today Done
+- Rechecked the formal module pages against the current shared workspace page contract.
+- Found that most modules already used `WorkspaceShell` / `StaticWorkbenchShell`; the remaining tree special pages `T-01 BinaryTreeTraversalPage` and `T-02 BstPage` still hand-rolled parts of the old command relationship.
+- Updated `T-01 /modules/binary-tree`:
+  - removed the top `步骤` command button
+  - added the fixed right-side step toggle arrow
+  - moved canvas zoom controls from the canvas top area into the bottom playback row
+  - kept zoom available as a bottom-right floating control when the playback row is hidden
+- Updated `T-02 /modules/bst`:
+  - removed the top `步骤` command button
+  - added the fixed right-side step toggle arrow
+  - added bottom playback-row zoom controls and floating zoom when playback is hidden
+  - wired tree nodes and edges to the same zoom value
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/pages/modules/BinaryTreeTraversalPage.tsx src/pages/modules/BstPage.tsx`
+- Targeted tree tests passed:
+  - `npm test -- src/modules/tree/binaryTreeTraversal.test.ts src/modules/tree/binaryTreeTraversalTimelineReplay.test.ts src/modules/tree/bst.test.ts src/modules/tree/bstTimelineReplay.test.ts`
+  - `4` files / `21` tests passed.
+- `npm run build` passed.
+- `git diff --check` passed.
+- Browser verification across tree routes confirmed:
+  - `T-00A`, `T-01`, `T-02`, `T-03`, `T-04`, `T-05`, `T-06`, and `T-07` all render the shared workspace page shell
+  - no visible `.tree-workspace-edge-tab` remains
+  - the visible step entry is the fixed right-side arrow
+  - zoom is in the playback row, not as a top canvas toolbar
+- Source scan confirmed all formal module pages, excluding test files and `BinaryTreeCanvasPlaygroundPage`, use the shared workspace page contract.
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one warning in `src/pages/modules/LinkedListPage.tsx`
+
+### Current State
+- Updated:
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - `src/pages/modules/BstPage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of `T-01 /modules/binary-tree` and `T-02 /modules/bst` against the current module-page prototype.
+
+## 2026-09-15 (linked-queue enqueue staging)
+
+### Today Done
+- Updated linked-queue enqueue so the new node `s` is created beside the queue before it joins the main chain.
+- Added linked-queue specific timeline steps:
+  - `prepareEnqueue`: create the side node `s`
+  - `linkEnqueue`: highlight old `rear` and show the temporary `rear->next` link to `s`
+  - `enqueue`: move `s` into the queue and make it the new `rear`
+- Added visual styling for the floating `s` node, its label, and the incoming connector.
+- Kept sequential and circular queue behavior unchanged.
+- Removed a QueuePage lint warning by using stable empty queue/buffer fallbacks.
+
+### Verification
+- Targeted tests passed:
+  - `npm test -- src/modules/linear/queueOps.test.ts src/modules/linear/queueTimelineReplay.test.ts src/pages/modules/queuePageUtils.test.ts`
+  - `3` files / `21` tests passed.
+- Targeted eslint passed:
+  - `npx eslint src/modules/linear/queueOps.ts src/pages/modules/QueuePage.tsx src/pages/modules/queuePageUtils.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+- `npm run build` passed.
+- `git diff --check` passed.
+- Browser verification on `http://127.0.0.1:4173/ui/visualizer/#/modules/linked-queue`:
+  - step `0/4`: only the existing queue nodes are shown
+  - step `1/4`: floating `s` node appears beside the queue
+  - step `2/4`: incoming connector appears and old `rear` is highlighted
+  - step `3/4`: `s` enters the queue and becomes the new `rear`
+- Full `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `330` tests)
+  - lint still stops on existing errors in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`
+
+### Current State
+- Updated:
+  - `src/modules/linear/queueOps.ts`
+  - `src/modules/linear/queueOps.test.ts`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/queuePageUtils.ts`
+  - `src/pages/modules/queuePageUtils.test.ts`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of linked-queue enqueue playback.
+
+## 2026-09-15 (linked-stack s.next arrow)
+
+### Today Done
+- Fixed the linked-stack push preview arrow for the `s->next = top` step.
+- Extracted the connector-point calculation so the preview line is anchored from the left side of the floating `s` node to the right side of the old top node, with a small fixed gap on both ends.
+- Recomputed the preview path on the next animation frame so the SVG line does not keep a stale position while the floating node settles.
+- Added a unit test that verifies the connector points keep `s` on the right and old top on the left.
+
+### Verification
+- Targeted tests passed:
+  - `npm test -- src/pages/modules/StackPage.test.tsx src/pages/modules/stackPageUtils.test.ts src/modules/linear/stackOps.test.ts src/modules/linear/stackTimelineReplay.test.ts`
+  - `4` files / `24` tests passed.
+- `npm run build` passed.
+- Browser verification on `http://127.0.0.1:4173/ui/visualizer/#/modules/linked-stack`:
+  - at step `2/4`, the path starts just outside the `s` node left edge and ends just outside the old top node right edge
+  - screenshot inspection confirmed the curve no longer extends from the right side of `s`
+- Targeted eslint was attempted for `StackPage.tsx` and `StackPage.test.tsx`; it still stops on the existing `react-refresh/only-export-components` issue because `StackPage.tsx` exports testable helpers.
+
+### Current State
+- Updated:
+  - `src/pages/modules/StackPage.tsx`
+  - `src/pages/modules/StackPage.test.tsx`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- User visual review of the linked-stack push step.
+
+## 2026-09-14 (full pseudocode audit)
+
+### Today Done
+- Re-audited all user-facing pseudocode surfaces after the linked-stack `oldTop` issue showed the previous pass was too narrow.
+- Extended the audit from double-column pages to single-column sorting/search/string/tree/graph/hash/paradigm pages.
+- Fixed teaching-semantics issues:
+  - bubble sort now displays and highlights the early-exit check
+  - queue pseudocode has separate sequential/linked/circular models, with circular queue using the one-empty-slot full rule consistently
+  - circular linked-list pseudocode explicitly locates `tail` and avoids implying a persistent tail variable
+  - divide-and-conquer checks the base case before splitting
+  - backtracking has a separate undo/backtrack pseudocode line
+  - counting sort stable placement shows both output write and `count[key] -= 1`
+  - B-Tree/B+Tree descent highlights the child-range selection line, and overflow/root lines now match the comparison animation better
+- Updated `docs/PSEUDOCODE_AUDIT.md` with the scope, fixes, verification, and remaining risk.
+
+### Verification
+- Targeted tests passed:
+  - `npm test -- src/modules/sorting/bubbleSort.test.ts src/modules/sorting/countingSort.test.ts src/modules/paradigm/divideConquer.test.ts src/modules/paradigm/backtracking.test.ts src/modules/tree/btreeComparison.test.ts src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts src/modules/linear/queueOps.test.ts src/pages/modules/queuePageUtils.test.ts`
+  - `9` files / `51` tests passed.
+- `npm run build` passed.
+- `git diff --check` passed.
+- `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `327` tests)
+  - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`.
+
+### Current State
+- Updated:
+  - `docs/PSEUDOCODE_AUDIT.md`
+  - `docs/HANDOFF.md`
+  - `docs/SESSION_BRIEF.md`
+  - `TODO.md`
+  - `src/i18n/translations.ts`
+  - `src/modules/paradigm/backtracking.ts`
+  - `src/modules/paradigm/divideConquer.ts`
+  - `src/modules/sorting/bubbleSort.ts`
+  - `src/modules/tree/btreeComparison.ts`
+  - `src/pages/modules/BacktrackingPage.tsx`
+  - `src/pages/modules/BubbleSortPage.tsx`
+  - `src/pages/modules/CountingSortPage.tsx`
+  - `src/pages/modules/DivideConquerPage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+
+### Next Step
+- If the user wants stronger assurance, run a browser spot-check through representative modules with the step panel open.
+- Separate task: clean the existing React lint blockers so `npm run check` can become fully green again.
+
+## 2026-09-14 (stack pointer spacing)
+
+### Today Done
+- Adjusted sequential-stack and linked-stack pointer labels so `top` / `bottom` sit farther away from the stack body.
+- Extended the CSS-drawn pointer lines from `12px` to `24px` and kept a visible gap from the stack cells so the line is not visually covered by node backgrounds.
+- Increased the reserved side padding around sequential-stack and linked-stack scenes to keep the farther labels visible.
+- Updated docked/adaptive stack overrides so narrow panel layouts do not pull the pointers back against the stack.
+- Follow-up fix: replaced rendered `←` / `→` glyph arrowheads with zero-size CSS border triangles, because the glyph approach produced an extra tiny arrow beside the horizontal line.
+- Follow-up fix: changed linked-stack `s.next = top` preview path to start from the floating `s` node side midpoint and end at the old top node side midpoint, instead of starting from the floating node bottom center.
+- Follow-up fix: corrected linked-stack pseudocode so push uses the standard `s->next = top; top = s;` sequence instead of introducing an unnecessary `oldTop` variable. Pop still uses a temporary `p` node because it must free the removed old top node safely.
+
+### Verification
+- Firefox/Playwright smoke captured:
+  - `output/playwright/sequential-stack-pointer-spacing.png`
+  - `output/playwright/linked-stack-pointer-spacing.png`
+  - `output/playwright/sequential-stack-pointer-arrowheads.png`
+  - `output/playwright/linked-stack-pointer-arrowheads.png`
+  - `output/playwright/sequential-stack-pointer-css-arrowheads.png`
+  - `output/playwright/linked-stack-pointer-css-arrowheads.png`
+  - `output/playwright/linked-stack-linkpush-start-fixed.png`
+- Browser metrics confirmed both stack variants render `top` / `bottom` labels and no stack-stage horizontal scrollbar is exposed.
+- Browser metrics confirmed the `.stack-pointer-arrow` spans render as CSS border triangles with `font-size: 0`, so the text glyph arrows no longer appear.
+- Browser metrics confirmed the linked-stack link preview `M` coordinate now equals the floating node side midpoint during step `2/4`.
+
+### Current State
+- Updated:
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Run the normal local gate and report whether the existing React lint issues still block `npm run check`.
+
+## 2026-09-14 (control panel default hidden)
+
+### Today Done
+- Changed the shared `WorkspaceShell` default so module control panels no longer open automatically on page entry.
+- Confirmed special tree pages `T-01` and `T-02` already default their control panels to hidden, so no page-specific change was needed there.
+
+### Verification
+- `npx eslint src/components/WorkspaceShell.tsx` passed.
+- `npm run build` passed.
+- `npm run check` was attempted: docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`.
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `docs/HANDOFF.md`
+  - `docs/SESSION_BRIEF.md`
+  - `TODO.md`
+
+### Next Step
+- Visual review one shared-shell module route to confirm first load shows only the canvas, command bar, side toggles, and transport/zoom controls.
+
+## 2026-09-14 (dual pseudocode audit)
+
+### Today Done
+- Audited the actual double-column `中文式 / 类 C 式` pseudocode surfaces.
+- Added `docs/PSEUDOCODE_AUDIT.md` as the audit record.
+- Corrected pseudocode-only issues in:
+  - `src/pages/modules/DynamicArrayPage.tsx`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+- Main content fixes:
+  - linked-list C-style pseudocode now uses 0-based indexes consistently with the page/runtime
+  - circular linked-list insertion now moves `head` on `index == 0`, not `index == 1`
+  - single/double/circular linked-list insert/delete C-style lines now spell out head, prev/next, and detach/free behavior
+  - stack and queue C-style pseudocode no longer uses placeholder prose such as `validate state` / `finish enqueue`
+  - dynamic-array append pseudocode now makes validation, direct append, resize-copy, and final append explicit
+  - Huffman C-style pseudocode fixes the `Haffman` typo and clarifies construction, code extraction, and WPL accumulation
+
+### Verification
+- Targeted tests passed:
+  - `npm test -- src/modules/linear/arrayInsert.test.ts src/modules/linear/dynamicArrayOps.test.ts src/modules/linear/linkedListOps.test.ts src/modules/linear/queueOps.test.ts src/modules/linear/stackOps.test.ts src/modules/tree/huffman.test.ts src/modules/tree/huffmanTimelineReplay.test.ts`
+  - `7` files / `55` tests passed.
+- `npm run build` passed.
+- `npm run check` was attempted:
+  - docs link check passed
+  - all tests passed (`103` files / `327` tests)
+  - lint then stopped on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`
+- Targeted eslint was attempted for the touched module pages, but it still stops on pre-existing React lint issues outside this pseudocode text change:
+  - `src/pages/modules/HuffmanTreePage.tsx` synchronous `setState` inside effect
+  - `src/pages/modules/StackPage.tsx` fast-refresh export and synchronous `setState` inside layout effect
+  - existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`
+
+### Current State
+- Updated:
+  - `docs/PSEUDOCODE_AUDIT.md`
+  - `TODO.md`
+  - `docs/HANDOFF.md`
+  - `src/pages/modules/DynamicArrayPage.tsx`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+
+### Next Step
+- Continue with a second audit pass for single-column pseudocode across sorting/search/graph/tree/paradigm pages and compare each page's displayed lines with runtime `codeLines` highlights.
+
+## 2026-09-14 (module shell aligned closer to selected prototype)
+
+### Today Done
+- Responded to user review that `L-01 /modules/array` was still too far from the selected module-page prototype.
+- Updated the shared app/module frame so formal `WorkspaceShell` routes move toward the selected full-canvas workbench:
+  - fixed 60px top app header
+  - left 72px module-category rail
+  - centered module picker signal in the header on module pages
+  - full-viewport grid canvas inside the module route
+  - bottom full-width transport bar
+  - controls panel open by default as a floating card
+- Tightened `L-01` control-card styling:
+  - narrower compact card
+  - two-column input layout
+  - hidden duplicate control-panel status summary, because status is already shown in the stage meta and bottom transport chips
+  - opaque card background so canvas content does not visually bleed through
+- Added the missing collapsible side-region behavior from the selected prototype:
+  - left module navigation is now a narrow rail by default, not a fully hidden sidebar
+  - the rail-top small toggle expands the rail into a wider module tree that shows concrete module routes
+  - expanded module tree highlights the current module and lists entries such as `L-01 数组`, `L-03 单链表`, `L-03B 双链表`, and `L-03C 循环链表`
+  - right `步骤` has a right-edge toggle and opens as a fixed right sidebar instead of a drifting floating panel
+  - hiding the bottom transport lets the right sidebar extend to the bottom edge
+  - the top app header and module command bar now share a flatter white background, fine border, and no drop shadow so they match the workbench area better
+  - latest refinement moved zoom controls into the bottom playback row, kept `- / 100% / +` visible as a bottom-right overlay when `播放栏` is hidden, removed the top `步骤` button, changed the right sidebar trigger to an arrow icon, fixed both left/right sidebar toggle positions so repeated clicks can happen in place, made right-sidebar step content stack vertically, and positioned the default controls panel near the top `控制` button
+- Added decision record `DEC-20260914-01` for the selected prototype-aligned shared module frame.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/app/layout/Layout.tsx src/components/WorkspaceShell.tsx src/pages/modules/ArrayPage.tsx src/i18n/translations.ts`
+- `npm run build` passed.
+- Edge/Playwright smoke on `/modules/array` captured:
+  - `output/playwright/l01-prototype-align-pass5.png`
+  - `output/playwright/l01-collapsible-sidebars.png`
+  - `output/playwright/module-rail-expanded-tree-final.png`
+  - `output/playwright/module-sidebars-topbar-refine.png`
+  - `output/playwright/workspace-zoom-step-controls-refine.png`
+  - `output/playwright/workspace-controls-near-button.png`
+  - `output/playwright/zoom-visible-with-transport-hidden.png`
+  - `output/playwright/fixed-sidebar-toggle-positions.png`
+  - `output/playwright/sidebar-toggle-no-overlap.png`
+- Browser metrics confirmed:
+  - top header height = `60`
+  - collapsed left module rail width = `72`
+  - expanded left module tree width = `248`
+  - module shell starts at `x=72, y=60`
+  - control card open by default
+  - bottom transport visible
+  - after expanding the left rail, module shell starts at `x=248` and the module tree exposes concrete route entries
+  - rail-top toggle is inside the sidebar, not the top app header
+  - right-edge `步骤` toggle opens a right sidebar pinned at the right edge with width `380`
+  - top app header and command bar both use white background with no shadow
+  - command bar buttons are now `控制` and `播放栏`; `步骤` is no longer in the top command bar
+  - zoom controls render inside the bottom transport row, not in the canvas top-right corner
+  - when `播放栏` is hidden, the same zoom controls remain visible at the canvas bottom-right
+  - left sidebar toggle remains at `x=19` and was moved up to `y=68~98`, clear of the active `线性结构` group at `y=166~200`
+  - right sidebar toggle remains at `x=1566, y=130` before expansion, after expansion, and after collapsing again
+  - right-sidebar code blocks stack vertically in the `380px` side panel
+  - default controls panel opens near the top `控制` button
+  - after hiding `播放栏`, bottom transport is absent and the right sidebar extends downward
+  - horizontal overflow = `false`
+  - page/console errors = `0`
+
+### Current State
+- Updated:
+  - `src/app/layout/Layout.tsx`
+  - `src/components/WorkspaceShell.tsx`
+  - `src/index.css`
+  - `docs/DECISIONS.md`
+  - `docs/HANDOFF.md`
+  - `docs/SESSION_BRIEF.md`
+  - `TODO.md`
+- The shared frame is now much closer to the selected prototype, but individual module canvases may still need route-specific polish.
+
+### Next Step
+- User visual review of `L-01`; if accepted, continue route-by-route polish under this shared frame instead of redefining the page relationship again.
+
+## 2026-09-14 (special tree pages migrated to command-bar shell)
+
+### Today Done
+- Completed the remaining formal module-page migration requested by the user.
+- Migrated the two special tree pages away from the old vertical edge-tab interaction:
+  - `T-01 /modules/binary-tree`
+  - `T-02 /modules/bst`
+- Added the same top command-bar relationship used by the rest of the module workbench:
+  - `控制`
+  - `步骤`
+  - `播放栏`
+  - plus `算法` on `T-01`, because its recursion/algorithm window is a real page-specific auxiliary region
+- Kept the existing custom tree geometry, traversal traces, recursion panel, BST layout, and timeline logic intact.
+- Added per-page `data-controls-open`, `data-step-open`, and `data-transport-open` state attributes so these special pages match the shared-shell behavior contract.
+
+### Verification
+- Targeted eslint passed:
+  - `npx eslint src/pages/modules/BstPage.tsx src/pages/modules/BinaryTreeTraversalPage.tsx`
+- Targeted tree tests passed:
+  - `npm test -- src/modules/tree/binaryTreeTraversal.test.ts src/modules/tree/binaryTreeTraversalTimelineReplay.test.ts src/modules/tree/bst.test.ts src/modules/tree/bstTimelineReplay.test.ts`
+  - `4` files / `21` tests passed.
+- `npm run build` passed.
+- `npm run check` was attempted: docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing repo issues outside this `T-01` / `T-02` migration:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+- Edge/Playwright smoke passed on:
+  - `/modules/binary-tree`
+  - `/modules/bst`
+- Browser smoke confirmed:
+  - command titles render as `T-01 二叉树遍历` and `T-02 二叉搜索树（BST）`
+  - command buttons render in the top bar
+  - old `.tree-workspace-edge-tab` count is `0`
+  - `控制` opens the controls panel
+  - `步骤` closes controls and opens the step panel
+  - `播放栏` hides the bottom transport
+  - tree nodes and edges remain visible
+  - page/console errors = `0`
+- Full formal module scan found no remaining module `.tsx` page outside the new workbench/command-bar pattern, excluding test/playground files.
+
+### Current State
+- Updated:
+  - `src/pages/modules/BinaryTreeTraversalPage.tsx`
+  - `src/pages/modules/BstPage.tsx`
+  - `docs/HANDOFF.md`
+- All formal module pages now use the new workbench relationship.
+- `BinaryTreeCanvasPlaygroundPage.tsx` remains a playground/development page, not a course module.
+
+### Next Step
+- User visual review of `T-01` and `T-02` after the shell migration, especially tree trace spacing and the `T-01` floating recursion window.
+
+## 2026-09-13 (static module pages unified into workspace shell)
+
+### Today Done
+- Re-aligned the implementation with the agreed product rule:
+  - module selection belongs to homepage / left navigation
+  - module pages use one workbench relationship
+  - the control panel only tunes the current module
+  - left controls, right step/notes, and bottom transport can be hidden through the shared command bar
+- Added `StaticWorkbenchShell` as a thin adapter over `WorkspaceShell` for concept/static teaching pages that do not have timeline playback.
+- Migrated these old standalone workbench pages into the shared shell:
+  - `M-01 /modules/two-dimensional-array`
+  - `M-02 /modules/symmetric-matrix`
+  - `M-03 /modules/upper-triangular-matrix`
+  - `M-04 /modules/lower-triangular-matrix`
+  - `M-05 /modules/sparse-matrix-triples`
+  - `M-06 /modules/sparse-matrix-linked`
+  - `M-07 /modules/generalized-list-head-tail`
+  - `G-01 /modules/graph-representation`
+  - `G-02A /modules/graph-adjacency-matrix`
+  - `G-02B /modules/graph-adjacency-list`
+  - `T-00A /modules/tree-definition`
+- Added compact control-panel CSS so old horizontal toolbars behave correctly when moved into the left `控制` panel.
+
+### Verification
+- `npm run build` passed.
+- Targeted eslint passed on changed TS/TSX files; including `src/index.css` in the eslint command only produced the expected "CSS ignored by config" warning.
+- Targeted unit tests passed:
+  - `npm test -- src/modules/storage/twoDimensionalArray.test.ts src/modules/storage/symmetricMatrix.test.ts src/modules/storage/upperTriangularMatrix.test.ts src/modules/storage/lowerTriangularMatrix.test.ts src/modules/storage/sparseMatrixTriples.test.ts src/modules/storage/sparseMatrixLinked.test.ts src/modules/storage/generalizedListHeadTail.test.ts src/modules/graph/graphRepresentation.test.ts`
+  - `8` files / `31` tests passed.
+- Edge/Playwright smoke passed on representative routes:
+  - `two-dimensional-array`
+  - `symmetric-matrix`
+  - `generalized-list-head-tail`
+  - `graph-representation`
+  - `graph-adjacency-matrix`
+  - `graph-adjacency-list`
+  - `tree-definition`
+  - `doubly-linked-list`
+- Browser smoke confirmed each route renders the shared `.tree-workspace-shell`, command buttons are `控制` / `步骤` / `播放栏`, old standalone workbench markers are absent, `控制` and `步骤` remain mutually exclusive, `播放栏` hides the bottom region, and page/console errors = `0`.
+
+### Current State
+- Updated:
+  - `src/components/StaticWorkbenchShell.tsx`
+  - `src/index.css`
+  - storage concept pages under `src/pages/modules/M-*.tsx` equivalents
+  - `src/pages/modules/GraphRepresentationPage.tsx`
+  - `src/pages/modules/GraphAdjacencyMatrixPage.tsx`
+  - `src/pages/modules/GraphAdjacencyListPage.tsx`
+  - `src/pages/modules/TreeDefinitionPage.tsx`
+  - `docs/HANDOFF.md`
+- Follow-up on 2026-09-14: `T-01 /modules/binary-tree` and `T-02 /modules/bst` were migrated to the same command-bar shell. No formal module pages remain on the old vertical edge-tab interaction.
+
+### Next Step
+- User visual review of the full module workbench surface.
+
+## 2026-09-13 (linked-list variants split into separate routes)
+
+### Today Done
+- Addressed the follow-up review that linked-list variants were still bundled behind a control-panel selector.
+- Split the linked-list family into separate navigation/module entries:
+  - `L-03 /modules/linked-list` = single linked list
+  - `L-03B /modules/doubly-linked-list` = double linked list
+  - `L-03C /modules/circular-linked-list` = circular linked list
+- Removed the linked-list type dropdown from the module controls; each route now fixes its own linked-list mode.
+- Kept legacy JSON import tolerant, but imported JSON no longer switches the current route's linked-list type.
+- Added zh/en titles and descriptions for the new double/circular linked-list module entries.
+
+### Verification
+- Targeted linked-list tests passed:
+  - `npm test -- src/modules/linear/linkedListOps.test.ts src/pages/modules/linkedListPageUtils.test.ts`
+- `npm run build` passed.
+- Targeted eslint passed with one existing warning still present in the touched page:
+  - `npx eslint src/pages/modules/LinkedListPage.tsx src/data/moduleRegistry.ts src/app/router.tsx src/i18n/translations.ts`
+  - existing warning: `src/pages/modules/LinkedListPage.tsx` exhaustive-deps warning around transient link measurements
+- Edge/Playwright smoke passed:
+  - homepage linear tree lists `单链表`, `双链表`, and `循环链表` as separate entries
+  - `/modules/doubly-linked-list` renders `L-03B 双链表`
+  - `/modules/circular-linked-list` renders `L-03C 循环链表`
+  - neither route renders the old `#linked-list-mode` control selector
+  - double-list node markers and circular return arrow render correctly
+  - page/console errors = `0`
+- Screenshot: `output/playwright/linked-list-split-routes-smoke.png`
+
+### Current State
+- Updated:
+  - `src/data/moduleRegistry.ts`
+  - `src/app/router.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/i18n/translations.ts`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue applying this "module selected from navigation, controls only tune the current module" rule to any remaining module families if they still expose structural choices in the control panel.
+
+## 2026-09-13 (module workbench shell refresh)
+
+### Today Done
+- Addressed the follow-up review that module routes still felt like the old animation pages.
+- Removed the homepage left-tree `查看本组` link because it changed the hash route and could land on 404.
+- Refreshed shared `WorkspaceShell` pages into a top-command workbench shell:
+  - title and description now live in the module workbench command bar
+  - `控制`, `步骤`, and `播放栏` are command buttons in one top-right group
+  - old left/right vertical edge tabs are no longer rendered on shared-shell module pages
+  - `控制` and `步骤` are mutually exclusive, so opening one closes the other
+  - bottom playback bar can still be hidden/restored from the command bar
+- Scoped the new workbench styling to `.workspace-shell-page` so special hand-built pages are not accidentally restyled.
+
+### Verification
+- `npm run build` passed.
+- targeted eslint passed:
+  - `npx eslint src/components/WorkspaceShell.tsx src/pages/HomePage.tsx`
+- `npm run check` was attempted: docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing repo issues outside this shell refresh:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+- Edge/Playwright smoke passed:
+  - homepage no longer contains `查看本组`
+  - expanding the left tree does not produce a 404
+  - `L-03 /modules/linked-list` renders `.tree-workspace-command-bar`
+  - command buttons are `控制`, `步骤`, `播放栏`
+  - old vertical edge tabs are absent
+  - opening `控制` shows the controls drawer and keeps `步骤` closed
+  - opening `步骤` closes controls and shows the step sheet
+  - clicking `播放栏` hides the bottom transport
+  - page/console errors = `0`
+- Screenshot: `output/playwright/module-workbench-shell-v2-smoke.png`
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/pages/HomePage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue route-by-route visual cleanup inside individual module canvases where shared-shell changes are not enough.
+
+## 2026-09-13 (homepage navigation relationship cleanup)
+
+### Today Done
+- Cleaned up the confusing homepage/catalog/module navigation relationship reported in review.
+- Unified top-level module entry:
+  - top `模块` nav now points to `/`
+  - brand link now points to `/`
+  - `/modules` now renders the new quick-navigation homepage instead of the old catalog page
+- Reworked the homepage left navigation from flat anchor links into an expandable course tree:
+  - categories can expand/collapse
+  - expanded categories list their module entries directly
+  - each module entry links to the real module route
+- Removed the old-catalog jump from homepage category actions:
+  - section action now expands the left tree category
+  - it no longer routes to `/modules?category=...`
+
+### Verification
+- `npm run build` passed.
+- targeted eslint passed:
+  - `npx eslint src/app/router.tsx src/app/layout/Layout.tsx src/pages/HomePage.tsx`
+- `npm run check` was attempted: docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing repo issues outside this navigation cleanup:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+- Edge/Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/` passed:
+  - `/` rendered `.quick-home-page` and no old catalog markers
+  - top `模块` nav href = `#/`
+  - brand href = `#/`
+  - left tree rendered 9 category groups and category expand/collapse worked
+  - expanded `树结构` listed module children
+  - center `链表` card navigated to `#/modules/linked-list` and rendered `.linked-diagram-canvas`
+  - direct `#/modules` rendered the new homepage and no old catalog markers
+  - page/console errors = `0`
+- Screenshot: `output/playwright/home-nav-tree-fix-smoke.png`
+
+### Current State
+- Updated:
+  - `src/app/router.tsx`
+  - `src/app/layout/Layout.tsx`
+  - `src/pages/HomePage.tsx`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue module-page visual overhaul separately; the homepage/category entry relationship is now consolidated.
+
+## 2026-09-12 (homepage quick-navigation redesign)
+
+### Today Done
+- Replaced the root-route redirect with a practical quick-navigation homepage.
+- The homepage now acts as an entry console instead of a marketing/AI-style landing page:
+  - left course-category navigation matches the module catalog categories
+  - center content groups implemented modules by category
+  - top search filters modules directly
+  - right rail shows recent visits, common entries, and a small favorites list
+- Removed learning-progress presentation from the homepage; no progress percentage is shown or inferred.
+- Kept the implementation data-driven from `moduleRegistry`, recent-visit storage, and existing translations.
+- Recorded the homepage product decision in `docs/DECISIONS.md`.
+
+### Verification
+- `npm run build` passed.
+- `npx eslint src/pages/HomePage.tsx` passed.
+- `npm run check` was attempted: docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing repo issues outside this homepage change:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+- Edge/Playwright smoke on `http://127.0.0.1:4173/ui/visualizer/#/` passed:
+  - homepage rendered all 9 category sections
+  - sidebar rendered `首页` plus the 9 module categories
+  - page text did not include `学习进度`
+  - search for `链表` narrowed results to the linked-list card only
+  - clicking the linked-list card navigated to `#/modules/linked-list` and rendered `.linked-diagram-canvas`
+  - page/console errors = `0`
+  - screenshot: `output/playwright/home-quick-nav-smoke.png`
+
+### Current State
+- Updated:
+  - `src/pages/HomePage.tsx`
+  - `src/index.css`
+  - `docs/DECISIONS.md`
+  - `docs/HANDOFF.md`
+- Local dev server remains available at:
+  - `http://127.0.0.1:4173/ui/visualizer/`
+
+### Next Step
+- Apply the selected tighter workbench direction to module pages after homepage checks are closed.
+
+## 2026-09-12 (shared module workspace collapse controls)
+
+### Today Done
+- Started applying the selected workbench direction to module pages through the shared `WorkspaceShell`.
+- Added a top-right playback-bar toggle to shared module workspaces:
+  - bottom transport/playback controls are visible by default
+  - clicking `播放栏` hides the bottom bar so the canvas can be viewed with less obstruction
+  - clicking it again restores playback controls
+- Kept existing left `控制` and right `步骤` regions as on-demand panels.
+- Tightened shared floating panel styling:
+  - smaller padding/gaps
+  - less inflated corner radius
+  - lighter shadow/background treatment
+- Added zh/en labels for the playback-bar toggle.
+
+### Verification
+- `npm run build` passed.
+- targeted eslint passed:
+  - `npx eslint src/components/WorkspaceShell.tsx src/i18n/translations.ts src/pages/HomePage.tsx`
+- `npm run check` was attempted: docs check and all tests passed (`103` files / `327` tests), then lint stopped on existing repo issues outside this shared-workspace change:
+  - `src/hooks/useStageAnchorPanel.ts`
+  - `src/pages/modules/HuffmanTreePage.tsx`
+  - `src/pages/modules/LinkedListPage.tsx`
+  - `src/pages/modules/QueuePage.tsx`
+  - `src/pages/modules/StackPage.tsx`
+- Edge/Playwright smoke on `L-03 /modules/linked-list` passed:
+  - initial `data-transport-open="true"`
+  - clicking `播放栏` set `data-transport-open="false"` and removed `.tree-workspace-transport`
+  - clicking again restored `.tree-workspace-transport`
+  - linked-list canvas remained rendered
+  - page/console errors = `0`
+- Edge/Playwright shared smoke passed on `/modules/quick-sort` and `/modules/dfs`:
+  - each route rendered the playback toggle
+  - each route hid the bottom transport after click
+  - page/console errors = `0`
+- Screenshot: `output/playwright/workspace-transport-toggle-smoke.png`
+
+### Current State
+- Updated:
+  - `src/components/WorkspaceShell.tsx`
+  - `src/i18n/translations.ts`
+  - `src/index.css`
+  - `docs/HANDOFF.md`
+
+### Next Step
+- Continue visual review and apply any remaining module-workbench prototype changes route-by-route only where the shared shell is insufficient.
+
 ## 2026-09-12 (workspace canvas zoom)
 
 ### Today Done
@@ -5707,3 +7606,119 @@ git -C /home/haoyu/data-structure-algorithm-visualizor pull
 
 ### Next Step
 - Continue from the graph line only, and do not resume tree-definition work unless the user reopens it later.
+
+## 2026-09-14 (stack/queue variants split into standalone entries)
+
+### Today Done
+- Split the stack/queue structural variants that were previously selected inside the control panel into standalone navigation entries and routes:
+  - `L-04 /modules/sequential-stack`
+  - `L-04B /modules/linked-stack`
+  - `L-05 /modules/sequential-queue`
+  - `L-05B /modules/linked-queue`
+  - `L-05C /modules/circular-queue`
+- Kept legacy compatibility routes in place:
+  - `/modules/stack` still opens the sequential stack page
+  - `/modules/queue` still opens the sequential queue page
+- Updated registry/catalog/router/i18n wiring so the home page, module list, and sidebar can address the split modules directly.
+- Removed the queue control-panel structure switch; queue pages now derive their mode from the route.
+- Adjusted stack/queue workbench rendering so each split page shows only its own structure, title, description, metadata, pseudocode, and stage visualization.
+- Added a linked-queue node/connector visualization for the new `L-05B` page.
+
+### Verification
+- Passed:
+  - `npm run build`
+  - targeted stack/queue/module-list tests
+  - `npm run check:docs`
+  - `git diff --check`
+- Full `npm run check` result:
+  - docs passed
+  - all tests passed: `103` files / `327` tests
+  - lint remains blocked by existing React lint issues in `useStageAnchorPanel.ts`, `HuffmanTreePage.tsx`, and `StackPage.tsx`, plus existing warnings in `LinkedListPage.tsx` and `QueuePage.tsx`.
+- Browser smoke was not completed because the local Playwright browser executable is missing; Playwright reported that browser installation is required.
+
+### Next Step
+- Open the five split routes in the app and confirm the sidebar/module-card entry flow matches the intended product structure.
+- If accepted, follow up by addressing the existing lint blockers so `npm run check` can complete green again.
+
+## 2026-09-14 (stack canvas background and full Chinese names)
+
+### Today Done
+- Removed the extra white lane/card layer from the split stack pages by giving the stack stage a single-variant layout and transparent lane styling.
+- Expanded Chinese display names to avoid abbreviated structural names:
+  - `顺序存储栈`
+  - `链式栈`
+  - `顺序队列`
+  - `链式队列`
+  - `循环队列`
+- Updated the sequential queue runtime label so the stage/status chips no longer show the old `普通队列` wording.
+
+### Verification
+- Passed:
+  - targeted stack/queue tests: `5` files / `40` tests
+  - `npm run build`
+- Full `npm run check`:
+  - docs passed
+  - all tests passed: `103` files / `327` tests
+  - lint remains blocked by the same existing React lint issues recorded earlier.
+
+### Next Step
+- Visually confirm `/modules/sequential-stack` and `/modules/linked-stack` no longer show the extra white canvas layer.
+
+## 2026-09-14 (module workbench top bar restyled)
+
+### Today Done
+- Restyled the module workbench global top bar so entering a module no longer shows the old homepage-style header.
+- Scoped the change to `.app-shell-module` only:
+  - compact 60px workbench bar
+  - neutral blue-gray border/background to match the canvas command bar
+  - compact module picker chip
+  - smaller nav/language controls
+- Left the homepage/top-level landing header styling unchanged.
+
+### Verification
+- Passed:
+  - `npm run build`
+
+### Next Step
+- Visually confirm a representative module route from the app sidebar/home entry and check that the top bar now matches the new workbench style.
+
+## 2026-09-14 (home surface aligned to workbench style)
+
+### Today Done
+- Reworked the homepage/global surface styling toward the module workbench direction the user preferred:
+  - removed the earthy green/tan global background feel
+  - switched the body background to a cool blue-gray grid-like work surface
+  - compacted the global top bar typography/buttons
+  - made the quick-navigation homepage use the full viewport width instead of a centered, roomy cover-like layout
+  - tightened sidebar, toolbar, module cards, and right panels to reduce empty space
+  - kept category accents but moved the dominant palette back toward the module workbench blue-gray language
+
+### Verification
+- Passed:
+  - `npm run build`
+
+### Next Step
+- Visually review the homepage at `/` or `/modules`; if the direction is accepted, continue tightening any remaining homepage card density or typography details.
+
+## 2026-09-14 (stack stage status moved beside structure)
+
+### Today Done
+- Removed the old stack lane header from the split stack canvas.
+- Moved stack status information into a small two-line inline note beside the stack structure:
+  - current stack state
+  - current stack element count
+- Applied the layout to both standalone stack pages:
+  - `/modules/sequential-stack`
+  - `/modules/linked-stack`
+- Added zh/en translation keys for the new inline labels.
+- Follow-up fix:
+  - restored visible top/bottom pointers after the inline layout by allowing horizontal overflow in stack containers and reserving side space for linked-stack pointers.
+  - replaced visually rendered arrow characters with CSS-drawn short pointer lines, so isolated arrow glyphs no longer appear as stray shapes near the bottom of the stack.
+
+### Verification
+- Passed:
+  - targeted stack tests: `4` files / `25` tests
+  - `npm run build`
+
+### Next Step
+- Visually confirm both stack routes: the status/count should sit near the structure and no longer float at the old top-left/top-right lane positions.

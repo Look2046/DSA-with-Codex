@@ -1,0 +1,24 @@
+P11-M2 DFS smoke report
+Date: 2026-04-07
+Branch: feat/p11-m2-dfs
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules: 21 cards, 19 ready badges, 19 open links
+- /modules?category=graph: 2 cards, 2 ready badges, 2 open links
+
+Route and interaction checks
+- Opened /modules/dfs from the graph filter successfully
+- Controls and Step panels both open correctly
+- Clicking the DFS stage collapses the open panels back to the pinned buttons
+- Default Next advances 0/28 -> 1/28
+- Initial DFS status block shows Visited 0/6, Backtracked 0/6, Stack depth 0
+- After one Next step, the stage shows Current vertex A and Stack depth 1
+- Console errors: 0
+
+Artifacts
+- output/playwright/p11m2-modules-smoke.png
+- output/playwright/p11m2-modules-graph-filter.png
+- output/playwright/p11m2-dfs-panels.png
+- output/playwright/p11m2-dfs-smoke.png

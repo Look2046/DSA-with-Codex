@@ -1,0 +1,17 @@
+P12-M3 G-06 Floyd-Warshall smoke report
+Date: 2026-04-19
+Branch: feat/p12-m3-shortest-paths
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules?category=graph: 6 cards, 6 ready badges, 6 open links
+
+Route and interaction checks
+- /modules/floyd-warshall opens cleanly
+- Default Next advances 0/138 -> 1/138
+- Console errors: 0
+
+Artifacts
+- output/playwright/p12m3-modules-graph-filter.png
+- output/playwright/p12m3-floyd-warshall-smoke.png

@@ -1,0 +1,19 @@
+P13-M3 / P13-M4 / P13-M5 acceptance closure
+Date: 2026-04-19
+Branch: feat/p13-m1-rabin-karp
+
+Local quality gate
+- npm run check: PASS
+
+Discovery
+- /modules: 33 cards, 33 ready badges, 33 open links
+- /modules?category=tree: 6 cards, 6 ready badges, 6 open links
+
+Route smoke
+- /modules/trie: opens cleanly, default Next advances 0/11 -> 1/11
+- /modules/btree: opens cleanly, default Next advances 0/7 -> 1/7
+
+Artifacts
+- output/playwright/p13m3-modules-tree-filter.png
+- output/playwright/p13m3-trie-smoke.png
+- output/playwright/p13m3-btree-smoke.png

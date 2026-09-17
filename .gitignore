@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.swp
+*.swo
+
+# Node / frontend build artifacts (future modules)
+node_modules/
+dist/
+build/
+.cache/
+coverage/
+
+# Local automation / session artifacts
+.playwright-cli/
+.claude/
+.workbuddy/
+AGENTS.md
+
+# Local design, scratch, and personal distribution artifacts
+docs/design-prototypes/
+output/design/
+output/playwright/scratch/
+output/playwright/dev-logs/
+output/playwright/*.png
+student-dist/
+dist-vm/
+start-project-wsl.bat
+tmp/
+{

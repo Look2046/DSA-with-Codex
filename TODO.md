@@ -54,6 +54,70 @@ Track actionable tasks here. Keep tasks small and testable.
   - Verified: follow-up Edge/Playwright regression confirms double-list continuous insertion renders the final transient arrow on both first and second insertions.
   - Note: repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing repo issues outside this zoom change.
 
+- [x] Redesign `/` as a practical quick-navigation homepage
+  - Done: root route now renders a module-entry homepage instead of redirecting straight to `/modules`.
+  - Done: homepage uses the module catalog categories as the left navigation, groups implemented modules by category, supports direct search, and keeps recent/common/favorite entry rails.
+  - Done: removed the unsupported learning-progress display so the page does not imply a tracking model that the product has not designed.
+  - Verified: `npm run build`, targeted homepage eslint, and Edge/Playwright smoke on `/` pass with no page/console errors.
+
+- [x] Start applying the selected compact module-workbench direction through `WorkspaceShell`
+  - Done: bottom playback/transport bar can now be hidden and restored from the shared module toolbar.
+  - Done: existing left `控制` and right `步骤` regions remain on-demand, while shared floating panels use tighter padding/gaps and less bulky radii/shadows.
+  - Verified: `npm run build`, targeted eslint, and Edge/Playwright smoke on linked-list, quick-sort, and DFS routes pass with no page/console errors.
+
+- [x] Consolidate homepage / module entry navigation relationship
+  - Done: top `模块`, brand link, `/`, and `/modules` now all resolve to the new quick-navigation homepage.
+  - Done: homepage left navigation is now an expandable course tree with direct module children.
+  - Done: homepage category actions no longer route into the old catalog page.
+  - Verified: `npm run build`, targeted eslint, and Edge/Playwright smoke pass with no page/console errors.
+
+- [x] Refresh shared module workbench shell
+  - Done: shared `WorkspaceShell` pages now use a top command bar for title, `控制`, `步骤`, and `播放栏`.
+  - Done: old vertical edge tabs are removed from shared-shell module pages, and `控制` / `步骤` panels open mutually exclusively.
+  - Done: removed the homepage `查看本组` link that could misroute to 404 under hash routing.
+  - Verified: `npm run build`, targeted eslint, and Edge/Playwright smoke on homepage + linked-list pass with no page/console errors.
+
+- [x] Split linked-list variants into separate module entries/routes
+  - Done: `L-03` remains single linked list, with new `L-03B /modules/doubly-linked-list` and `L-03C /modules/circular-linked-list` entries.
+  - Done: the linked-list type dropdown was removed from the control panel; route selection fixes the module type.
+  - Done: homepage linear navigation and center cards now expose single/double/circular linked lists separately.
+  - Verified: targeted linked-list tests, `npm run build`, targeted eslint, and Edge/Playwright route smoke pass.
+
+- [x] Unify static/concept module pages into the shared workbench shell
+  - Done: added `StaticWorkbenchShell` over `WorkspaceShell`.
+  - Done: migrated storage pages `M-01`~`M-07`, graph definition/storage pages `G-01`, `G-02`, `G-03`, and tree definition `T-00A`.
+  - Done: old horizontal toolbars now live in the left `控制` panel; central visualizations use the shared command-bar shell with hideable `步骤` and `播放栏`.
+  - Verified: `npm run build`, targeted storage/graph tests, targeted eslint, and Edge/Playwright smoke pass.
+
+- [x] Migrate special tree pages into the shared command-bar workbench
+  - Scope:
+    - `T-01 /modules/binary-tree`
+    - `T-02 /modules/bst`
+  - Done: old vertical edge tabs were removed; both pages now use the top command bar and shared hide/show region contract.
+  - Done: `T-01` keeps its page-specific `算法` command for the recursion/algorithm floating window.
+  - Verified: targeted eslint, targeted tree tests, `npm run build`, and Edge/Playwright smoke pass with nodes/edges visible and no page/console errors.
+
+- [x] Align the shared module frame toward the selected prototype
+  - Done: module routes now use a fixed top header, left module-category rail, full grid canvas, open floating control card, and bottom full-width transport bar.
+  - Done: `L-01 /modules/array` control card was compacted and duplicate status details were removed from the card.
+  - Done: left module navigation now has a narrow rail state and an expanded module-tree state with concrete module links; right `步骤` sidebar and bottom playback bar can still be opened/hidden from command controls.
+  - Done: left rail toggle moved into the sidebar top, right `步骤` gained a right-edge toggle, and the two top bars were flattened to match the workbench styling.
+  - Done: zoom controls moved into the bottom playback row, remain visible as a bottom-right overlay when `播放栏` is hidden, top `步骤` command was removed, the right sidebar now opens from an arrow button, left/right sidebar toggle positions are fixed for repeated in-place clicking, step content stacks vertically, and the controls panel opens near the top `控制` button.
+  - Verified: targeted eslint, `npm run build`, and Edge/Playwright smoke on `/modules/array` pass with no page/console errors.
+
+- [x] Audit dual Chinese-style / C-style pseudocode for implemented pages
+  - Done: audited the double-column pseudocode shown by array, dynamic array, linked-list variants, stack, queue, and Huffman pages.
+  - Done: corrected linked-list 0-based index semantics, circular head insertion, double-list pointer steps, stack/queue placeholder C-style lines, dynamic-array resize wording, and Huffman C-style construction/code/WPL details.
+  - Done follow-up: re-audited the single-column pseudocode surfaces across sorting/search/string/tree/graph/hash/paradigm pages.
+  - Done follow-up: corrected bubble-sort early-exit display/highlight, queue variant pseudocode models, circular linked-list tail/head wording, divide-and-conquer base-case order, backtracking undo line, counting-sort stable placement decrement, and B-Tree/B+Tree descent/overflow wording.
+  - Evidence: `docs/PSEUDOCODE_AUDIT.md`.
+  - Verified: targeted linear/Huffman tests, targeted full-audit tests, `npm run build`, and `git diff --check` pass.
+  - Note: repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing React-rule issues outside the pseudocode content changes.
+
+- [x] Hide control panel by default on module pages
+  - Done: shared `WorkspaceShell` now starts with `showControls = false`; special tree pages were already default-hidden.
+  - Verified: targeted eslint on `WorkspaceShell` and `npm run build` pass.
+
 - [ ] Prepare the first Chapter 4 storage-visualization batch after `P15`
   - Pilot landed locally (2026-08-21):
     - `M-01` two-dimensional array sequential storage
@@ -88,29 +152,29 @@ Track actionable tasks here. Keep tasks small and testable.
       - temporary route `/modules/tree-definition`
     - do not treat it as the active next module until the remaining graph basic-content line is explicitly completed
 
-- [ ] Continue the rebuilt graph-definition/storage track after accepted `G-02A`
+- [ ] Continue the rebuilt graph-definition/storage track after accepted `G-02`
   - Accepted current boundary:
       - `G-01 /modules/graph-representation`
-      - temporary `G-02A /modules/graph-adjacency-matrix`
+      - `G-02 /modules/graph-adjacency-matrix`
   - Landed locally for review (2026-08-28):
-    - temporary `G-02B /modules/graph-adjacency-list`
+    - `G-03 /modules/graph-adjacency-list`
     - first pass focuses on static adjacency-list storage teaching:
       - separate `顶点数组` and `邻接表`
       - graph <-> adjacency-list click linkage
       - selected edge mirrors to one or two list entries depending on directionality
       - compact numbered notes panel, no algorithm playback
   - Keep unchanged:
-    - preserved legacy `G-02 /modules/dfs`
-    - temporary adjacency-matrix page stays on `/modules/graph-adjacency-matrix`
+    - preserved graph routes; graph algorithm modules are now numbered continuously from `G-04 /modules/dfs` through `G-11 /modules/topological-sort`
+    - adjacency-matrix page stays on `/modules/graph-adjacency-matrix`
   - Still open by user direction:
     - continue and finish the graph basic-content line before switching to tree
-    - review/iterate `G-02B` as needed, then continue the remaining graph-definition/storage follow-up instead of opening new tree scope
+    - review/iterate `G-03` as needed, then continue the remaining graph-definition/storage follow-up instead of opening new tree scope
 
 - [x] Continue the rebuilt graph-definition track with adjacency-matrix teaching page `G-02`
   - Done locally first pass (2026-08-27):
-    - preserved legacy `G-02 /modules/dfs`
-    - added temporary route `/modules/graph-adjacency-matrix`
-    - added temporary module id `G-02A`
+    - graph algorithm modules were later renumbered continuously, so DFS is now `G-04 /modules/dfs`
+    - added route `/modules/graph-adjacency-matrix`
+    - final visible module id is `G-02`
     - landed definition/basic-operation first pass for:
       - `查找顶点`
       - `显示矩阵`
@@ -751,6 +815,13 @@ Track actionable tasks here. Keep tasks small and testable.
     - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l01-array-centered-controls.png`
     - `L-02 /modules/dynamic-array` now follows the same compact centered workbench pattern, keeps the first-open controls fixed, and removes JSON controls from the primary drawer
     - targeted Firefox Playwright recheck passed and artifact captured at `output/playwright/p15-l02-dynamic-array-centered-controls.png`
+  - Progress (2026-09-14):
+    - split stack variants into standalone `L-04 /modules/sequential-stack` and `L-04B /modules/linked-stack` entries
+    - split queue variants into standalone `L-05 /modules/sequential-queue`, `L-05B /modules/linked-queue`, and `L-05C /modules/circular-queue` entries
+    - removed the queue control-panel structure switch so queue mode is route-owned
+    - retained legacy `/modules/stack` and `/modules/queue` aliases to the sequential variants
+    - verification: build, targeted stack/queue/module-list tests, docs link check, and `git diff --check` passed
+    - full `npm run check` still reaches lint failure on existing React lint blockers after docs and all `327` tests pass
 
 - [ ] P15-M3 Router/module-load warning diagnosis and stabilization
   - DoD: identify and fix the root cause of the Firefox warning storm observed during representative audit.

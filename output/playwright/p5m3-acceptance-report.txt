@@ -1,0 +1,315 @@
+===== s01-bubble-sort /modules/bubble-sort =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/bubble-sort');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/bubble-sort
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-17-22-704Z.yml)
+### Result
+{
+  "path": "/modules/bubble-sort",
+  "title": "S-01 Bubble Sort",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-s01-bubble-sort.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-s01-bubble-sort.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-s01-bubble-sort.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== s02-selection-sort /modules/selection-sort =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/selection-sort');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/selection-sort
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-17-31-519Z.yml)
+### Result
+{
+  "path": "/modules/selection-sort",
+  "title": "S-02 Selection Sort",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-s02-selection-sort.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-s02-selection-sort.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-s02-selection-sort.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== s03-insertion-sort /modules/insertion-sort =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/insertion-sort');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/insertion-sort
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-17-39-340Z.yml)
+### Result
+{
+  "path": "/modules/insertion-sort",
+  "title": "S-03 Insertion Sort",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-s03-insertion-sort.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-s03-insertion-sort.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-s03-insertion-sort.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== sr02-binary-search /modules/binary-search =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/binary-search');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/binary-search
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-17-47-811Z.yml)
+### Result
+{
+  "path": "/modules/binary-search",
+  "title": "SR-02 Binary Search",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-sr02-binary-search.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-sr02-binary-search.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-sr02-binary-search.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== l01-array /modules/array =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/array');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/array
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-17-56-770Z.yml)
+### Result
+{
+  "path": "/modules/array",
+  "title": "L-01 Array",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-l01-array.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-l01-array.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-l01-array.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== l02-dynamic-array /modules/dynamic-array =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/dynamic-array');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/dynamic-array
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-18-05-663Z.yml)
+### Result
+{
+  "path": "/modules/dynamic-array",
+  "title": "L-02 Dynamic Array",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-l02-dynamic-array.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-l02-dynamic-array.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-l02-dynamic-array.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== l03-linked-list /modules/linked-list =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/linked-list');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/linked-list
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-18-12-893Z.yml)
+### Result
+{
+  "path": "/modules/linked-list",
+  "title": "L-03 Linked List",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-l03-linked-list.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-l03-linked-list.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-l03-linked-list.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== l04-stack /modules/stack =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/stack');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/stack
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-18-21-772Z.yml)
+### Result
+{
+  "path": "/modules/stack",
+  "title": "L-04 Stack",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-l04-stack.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-l04-stack.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-l04-stack.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+
+===== l05-queue /modules/queue =====
+### Ran Playwright code
+```js
+await page.goto('http://127.0.0.1:5174/modules/queue');
+```
+### Page
+- Page URL: http://127.0.0.1:5174/modules/queue
+- Page Title: m0-scaffold-tmp
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-03-06T13-18-30-340Z.yml)
+### Result
+{
+  "path": "/modules/queue",
+  "title": "L-05 Queue",
+  "hasRuntimeError": false,
+  "hasPlaybackActions": true,
+  "hasFormError": false
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => ({ path: location.pathname, title: document.querySelector(\'h2\')?.textContent || \'\', hasRuntimeError: !!document.querySelector(\'.route-error, [data-route-error], pre\'), hasPlaybackActions: document.querySelectorAll(\'.playback-actions button\').length > 0, hasFormError: !!document.querySelector(\'.form-error\') })');
+```
+### Result
+- [Screenshot of full page](output/playwright/p5m3-l05-queue.png)
+### Ran Playwright code
+```js
+// Screenshot full page and save it as output/playwright/p5m3-l05-queue.png
+await page.screenshot({
+fullPage: true,
+  path: 'output/playwright/p5m3-l05-queue.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+

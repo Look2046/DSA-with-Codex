@@ -1,0 +1,38 @@
+# P10-M3 Acceptance Report
+
+Date: 2026-04-07
+Local Preview URL: http://127.0.0.1:4173
+Browser: Firefox (repo-local `./scripts/playwright-cli.sh`)
+
+## Discovery Consistency (/modules)
+
+- Total module cards: 19
+- Ready badges / open links: 17 / 17
+- Tree filter cards: 6
+- `T-03 AVL Tree` and `T-04 Heap` both appear as `Ready` with live open links.
+- Screenshots:
+  - `output/playwright/p10m3-modules.png`
+  - `output/playwright/p10m3-modules-tree.png`
+
+## Tree Track Consistency Sweep (T-01 ~ T-04)
+
+- `T-01` keeps the accepted tree workspace shell entrypoints (`Controls`, `Step`) and its tree-specific `Algorithm` window, and default `Next` advances from `0/31` to `1/31`.
+- `T-02` keeps the same tree workspace shell contract and default `Next` advances from `0/2` to `1/2`.
+- `T-03` opens with the same shell structure (`Controls` + `Step`), default `Next` advances from `0/11` to `1/11`, and opening both panels then clicking the stage collapses them back to `0` open panels.
+- `T-04` matches the same shell structure, default `Next` advances from `0/11` to `1/11`, and opening both panels then clicking the stage collapses them back to `0` open panels.
+- No route-level console errors were reported on `T-01` / `T-02` / `T-03` / `T-04`.
+
+## Tree Route Smoke Artifacts
+
+- `T-01` `/modules/binary-tree` -> `output/playwright/p10m3-t01-binary-tree.png`
+- `T-02` `/modules/bst` -> `output/playwright/p10m3-t02-bst.png`
+- `T-03` `/modules/avl-tree` -> `output/playwright/p10m3-t03-avl-tree.png`
+- `T-04` `/modules/heap` -> `output/playwright/p10m3-t04-heap.png`
+
+Detailed smoke log: `output/playwright/p10m3-runtime-smoke.txt`
+
+## Conclusion
+
+- The expanded tree track now exposes four ready modules (`T-01` ~ `T-04`) without dead-end discovery states.
+- `T-03` and `T-04` fit the accepted tree workspace interaction model used by the earlier tree pages.
+- Local `P10` tree-track acceptance evidence is complete.

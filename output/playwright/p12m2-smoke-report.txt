@@ -1,0 +1,17 @@
+P12-M2 BFS smoke report
+Date: 2026-04-19
+Branch: feat/p12-m2-bfs
+Viewport: 1440x1100
+Browser: firefox via ./scripts/playwright-cli.sh
+
+Discovery checks
+- /modules?category=graph: 3 cards, 3 ready badges, 3 open links
+
+Route and interaction checks
+- /modules/bfs opens cleanly
+- Default Next advances 0/34 -> 1/34
+- Console errors: 0
+
+Artifacts
+- output/playwright/p12m2-modules-graph-filter.png
+- output/playwright/p12m2-bfs-smoke.png
