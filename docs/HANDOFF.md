@@ -186,28 +186,19 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
 
 ### Current State
-- Updated:
-  - `src/pages/modules/HeapSortPage.tsx`
-  - `src/data/moduleRegistry.ts`
-  - `src/pages/moduleCatalog.ts`
-  - `src/pages/modulesPageUtils.test.ts`
-  - `src/modules/graph/weightedGraph.ts`
-  - `src/modules/graph/dijkstra.test.ts`
-  - `src/i18n/translations.ts`
-  - `src/pages/modules/graphStageGeometry.ts`
-  - `src/pages/modules/DfsPage.tsx`
-  - `src/pages/modules/BfsPage.tsx`
-  - `src/pages/modules/DijkstraPage.tsx`
-  - `src/pages/modules/BellmanFordPage.tsx`
-  - `src/pages/modules/FloydWarshallPage.tsx`
-  - `src/pages/modules/TopologicalSortPage.tsx`
-  - `src/app/layout/Layout.tsx`
-  - `src/pages/modules/KruskalPage.tsx`
-  - `src/index.css`
-  - `docs/HANDOFF.md`
+- Committed locally on `feat/p14-backlog-wave`:
+  - `6f43375 docs: checkpoint visualizer planning and evidence`
+  - `6b6a67d feat: unify visualizer workspace shell`
+  - `b3f17c0 feat: refine graph modules and directed edges`
+  - `d18a8d0 feat: clarify heap sort extraction animation`
+- Working tree was clean immediately after these commits.
+- Important verification caveat:
+  - targeted checks, tests, build, and browser smoke listed above passed
+  - full `npm run check` still stops at the documented pre-existing React lint blockers in `useStageAnchorPanel`, `HuffmanTreePage`, and `StackPage`
 
 ### Next Step
-- If this Kruskal density direction is accepted, apply the same lower-panel typography/packing rules to adjacent graph algorithm pages that still show bulky chips or clipped data panels.
+- Next implementation work should start from the committed shared shell / graph / heap-sort baseline above.
+- Before calling the milestone fully closed, decide whether to fix the remaining repo-wide lint blockers or keep them as a separate stabilization task.
 
 ## 2026-09-16 (G-04 to G-11 graph algorithm layout cleanup)
 

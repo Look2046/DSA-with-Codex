@@ -8,6 +8,11 @@ Use this file as the first thing to read in a new chat/session.
 - Active branch (expected): `feat/p14-backlog-wave`
 - Current phase: `P15` acceptance-and-stabilization wave remains the documented baseline, but the user explicitly approved a Chapter 4 pilot override on 2026-08-21; the original `42/42` blueprint remains closed, `T-07 Huffman Tree` had brought the prior runtime surface to `43/43`, local Chapter 4 pilots `M-01` + `M-07` had expanded the local implemented surface, graph definition/storage pages have now been renumbered without temporary `A/B` suffixes (`G-02` adjacency matrix, `G-03` adjacency list, graph algorithms shifted to `G-04`~`G-11`), and the paused temporary `T-00A` concept-first tree-definition page brings the current local implemented surface to `53` routes pending user review
 - Last local quality gates:
+  - Visualizer workspace / graph / heap-sort commit checkpoint (committed locally, 2026-09-17, `feat/p14-backlog-wave`):
+    - commits: `6f43375`, `6b6a67d`, `b3f17c0`, `d18a8d0`
+    - committed the selected compact workbench shell, split module navigation baseline, graph-module visual cleanup, directed-edge rendering refinements, Dijkstra undirected preset, left-rail centering, and heap-sort tree-dominant animation refinements
+    - targeted tests/build/browser smoke passed as recorded in `docs/HANDOFF.md`
+    - full `npm run check` was attempted; docs check and all tests passed (`104` files / `335` tests), then lint stopped on the existing React-rule blockers in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus the existing `LinkedListPage.tsx` warning
   - Full pseudocode audit checks (passed locally through tests/build, 2026-09-14, `feat/p14-backlog-wave`):
     - re-audited all user-facing pseudocode surfaces beyond the earlier double-column pass, including sorting/search/string/tree/graph/hash/paradigm single-column pages and the linear double-column pages
     - corrected bubble-sort early-exit display/highlight, queue variant pseudocode models, circular linked-list tail/head wording, divide-and-conquer base-case order, backtracking undo line, counting-sort stable placement decrement, and B-Tree/B+Tree descent/overflow wording

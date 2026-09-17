@@ -114,6 +114,11 @@ Track actionable tasks here. Keep tasks small and testable.
   - Verified: targeted linear/Huffman tests, targeted full-audit tests, `npm run build`, and `git diff --check` pass.
   - Note: repo-wide `npm run check` was attempted; docs check and all `327` tests passed, then lint stopped on existing React-rule issues outside the pseudocode content changes.
 
+- [x] Commit compact workbench, graph cleanup, and heap-sort refinement baseline
+  - Done: committed docs/tooling checkpoint, shared workspace shell, graph module cleanup, and heap-sort extraction animation as separate local commits on `feat/p14-backlog-wave`.
+  - Evidence: latest commit series `6f43375`, `6b6a67d`, `b3f17c0`, `d18a8d0`.
+  - Note: full `npm run check` still has the same repo-wide React lint blockers documented in `docs/HANDOFF.md`; targeted tests/build/browser smoke for the changed surfaces passed.
+
 - [x] Hide control panel by default on module pages
   - Done: shared `WorkspaceShell` now starts with `showControls = false`; special tree pages were already default-hidden.
   - Verified: targeted eslint on `WorkspaceShell` and `npm run build` pass.
