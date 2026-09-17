@@ -249,6 +249,7 @@ export function SequentialOverflowPointer({ topLabel, nullLabel }: SequentialOve
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function buildLinkedStackConnectorPath(start: ConnectorPoint, end: ConnectorPoint): string {
   const horizontalSpan = Math.abs(end.x - start.x);
   const controlOffset = Math.min(Math.max(24, horizontalSpan * 0.36), Math.max(24, horizontalSpan * 0.5));
@@ -260,6 +261,7 @@ export function buildLinkedStackConnectorPath(start: ConnectorPoint, end: Connec
   ].join(' ');
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function getLinkedStackPreviewConnectorPoints(
   sceneRect: Pick<DOMRect, 'left' | 'top'>,
   floatingRect: Pick<DOMRect, 'left' | 'top' | 'right' | 'height'>,

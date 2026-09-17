@@ -361,6 +361,8 @@ export function useStageAnchorPanel({
       overflowMargin,
     );
 
+    // Intentional: synchronise derived anchor position with external collision state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnchorPosition((previous) => (arePointsEqual(previous, nextAnchor) ? previous : nextAnchor));
   }, [
     allCollisionTargets,

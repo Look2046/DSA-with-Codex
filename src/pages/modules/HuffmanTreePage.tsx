@@ -483,6 +483,8 @@ export function HuffmanTreePage() {
   useEffect(() => {
     setTotalFrames(buildSteps.length);
     reset();
+    // Intentional: initialise detail mode when the built step set changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDetailMode('build');
   }, [reset, setTotalFrames, buildSteps.length]);
 
