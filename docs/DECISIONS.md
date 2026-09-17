@@ -185,6 +185,7 @@ Record architecture or workflow decisions here.
 - Status: accepted
 - Context: The repo now exposes a `43/43` runtime surface after `T-07 Huffman Tree`, but the user has not yet accepted the surface and a first representative browser audit immediately exposed product-surface and runtime concerns (placeholder document titles plus a large Firefox warning burst on representative routes).
 - Decision: Define `P15` as an acceptance-and-stabilization wave before any new feature scope. The first responsibilities are to inventory real user-facing issues, fix the scaffold/product-surface baseline, diagnose the router/module-load warning storm, and only then consider opening new feature work.
+- Verification (2026-09-17): re-ran the representative Firefox dev audit on 10 routes (incl. `/modules/heap-sort`); `0` console warnings/errors observed. The warning storm does not reproduce on the current `react-router-dom 7.9.6 + React 19 + Vite 7` stack (previous claim came from the pre-upgrade v6 / React 18 era). P15-M3 root-cause diagnosis is therefore closed as a non-issue; no router/runtime fix required.
 - Alternatives considered: continue directly into more algorithm work; treat the current `43/43` surface as accepted without a user-facing audit; fix isolated pages ad hoc without a milestone boundary.
 - Consequences: delivery of new modules pauses temporarily, but the project regains a trusted baseline and future work starts from an accepted surface rather than a partially verified one.
 - Owner: haoyu + codex

@@ -125,7 +125,7 @@ Use this file as the first thing to read in a new chat/session.
   - representative Playwright audit (2026-07-21, `feat/p14-backlog-wave`):
     - `/modules`, `/modules/huffman-tree`, `/modules/binary-tree`, and `/modules/heap-sort` all still report page title `m0-scaffold-tmp`
     - `/modules/huffman-tree` default `Next` still advances `Step 1/9 -> Step 2/9`
-    - `/modules/heap-sort` in Firefox dev audit reported `57` console warnings, dominated by module-load warnings routed through `src/app/router.tsx`
+    - `/modules/heap-sort` in Firefox dev audit reported `57` console warnings, dominated by module-load warnings routed through `src/app/router.tsx` — *historical finding (2026-07-21); superseded 2026-09-17 — re-audit showed `0` warnings, see P15-M3 closure note in §3 cross-cutting list*
   - targeted `L-01 /modules/array` acceptance recheck (passed locally in Firefox, 2026-07-21, `feat/p14-backlog-wave`):
     - controls drawer first-open rect now stays inside a `1280x720` viewport (`bottom = 708.6`)
     - first array cell height reduced from the earlier reproduced `380px` stretch to `49px`
@@ -592,7 +592,7 @@ Use this file as the first thing to read in a new chat/session.
   - treat the newly added temporary `T-00A /modules/tree-definition` page as paused local work, not the active priority
 - Address remaining cross-cutting items when requested:
   - scaffold placeholder titles (`m0-scaffold-tmp`)
-  - router/module-load warning storm seen in Firefox dev audit
+  - router/module-load warning storm seen in Firefox dev audit — **closed 2026-09-17**: re-audited 10 representative routes (incl. `/modules/heap-sort`) in Firefox with a live self-test marker; `0` console warnings/errors. Belonged to the pre-upgrade `react-router-dom` v6 / React 18 stack; current `react-router-dom 7.9.6 + React 19 + Vite 7` emits none. No code change required.
   - existing React lint blockers preventing full `npm run check` from going green after docs/tests pass
 - Keep quality gates unchanged:
   - meaningful code changes: `npm run check`

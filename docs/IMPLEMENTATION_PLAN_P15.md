@@ -20,6 +20,8 @@ P15-3: route/runtime warning diagnosis
 - separate true app regressions from environment-only noise
 - fix root causes before expanding the audit breadth
 
+**Status (2026-09-17): CLOSED / verified non-issue.** Re-audited 10 representative routes in Firefox (incl. `/modules/heap-sort`) with an injected self-test marker confirming the capture path; `0` console warnings/errors. The storm was a pre-upgrade `react-router-dom` v6 / React 18 artifact; current `react-router-dom 7.9.6 + React 19 + Vite 7` emits none. No root-cause fix required — superseded by the dependency upgrade.
+
 P15-4: full cross-route acceptance sweep
 - run a structured acceptance sweep across all 43 implemented routes
 - refresh evidence and sync milestone docs only after the stabilized surface is actually accepted
@@ -74,6 +76,12 @@ Deliverables
 Acceptance
 - targeted browser audit on `/modules`, `/modules/binary-tree`, `/modules/heap-sort`, and `/modules/huffman-tree` reports `0` unexpected runtime errors
 - warning count is either reduced to zero or explicitly justified in docs with the root cause identified
+
+**Status (2026-09-17): CLOSED / verified non-issue**
+- re-ran the representative Firefox dev audit on 10 routes (incl. `/modules/heap-sort`, `/modules`, `/modules/binary-tree`, `/modules/huffman-tree`, `/modules/linked-list`, `/modules/bst`, `/modules/graph-adjacency-list`, `/modules/sorting-race`, `/modules/avl-tree`, `/modules/dijkstra`)
+- injected a self-test `console.warn` marker to confirm the capture path is live (`selftest ok = true`)
+- total console warnings/errors observed = `0` across all sampled routes
+- conclusion: the earlier `57`-warning claim belonged to the pre-upgrade `react-router-dom` v6 / React 18 stack; the current `react-router-dom 7.9.6 + React 19 + Vite 7` stack emits no dev-console warnings. No router/import/runtime fix required.
 
 ### P15-M4 Full acceptance closure for the current `43/43` surface
 

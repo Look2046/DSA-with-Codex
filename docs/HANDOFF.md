@@ -185,6 +185,21 @@ Use this file for end-of-day handoff. Add one new section per day (latest first)
   - all tests passed (`104` files / `335` tests)
   - lint still stops on existing React-rule issues in `src/hooks/useStageAnchorPanel.ts`, `src/pages/modules/HuffmanTreePage.tsx`, and `src/pages/modules/StackPage.tsx`, plus one existing warning in `src/pages/modules/LinkedListPage.tsx`
 
+### P15-M3 warning-storm re-verification (2026-09-17)
+
+- Re-ran the representative Firefox dev-console audit that originally motivated `P15-M3`:
+  - started `vite --port 5173 --host 127.0.0.1` (base `/ui/visualizer/`)
+  - used the repo's installed Playwright **Firefox** binary (chromium/webkit not present locally) to open routes and listen on `console`
+  - injected a self-test `console.warn('__SELFTEST_MARKER__')` to confirm the capture path is live (`selftest ok = true`)
+  - scanned 10 representative routes: `/`, `/modules`, `/modules/heap-sort`, `/modules/linked-list`, `/modules/bst`, `/modules/graph-adjacency-list`, `/modules/sorting-race`, `/modules/huffman-tree`, `/modules/avl-tree`, `/modules/dijkstra`
+- Result:
+  - **total console warnings + errors = `0`** across all 10 routes, including the route (`/modules/heap-sort`) the original audit claimed produced `57` warnings
+- Conclusion:
+  - the original `57`-warning "storm" does not reproduce on the current stack (`react-router-dom 7.9.6` + React 19 + Vite 7); it belonged to the earlier pre-upgrade `react-router-dom` v6 / React 18 era and was eliminated by the later upgrade/refactor
+  - `src/app/router.tsx` uses standard `React.lazy` + `Suspense` over a stable `lazyNamedPage()` map and emits no warnings under the current dependencies
+  - **P15-M3 is therefore closed as a non-issue; no code change is required**
+  - stale "warning storm" references in `docs/HANDOFF.md`, `docs/SESSION_BRIEF.md`, `docs/DECISIONS.md`, and `docs/IMPLEMENTATION_PLAN_P15.md` were updated to reflect this verification
+
 ### Current State
 - Committed locally on `feat/p14-backlog-wave`:
   - `6f43375 docs: checkpoint visualizer planning and evidence`
