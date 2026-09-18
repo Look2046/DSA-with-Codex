@@ -126,7 +126,10 @@ function getStepDescription(step: HeapSortStep | undefined, t: ReturnType<typeof
     return t('module.s07.step.heapBuilt');
   }
   if (step.action === 'extractMax') {
-    return `${t('module.s07.step.extractMax')} ${step.indices[1] ?? '-'}`;
+    return `${t('module.s07.step.extractMax')} #0 ${t('module.s01.step.and')} #${step.indices[1] ?? '-'}`;
+  }
+  if (step.action === 'sortedLock') {
+    return t('module.s07.step.sortedLock');
   }
   return t('module.s07.step.completed');
 }
@@ -188,14 +191,6 @@ function getHeapNodePosition(index: number, total: number) {
   return {
     x: ((positionInLevel + 1) / (nodesInLevel + 1)) * 100,
     y: levelCount === 1 ? 18 : 10 + (level / Math.max(levelCount - 1, 1)) * 76,
-  };
-}
-
-function getSortedLandingPosition(index: number, total: number) {
-  const sortedOffset = total - index - 1;
-  return {
-    x: Math.max(58, 94 - sortedOffset * 7),
-    y: 94,
   };
 }
 
@@ -291,34 +286,36 @@ export function HeapSortPage() {
       return null;
     }
 
-    if (currentSnapshot.action !== 'swap' && currentSnapshot.action !== 'extractMax') {
+    const action = currentSnapshot.action;
+    if (action !== 'swap' && action !== 'extractMax') {
       return null;
     }
 
     const [leftIndex, rightIndex] = currentSnapshot.indices;
-    const visibleHeapSize = Math.min(
-      currentSnapshot.action === 'extractMax' ? previousSnapshot.heapSize : currentSnapshot.heapSize,
-      MAX_VISIBLE_HEAP_NODES,
-    );
+    const visibleHeapSize = Math.min(currentSnapshot.heapSize, MAX_VISIBLE_HEAP_NODES);
     if (leftIndex >= MAX_VISIBLE_HEAP_NODES || rightIndex >= previousSnapshot.arrayState.length) {
       return null;
     }
 
+    // Both `swap` and `extractMax` exchange two tree nodes, so the motion is a
+    // two-way swap: the root value travels down to the last node and the last
+    // value travels up to the root. No separate "sorted sequence" is involved.
     const from = getHeapNodePosition(leftIndex, Math.max(visibleHeapSize, 1));
-    const to =
-      currentSnapshot.action === 'extractMax'
-        ? getSortedLandingPosition(rightIndex, previousSnapshot.arrayState.length)
-        : getHeapNodePosition(rightIndex, Math.max(visibleHeapSize, 1));
-    const controlY = Math.min(from.y, to.y) - (currentSnapshot.action === 'extractMax' ? 10 : 8);
+    const to = getHeapNodePosition(rightIndex, Math.max(visibleHeapSize, 1));
+    const value = previousSnapshot.arrayState[leftIndex];
+    const hasReturn = true;
+
+    const controlY = Math.min(from.y, to.y) - 8;
     const path = `M ${from.x} ${from.y} Q ${(from.x + to.x) / 2} ${controlY} ${to.x} ${to.y}`;
 
     return {
       from,
       to,
       path,
-      value: previousSnapshot.arrayState[leftIndex],
+      value,
       returningValue: previousSnapshot.arrayState[rightIndex],
-      action: currentSnapshot.action,
+      hasReturn,
+      action,
     };
   }, [currentSnapshot, previousSnapshot]);
 
@@ -565,11 +562,11 @@ export function HeapSortPage() {
                 />
                 <circle
                   className={`heap-sort-motion-dot heap-sort-motion-dot-${heapMotionPath.action}`}
-                  r={heapMotionPath.action === 'extractMax' ? 1.8 : 1.45}
+                  r={1.5}
                 >
                   <animateMotion dur="0.86s" repeatCount="indefinite" path={heapMotionPath.path} />
                 </circle>
-                {heapMotionPath.action === 'swap' ? (
+                {heapMotionPath.hasReturn ? (
                   <circle className="heap-sort-motion-dot heap-sort-motion-dot-return" r="1.15">
                     <animateMotion dur="0.86s" begin="0.18s" repeatCount="indefinite" path={heapMotionPath.path} />
                   </circle>

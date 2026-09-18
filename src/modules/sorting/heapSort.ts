@@ -1,6 +1,14 @@
 import type { AnimationStep, HighlightEntry } from '../../types/animation';
 
-export type HeapSortAction = 'initial' | 'heapifyStart' | 'compare' | 'swap' | 'heapBuilt' | 'extractMax' | 'completed';
+export type HeapSortAction =
+  | 'initial'
+  | 'heapifyStart'
+  | 'compare'
+  | 'swap'
+  | 'heapBuilt'
+  | 'extractMax'
+  | 'sortedLock'
+  | 'completed';
 export type HeapSortPhase = 'build' | 'sort' | 'completed';
 
 export type HeapSortStep = AnimationStep & {
@@ -180,20 +188,46 @@ export function generateHeapSortSteps(input: number[]): HeapSortStep[] {
   steps.push(createStep(arrayState, 'heapBuilt', 'build', total, [6], [{ index: 0, type: 'comparing' }], [0], [0]));
 
   for (let endIndex = total - 1; endIndex > 0; endIndex -= 1) {
+    // Extract the max: swap the heap root (index 0) with the last element of
+    // the current unsorted region (index endIndex). The max now sits at the
+    // boundary and will be locked into the sorted suffix on the next beat.
     swapValues(arrayState, 0, endIndex);
+
+    // Beat 1 — extractMax: animate the swap between the root and the last
+    // heap node. Both nodes are still part of the heap (heapSize = endIndex + 1)
+    // so the swap is fully visible in the tree — no separate "sorted sequence".
     steps.push(
       createStep(
         arrayState,
         'extractMax',
         'sort',
-        endIndex,
+        endIndex + 1,
         [7, 8],
         [
           { index: 0, type: 'swapping' },
-          { index: endIndex, type: 'sorted' },
+          { index: endIndex, type: 'swapping' },
         ],
         [0, endIndex],
-        [0],
+        [],
+      ),
+    );
+
+    // Beat 2 — sortedLock: the heap shrinks by one. The node formerly at the
+    // end of the region leaves the tree and is rendered in the sorted suffix,
+    // so the unsorted region visibly shrinks.
+    steps.push(
+      createStep(
+        arrayState,
+        'sortedLock',
+        'sort',
+        endIndex,
+        [8],
+        [
+          { index: endIndex, type: 'sorted' },
+          { index: 0, type: 'comparing' },
+        ],
+        [endIndex, 0],
+        [],
       ),
     );
 

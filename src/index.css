@@ -2698,6 +2698,9 @@ body {
   position: sticky;
   top: 92px;
   align-self: start;
+  max-height: calc(100svh - 116px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: grid;
   gap: 6px;
   padding: 12px;
@@ -3168,6 +3171,8 @@ button.quick-home-side-link {
 
   .quick-home-sidebar {
     position: static;
+    max-height: none;
+    overflow: visible;
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
@@ -3783,19 +3788,14 @@ button.quick-home-side-link {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 4 3;
+  stroke-dasharray: 3 2.4;
   animation: heap-sort-motion-dash 0.9s linear infinite;
   filter: drop-shadow(0 4px 8px rgba(30, 90, 160, 0.18));
 }
 
 .heap-sort-motion-path-swap {
   stroke: #1d7be0;
-  stroke-width: 1.08;
-}
-
-.heap-sort-motion-path-extractMax {
-  stroke: #23864b;
-  stroke-width: 1.28;
+  stroke-width: 0.74;
 }
 
 .heap-sort-motion-dot {
@@ -3803,11 +3803,6 @@ button.quick-home-side-link {
   stroke: #fff;
   stroke-width: 0.45;
   filter: drop-shadow(0 3px 7px rgba(29, 123, 224, 0.28));
-}
-
-.heap-sort-motion-dot-extractMax {
-  fill: #23864b;
-  filter: drop-shadow(0 3px 7px rgba(35, 134, 75, 0.3));
 }
 
 .heap-sort-motion-dot-return {
